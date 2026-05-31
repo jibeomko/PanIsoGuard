@@ -7,7 +7,7 @@ package:
 
 source:
   # At release, point to the tagged source tarball and fill in its sha256.
-  url: https://github.com/REPLACE_ORG/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
+  url: https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
   sha256: 0000000000000000000000000000000000000000000000000000000000000000
 
 build:
@@ -31,7 +31,7 @@ test:
     - panisoguard --version
 
 about:
-  home: https://github.com/REPLACE_ORG/PanIsoGuard
+  home: https://github.com/jibeomko/PanIsoGuard
   license: MIT
   license_file: LICENSE
   summary: Caller-agnostic adjudication of long-read RNA-seq novel isoforms
@@ -44,4 +44,4 @@ about:
 
 extra:
   recipe-maintainers:
-    - REPLACE_MAINTAINER
+    - jibeomko
