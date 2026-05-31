@@ -73,7 +73,13 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
     const int64_t e1 = std::stoll(f[2]);
     rec.intron = Junction{s1 - 1, e1};
     rec.strand = parse_strand(f[3]);
-    if (f.size() >= 5 && !f[4].empty()) rec.n_haplotypes = std::stoi(f[4]);
+    if (f.size() >= 5 && !f[4].empty()) {
+      rec.n_haplotypes = std::stoi(f[4]);
+      if (rec.n_haplotypes < 1) {
+        throw std::runtime_error("pangenome junctions line " + std::to_string(lineno) +
+                                 ": n_haplotypes must be >= 1, got " + f[4]);
+      }
+    }
     table.add(std::move(rec));
   }
   return table;

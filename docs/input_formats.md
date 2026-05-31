@@ -73,7 +73,13 @@ chrom   intron_start   intron_end   strand   [n_haplotypes]
 `intron_start`/`intron_end` are **1-based inclusive** (first/last intronic base, the
 same convention as STAR `SJ.tab` and GTF introns); `strand` is `+`/`-` (`1`/`2` also
 accepted); the optional 5th column is the number of supporting graph haplotypes
-(default `1`, gated by `axis_pangenome.min_haplotypes`). A novel-vs-linear-reference
-junction found here is reference bias → `PAN_REF_RESCUED_FALSE_NOVEL` (mechanism
-`population_known`). This is population-level reference data, so the evidence is
-**non-circular** by construction and always promotes.
+(default `1`, gated by `axis_pangenome.min_haplotypes`; note `1` is a single graph path,
+not a population frequency — raise it for stricter support). When **all** of an isoform's
+novel-vs-linear-reference junctions are found here, the apparent novelty is consistent
+with reference bias → `PAN_REF_RESCUED_FALSE_NOVEL` (mechanism `population_known`). This
+is independent evidence only if the file was extracted from population assemblies;
+PanIsoGuard cannot verify that, so the rescue is gated by
+`--pangenome-provenance {population|external|sample_derived|unknown}` — `population`/
+`external` promote, while the default `unknown` (and `sample_derived`) are held
+`AMBIGUOUS` under the same circularity firewall as the variant axis. **Experimental:**
+not yet validated on real graph data (GATE-1).

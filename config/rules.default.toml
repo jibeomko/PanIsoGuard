@@ -41,11 +41,15 @@ max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
 
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
-# A novel-vs-linear-reference junction realizable on a pangenome graph haplotype
-# path is reference bias, not new splicing. Population-level reference data, so it
-# is non-circular and always allowed to promote.
+# When ALL of an isoform's novel-vs-linear-reference junctions are realizable on a
+# pangenome graph haplotype path, the apparent novelty is consistent with reference
+# bias. This is independent (non-circular) evidence ONLY if the junction set comes
+# from population assemblies; PanIsoGuard cannot verify the file, so it applies the
+# same circularity firewall as the variant axis (--pangenome-provenance: population/
+# external promote; sample_derived/unknown are held AMBIGUOUS). Experimental: not yet
+# validated on real graph data (see GATE-1 in docs/decision_engine.md).
 [axis_pangenome]
-min_haplotypes = 1                  # a novel junction must be on >= this many graph haplotypes to rescue
+min_haplotypes = 1                  # >= this many graph haplotypes must carry a junction (1 = a single path)
 
 # --- Confidence classes ------------------------------------------------------
 # Output classes (ordinal within the novel tiers). PAN_REF_RESCUED_FALSE_NOVEL is

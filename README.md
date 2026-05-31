@@ -29,11 +29,13 @@ output classes shown are a simplified grouping — the full set is listed
 [`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
 > **Status: alpha.** Four evidence axes (SQANTI priors, short-read junctions, BAM
-> read-level mapping, variant/reference-bias) and the `adjudicate` / `benchmark` /
-> `ablate` / `combine` subcommands are implemented and tested. Rule thresholds are
+> read-level mapping, variant/reference-bias) plus an **experimental** file-based
+> pangenome reference-bias tier, and the `adjudicate` / `benchmark` / `ablate` /
+> `combine` subcommands, are implemented and tested. Rule thresholds are
 > conservative defaults that are **not yet calibrated** against simulated truth
-> (SQANTI-SIM); treat the confidence classes as orthogonal evidence integration,
-> not a calibrated probability.
+> (SQANTI-SIM), and the pangenome tier is **not yet validated on real graph data**
+> (see GATE-1 in [docs/decision_engine.md](docs/decision_engine.md)); treat the
+> confidence classes as orthogonal evidence integration, not a calibrated probability.
 
 ## Subcommands
 
@@ -94,10 +96,13 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
-**Pangenome reference-bias rescue** — supply graph-supported splice junctions
-(pre-extracted from a pangenome graph such as HPRC with vg/rpvg). A novel junction
-realizable on a graph haplotype path is rescued as reference bias; this evidence is
-population-level and non-circular, so it always promotes:
+**Pangenome reference-bias rescue** (experimental) — supply graph-supported splice
+junctions (pre-extracted from a pangenome graph such as HPRC with vg/rpvg). An isoform
+whose novel junctions are **all** realizable on a graph haplotype path is rescued as
+reference bias. This is independent evidence only if the junction set comes from
+population assemblies, so it is gated by `--pangenome-provenance` (the same circularity
+firewall as the variant axis): `population`/`external` promote, while the default
+`unknown` (or `sample_derived`) is held `AMBIGUOUS`:
 
 ```bash
 panisoguard adjudicate \
@@ -105,6 +110,7 @@ panisoguard adjudicate \
   --isoforms-bed   flair.isoforms.bed \
   --ref-gtf        gencode.v49.annotation.gtf \
   --pangenome-junctions hprc.graph_junctions.tsv \
+  --pangenome-provenance population \
   --out-prefix     out/sample
 ```
 
@@ -157,7 +163,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | 0 | SQANTI3 classification (priors) + STAR `SJ.tab` | recommended | short-read junction corroboration |
 | 1 | BAM (HiFi/ONT) | recommended | read-level mapping / chimera / soft-clip features |
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
-| 3 | pangenome graph junctions (`--pangenome-junctions`) | optional | novel junction realizable on a graph haplotype path (reference bias) |
+| 3 | pangenome graph junctions (`--pangenome-junctions`) | optional, **experimental** | all novel junctions realizable on a graph haplotype path → reference bias (provenance-gated) |
 
 ## Build
 

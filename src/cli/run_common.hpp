@@ -21,12 +21,19 @@ struct CommonArgs {
   std::vector<std::string> reference_haplotypes;  // personalized FASTAs (variant axis)
   std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown
   std::string pangenome_junctions;                // graph-supported junction file (pangenome axis)
+  std::string pangenome_provenance = "unknown";   // population|external|sample_derived|unknown
   std::string config;
 };
 
 // A haplotype provenance is "circular-risk" unless it is independent genomic data.
 inline bool haplotype_provenance_is_circular(const std::string& p) {
   return !(p == "wgs" || p == "external");
+}
+
+// A pangenome junction set is "circular-risk" unless it comes from independent
+// population assemblies (not the sample's own reads/graph).
+inline bool pangenome_provenance_is_circular(const std::string& p) {
+  return !(p == "population" || p == "external");
 }
 
 // If argv[i] is a shared flag, store it (advancing i past its value) and return

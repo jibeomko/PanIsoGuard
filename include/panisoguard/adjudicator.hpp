@@ -34,6 +34,7 @@ struct AdjudicateInputs {
   const HaplotypeProvider* haplotype = nullptr;              // optional (variant/reference-bias axis)
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
   const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)
+  bool pangenome_circular = false;                           // true if junction-set provenance is sample-derived/unknown
 };
 
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller

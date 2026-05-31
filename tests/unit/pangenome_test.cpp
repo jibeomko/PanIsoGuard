@@ -68,4 +68,11 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED",
     const Verdict v = off.evaluate(ev);
     REQUIRE(v.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
   }
+
+  SECTION("sample-derived/unknown provenance is held under the circularity firewall") {
+    ev.pangenome_circular = true;  // junction set may derive from the sample's own reads
+    const Verdict v = engine.evaluate(ev);
+    REQUIRE(v.confidence == ConfidenceClass::kAmbiguous);
+    REQUIRE(v.circularity_flag);
+  }
 }

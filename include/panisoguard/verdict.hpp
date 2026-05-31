@@ -72,10 +72,12 @@ struct EvidenceVector {
   bool variant_rescue = false;
   bool variant_circular = false;  // haplotype provenance is RNA-derived/unknown (circular-risk)
 
-  // pangenome (reference-bias) axis: a novel junction realizable on a pangenome
-  // graph haplotype path (population-level reference data; non-circular).
+  // pangenome (reference-bias) axis: every novel junction is realizable on a
+  // pangenome graph haplotype path. Non-circular only when the junction set was
+  // extracted from independent population assemblies (gated by provenance).
   bool pangenome_evaluable = false;
-  bool pangenome_rescue = false;
+  bool pangenome_rescue = false;       // ALL novel junctions graph-supported
+  bool pangenome_circular = false;     // junction-set provenance is sample-derived/unknown (circular-risk)
   int n_novel_jx_pangenome = 0;
 
   // multi-caller consensus (optional)

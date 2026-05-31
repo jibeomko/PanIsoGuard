@@ -27,7 +27,8 @@ void usage() {
       "\n"
       "Re-runs the rule engine with one evidence axis disabled at a time and reports\n"
       "per-axis confidence-class changes vs the full model.\n"
-      "Axes: short_read, mapping, noncanonical, rt_switch, degradation (default: all).\n");
+      "Axes: short_read, mapping, noncanonical, rt_switch, degradation, variant,\n"
+      "      pangenome (default: all; an axis with no input simply yields 0 changes).\n");
 }
 
 }  // namespace
@@ -57,7 +58,9 @@ int cmd_ablate(int argc, char** argv) {
     usage();
     return 1;
   }
-  if (axes.empty()) axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation"};
+  if (axes.empty()) {
+    axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome"};
+  }
 
   try {
     const LoadedRun run = load_and_adjudicate(common);

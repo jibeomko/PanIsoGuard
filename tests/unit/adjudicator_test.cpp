@@ -118,3 +118,60 @@ TEST_CASE("adjudicator: pangenome graph-supported novel junction -> PAN_REF_RESC
   const auto out_off = adjudicate(in, RuleEngine().with_axis_disabled("pangenome"));
   CHECK(find(out_off, "isoPan")->verdict.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
 }
+
+TEST_CASE("adjudicator: pangenome partial support does NOT rescue (all-or-nothing)", "[adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoPartial", "novel_not_in_catalog", "canonical"));
+
+  std::map<std::string, IntronChain> chains;
+  // BOTH introns are novel vs the catalog ({200,350} and {600,900}).
+  chains["isoPartial"] = chain({{200, 350}, {600, 900}});
+
+  // The pangenome carries only ONE of the two novel junctions.
+  PangenomeJunctions pan;
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.pangenome = &pan;
+  const auto out = adjudicate(in, RuleEngine());
+
+  const AdjudicationResult* p = find(out, "isoPartial");
+  REQUIRE(p != nullptr);
+  CHECK(p->evidence.n_novel_junctions == 2);
+  CHECK(p->evidence.n_novel_jx_pangenome == 1);
+  CHECK_FALSE(p->evidence.pangenome_rescue);  // 1 of 2 -> the isoform is not fully reference bias
+  CHECK(p->verdict.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
+}
+
+TEST_CASE("adjudicator: sample-derived pangenome provenance is held (circularity firewall)", "[adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoPan", "novel_not_in_catalog", "canonical"));
+
+  std::map<std::string, IntronChain> chains;
+  chains["isoPan"] = chain({{200, 350}, {400, 500}});  // single novel jx {200,350}
+
+  PangenomeJunctions pan;
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.pangenome = &pan;
+  in.pangenome_circular = true;  // junction set may derive from the sample's own reads
+  const auto out = adjudicate(in, RuleEngine());
+
+  const AdjudicationResult* p = find(out, "isoPan");
+  REQUIRE(p != nullptr);
+  CHECK(p->evidence.pangenome_rescue);  // all novel junctions are graph-supported...
+  CHECK(p->evidence.pangenome_circular);
+  CHECK(p->verdict.confidence == ConfidenceClass::kAmbiguous);  // ...but held, not promoted
+  CHECK(p->verdict.circularity_flag);
+}

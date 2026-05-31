@@ -37,6 +37,7 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   if (auto pg = tbl["axis_pangenome"].as_table()) {
     c.pangenome_min_haplotypes =
         static_cast<int>((*pg)["min_haplotypes"].value_or<int64_t>(c.pangenome_min_haplotypes));
+    if (c.pangenome_min_haplotypes < 1) c.pangenome_min_haplotypes = 1;  // a 0/negative gate would rescue everything
   }
   return engine;
 }
@@ -64,19 +65,30 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   }
 
   // --- Pangenome (reference-bias) rescue: highest priority ---------------------
-  // A novel-vs-linear-reference junction that is realizable on a pangenome graph
-  // haplotype path is reference bias, not new splicing. The pangenome is
-  // population-level reference data, so this evidence is non-circular by
-  // construction (it never rests on the sample's own RNA) and always promotes --
-  // it is checked before the variant axis so it rescues even when the sample's
-  // own haplotype provenance is circular-risk.
+  // When ALL of an isoform's novel-vs-linear-reference junctions are realizable on a
+  // pangenome graph haplotype path, the apparent novelty is consistent with reference
+  // bias rather than new splicing. This is independent evidence ONLY when the junction
+  // set was extracted from population assemblies; PanIsoGuard cannot verify the
+  // supplied file's provenance, so it applies the same circularity firewall as the
+  // variant axis (sample-derived/unknown provenance is held, not promoted). It is
+  // checked before the variant axis so an independent graph rescues even when the
+  // sample's own haplotype provenance is circular-risk.
   if (cfg_.use_pangenome && ev.pangenome_evaluable && ev.pangenome_rescue) {
     v.primary_mechanism = Mechanism::kPopulationKnown;
-    v.confidence = ConfidenceClass::kPanRefRescuedFalseNovel;
-    trace("novel junction realizable on a pangenome haplotype path (" +
-          std::to_string(ev.n_novel_jx_pangenome) + "/" +
-          std::to_string(ev.n_novel_junctions) +
-          ") -> PAN_REF_RESCUED_FALSE_NOVEL (reference bias, population_known)");
+    const std::string frac = std::to_string(ev.n_novel_jx_pangenome) + "/" +
+                             std::to_string(ev.n_novel_junctions);
+    if (ev.pangenome_circular) {
+      v.confidence = ConfidenceClass::kAmbiguous;
+      v.circularity_flag = true;
+      trace("all " + frac + " novel junctions realizable on a pangenome path, but the "
+            "junction-set provenance is sample-derived/unknown (circular-risk) -> held "
+            "AMBIGUOUS (not promoted)");
+    } else {
+      v.confidence = ConfidenceClass::kPanRefRescuedFalseNovel;
+      trace("all " + frac + " novel junctions realizable on a pangenome haplotype path "
+            "(independent population data) -> PAN_REF_RESCUED_FALSE_NOVEL "
+            "(reference bias, population_known)");
+    }
     return v;
   }
 

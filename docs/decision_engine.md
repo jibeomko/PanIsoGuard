@@ -51,11 +51,15 @@ fired conditions are listed in `rule_trace`.
 
 1. **Reference-bias rescue (highest priority).** A novel-vs-linear-reference
    junction explained by reference bias is `PAN_REF_RESCUED_FALSE_NOVEL`, via either:
-   - *Pangenome axis* (`--pangenome-junctions`): the junction is realizable on a
-     pangenome graph haplotype path (mechanism `population_known`). The pangenome is
-     population-level reference data, so this is non-circular by construction and
-     always promotes; it is evaluated first, so it rescues even when the sample's
-     own haplotype provenance is circular-risk.
+   - *Pangenome axis* (`--pangenome-junctions`): **all** of the isoform's novel
+     junctions are realizable on a pangenome graph haplotype path (mechanism
+     `population_known`) — consistent with reference bias, not proof the splice is
+     used. Independent only if the junction set is from population assemblies, which
+     PanIsoGuard cannot verify, so it is gated by the **same circularity firewall**
+     as the variant axis: `--pangenome-provenance population`/`external` promote,
+     while `sample_derived`/`unknown` (the default) are held `AMBIGUOUS`. It is
+     evaluated first, so an *independent* graph rescues even when the sample's own
+     haplotype provenance is circular-risk. **Experimental** (pending GATE-1).
    - *Variant axis* (`--reference-haplotype`): the junction is non-canonical on the
      reference but canonical on a personalized haplotype (mechanism
      `variant_created`). **Circularity firewall:** if the haplotype provenance is

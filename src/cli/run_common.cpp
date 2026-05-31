@@ -32,6 +32,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--reference-haplotype"){ c.reference_haplotypes.push_back(next("--reference-haplotype")); return true; }
   if (a == "--haplotype-provenance"){ c.haplotype_provenance = next("--haplotype-provenance"); return true; }
   if (a == "--pangenome-junctions"){ c.pangenome_junctions = next("--pangenome-junctions"); return true; }
+  if (a == "--pangenome-provenance"){ c.pangenome_provenance = next("--pangenome-provenance"); return true; }
   if (a == "--config")             { c.config = next("--config"); return true; }
   return false;
 }
@@ -100,7 +101,8 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   if (!c.pangenome_junctions.empty()) {
     pangenome = read_pangenome_junctions(c.pangenome_junctions);
     pangenome_ptr = &pangenome;
-    std::fprintf(stderr, "read %zu pangenome graph junctions\n", pangenome.size());
+    std::fprintf(stderr, "read %zu pangenome graph junctions, provenance=%s\n",
+                 pangenome.size(), c.pangenome_provenance.c_str());
   }
 
   run.engine = c.config.empty() ? RuleEngine() : RuleEngine::from_toml(c.config);
@@ -114,6 +116,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.haplotype = haplo.get();
   in.haplotype_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
   in.pangenome = pangenome_ptr;
+  in.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);
   run.results = adjudicate(in, run.engine);
   return run;
 }
