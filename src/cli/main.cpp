@@ -1,8 +1,8 @@
 // PanIsoGuard CLI entry point (samtools-style subcommand dispatch).
 //
-// M0 scaffold: the binary links htslib and reports versions/capabilities so the
-// build toolchain can be verified end to end. Subcommands are stubs that exit
-// with a clear "not yet implemented" message; they are filled in from M1 on.
+// Each subcommand (adjudicate / benchmark / ablate / combine) is implemented in its
+// own translation unit and dispatched here; `version` reports the build's linked
+// htslib and compiled-in capabilities.
 
 #include <clocale>
 #include <cstdio>

@@ -1,0 +1,23 @@
+PanIsoGuard bundles ("vendors") the following third-party components under
+thirdparty/. Their full license texts are included alongside each, and reproduced
+in distributions. PanIsoGuard itself is MIT-licensed (see LICENSE).
+
+1. cgranges (IITree.h)
+   - File:    thirdparty/cgranges/IITree.h
+   - License: MIT  (thirdparty/cgranges/LICENSE.txt; (c) 2019 Dana-Farber Cancer Institute)
+   - Upstream: https://github.com/lh3/cgranges
+
+2. Catch2 (single-header v2)
+   - File:    thirdparty/catch2/catch.hpp   (test-only; not linked into the installed binary)
+   - License: Boost Software License 1.0  (thirdparty/catch2/LICENSE.txt)
+   - Upstream: https://github.com/catchorg/Catch2
+
+3. toml++ (single-header v3.4.0)
+   - File:    thirdparty/tomlplusplus/toml.hpp
+   - License: MIT  (thirdparty/tomlplusplus/LICENSE; (c) Mark Gillard)
+   - Upstream: https://github.com/marzer/tomlplusplus
+
+htslib is a runtime/build dependency and is NOT vendored (dynamically linked;
+provided by the system / conda environment).
+
+Effective combined license of the redistributed source: MIT AND BSL-1.0.

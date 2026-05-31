@@ -101,4 +101,10 @@ truth-based validation plan (SQANTI-SIM, HG002/HPRC, LRGASP).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+PanIsoGuard is MIT-licensed — see [LICENSE](LICENSE).
+
+It bundles three third-party single-header components under `thirdparty/`, with
+their license texts included: **cgranges** (`IITree.h`, MIT), **toml++** (MIT), and
+**Catch2** (Boost Software License 1.0, test-only). See [THIRDPARTY.txt](THIRDPARTY.txt)
+for attribution. The effective combined license of the redistributed source is
+**MIT AND BSL-1.0**. htslib is a dynamically-linked dependency, not vendored.
