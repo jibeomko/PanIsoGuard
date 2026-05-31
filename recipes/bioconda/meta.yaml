@@ -13,11 +13,14 @@ source:
 build:
   number: 0
   skip: true  # [win]
+  run_exports:
+    - {{ pin_subpackage(name, max_pin="x.x") }}
 
 requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('c') }}
+    - {{ stdlib('c') }}
     - cmake >=3.20
     - make
   host:
@@ -27,13 +30,22 @@ requirements:
     - htslib >=1.18
 
 test:
+  source_files:
+    - tests/data/tiny/mini.gtf
   commands:
     - panisoguard --version
-    - panisoguard adjudicate --help
+    - panisoguard --help > /dev/null
+    - panisoguard adjudicate --help > /dev/null
+    - panisoguard combine --help > /dev/null
+    - panisoguard combine --gtf flair:tests/data/tiny/mini.gtf --out combine_smoke.tsv
+    - test -s combine_smoke.tsv
 
 about:
   home: https://github.com/jibeomko/PanIsoGuard
+  dev_url: https://github.com/jibeomko/PanIsoGuard
+  doc_url: https://github.com/jibeomko/PanIsoGuard#readme
   license: MIT AND BSL-1.0
+  license_family: MIT
   license_file:
     - LICENSE
     - THIRDPARTY.txt
