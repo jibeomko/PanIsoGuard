@@ -1,8 +1,9 @@
 name: CI
 
-# Build PanIsoGuard and run the unit suite on every push / PR to main.
-# htslib (>= 1.18) and the C/C++ toolchain are installed from conda-forge/bioconda
-# via micromamba — the same dependency path users get with `conda install`.
+# Build PanIsoGuard and run the unit suite on every push / PR to main, on Linux
+# and macOS. htslib (>= 1.18) and the C/C++ toolchain are installed from
+# conda-forge/bioconda via micromamba — the same dependency path users get with
+# `conda install`. A separate job lints the bioconda recipe.
 
 on:
   push:
@@ -17,8 +18,12 @@ concurrency:
 
 jobs:
   build-test:
-    name: build + test (linux)
-    runs-on: ubuntu-latest
+    name: build + test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,3 +65,39 @@ jobs:
       - name: Smoke
         shell: bash -el {0}
         run: ./build/panisoguard --version
+
+  recipe-lint:
+    name: bioconda recipe lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up bioconda-utils (micromamba)
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: lint
+          init-shell: bash
+          cache-environment: true
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+          create-args: >-
+            bioconda-utils
+
+      - name: Lint recipe with bioconda-utils
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          # bioconda-utils expects the recipe under recipes/<package-name>/.
+          mkdir -p work/recipes/panisoguard
+          cp recipes/bioconda/meta.yaml recipes/bioconda/build.sh work/recipes/panisoguard/
+          curl -fsSL https://raw.githubusercontent.com/bioconda/bioconda-recipes/master/config.yml \
+            -o work/config.yml
+          touch work/build-fail-blacklist
+          cd work
+          git init -q
+          git -c user.email=ci@example.com -c user.name=ci add -A
+          git -c user.email=ci@example.com -c user.name=ci commit -qm init
+          bioconda-utils lint recipes config.yml --packages panisoguard

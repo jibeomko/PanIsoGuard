@@ -1,0 +1,76 @@
+name: Release
+
+# On a version tag (vX.Y.Z), compute the sha256 of the GitHub-generated source
+# tarball and publish a GitHub Release whose notes contain a ready-to-paste
+# bioconda `source:` block — everything needed to open the bioconda-recipes PR.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: tarball sha256 + GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute source tarball sha256
+        id: sha
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          URL="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz"
+          # GitHub may take a moment to generate the tag archive.
+          for i in $(seq 1 12); do
+            code=$(curl -sL -o src.tar.gz -w '%{http_code}' "$URL")
+            if [ "$code" = "200" ] && [ -s src.tar.gz ]; then break; fi
+            echo "attempt $i: HTTP $code — waiting for the tarball"; sleep 5
+          done
+          SHA=$(sha256sum src.tar.gz | cut -d' ' -f1)
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA"  >> "$GITHUB_OUTPUT"
+          echo "Computed sha256=$SHA for $TAG"
+
+      - name: Assemble bioconda source block + release notes
+        run: |
+          set -euo pipefail
+          URL="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${{ steps.sha.outputs.tag }}.tar.gz"
+          cat > bioconda-source.yaml <<EOF
+          source:
+            url: ${URL}
+            sha256: ${{ steps.sha.outputs.sha256 }}
+          EOF
+          cat > notes.md <<EOF
+          ## PanIsoGuard ${{ steps.sha.outputs.tag }}
+
+          **bioconda recipe \`source:\`** — paste into \`recipes/panisoguard/meta.yaml\`
+          in your \`bioconda-recipes\` fork:
+
+          \`\`\`yaml
+          source:
+            url: ${URL}
+            sha256: ${{ steps.sha.outputs.sha256 }}
+          \`\`\`
+          EOF
+          cat bioconda-source.yaml
+
+      - name: Create / update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.sha.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file notes.md
+            gh release upload "$TAG" bioconda-source.yaml --clobber
+          else
+            gh release create "$TAG" bioconda-source.yaml \
+              --title "PanIsoGuard $TAG" \
+              --notes-file notes.md
+          fi
