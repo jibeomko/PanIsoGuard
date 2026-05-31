@@ -28,8 +28,10 @@ enum class ConfidenceClass {
   kHighConfNovel,
   kMediumConfNovel,
   kLowConfPartial,
-  kPanRefRescuedFalseNovel,     // requires the variant/pangenome axis (not Tier-0)
-  kHaplotypeRescuedKnownLike,   // requires the haplotype/pangenome axis (not Tier-0)
+  kPanRefRescuedFalseNovel,     // variant axis: non-canonical on ref, canonical on a haplotype
+  // NOTE: a HAPLOTYPE_RESCUED_KNOWN_LIKE class (graph/haplotype-path rescue) is
+  // reserved for the future pangenome tier and is intentionally NOT defined here
+  // until the engine can actually emit it.
   kAmbiguous,
   kArtifact,
 };

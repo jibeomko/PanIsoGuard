@@ -177,6 +177,8 @@ rule adjudicate:
         ref_gtf=GTF,
     output:
         tsv=f"{OUT}/adjudicate/{{s}}.adjudicated.tsv",
+        attribution=f"{OUT}/adjudicate/{{s}}.attribution.jsonl",
+        provenance=f"{OUT}/adjudicate/{{s}}.provenance.log",
     params:
         pfx=lambda wc: f"{OUT}/adjudicate/{wc.s}",
         extra=adjudicate_extra,

@@ -49,11 +49,12 @@ classes = [
   "HIGH_CONF_NOVEL",
   "MEDIUM_CONF_NOVEL",
   "LOW_CONF_PARTIAL",
-  "PAN_REF_RESCUED_FALSE_NOVEL",      # needs variant/pangenome axis (not Tier-0)
-  "HAPLOTYPE_RESCUED_KNOWN_LIKE",     # needs haplotype/pangenome axis (not Tier-0)
+  "PAN_REF_RESCUED_FALSE_NOVEL",      # variant axis: non-canonical on ref, canonical on a haplotype
   "AMBIGUOUS",
   "ARTIFACT",
 ]
+# (HAPLOTYPE_RESCUED_KNOWN_LIKE is reserved for the future pangenome tier and is
+#  not emitted yet.)
 
 # Projection grid implemented in src/core/rules.cpp (v1) and documented in
 # docs/decision_engine.md:

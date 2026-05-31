@@ -7,8 +7,12 @@
 namespace panisoguard {
 namespace {
 
-std::string jx_key(const std::string& chrom, const Junction& j) {
-  return chrom + ':' + std::to_string(j.start) + '-' + std::to_string(j.end);
+std::string jx_key(const std::string& chrom, Strand strand, const Junction& j) {
+  // Strand-aware to match SjTable::key / Catalog: two opposite-strand isoforms
+  // sharing identical intron coordinates (antisense/overlapping loci) must not
+  // collide in the BAM-feature cache.
+  return chrom + '|' + strand_char(strand) + ':' + std::to_string(j.start) + '-' +
+         std::to_string(j.end);
 }
 
 // Assemble the evidence for one SQANTI record. `bam_cache` memoizes per-junction
@@ -60,7 +64,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         if (supported) ++n_supported;
       }
       if (bam != nullptr) {
-        const std::string key = jx_key(chain.chrom, intron);
+        const std::string key = jx_key(chain.chrom, chain.strand, intron);
         auto cit = bam_cache.find(key);
         if (cit == bam_cache.end()) {
           cit = bam_cache.emplace(key, bam->features_at_junction(chain.chrom, intron, bp)).first;

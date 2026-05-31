@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <cstdlib>
+#include <memory>
 #include <stdexcept>
 
 #include <htslib/faidx.h>
@@ -35,15 +36,13 @@ std::string FastaFetcher::fetch(const std::string& chrom, int64_t start, int64_t
   if (end <= start || start < 0) return "";
   if (!faidx_has_seq(impl_->fai, chrom.c_str())) return "";
   int len = 0;
-  // faidx uses 0-based inclusive coordinates [beg, end].
-  char* seq = faidx_fetch_seq(impl_->fai, chrom.c_str(), static_cast<int>(start),
-                              static_cast<int>(end - 1), &len);
-  if (seq == nullptr || len <= 0) {
-    if (seq) free(seq);
-    return "";
-  }
-  std::string out(seq, static_cast<std::size_t>(len));
-  free(seq);
+  // faidx uses 0-based inclusive coordinates [beg, end]; free() guaranteed via RAII.
+  std::unique_ptr<char, void (*)(void*)> seq(
+      faidx_fetch_seq(impl_->fai, chrom.c_str(), static_cast<int>(start),
+                      static_cast<int>(end - 1), &len),
+      std::free);
+  if (!seq || len <= 0) return "";
+  std::string out(seq.get(), static_cast<std::size_t>(len));
   for (char& c : out) c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
   return out;
 }

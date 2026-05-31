@@ -22,10 +22,11 @@ a `rule_trace`).
 
 ## Confidence classes
 
-`HIGH_CONF_NOVEL` · `MEDIUM_CONF_NOVEL` · `LOW_CONF_PARTIAL` ·
-`PAN_REF_RESCUED_FALSE_NOVEL` · `HAPLOTYPE_RESCUED_KNOWN_LIKE` · `AMBIGUOUS` ·
-`ARTIFACT` — emitted as a deterministic projection of a 2-axis evidence grid
-(novelty-support × artifact-mechanism).
+`HIGH_CONF_KNOWN` · `HIGH_CONF_NOVEL` · `MEDIUM_CONF_NOVEL` · `LOW_CONF_PARTIAL` ·
+`PAN_REF_RESCUED_FALSE_NOVEL` · `AMBIGUOUS` · `ARTIFACT` — emitted as a
+deterministic projection of a 2-axis evidence grid (novelty-support ×
+artifact-mechanism). (A graph/haplotype-path rescue class is reserved for the
+future pangenome tier and is not emitted yet.)
 
 ## Evidence tiers
 

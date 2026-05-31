@@ -33,7 +33,6 @@ const char* to_string(ConfidenceClass c) {
     case ConfidenceClass::kMediumConfNovel:           return "MEDIUM_CONF_NOVEL";
     case ConfidenceClass::kLowConfPartial:            return "LOW_CONF_PARTIAL";
     case ConfidenceClass::kPanRefRescuedFalseNovel:   return "PAN_REF_RESCUED_FALSE_NOVEL";
-    case ConfidenceClass::kHaplotypeRescuedKnownLike: return "HAPLOTYPE_RESCUED_KNOWN_LIKE";
     case ConfidenceClass::kAmbiguous:                 return "AMBIGUOUS";
     case ConfidenceClass::kArtifact:                  return "ARTIFACT";
   }
