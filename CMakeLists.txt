@@ -64,6 +64,7 @@ add_library(panisoguard_core STATIC
   src/evidence/bam_features.cpp
   src/evidence/variant_motif.cpp
   src/io/sj_tab_reader.cpp
+  src/io/pangenome_reader.cpp
   src/io/gtf_reader.cpp
   src/io/bed12_reader.cpp
   src/io/sqanti_reader.cpp
@@ -103,6 +104,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/fingerprint_test.cpp
     tests/unit/interval_index_test.cpp
     tests/unit/sj_tab_test.cpp
+    tests/unit/pangenome_test.cpp
     tests/unit/gtf_test.cpp
     tests/unit/bed12_test.cpp
     tests/unit/sqanti_test.cpp

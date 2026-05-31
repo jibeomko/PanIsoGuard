@@ -40,21 +40,29 @@ junction_window_bp     = 10         # indel proximity window around each splice 
 max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
 
+# --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
+# A novel-vs-linear-reference junction realizable on a pangenome graph haplotype
+# path is reference bias, not new splicing. Population-level reference data, so it
+# is non-circular and always allowed to promote.
+[axis_pangenome]
+min_haplotypes = 1                  # a novel junction must be on >= this many graph haplotypes to rescue
+
 # --- Confidence classes ------------------------------------------------------
-# Output classes (ordinal within the novel tiers). The rescue classes require the
-# variant/pangenome axes and are therefore unreachable in Tier-0.
+# Output classes (ordinal within the novel tiers). PAN_REF_RESCUED_FALSE_NOVEL is
+# emitted only when the variant axis (--reference-haplotype) or the pangenome axis
+# (--pangenome-junctions) is supplied; without them the run stays in the Tier-0
+# grid (no rescue class).
 [confidence]
 classes = [
   "HIGH_CONF_KNOWN",
   "HIGH_CONF_NOVEL",
   "MEDIUM_CONF_NOVEL",
   "LOW_CONF_PARTIAL",
-  "PAN_REF_RESCUED_FALSE_NOVEL",      # variant axis: non-canonical on ref, canonical on a haplotype
+  "PAN_REF_RESCUED_FALSE_NOVEL",      # reference bias: explained by a personalized haplotype
+                                      # (variant axis) or a pangenome graph path (pangenome axis)
   "AMBIGUOUS",
   "ARTIFACT",
 ]
-# (HAPLOTYPE_RESCUED_KNOWN_LIKE is reserved for the future pangenome tier and is
-#  not emitted yet.)
 
 # Projection grid implemented in src/core/rules.cpp (v1) and documented in
 # docs/decision_engine.md:

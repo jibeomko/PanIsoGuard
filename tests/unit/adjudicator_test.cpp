@@ -81,3 +81,40 @@ TEST_CASE("adjudicator end-to-end: SR-supported novel vs unsupported artifact", 
   REQUIRE(fsm != nullptr);
   CHECK(fsm->verdict.confidence == ConfidenceClass::kHighConfKnown);
 }
+
+TEST_CASE("adjudicator: pangenome graph-supported novel junction -> PAN_REF_RESCUED", "[adjudicator]") {
+  // Catalog knows {200,300},{400,500} (T1) and {200,500} (T2); {200,350} is novel.
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoPan", "novel_not_in_catalog", "non_canonical"));
+
+  std::map<std::string, IntronChain> chains;
+  chains["isoPan"] = chain({{200, 350}, {400, 500}});  // novel jx {200,350}
+
+  // The pangenome carries that novel junction on a graph haplotype path.
+  PangenomeJunctions pan;
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.pangenome = &pan;
+  const auto out = adjudicate(in, RuleEngine());
+  REQUIRE(out.size() == 1);
+
+  const AdjudicationResult* p = find(out, "isoPan");
+  REQUIRE(p != nullptr);
+  CHECK(p->evidence.n_novel_junctions == 1);
+  CHECK(p->evidence.pangenome_evaluable);
+  CHECK(p->evidence.pangenome_rescue);
+  CHECK(p->evidence.n_novel_jx_pangenome == 1);
+  CHECK(p->verdict.confidence == ConfidenceClass::kPanRefRescuedFalseNovel);
+  CHECK(p->verdict.primary_mechanism == Mechanism::kPopulationKnown);
+  CHECK_FALSE(p->verdict.circularity_flag);  // population reference data is non-circular
+
+  // Disabling the pangenome axis must drop the rescue (no SR/variant evidence here).
+  const auto out_off = adjudicate(in, RuleEngine().with_axis_disabled("pangenome"));
+  CHECK(find(out_off, "isoPan")->verdict.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
+}

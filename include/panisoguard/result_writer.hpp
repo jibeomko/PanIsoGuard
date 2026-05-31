@@ -19,6 +19,7 @@ struct RunProvenance {
   std::string bam_path;       // "" if none
   bool variant_axis_on = false;     // a haplotype FASTA was supplied
   bool variant_circular = false;    // haplotype provenance is circular-risk
+  bool pangenome_axis_on = false;   // a pangenome junction file was supplied
   std::string config_path;    // "" if built-in defaults
 };
 

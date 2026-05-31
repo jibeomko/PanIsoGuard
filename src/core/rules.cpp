@@ -34,6 +34,10 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
       c.bam_max_supplementary_frac = (*map)["max_supplementary_frac"].value_or(c.bam_max_supplementary_frac);
     }
   }
+  if (auto pg = tbl["axis_pangenome"].as_table()) {
+    c.pangenome_min_haplotypes =
+        static_cast<int>((*pg)["min_haplotypes"].value_or<int64_t>(c.pangenome_min_haplotypes));
+  }
   return engine;
 }
 
@@ -56,6 +60,23 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   if (!ev.is_novel) {
     v.confidence = ConfidenceClass::kAmbiguous;
     trace("category=" + ev.structural_category + " (not a targeted novel class) -> AMBIGUOUS");
+    return v;
+  }
+
+  // --- Pangenome (reference-bias) rescue: highest priority ---------------------
+  // A novel-vs-linear-reference junction that is realizable on a pangenome graph
+  // haplotype path is reference bias, not new splicing. The pangenome is
+  // population-level reference data, so this evidence is non-circular by
+  // construction (it never rests on the sample's own RNA) and always promotes --
+  // it is checked before the variant axis so it rescues even when the sample's
+  // own haplotype provenance is circular-risk.
+  if (cfg_.use_pangenome && ev.pangenome_evaluable && ev.pangenome_rescue) {
+    v.primary_mechanism = Mechanism::kPopulationKnown;
+    v.confidence = ConfidenceClass::kPanRefRescuedFalseNovel;
+    trace("novel junction realizable on a pangenome haplotype path (" +
+          std::to_string(ev.n_novel_jx_pangenome) + "/" +
+          std::to_string(ev.n_novel_junctions) +
+          ") -> PAN_REF_RESCUED_FALSE_NOVEL (reference bias, population_known)");
     return v;
   }
 
@@ -156,8 +177,8 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   trace(std::string("project(") + to_string(sup) + "," + to_string(mech) + ") -> " +
         to_string(cls));
 
-  // Tier-0 carries no variant/pangenome axis, so no rescue classes are reachable
-  // and no verdict rests on RNA-derived variants.
+  // Reaching the grid means no reference-bias rescue fired (pangenome/variant
+  // branches return early), so this verdict never rests on RNA-derived variants.
   v.circularity_flag = false;
   return v;
 }
@@ -170,6 +191,7 @@ RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
   else if (axis == "rt_switch")    e.cfg_.use_rts = false;
   else if (axis == "degradation")  e.cfg_.use_degradation = false;
   else if (axis == "variant")      e.cfg_.use_variant = false;
+  else if (axis == "pangenome")    e.cfg_.use_pangenome = false;
   return e;
 }
 

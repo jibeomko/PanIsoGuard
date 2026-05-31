@@ -21,6 +21,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
                               const std::map<std::string, IntronChain>& chains,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
                               const HaplotypeProvider* haplotype, bool haplotype_circular,
+                              const PangenomeJunctions* pangenome,
                               const RuleConfig& cfg,
                               std::unordered_map<std::string, JunctionBamFeatures>& bam_cache) {
   EvidenceVector ev;
@@ -46,9 +47,10 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bp.softclip_min_bp = cfg.bam_softclip_min_bp;
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
-    int n_novel = 0, n_supported = 0;
+    int n_novel = 0, n_supported = 0, n_pan = 0;
     bool any_bam_eval = false;
     bool any_variant_eval = false;
+    bool any_pan_eval = false;
     for (const auto& intron : chain.introns) {
       if (catalog->has_intron(chain.chrom, chain.strand, intron)) continue;  // known junction
       ++n_novel;
@@ -56,6 +58,12 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         const VariantVerdict vv = haplotype->classify(chain.chrom, intron, chain.strand);
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
         if (vv == VariantVerdict::kCreated) ev.variant_rescue = true;
+      }
+      if (pangenome != nullptr) {
+        any_pan_eval = true;
+        if (pangenome->supports(chain.chrom, chain.strand, intron, cfg.pangenome_min_haplotypes)) {
+          ++n_pan;
+        }
       }
       if (sj != nullptr) {
         const SjRecord* hit = sj->find_exact(chain.chrom, chain.strand, intron);
@@ -92,6 +100,9 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.bam_evaluable = (bam != nullptr) && any_bam_eval;
     ev.variant_evaluable = (haplotype != nullptr) && any_variant_eval;
     ev.variant_circular = haplotype_circular;
+    ev.pangenome_evaluable = (pangenome != nullptr) && any_pan_eval;
+    ev.n_novel_jx_pangenome = n_pan;
+    ev.pangenome_rescue = (n_pan > 0);
   }
   return ev;
 }
@@ -113,7 +124,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.strand = r.strand;
     res.structural_category = r.structural_category;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
-                                  in.haplotype_circular, engine.config(), bam_cache);
+                                  in.haplotype_circular, in.pangenome, engine.config(), bam_cache);
     res.verdict = engine.evaluate(res.evidence);
     out.push_back(std::move(res));
   }

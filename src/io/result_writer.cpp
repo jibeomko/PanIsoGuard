@@ -72,7 +72,10 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near << ","
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
-        << "\"variant_circular\":" << (e.variant_circular ? "true" : "false")
+        << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
+        << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
+        << "\"pangenome_rescue\":" << (e.pangenome_rescue ? "true" : "false") << ","
+        << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome
         << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
@@ -105,7 +108,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
       << (prov.variant_axis_on ? (prov.variant_circular ? "on (circular-risk: held, not promoted)" : "on")
                                : "not_evaluable")
       << '\n';
-  out << "axis.pangenome\tnot_evaluable (Tier-0)\n";
+  out << "axis.pangenome\t" << (prov.pangenome_axis_on ? "on" : "not_evaluable") << '\n';
 
   std::map<std::string, std::size_t> class_counts;
   for (const auto& r : results) ++class_counts[to_string(r.verdict.confidence)];

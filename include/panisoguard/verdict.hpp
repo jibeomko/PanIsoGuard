@@ -28,10 +28,9 @@ enum class ConfidenceClass {
   kHighConfNovel,
   kMediumConfNovel,
   kLowConfPartial,
-  kPanRefRescuedFalseNovel,     // variant axis: non-canonical on ref, canonical on a haplotype
-  // NOTE: a HAPLOTYPE_RESCUED_KNOWN_LIKE class (graph/haplotype-path rescue) is
-  // reserved for the future pangenome tier and is intentionally NOT defined here
-  // until the engine can actually emit it.
+  kPanRefRescuedFalseNovel,     // reference bias: a novel-vs-linear-reference junction
+                                // explained by a personalized haplotype (variant axis)
+                                // or realizable on a pangenome graph path (pangenome axis)
   kAmbiguous,
   kArtifact,
 };
@@ -72,6 +71,12 @@ struct EvidenceVector {
   bool variant_evaluable = false;
   bool variant_rescue = false;
   bool variant_circular = false;  // haplotype provenance is RNA-derived/unknown (circular-risk)
+
+  // pangenome (reference-bias) axis: a novel junction realizable on a pangenome
+  // graph haplotype path (population-level reference data; non-circular).
+  bool pangenome_evaluable = false;
+  bool pangenome_rescue = false;
+  int n_novel_jx_pangenome = 0;
 
   // multi-caller consensus (optional)
   bool consensus_evaluable = false;  int n_callers = 0;

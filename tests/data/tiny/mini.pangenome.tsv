@@ -1,0 +1,4 @@
+# pangenome graph junctions: chrom  intron_start(1-based)  intron_end(1-based)  strand  [n_haplotypes]
+chr1	101	200	+	3
+chr1	301	400	-	1
+chr2	51	150	+	5

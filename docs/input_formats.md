@@ -57,3 +57,23 @@ the splice motif at each novel junction between the reference and the haplotype(
 indels shift downstream coordinates (a documented limitation). Set
 `--haplotype-provenance {wgs|external}` for independent genomic data (promotes the
 rescue) vs `{rna_derived|unknown}` (held under the circularity firewall).
+
+## Pangenome graph junctions (`--pangenome-junctions`, optional)
+
+A tab-separated file (no header; `#` comment lines allowed) of splice junctions that
+are present on at least one haplotype path of a pangenome graph (e.g. HPRC),
+pre-extracted with `vg`/`rpvg`. PanIsoGuard does not traverse the graph itself — it
+adjudicates using this junction set (the in-process GBZ tier stays behind
+`-DWITH_PANGENOME_LIB`). Columns:
+
+```text
+chrom   intron_start   intron_end   strand   [n_haplotypes]
+```
+
+`intron_start`/`intron_end` are **1-based inclusive** (first/last intronic base, the
+same convention as STAR `SJ.tab` and GTF introns); `strand` is `+`/`-` (`1`/`2` also
+accepted); the optional 5th column is the number of supporting graph haplotypes
+(default `1`, gated by `axis_pangenome.min_haplotypes`). A novel-vs-linear-reference
+junction found here is reference bias → `PAN_REF_RESCUED_FALSE_NOVEL` (mechanism
+`population_known`). This is population-level reference data, so the evidence is
+**non-circular** by construction and always promotes.

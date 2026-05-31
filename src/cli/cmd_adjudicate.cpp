@@ -25,6 +25,7 @@ void usage() {
       "  --reference PATH        genome FASTA (for the variant axis; also decodes a CRAM --bam)\n"
       "  --reference-haplotype PATH   personalized haplotype FASTA for the variant axis (repeatable)\n"
       "  --haplotype-provenance X     rna_derived|wgs|external|unknown (default unknown=circular-risk)\n"
+      "  --pangenome-junctions PATH   graph-supported splice junctions (pangenome reference-bias axis; optional)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n");
 }
@@ -73,6 +74,7 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.bam_path = common.bam_path;
     prov.variant_axis_on = !common.reference_haplotypes.empty();
     prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
+    prov.pangenome_axis_on = !common.pangenome_junctions.empty();
     prov.config_path = common.config;
     write_adjudication_outputs(out_prefix, run.results, prov);
 

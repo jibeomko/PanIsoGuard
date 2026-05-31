@@ -6,6 +6,7 @@
 
 #include "panisoguard/bam_features.hpp"
 #include "panisoguard/gtf.hpp"   // Catalog
+#include "panisoguard/pangenome.hpp"
 #include "panisoguard/rules.hpp"
 #include "panisoguard/sj_tab.hpp"
 #include "panisoguard/sqanti.hpp"
@@ -32,6 +33,7 @@ struct AdjudicateInputs {
   const BamReader* bam = nullptr;                            // optional (mapping axis)
   const HaplotypeProvider* haplotype = nullptr;              // optional (variant/reference-bias axis)
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
+  const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)
 };
 
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller

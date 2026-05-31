@@ -20,6 +20,7 @@ struct CommonArgs {
   std::string reference;                          // genome FASTA (variant axis + CRAM decode)
   std::vector<std::string> reference_haplotypes;  // personalized FASTAs (variant axis)
   std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown
+  std::string pangenome_junctions;                // graph-supported junction file (pangenome axis)
   std::string config;
 };
 

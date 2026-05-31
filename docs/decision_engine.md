@@ -49,12 +49,19 @@ fired conditions are listed in `rule_trace`.
 
 ## Projection to confidence classes (7 reachable)
 
-1. **Variant rescue (highest priority).** If a novel junction is non-canonical on
-   the reference but canonical on a haplotype, it is reference bias, not new
-   splicing → `PAN_REF_RESCUED_FALSE_NOVEL`. **Circularity firewall:** if the
-   haplotype provenance is RNA-derived/unknown, this is *not* independent evidence,
-   so it is held `AMBIGUOUS` with `circularity_flag=true` and never promoted; only
-   `wgs`/`external` provenance promotes.
+1. **Reference-bias rescue (highest priority).** A novel-vs-linear-reference
+   junction explained by reference bias is `PAN_REF_RESCUED_FALSE_NOVEL`, via either:
+   - *Pangenome axis* (`--pangenome-junctions`): the junction is realizable on a
+     pangenome graph haplotype path (mechanism `population_known`). The pangenome is
+     population-level reference data, so this is non-circular by construction and
+     always promotes; it is evaluated first, so it rescues even when the sample's
+     own haplotype provenance is circular-risk.
+   - *Variant axis* (`--reference-haplotype`): the junction is non-canonical on the
+     reference but canonical on a personalized haplotype (mechanism
+     `variant_created`). **Circularity firewall:** if the haplotype provenance is
+     RNA-derived/unknown this is *not* independent evidence, so it is held
+     `AMBIGUOUS` with `circularity_flag=true` and never promoted; only
+     `wgs`/`external` provenance promotes.
 2. Otherwise project (Axis A × Axis B):
    - `SUPPORTED × none → HIGH_CONF_NOVEL`
    - `SUPPORTED × mechanism → MEDIUM_CONF_NOVEL`
@@ -94,13 +101,16 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
   a canonical GT-AG?) is verified deterministically at the motif level
   (`tests/unit/variant_motif_test.cpp`; see [benchmark/variant_inject](../benchmark/variant_inject)).
 - **GATE-1**: the pangenome reference is pinned to **HPRC v1.1 (freeze1)** with HG002
-  confirmed out-of-graph before any real-data graph rescue (future pangenome tier).
+  confirmed out-of-graph before any real-data graph rescue is validated for use.
 
 ## Future work
 
-- **Pangenome tier** (vg/rpvg): a `HAPLOTYPE_RESCUED_KNOWN_LIKE` class is reserved
-  for graph/haplotype-path rescue and is deliberately not emitted until the engine
-  can compute it.
+- **In-process pangenome tier** (gbwtgraph/GBZ, `-DWITH_PANGENOME_LIB`): the
+  file-based pangenome axis (`--pangenome-junctions`, graph-supported junctions
+  pre-extracted with vg/rpvg) is implemented and emits
+  `PAN_REF_RESCUED_FALSE_NOVEL` (mechanism `population_known`). Loading and
+  traversing a GBZ graph in-process (instead of consuming a pre-extracted junction
+  file) remains behind the experimental build flag.
 - **Table-driven projection**: move the (Axis A × Axis B) grid fully into the TOML.
 - **SQANTI RF concordance**: optionally annotate `rule_trace` with agreement vs the
   SQANTI3 `filter_result`, reinforcing the orthogonal-attribution framing.

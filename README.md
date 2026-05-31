@@ -94,6 +94,20 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
+**Pangenome reference-bias rescue** — supply graph-supported splice junctions
+(pre-extracted from a pangenome graph such as HPRC with vg/rpvg). A novel junction
+realizable on a graph haplotype path is rescued as reference bias; this evidence is
+population-level and non-circular, so it always promotes:
+
+```bash
+panisoguard adjudicate \
+  --classification sample_classification.txt \
+  --isoforms-bed   flair.isoforms.bed \
+  --ref-gtf        gencode.v49.annotation.gtf \
+  --pangenome-junctions hprc.graph_junctions.tsv \
+  --out-prefix     out/sample
+```
+
 **Combine several callers first** (optional) — merge isoforms by intron-chain
 fingerprint into a caller-support matrix, then feed the union to `adjudicate`:
 
@@ -131,7 +145,10 @@ panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --o
 `HIGH_CONF_KNOWN` · `HIGH_CONF_NOVEL` · `MEDIUM_CONF_NOVEL` · `LOW_CONF_PARTIAL` ·
 `PAN_REF_RESCUED_FALSE_NOVEL` · `AMBIGUOUS` · `ARTIFACT` — emitted as a
 deterministic projection of a 2-axis evidence grid (novelty-support ×
-artifact-mechanism).
+artifact-mechanism). `PAN_REF_RESCUED_FALSE_NOVEL` is reached when a novel junction
+is explained by reference bias — either a personalized haplotype (variant axis,
+`--reference-haplotype`) or a pangenome graph path (pangenome axis,
+`--pangenome-junctions`).
 
 ## Evidence tiers
 
@@ -140,6 +157,7 @@ artifact-mechanism).
 | 0 | SQANTI3 classification (priors) + STAR `SJ.tab` | recommended | short-read junction corroboration |
 | 1 | BAM (HiFi/ONT) | recommended | read-level mapping / chimera / soft-clip features |
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
+| 3 | pangenome graph junctions (`--pangenome-junctions`) | optional | novel junction realizable on a graph haplotype path (reference bias) |
 
 ## Build
 
