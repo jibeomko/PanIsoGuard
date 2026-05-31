@@ -65,6 +65,12 @@ struct EvidenceVector {
   double bam_max_frac_softclip = 0.0;
   double bam_max_frac_indel_near = 0.0;
 
+  // variant (reference-bias) axis: a novel junction that is non-canonical on the
+  // reference but canonical on a personalized haplotype FASTA.
+  bool variant_evaluable = false;
+  bool variant_rescue = false;
+  bool variant_circular = false;  // haplotype provenance is RNA-derived/unknown (circular-risk)
+
   // multi-caller consensus (optional)
   bool consensus_evaluable = false;  int n_callers = 0;
 };

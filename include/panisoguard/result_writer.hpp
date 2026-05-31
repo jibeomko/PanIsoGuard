@@ -17,6 +17,8 @@ struct RunProvenance {
   std::string ref_gtf_path;   // "" if none
   std::string sj_tab_path;    // "" if none
   std::string bam_path;       // "" if none
+  bool variant_axis_on = false;     // a haplotype FASTA was supplied
+  bool variant_circular = false;    // haplotype provenance is circular-risk
   std::string config_path;    // "" if built-in defaults
 };
 

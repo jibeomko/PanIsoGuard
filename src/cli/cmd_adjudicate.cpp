@@ -22,7 +22,9 @@ void usage() {
       "  --ref-gtf PATH          reference GTF; enables novel-junction classification (recommended)\n"
       "  --sj-tab PATH           STAR SJ.tab for short-read corroboration (optional)\n"
       "  --bam PATH              indexed BAM/CRAM for the read-level mapping axis (optional)\n"
-      "  --reference PATH        reference FASTA (required only to decode a CRAM --bam)\n"
+      "  --reference PATH        genome FASTA (for the variant axis; also decodes a CRAM --bam)\n"
+      "  --reference-haplotype PATH   personalized haplotype FASTA for the variant axis (repeatable)\n"
+      "  --haplotype-provenance X     rna_derived|wgs|external|unknown (default unknown=circular-risk)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n");
 }
@@ -69,6 +71,8 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.ref_gtf_path = common.ref_gtf;
     prov.sj_tab_path = common.sj_tab;
     prov.bam_path = common.bam_path;
+    prov.variant_axis_on = !common.reference_haplotypes.empty();
+    prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
     prov.config_path = common.config;
     write_adjudication_outputs(out_prefix, run.results, prov);
 

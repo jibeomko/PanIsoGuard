@@ -26,6 +26,7 @@ struct RuleConfig {
   bool use_noncanonical = true;
   bool use_rts = true;
   bool use_degradation = true;
+  bool use_variant = true;
   std::string sqanti3_version_target = "6.0";
   std::string ruleset_version = "builtin-0.0.1";
 };

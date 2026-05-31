@@ -16,6 +16,7 @@ std::string jx_key(const std::string& chrom, const Junction& j) {
 EvidenceVector build_evidence(const SqantiRecord& r,
                               const std::map<std::string, IntronChain>& chains,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
+                              const HaplotypeProvider* haplotype, bool haplotype_circular,
                               const RuleConfig& cfg,
                               std::unordered_map<std::string, JunctionBamFeatures>& bam_cache) {
   EvidenceVector ev;
@@ -43,9 +44,15 @@ EvidenceVector build_evidence(const SqantiRecord& r,
 
     int n_novel = 0, n_supported = 0;
     bool any_bam_eval = false;
+    bool any_variant_eval = false;
     for (const auto& intron : chain.introns) {
       if (catalog->has_intron(chain.chrom, chain.strand, intron)) continue;  // known junction
       ++n_novel;
+      if (haplotype != nullptr) {
+        const VariantVerdict vv = haplotype->classify(chain.chrom, intron, chain.strand);
+        if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
+        if (vv == VariantVerdict::kCreated) ev.variant_rescue = true;
+      }
       if (sj != nullptr) {
         const SjRecord* hit = sj->find_exact(chain.chrom, chain.strand, intron);
         const bool supported = hit != nullptr && hit->n_uniq >= cfg.sj_min_uniq_reads &&
@@ -79,6 +86,8 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       ev.n_novel_junctions = n_novel;  // recorded even without SR for reference
     }
     ev.bam_evaluable = (bam != nullptr) && any_bam_eval;
+    ev.variant_evaluable = (haplotype != nullptr) && any_variant_eval;
+    ev.variant_circular = haplotype_circular;
   }
   return ev;
 }
@@ -99,7 +108,8 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.chrom = r.chrom;
     res.strand = r.strand;
     res.structural_category = r.structural_category;
-    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, engine.config(), bam_cache);
+    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
+                                  in.haplotype_circular, engine.config(), bam_cache);
     res.verdict = engine.evaluate(res.evidence);
     out.push_back(std::move(res));
   }

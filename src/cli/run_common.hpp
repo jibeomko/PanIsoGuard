@@ -17,9 +17,16 @@ struct CommonArgs {
   std::string ref_gtf;
   std::string sj_tab;
   std::string bam_path;
-  std::string reference;
+  std::string reference;                          // genome FASTA (variant axis + CRAM decode)
+  std::vector<std::string> reference_haplotypes;  // personalized FASTAs (variant axis)
+  std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown
   std::string config;
 };
+
+// A haplotype provenance is "circular-risk" unless it is independent genomic data.
+inline bool haplotype_provenance_is_circular(const std::string& p) {
+  return !(p == "wgs" || p == "external");
+}
 
 // If argv[i] is a shared flag, store it (advancing i past its value) and return
 // true; otherwise return false so the caller can handle subcommand-specific flags.

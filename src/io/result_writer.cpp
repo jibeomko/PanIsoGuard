@@ -69,7 +69,10 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"bam_frac_low_mapq\":" << e.bam_max_frac_low_mapq << ","
         << "\"bam_frac_supplementary\":" << e.bam_max_frac_supplementary << ","
         << "\"bam_frac_softclip\":" << e.bam_max_frac_softclip << ","
-        << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near
+        << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near << ","
+        << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
+        << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
+        << "\"variant_circular\":" << (e.variant_circular ? "true" : "false")
         << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
@@ -98,7 +101,10 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "axis.short_read\t" << (prov.sj_tab_path.empty() ? "not_evaluable" : "on") << '\n';
   out << "axis.catalog\t" << (prov.ref_gtf_path.empty() ? "not_evaluable" : "on") << '\n';
   out << "axis.bam\t" << (prov.bam_path.empty() ? "not_evaluable" : "on") << '\n';
-  out << "axis.variant\tnot_evaluable (later tier)\n";
+  out << "axis.variant\t"
+      << (prov.variant_axis_on ? (prov.variant_circular ? "on (circular-risk: held, not promoted)" : "on")
+                               : "not_evaluable")
+      << '\n';
   out << "axis.pangenome\tnot_evaluable (Tier-0)\n";
 
   std::map<std::string, std::size_t> class_counts;

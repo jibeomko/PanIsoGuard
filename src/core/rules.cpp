@@ -59,6 +59,25 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
     return v;
   }
 
+  // --- Variant (reference-bias) rescue: highest priority -----------------------
+  // A novel junction that is non-canonical on the reference but canonical on the
+  // sample's haplotype is explained by reference bias, not new splicing.
+  if (cfg_.use_variant && ev.variant_evaluable && ev.variant_rescue) {
+    v.primary_mechanism = Mechanism::kVariant;
+    if (ev.variant_circular) {
+      // RNA-derived/unknown provenance: not independent evidence -> never promoted.
+      v.confidence = ConfidenceClass::kAmbiguous;
+      v.circularity_flag = true;
+      trace("variant creates canonical motif on haplotype but provenance is circular-risk "
+            "(RNA-derived/unknown) -> held AMBIGUOUS (not promoted)");
+    } else {
+      v.confidence = ConfidenceClass::kPanRefRescuedFalseNovel;
+      trace("variant creates canonical splice motif on haplotype, non-canonical on reference "
+            "-> PAN_REF_RESCUED_FALSE_NOVEL (reference bias)");
+    }
+    return v;
+  }
+
   // --- Axis A: novelty support from short-read corroboration -------------------
   const bool sj_ok = ev.sj_evaluable && cfg_.use_short_read;
   NoveltySupport sup;
@@ -150,6 +169,7 @@ RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
   else if (axis == "noncanonical") e.cfg_.use_noncanonical = false;
   else if (axis == "rt_switch")    e.cfg_.use_rts = false;
   else if (axis == "degradation")  e.cfg_.use_degradation = false;
+  else if (axis == "variant")      e.cfg_.use_variant = false;
   return e;
 }
 
