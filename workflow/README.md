@@ -31,7 +31,7 @@ removes the *redundant* cost (re-alignment, serial execution).
 cd workflow
 snakemake --use-conda --cores 16            # full run
 snakemake -n                                 # dry-run: inspect the DAG first
-snakemake --use-conda --cores 16 results/adjudicate/10-CRC-N.adjudicated.tsv  # one target
+snakemake --use-conda --cores 16 results/adjudicate/sample1.adjudicated.tsv   # one target
 ```
 
 Each tool runs in its own conda env (`envs/*.yaml`) via `--use-conda`, so nothing

@@ -11,15 +11,15 @@
 # Run:  snakemake --use-conda --cores 16
 
 reference:
-  genome: "/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa"
-  gtf:    "/mnt/Data/LR-RNAseq/reference/gencode.v49.annotation.gtf"
+  genome: "/path/to/reference/genome.fa"        # + .fai
+  gtf:    "/path/to/reference/annotation.gtf"    # e.g. GENCODE
 
 platform: hifi            # hifi | ont  (selects the minimap2 splice preset)
 
 # sample_name: path/to/reads.fastq.gz
 samples:
-  10-CRC-N: "/mnt/Data/LR-RNAseq/Long-read/fastq/10-CRC-N.fastq.gz"
-  # 10-CRC-T: "/mnt/Data/LR-RNAseq/Long-read/fastq/10-CRC-T-ccc-md.fastq.gz"
+  sample1: "/path/to/reads/sample1.fastq.gz"
+  # sample2: "/path/to/reads/sample2.fastq.gz"
 
 callers: [flair, isoquant, bambu]   # enable any subset; they run in parallel
 primary_caller: flair               # SQANTI3 + adjudicate run on this caller's isoforms
