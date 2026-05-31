@@ -131,8 +131,7 @@ panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --o
 `HIGH_CONF_KNOWN` · `HIGH_CONF_NOVEL` · `MEDIUM_CONF_NOVEL` · `LOW_CONF_PARTIAL` ·
 `PAN_REF_RESCUED_FALSE_NOVEL` · `AMBIGUOUS` · `ARTIFACT` — emitted as a
 deterministic projection of a 2-axis evidence grid (novelty-support ×
-artifact-mechanism). A graph/haplotype-path rescue class is reserved for a future
-pangenome tier and is not emitted yet.
+artifact-mechanism).
 
 ## Evidence tiers
 
@@ -141,7 +140,6 @@ pangenome tier and is not emitted yet.
 | 0 | SQANTI3 classification (priors) + STAR `SJ.tab` | recommended | short-read junction corroboration |
 | 1 | BAM (HiFi/ONT) | recommended | read-level mapping / chimera / soft-clip features |
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
-| 3 | pangenome `GFA` / `rpvg` | future | haplotype-path rescue (planned; not yet implemented) |
 
 ## Build
 
@@ -188,7 +186,7 @@ callers in parallel over a single shared alignment and pipes into PanIsoGuard
 
 ## Validation
 
-See [docs/validation.md](docs/validation.md) for what is verified today and the
+See [docs/validation.md](docs/validation.md) for what is verified and the
 truth-based validation plan (SQANTI-SIM, HG002/HPRC, LRGASP).
 
 ## License

@@ -1,6 +1,6 @@
 # Validation
 
-## What is verified today
+## What is verified
 
 **Unit suite** (`ctest`, 28 cases / 159 assertions, htslib-only build):
 
