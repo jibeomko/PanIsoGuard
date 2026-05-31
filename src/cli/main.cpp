@@ -4,6 +4,7 @@
 // build toolchain can be verified end to end. Subcommands are stubs that exit
 // with a clear "not yet implemented" message; they are filled in from M1 on.
 
+#include <clocale>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -58,6 +59,10 @@ int cmd_stub(const char* name) {
 }  // namespace
 
 int main(int argc, char** argv) {
+  // Force C numeric locale so float parsing (std::stod) is decimal-point stable
+  // regardless of the user's environment locale.
+  std::setlocale(LC_NUMERIC, "C");
+
   if (argc < 2) {
     print_usage();
     return 1;

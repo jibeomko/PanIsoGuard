@@ -32,7 +32,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     for (const auto& intron : chain.introns) {
       if (catalog->has_intron(chain.chrom, chain.strand, intron)) continue;  // known junction
       ++n_novel;
-      const SjRecord* hit = sj->find_exact(chain.chrom, intron);
+      const SjRecord* hit = sj->find_exact(chain.chrom, chain.strand, intron);
       const bool supported = hit != nullptr && hit->n_uniq >= cfg.sj_min_uniq_reads &&
                              (!cfg.sj_require_canonical_motif || hit->canonical());
       if (supported) ++n_supported;

@@ -37,9 +37,13 @@ TEST_CASE("rule projection over the 2-axis grid", "[rules]") {
   CHECK(eng.evaluate(novel_ev(2, 1, /*noncanonical=*/true)).confidence == ConfidenceClass::kLowConfPartial);
   CHECK(eng.evaluate(novel_ev(2, 0)).confidence == ConfidenceClass::kLowConfPartial);
   CHECK(eng.evaluate(novel_ev(2, 0, /*noncanonical=*/true)).confidence == ConfidenceClass::kArtifact);
-
-  // degradation mechanism via perc_A over the default 59 threshold
+  // UNSUPPORTED x rt_switch and x degradation also -> ARTIFACT (explicit grid coverage)
+  CHECK(eng.evaluate(novel_ev(2, 0, false, /*rts=*/true)).confidence == ConfidenceClass::kArtifact);
   CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/70.0)).confidence == ConfidenceClass::kArtifact);
+
+  // perc_A intra-priming threshold matches SQANTI3 default (flag >= 60)
+  CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/60.0)).confidence == ConfidenceClass::kArtifact);
+  CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/59.5)).confidence == ConfidenceClass::kLowConfPartial);
 }
 
 TEST_CASE("rules: unevaluable novelty support is AMBIGUOUS, not a guess", "[rules]") {

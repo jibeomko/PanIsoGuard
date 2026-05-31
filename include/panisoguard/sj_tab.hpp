@@ -32,14 +32,16 @@ class SjTable {
  public:
   void add(SjRecord rec);
 
-  // Exact match on (chrom, intron.start, intron.end). Returns nullptr if absent.
-  const SjRecord* find_exact(const std::string& chrom, const Junction& intron) const;
+  // Exact match on (chrom, strand, intron.start, intron.end). Returns nullptr if
+  // absent. Strand-aware so an opposite-strand junction at the same coordinates
+  // cannot corroborate (mirrors the strand-aware reference Catalog).
+  const SjRecord* find_exact(const std::string& chrom, Strand strand, const Junction& intron) const;
 
   std::size_t size() const { return records_.size(); }
   const std::vector<SjRecord>& records() const { return records_; }
 
  private:
-  static std::string key(const std::string& chrom, const Junction& j);
+  static std::string key(const std::string& chrom, Strand strand, const Junction& j);
 
   std::vector<SjRecord> records_;
   std::unordered_map<std::string, std::size_t> by_coord_;

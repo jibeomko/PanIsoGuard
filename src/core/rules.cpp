@@ -56,7 +56,14 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   NoveltySupport sup;
   if (!ev.sj_evaluable || !ev.chain_available || ev.n_novel_junctions == 0) {
     sup = NoveltySupport::kUnknown;
-    trace("novelty-support not evaluable (sj/chain absent or no novel junctions) -> UNKNOWN");
+    // Distinguish the unknowability mode for downstream filtering.
+    if (!ev.chain_available) {
+      trace("novelty-support UNKNOWN reason=caller_chain_absent");
+    } else if (!ev.sj_evaluable) {
+      trace("novelty-support UNKNOWN reason=short_read/catalog_axis_absent");
+    } else {
+      trace("novelty-support UNKNOWN reason=no_novel_junctions (e.g. NIC combinatorial novelty)");
+    }
   } else if (ev.n_novel_jx_sr_supported == ev.n_novel_junctions) {
     sup = NoveltySupport::kSupported;
     trace("sj_support=" + std::to_string(ev.n_novel_jx_sr_supported) + "/" +
@@ -79,9 +86,9 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   } else if (ev.rts_evaluable && ev.rts_stage) {
     mech = Mechanism::kRtSwitch;
     trace("RTS_stage=TRUE -> mechanism=rt_switch");
-  } else if (ev.percA_evaluable && ev.perc_A_downstream_TTS > cfg_.perc_A_degradation_threshold) {
+  } else if (ev.percA_evaluable && ev.perc_A_downstream_TTS >= cfg_.perc_A_degradation_threshold) {
     mech = Mechanism::kDegradation;
-    trace("perc_A_downstream_TTS=" + std::to_string(ev.perc_A_downstream_TTS) + " > " +
+    trace("perc_A_downstream_TTS=" + std::to_string(ev.perc_A_downstream_TTS) + " >= " +
           std::to_string(cfg_.perc_A_degradation_threshold) + " -> mechanism=degradation");
   } else {
     trace("no artifact mechanism flagged -> mechanism=none");

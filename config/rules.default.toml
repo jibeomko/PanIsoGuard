@@ -25,7 +25,7 @@ consensus_min_callers      = 999    # multi-caller agreement gate; 999 disables 
 # --- Axis B: artifact mechanism (engine-read where noted) --------------------
 # Priority order applied by the engine: noncanonical > rt_switch > degradation.
 [axis_artifact.degradation]
-max_perc_A_downstream_TTS = 59.0    # SQANTI intra-priming heuristic boundary (engine-read)
+max_perc_A_downstream_TTS = 60.0    # SQANTI3 intra-priming default: keep <60, flag >=60 (engine-read)
 
 [axis_artifact.rt_switch]
 use_sqanti_RTS_stage = true         # documented; engine uses SQANTI RTS_stage prior
