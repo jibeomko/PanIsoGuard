@@ -6,9 +6,10 @@ package:
   version: {{ version }}
 
 source:
-  # At release, point to the tagged source tarball and fill in its sha256.
+  # sha256 of the v{{ version }} GitHub release tarball (the v0.0.1 tag's own
+  # frozen copy of this file necessarily still shows the placeholder).
   url: https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  sha256: b4890cd7174e4653841877e44dadb5dd4436f12753a7904296079894e9b89d01
 
 build:
   number: 0
