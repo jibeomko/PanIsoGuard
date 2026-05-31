@@ -16,6 +16,8 @@
 // Real subcommands implemented in their own translation units.
 int cmd_combine(int argc, char** argv);
 int cmd_adjudicate(int argc, char** argv);
+int cmd_benchmark(int argc, char** argv);
+int cmd_ablate(int argc, char** argv);
 
 namespace {
 
@@ -48,14 +50,6 @@ void print_usage() {
       panisoguard::kVersion);
 }
 
-int cmd_stub(const char* name) {
-  std::fprintf(stderr,
-      "panisoguard %s: not yet implemented (M0 scaffold).\n"
-      "This subcommand is planned for an upcoming milestone.\n",
-      name);
-  return 2;
-}
-
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -79,8 +73,8 @@ int main(int argc, char** argv) {
     return 0;
   }
   if (sub == "adjudicate")      return cmd_adjudicate(argc, argv);
-  if (sub == "benchmark")       return cmd_stub("benchmark");
-  if (sub == "ablate")          return cmd_stub("ablate");
+  if (sub == "benchmark")       return cmd_benchmark(argc, argv);
+  if (sub == "ablate")          return cmd_ablate(argc, argv);
   if (sub == "combine")         return cmd_combine(argc, argv);
 
   std::fprintf(stderr, "panisoguard: unknown subcommand '%s'\n\n", sub.c_str());

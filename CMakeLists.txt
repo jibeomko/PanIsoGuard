@@ -60,6 +60,7 @@ add_library(panisoguard_core STATIC
   src/core/verdict.cpp
   src/core/rules.cpp
   src/core/adjudicator.cpp
+  src/core/analysis.cpp
   src/evidence/bam_features.cpp
   src/io/sj_tab_reader.cpp
   src/io/gtf_reader.cpp
@@ -76,8 +77,11 @@ target_link_libraries(panisoguard_core PUBLIC HTSlib::hts)
 # --- CLI ---------------------------------------------------------------------
 add_executable(panisoguard
   src/cli/main.cpp
+  src/cli/run_common.cpp
   src/cli/cmd_combine.cpp
   src/cli/cmd_adjudicate.cpp
+  src/cli/cmd_benchmark.cpp
+  src/cli/cmd_ablate.cpp
 )
 target_link_libraries(panisoguard PRIVATE panisoguard_core)
 target_compile_definitions(panisoguard PRIVATE PANISOGUARD_VERSION="${PROJECT_VERSION}")
@@ -105,6 +109,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/rules_test.cpp
     tests/unit/adjudicator_test.cpp
     tests/unit/bam_features_test.cpp
+    tests/unit/analysis_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
   target_include_directories(panisoguard_tests PRIVATE

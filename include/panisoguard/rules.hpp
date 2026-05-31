@@ -20,6 +20,12 @@ struct RuleConfig {
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
+  // Per-axis enable switches (used by `ablate` to mask one axis at a time).
+  bool use_short_read = true;
+  bool use_mapping = true;
+  bool use_noncanonical = true;
+  bool use_rts = true;
+  bool use_degradation = true;
   std::string sqanti3_version_target = "6.0";
   std::string ruleset_version = "builtin-0.0.1";
 };
@@ -35,6 +41,10 @@ class RuleEngine {
 
   // Map an assembled EvidenceVector to a Verdict (2-axis evaluation + projection).
   Verdict evaluate(const EvidenceVector& ev) const;
+
+  // A copy of this engine with one evidence axis disabled, for ablation. Axis is
+  // one of: short_read, mapping, noncanonical, rt_switch, degradation.
+  RuleEngine with_axis_disabled(const std::string& axis) const;
 
  private:
   RuleConfig cfg_;

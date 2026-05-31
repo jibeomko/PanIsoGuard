@@ -60,8 +60,9 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   }
 
   // --- Axis A: novelty support from short-read corroboration -------------------
+  const bool sj_ok = ev.sj_evaluable && cfg_.use_short_read;
   NoveltySupport sup;
-  if (!ev.sj_evaluable || !ev.chain_available || ev.n_novel_junctions == 0) {
+  if (!sj_ok || !ev.chain_available || ev.n_novel_junctions == 0) {
     sup = NoveltySupport::kUnknown;
     // Distinguish the unknowability mode for downstream filtering.
     if (!ev.chain_available) {
@@ -91,7 +92,7 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   // do not map confidently (low MAPQ / supplementary / multimapping), the junction
   // may be a mapping artifact and downstream motif/QC signals are moot. Only the
   // first-matching mechanism is reported as primary (see rule_trace for all flags).
-  const bool mapping_flag = ev.bam_evaluable && ev.bam_n_spanning_total > 0 &&
+  const bool mapping_flag = cfg_.use_mapping && ev.bam_evaluable && ev.bam_n_spanning_total > 0 &&
                             (ev.bam_max_frac_low_mapq > cfg_.bam_max_low_mapq_frac ||
                              ev.bam_max_frac_supplementary > cfg_.bam_max_supplementary_frac);
   Mechanism mech = Mechanism::kNone;
@@ -100,13 +101,14 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
     trace("bam mapping artifact (low_mapq_frac=" + std::to_string(ev.bam_max_frac_low_mapq) +
           ", supplementary_frac=" + std::to_string(ev.bam_max_frac_supplementary) +
           ") -> mechanism=mapping_or_repeat");
-  } else if (ev.canon_evaluable && ev.noncanonical) {
+  } else if (cfg_.use_noncanonical && ev.canon_evaluable && ev.noncanonical) {
     mech = Mechanism::kNoncanonical;
     trace("all_canonical=non_canonical -> mechanism=noncanonical");
-  } else if (ev.rts_evaluable && ev.rts_stage) {
+  } else if (cfg_.use_rts && ev.rts_evaluable && ev.rts_stage) {
     mech = Mechanism::kRtSwitch;
     trace("RTS_stage=TRUE -> mechanism=rt_switch");
-  } else if (ev.percA_evaluable && ev.perc_A_downstream_TTS >= cfg_.perc_A_degradation_threshold) {
+  } else if (cfg_.use_degradation && ev.percA_evaluable &&
+             ev.perc_A_downstream_TTS >= cfg_.perc_A_degradation_threshold) {
     mech = Mechanism::kDegradation;
     trace("perc_A_downstream_TTS=" + std::to_string(ev.perc_A_downstream_TTS) + " >= " +
           std::to_string(cfg_.perc_A_degradation_threshold) + " -> mechanism=degradation");
@@ -139,6 +141,16 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   // and no verdict rests on RNA-derived variants.
   v.circularity_flag = false;
   return v;
+}
+
+RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
+  RuleEngine e = *this;
+  if (axis == "short_read")        e.cfg_.use_short_read = false;
+  else if (axis == "mapping")      e.cfg_.use_mapping = false;
+  else if (axis == "noncanonical") e.cfg_.use_noncanonical = false;
+  else if (axis == "rt_switch")    e.cfg_.use_rts = false;
+  else if (axis == "degradation")  e.cfg_.use_degradation = false;
+  return e;
 }
 
 }  // namespace panisoguard
