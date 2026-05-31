@@ -2,6 +2,9 @@
 
 **Caller-agnostic adjudication of long-read RNA-seq novel isoforms.**
 
+[![CI](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml)
+[![License: MIT AND BSL-1.0](https://img.shields.io/badge/license-MIT%20AND%20BSL--1.0-blue.svg)](LICENSE)
+
 PanIsoGuard is a post-processing / decision layer that ingests the *novel* isoform
 calls produced by long-read isoform callers (FLAIR, IsoQuant, Bambu, ESPRESSO,
 TALON, …) and/or [SQANTI3](https://github.com/ConesaLab/SQANTI3) output, together

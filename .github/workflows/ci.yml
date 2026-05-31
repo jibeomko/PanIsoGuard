@@ -1,0 +1,62 @@
+name: CI
+
+# Build PanIsoGuard and run the unit suite on every push / PR to main.
+# htslib (>= 1.18) and the C/C++ toolchain are installed from conda-forge/bioconda
+# via micromamba — the same dependency path users get with `conda install`.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build + test (linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up toolchain + htslib (micromamba)
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: build
+          init-shell: bash
+          cache-environment: true
+          condarc: |
+            channels:
+              - conda-forge
+              - bioconda
+          create-args: >-
+            cxx-compiler
+            c-compiler
+            cmake>=3.20
+            make
+            pkg-config
+            htslib>=1.18
+            zlib
+
+      - name: Configure
+        shell: bash -el {0}
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="$CONDA_PREFIX"
+
+      - name: Build
+        shell: bash -el {0}
+        run: cmake --build build -j
+
+      - name: Test
+        shell: bash -el {0}
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Smoke
+        shell: bash -el {0}
+        run: ./build/panisoguard --version
