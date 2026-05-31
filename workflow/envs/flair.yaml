@@ -1,0 +1,4 @@
+channels: [bioconda, conda-forge]
+dependencies:
+  - flair >=3.0.0
+  - samtools >=1.18

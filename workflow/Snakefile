@@ -1,0 +1,192 @@
+# PanIsoGuard orchestration: raw long-read RNA -> shared alignment -> parallel
+# callers -> SQANTI3 -> PanIsoGuard combine + adjudicate.
+#
+# Design notes
+#  * ONE minimap2 alignment per sample (rule align) is reused by every caller and
+#    by PanIsoGuard's mapping axis -- callers do NOT each re-align.
+#  * Caller rules are independent, so `snakemake --cores N` schedules flair /
+#    isoquant / bambu (and across samples) concurrently.
+#  * Each tool runs in its own conda env (envs/*.yaml) via --use-conda, matching
+#    the manuscript pipeline's pattern; no tool needs to be on the base PATH.
+#
+# Caller invocations are version-sensitive: treat the flair/isoquant/bambu/sqanti3
+# rules as templates and adjust flags to your installed versions. The align,
+# combine, and adjudicate rules are exercised directly.
+
+configfile: "config.yaml"
+
+GENOME   = config["reference"]["genome"]
+GTF      = config["reference"]["gtf"]
+SAMPLES  = config["samples"]
+CALLERS  = config["callers"]
+PRIMARY  = config["primary_caller"]
+OUT      = config["outdir"].rstrip("/")
+PIG      = config["panisoguard"]
+THREADS  = config["threads"]
+
+MM2_PRESET = {"hifi": "splice:hq", "ont": "splice"}[config["platform"]]
+
+assert PRIMARY in CALLERS, "primary_caller must be one of callers"
+
+
+def caller_gtf(sample, caller):
+    return f"{OUT}/callers/{caller}/{sample}.{caller}.gtf"
+
+
+rule all:
+    input:
+        expand(f"{OUT}/adjudicate/{{s}}.adjudicated.tsv", s=SAMPLES),
+        expand(f"{OUT}/combine/{{s}}.caller_support_matrix.tsv", s=SAMPLES),
+
+
+# --- Shared alignment (computed once, reused by all callers) ------------------
+rule align:
+    input:
+        reads=lambda wc: SAMPLES[wc.s],
+        genome=GENOME,
+    output:
+        bam=f"{OUT}/align/{{s}}.bam",
+        bai=f"{OUT}/align/{{s}}.bam.bai",
+    threads: THREADS
+    conda: "envs/minimap2.yaml"
+    params:
+        preset=MM2_PRESET,
+    shell:
+        r"""
+        minimap2 -t {threads} -ax {params.preset} -uf --secondary=no {input.genome} {input.reads} \
+          | samtools sort -@ {threads} -o {output.bam} -
+        samtools index {output.bam}
+        """
+
+
+# --- Callers (parallel, all consume the shared BAM) ---------------------------
+rule flair:
+    input:
+        bam=f"{OUT}/align/{{s}}.bam",
+        reads=lambda wc: SAMPLES[wc.s],
+        genome=GENOME, gtf=GTF,
+    output:
+        gtf=f"{OUT}/callers/flair/{{s}}.flair.gtf",
+        bed=f"{OUT}/callers/flair/{{s}}.flair.bed",
+    threads: THREADS
+    conda: "envs/flair.yaml"
+    params:
+        pfx=lambda wc: f"{OUT}/callers/flair/{wc.s}",
+    shell:
+        r"""
+        # Reuse the shared BAM instead of `flair align` re-running minimap2.
+        bam2Bed12 -i {input.bam} > {params.pfx}.input.bed12
+        flair correct -q {params.pfx}.input.bed12 -g {input.genome} -f {input.gtf} \
+              -o {params.pfx} -t {threads}
+        flair collapse -g {input.genome} -q {params.pfx}_all_corrected.bed \
+              -r {input.reads} --gtf {input.gtf} -o {params.pfx} -t {threads}
+        cp {params.pfx}.isoforms.gtf {output.gtf}
+        cp {params.pfx}.isoforms.bed {output.bed}
+        """
+
+
+rule isoquant:
+    input:
+        bam=f"{OUT}/align/{{s}}.bam", genome=GENOME, gtf=GTF,
+    output:
+        gtf=f"{OUT}/callers/isoquant/{{s}}.isoquant.gtf",
+    threads: THREADS
+    conda: "envs/isoquant.yaml"
+    params:
+        dt=lambda wc: {"hifi": "pacbio_ccs", "ont": "nanopore"}[config["platform"]],
+        d=lambda wc: f"{OUT}/callers/isoquant/{wc.s}_work",
+    shell:
+        r"""
+        isoquant.py --reference {input.genome} --genedb {input.gtf} --bam {input.bam} \
+            --data_type {params.dt} --threads {threads} --output {params.d}
+        cp {params.d}/OUT/OUT.transcript_models.gtf {output.gtf}
+        """
+
+
+rule bambu:
+    input:
+        bam=f"{OUT}/align/{{s}}.bam", genome=GENOME, gtf=GTF,
+    output:
+        gtf=f"{OUT}/callers/bambu/{{s}}.bambu.gtf",
+    threads: THREADS
+    conda: "envs/bambu.yaml"
+    params:
+        d=lambda wc: f"{OUT}/callers/bambu/{wc.s}_work",
+    shell:
+        r"""
+        Rscript scripts/run_bambu.R {input.bam} {input.gtf} {input.genome} {params.d} {threads}
+        cp {params.d}/extended_annotations.gtf {output.gtf}
+        """
+
+
+# --- SQANTI3 QC on the primary caller ----------------------------------------
+rule sqanti3:
+    input:
+        gtf=lambda wc: caller_gtf(wc.s, PRIMARY),
+        genome=GENOME, ref_gtf=GTF,
+    output:
+        classification=f"{OUT}/sqanti3/{{s}}_classification.txt",
+    threads: THREADS
+    conda: "envs/sqanti3.yaml"
+    params:
+        d=lambda wc: f"{OUT}/sqanti3/{wc.s}",
+        sq=config["sqanti3_dir"],
+    shell:
+        r"""
+        python {params.sq}/sqanti3_qc.py {input.gtf} {input.ref_gtf} {input.genome} \
+            -d {params.d} -o {wildcards.s} --cpus {threads} --report skip
+        cp {params.d}/{wildcards.s}_classification.txt {output.classification}
+        """
+
+
+# --- PanIsoGuard: multi-caller integration -----------------------------------
+rule combine:
+    input:
+        gtfs=lambda wc: [caller_gtf(wc.s, c) for c in CALLERS],
+        ref_gtf=GTF,
+    output:
+        matrix=f"{OUT}/combine/{{s}}.caller_support_matrix.tsv",
+    params:
+        gtf_args=lambda wc: " ".join(f"--gtf {c}:{caller_gtf(wc.s, c)}" for c in CALLERS),
+        pig=PIG,
+    shell:
+        r"""
+        {params.pig} combine {params.gtf_args} --ref-gtf {input.ref_gtf} --out {output.matrix}
+        """
+
+
+# --- PanIsoGuard: adjudication ------------------------------------------------
+def adjudicate_extra(wc):
+    args = []
+    if config.get("short_read_sj"):
+        args.append(f"--sj-tab {config['short_read_sj']}")
+    args.append(f"--bam {OUT}/align/{wc.s}.bam")
+    if config.get("haplotype_fastas"):
+        args.append(f"--reference {GENOME}")
+        for h in config["haplotype_fastas"]:
+            args.append(f"--reference-haplotype {h}")
+        args.append(f"--haplotype-provenance {config['haplotype_provenance']}")
+    return " ".join(args)
+
+
+rule adjudicate:
+    input:
+        classification=f"{OUT}/sqanti3/{{s}}_classification.txt",
+        primary_gtf=lambda wc: caller_gtf(wc.s, PRIMARY),
+        bam=f"{OUT}/align/{{s}}.bam",
+        ref_gtf=GTF,
+    output:
+        tsv=f"{OUT}/adjudicate/{{s}}.adjudicated.tsv",
+    params:
+        pfx=lambda wc: f"{OUT}/adjudicate/{wc.s}",
+        extra=adjudicate_extra,
+        pig=PIG,
+    shell:
+        r"""
+        {params.pig} adjudicate \
+            --classification {input.classification} \
+            --isoforms-gtf {input.primary_gtf} \
+            --ref-gtf {input.ref_gtf} \
+            {params.extra} \
+            --out-prefix {params.pfx}
+        """

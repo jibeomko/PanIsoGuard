@@ -1,0 +1,34 @@
+# PanIsoGuard orchestration config.
+#
+# Pipeline: raw long-read RNA  ->  ONE shared minimap2 alignment  ->  isoform
+# callers run IN PARALLEL over that shared BAM  ->  SQANTI3 on the primary caller
+# ->  PanIsoGuard combine (multi-caller integration) + adjudicate.
+#
+# The speed-up vs a naive pipeline: the genome alignment is computed once and
+# reused by every caller (instead of each caller re-running minimap2), and the
+# callers are independent Snakemake rules so `--cores N` runs them concurrently.
+#
+# Run:  snakemake --use-conda --cores 16
+
+reference:
+  genome: "/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa"
+  gtf:    "/mnt/Data/LR-RNAseq/reference/gencode.v49.annotation.gtf"
+
+platform: hifi            # hifi | ont  (selects the minimap2 splice preset)
+
+# sample_name: path/to/reads.fastq.gz
+samples:
+  10-CRC-N: "/mnt/Data/LR-RNAseq/Long-read/fastq/10-CRC-N.fastq.gz"
+  # 10-CRC-T: "/mnt/Data/LR-RNAseq/Long-read/fastq/10-CRC-T-ccc-md.fastq.gz"
+
+callers: [flair, isoquant, bambu]   # enable any subset; they run in parallel
+primary_caller: flair               # SQANTI3 + adjudicate run on this caller's isoforms
+
+short_read_sj: ""                   # optional STAR combined_SJ.tab -> short-read axis
+haplotype_fastas: []                # optional personalized FASTAs -> variant axis
+haplotype_provenance: unknown       # rna_derived | wgs | external | unknown
+
+threads: 16
+panisoguard: "../build/panisoguard" # path to the built binary
+sqanti3_dir: ""                     # path to a SQANTI3 checkout (has sqanti3_qc.py)
+outdir: "results"
