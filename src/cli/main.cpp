@@ -14,6 +14,7 @@
 
 // Real subcommands implemented in their own translation units.
 int cmd_combine(int argc, char** argv);
+int cmd_adjudicate(int argc, char** argv);
 
 namespace {
 
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
     print_usage();
     return 0;
   }
-  if (sub == "adjudicate")      return cmd_stub("adjudicate");
+  if (sub == "adjudicate")      return cmd_adjudicate(argc, argv);
   if (sub == "benchmark")       return cmd_stub("benchmark");
   if (sub == "ablate")          return cmd_stub("ablate");
   if (sub == "combine")         return cmd_combine(argc, argv);

@@ -1,110 +1,61 @@
 # PanIsoGuard default adjudication rules (auditable, runtime-loaded).
 #
-# This file IS the methodological contribution made inspectable: every threshold,
-# weight, and the full (novelty-bin x mechanism) -> label projection live here in
-# plain text, never compiled in. The engine also emits a per-isoform `rule_trace`
-# (which rules fired, with sub-scores) so any verdict can be audited.
+# This file makes the decision logic inspectable: the tunable thresholds below
+# are read by the rule engine, and the (novelty-support x mechanism) -> class
+# projection is documented in docs/decision_engine.md and echoed per-isoform in
+# the `rule_trace` field of <prefix>.attribution.jsonl.
 #
-# Status: DRAFT thresholds for the M0 scaffold. Values are placeholders to be
-# calibrated on SQANTI-SIM (E1/E2) before any claim is made; do not treat them as
-# validated. Framing constraint: PanIsoGuard reports ORTHOGONAL attribution +
-# confidence + provenance, and never claims to beat the SQANTI3 RF filter or FLAIR2.
+# Status: Tier-0 (SQANTI priors + short-read junction corroboration). Thresholds
+# are conservative defaults, NOT yet calibrated on SQANTI-SIM (E1/E2); do not
+# treat them as validated. Framing constraint: PanIsoGuard reports orthogonal
+# attribution + confidence + provenance, never "beats" the SQANTI3 RF filter or
+# FLAIR2.
 
 [meta]
-ruleset_version       = "0.0.1-draft"
-sqanti3_version_target = "6.0"   # QC priors are reconciled against this; pin & cite
-random_seed           = 1
+ruleset_version        = "default-0.0.1"
+sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
+random_seed            = 1
 
-# --- Axis A: novelty-support -------------------------------------------------
+# --- Axis A: novelty support (engine-read) -----------------------------------
 [axis_novelty_support]
-sj_min_uniq_reads        = 3       # STAR SJ.tab n_uniq to corroborate a novel junction
-sj_require_canonical_motif = true  # SJ.tab motif code >= 1
-consensus_min_callers    = 2       # multi-caller fingerprint agreement; 999 disables
-high_if_score_ge         = 0.70
-low_if_score_le          = 0.30
+sj_min_uniq_reads          = 3      # STAR SJ.tab n_uniq to corroborate a novel junction
+sj_require_canonical_motif = true   # require SJ.tab motif code >= 1
+consensus_min_callers      = 999    # multi-caller agreement gate; 999 disables (single-caller)
 
-# --- Axis B: artifact-mechanism ----------------------------------------------
-# Each mechanism contributes a normalized [0,1] sub-score; `weight` scales it.
-# `not_evaluable` (e.g. variant axis without a haplotype FASTA) is a soft-skip,
-# never a crash and never silently treated as evidence-for or evidence-against.
-[axis_artifact.variant]
-weight              = 1.0
-motif_window_bp     = 2
-canonical_motifs    = ["GTAG", "GCAG", "ATAC"]
-require_haplotype_fasta = true     # not_evaluable if no --reference-haplotype supplied
+# --- Axis B: artifact mechanism (engine-read where noted) --------------------
+# Priority order applied by the engine: noncanonical > rt_switch > degradation.
+[axis_artifact.degradation]
+max_perc_A_downstream_TTS = 59.0    # SQANTI intra-priming heuristic boundary (engine-read)
 
 [axis_artifact.rt_switch]
-weight              = 0.9
-use_sqanti_RTS_stage = true
-repeat_overlap_flags = true
-
-[axis_artifact.mapping]
-weight              = 1.0
-min_mapq            = 20
-max_softclip_frac   = 0.20
-max_supplementary_frac = 0.10
-paralog_overlap_flags = true
-
-[axis_artifact.degradation]
-weight              = 1.0
-max_perc_A_downstream_TTS = 59     # SQANTI3 intra-priming heuristic boundary
-
-[axis_artifact.flair_inconsistent]
-weight              = 0.30         # conservative pending FLAIR3 BED semantics confirmation
-is_signal           = true
+use_sqanti_RTS_stage = true         # documented; engine uses SQANTI RTS_stage prior
 
 [axis_artifact.noncanonical]
-weight              = 0.8
-reconcile_sqanti_all_canonical = true
+use_sqanti_all_canonical = true     # documented; engine uses SQANTI all_canonical prior
 
-# --- Confidence classes (ordinal) --------------------------------------------
-# Rule output is an ordinal class; empirical probabilities are assigned post-hoc
-# from E1 correctness rates for calibration (ECE/Brier). These are NOT native
-# model probabilities.
+# --- Confidence classes ------------------------------------------------------
+# Output classes (ordinal within the novel tiers). The rescue classes require the
+# variant/pangenome axes and are therefore unreachable in Tier-0.
 [confidence]
-classes = ["very_high", "high", "medium", "low", "very_low"]
+classes = [
+  "HIGH_CONF_KNOWN",
+  "HIGH_CONF_NOVEL",
+  "MEDIUM_CONF_NOVEL",
+  "LOW_CONF_PARTIAL",
+  "PAN_REF_RESCUED_FALSE_NOVEL",      # needs variant/pangenome axis (not Tier-0)
+  "HAPLOTYPE_RESCUED_KNOWN_LIKE",     # needs haplotype/pangenome axis (not Tier-0)
+  "AMBIGUOUS",
+  "ARTIFACT",
+]
 
-# --- Deterministic (novelty-bin x dominant-mechanism) -> 7-label projection ---
-# The full grid (5 novelty bins x 6 mechanisms) is enumerated; a few rows shown.
-# fusion / antisense / genic / intergenic are preserved from the SQANTI prior.
-[[projection]]
-novelty = "high"
-mechanism = "none"
-label = "NIC"
-confidence = "very_high"
-
-[[projection]]
-novelty = "high"
-mechanism = "noncanonical"
-label = "NNC"
-confidence = "high"
-
-[[projection]]
-novelty = "low"
-mechanism = "variant"      # novel vs GRCh38 but reference-match on the alt haplotype
-label = "FSM"
-confidence = "high"
-
-[[projection]]
-novelty = "low"
-mechanism = "mapping"
-label = "ISM"
-confidence = "low"
-
-[[projection]]
-novelty = "low"
-mechanism = "degradation"
-label = "ISM"
-confidence = "low"
-
-[[projection]]
-novelty = "low"
-mechanism = "rt_switch"
-label = "NNC"
-confidence = "low"
-
-[[projection]]
-novelty = "medium"
-mechanism = "none"
-label = "NIC"
-confidence = "medium"
+# Projection grid implemented in src/core/rules.cpp (v1) and documented in
+# docs/decision_engine.md:
+#   SUPPORTED   x none      -> HIGH_CONF_NOVEL
+#   SUPPORTED   x mechanism -> MEDIUM_CONF_NOVEL
+#   PARTIAL     x none      -> MEDIUM_CONF_NOVEL
+#   PARTIAL     x mechanism -> LOW_CONF_PARTIAL
+#   UNSUPPORTED x none      -> LOW_CONF_PARTIAL
+#   UNSUPPORTED x mechanism -> ARTIFACT
+#   UNKNOWN (support not evaluable) -> AMBIGUOUS
+# Moving the full grid into this file (table-driven projection) is a planned
+# refinement.
