@@ -17,7 +17,7 @@ and each verdict carries a `rule_trace`; see [docs/decision_engine.md](docs/deci
 
 ## At a glance
 
-![PanIsoGuard adjudication overview: multi-caller novel isoform calls plus SQANTI3 are unified by intron-chain fingerprint and weighed across four orthogonal evidence axes into a confidence-graded per-isoform verdict.](docs/figures/overview.png)
+![PanIsoGuard overview: long-read novel isoform calls (real or artifact?) are checked against four kinds of evidence — SQANTI QC priors, short-read junctions, long-read mapping, and variants/reference bias — and sorted into plain-language verdicts: real novel, reference-bias rescued, uncertain (held), or artifact.](docs/figures/overview.png)
 
 <sub>Consumes caller + SQANTI3 output (does not replace them); adds an orthogonal,
 auditable verdict layer, each call carrying a machine-readable `rule_trace`. The four
@@ -43,6 +43,85 @@ output classes shown are a simplified grouping — the full set is listed
 | `version`    | version, linked htslib, compiled-in capabilities |
 
 `panisoguard <command> --help` for options. Input formats: [docs/input_formats.md](docs/input_formats.md).
+
+## Usage
+
+`adjudicate` is the main entry point. The **only** hard requirements are a SQANTI3
+classification and an output prefix — every evidence input below is optional and
+simply switches on another axis (see [Evidence tiers](#evidence-tiers)).
+
+**Baseline** — SQANTI priors only (no short/long-read evidence; novel calls are
+flagged or held, never positively confirmed):
+
+```bash
+panisoguard adjudicate \
+  --classification sample_classification.txt \
+  --isoforms-bed   flair.isoforms.bed \
+  --ref-gtf        gencode.v49.annotation.gtf \
+  --out-prefix     out/sample
+```
+
+**Recommended** — add short-read junctions (`--sj-tab`) and the long-read BAM
+(`--bam`), the two axes that let a novel isoform be confirmed or rejected on evidence:
+
+```bash
+panisoguard adjudicate \
+  --classification sample_classification.txt \
+  --isoforms-bed   flair.isoforms.bed \
+  --ref-gtf        gencode.v49.annotation.gtf \
+  --sj-tab         star.SJ.out.tab \
+  --bam            aligned.sorted.bam \
+  --reference      GRCh38.fa \
+  --out-prefix     out/sample
+```
+
+**Reference-bias rescue** — add a personalized haplotype FASTA. Provenance gates the
+circularity firewall: `wgs`/`external` may promote to a rescue verdict, while
+`rna_derived`/`unknown` are held as `AMBIGUOUS`:
+
+```bash
+panisoguard adjudicate \
+  --classification sample_classification.txt \
+  --isoforms-bed   flair.isoforms.bed \
+  --ref-gtf        gencode.v49.annotation.gtf \
+  --reference      GRCh38.fa \
+  --reference-haplotype sample.hap1.fa \
+  --reference-haplotype sample.hap2.fa \
+  --haplotype-provenance wgs \
+  --out-prefix     out/sample
+```
+
+**Combine several callers first** (optional) — merge isoforms by intron-chain
+fingerprint into a caller-support matrix, then feed the union to `adjudicate`:
+
+```bash
+panisoguard combine \
+  --gtf flair:flair.gtf \
+  --gtf isoquant:isoquant.gtf \
+  --gtf bambu:bambu.gtf \
+  --ref-gtf gencode.v49.annotation.gtf \
+  --out caller_support_matrix.tsv
+```
+
+### Outputs
+
+`adjudicate` writes three files at `<out-prefix>`:
+
+| File | Contents |
+|------|----------|
+| `<prefix>.adjudicated.tsv`   | one row per isoform — confidence class, primary mechanism, novel-junction support counts |
+| `<prefix>.attribution.jsonl` | per-isoform `rule_trace`: every rule that fired, in order (fully auditable) |
+| `<prefix>.provenance.log`    | which axes were active + circularity status of the run |
+
+### Reviewer-facing analyses
+
+```bash
+# non-redundancy vs the SQANTI3 filter on novel isoforms (2x2, Jaccard, McNemar)
+panisoguard benchmark [adjudicate options] --out bench/
+
+# per-axis contribution: which calls change when an axis is removed
+panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
+```
 
 ## Confidence classes
 
