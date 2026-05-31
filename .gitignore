@@ -47,3 +47,7 @@ _skbuild/
 *.vcf.gz
 results/
 benchmark/**/data/
+
+# ...but DO track the tiny bundled test fixtures
+!tests/data/tiny/mini.bam
+!tests/data/tiny/mini.bam.bai

@@ -14,6 +14,12 @@ struct RuleConfig {
   bool sj_require_canonical_motif = true;
   double perc_A_degradation_threshold = 60.0;  // SQANTI3 intra-priming default: keep <60, flag >=60
   int consensus_min_callers = 999;       // disabled by default (single-caller runs)
+  // BAM (mapping) axis
+  int bam_min_mapq = 20;
+  int bam_softclip_min_bp = 20;
+  int bam_junction_window_bp = 10;
+  double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
+  double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
   std::string sqanti3_version_target = "6.0";
   std::string ruleset_version = "builtin-0.0.1";
 };

@@ -60,6 +60,7 @@ add_library(panisoguard_core STATIC
   src/core/verdict.cpp
   src/core/rules.cpp
   src/core/adjudicator.cpp
+  src/evidence/bam_features.cpp
   src/io/sj_tab_reader.cpp
   src/io/gtf_reader.cpp
   src/io/bed12_reader.cpp
@@ -103,6 +104,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/consensus_test.cpp
     tests/unit/rules_test.cpp
     tests/unit/adjudicator_test.cpp
+    tests/unit/bam_features_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
   target_include_directories(panisoguard_tests PRIVATE

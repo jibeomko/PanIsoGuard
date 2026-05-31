@@ -56,6 +56,15 @@ struct EvidenceVector {
   bool canon_evaluable = false;  bool noncanonical = false;
   bool percA_evaluable = false;  double perc_A_downstream_TTS = 0.0;
 
+  // BAM read-level (mapping) axis: worst per-novel-junction fractions over reads
+  // whose N op matches the junction.
+  bool bam_evaluable = false;
+  int bam_n_spanning_total = 0;
+  double bam_max_frac_low_mapq = 0.0;
+  double bam_max_frac_supplementary = 0.0;
+  double bam_max_frac_softclip = 0.0;
+  double bam_max_frac_indel_near = 0.0;
+
   // multi-caller consensus (optional)
   bool consensus_evaluable = false;  int n_callers = 0;
 };

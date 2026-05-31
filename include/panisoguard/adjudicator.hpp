@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "panisoguard/bam_features.hpp"
 #include "panisoguard/gtf.hpp"   // Catalog
 #include "panisoguard/rules.hpp"
 #include "panisoguard/sj_tab.hpp"
@@ -25,8 +26,9 @@ struct AdjudicationResult {
 struct AdjudicateInputs {
   const SqantiTable* sqanti = nullptr;                       // required
   const std::map<std::string, IntronChain>* chains = nullptr;  // isoform_id -> chain (required)
-  const Catalog* catalog = nullptr;                          // optional (needed for SR corroboration)
-  const SjTable* sj = nullptr;                               // optional
+  const Catalog* catalog = nullptr;                          // optional (needed for novel-junction axes)
+  const SjTable* sj = nullptr;                               // optional (short-read corroboration)
+  const BamReader* bam = nullptr;                            // optional (mapping axis)
 };
 
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller

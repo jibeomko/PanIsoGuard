@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "panisoguard/adjudicator.hpp"
@@ -26,6 +27,8 @@ void usage() {
       "  --isoforms-gtf PATH     caller isoform GTF\n"
       "  --ref-gtf PATH          reference GTF; enables novel-junction classification (recommended)\n"
       "  --sj-tab PATH           STAR SJ.tab for short-read corroboration (optional)\n"
+      "  --bam PATH              indexed BAM/CRAM for the read-level mapping axis (optional)\n"
+      "  --reference PATH        reference FASTA (required only to decode a CRAM --bam)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     output prefix (writes .adjudicated.tsv/.attribution.jsonl/.provenance.log)\n");
 }
@@ -33,7 +36,7 @@ void usage() {
 }  // namespace
 
 int cmd_adjudicate(int argc, char** argv) {
-  std::string classification, isoforms_bed, isoforms_gtf, ref_gtf, sj_tab, config, out_prefix;
+  std::string classification, isoforms_bed, isoforms_gtf, ref_gtf, sj_tab, bam_path, reference, config, out_prefix;
 
   for (int i = 2; i < argc; ++i) {
     const std::string a = argv[i];
@@ -49,6 +52,8 @@ int cmd_adjudicate(int argc, char** argv) {
     else if (a == "--isoforms-gtf")  isoforms_gtf = next("--isoforms-gtf");
     else if (a == "--ref-gtf")       ref_gtf = next("--ref-gtf");
     else if (a == "--sj-tab")        sj_tab = next("--sj-tab");
+    else if (a == "--bam")           bam_path = next("--bam");
+    else if (a == "--reference")     reference = next("--reference");
     else if (a == "--config")        config = next("--config");
     else if (a == "--out-prefix")    out_prefix = next("--out-prefix");
     else if (a == "-h" || a == "--help") { usage(); return 0; }
@@ -92,6 +97,12 @@ int cmd_adjudicate(int argc, char** argv) {
       std::fprintf(stderr, "read %zu short-read junctions\n", sj.size());
     }
 
+    std::unique_ptr<BamReader> bam;
+    if (!bam_path.empty()) {
+      bam = std::make_unique<BamReader>(bam_path, reference);
+      std::fprintf(stderr, "opened BAM for mapping axis: %s\n", bam_path.c_str());
+    }
+
     const RuleEngine engine = config.empty() ? RuleEngine() : RuleEngine::from_toml(config);
 
     AdjudicateInputs in;
@@ -99,6 +110,7 @@ int cmd_adjudicate(int argc, char** argv) {
     in.chains = &chains;
     in.catalog = catalog_ptr;
     in.sj = sj_ptr;
+    in.bam = bam.get();
     const auto results = adjudicate(in, engine);
 
     RunProvenance prov;
@@ -109,6 +121,7 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.isoforms_path = isoforms_bed.empty() ? isoforms_gtf : isoforms_bed;
     prov.ref_gtf_path = ref_gtf;
     prov.sj_tab_path = sj_tab;
+    prov.bam_path = bam_path;
     prov.config_path = config;
     write_adjudication_outputs(out_prefix, results, prov);
 

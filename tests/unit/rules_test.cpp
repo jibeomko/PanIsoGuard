@@ -56,6 +56,35 @@ TEST_CASE("rules: unevaluable novelty support is AMBIGUOUS, not a guess", "[rule
   CHECK_FALSE(v.circularity_flag);  // Tier-0 never sets circularity
 }
 
+TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
+  const RuleEngine eng;
+
+  // SR-supported novel but reads map poorly -> demoted to MEDIUM (conflicting).
+  EvidenceVector sup = novel_ev(1, 1);
+  sup.bam_evaluable = true;
+  sup.bam_n_spanning_total = 10;
+  sup.bam_max_frac_low_mapq = 0.8;  // > default 0.5
+  Verdict vs = eng.evaluate(sup);
+  CHECK(vs.primary_mechanism == Mechanism::kMapping);
+  CHECK(vs.confidence == ConfidenceClass::kMediumConfNovel);
+
+  // Unsupported novel + mapping artifact -> ARTIFACT.
+  EvidenceVector uns = novel_ev(1, 0);
+  uns.bam_evaluable = true;
+  uns.bam_n_spanning_total = 10;
+  uns.bam_max_frac_supplementary = 0.9;  // > default 0.5
+  CHECK(eng.evaluate(uns).confidence == ConfidenceClass::kArtifact);
+
+  // SR axis absent (UNKNOWN support) but a strong mapping artifact is decisive.
+  EvidenceVector unk = novel_ev(0, 0);
+  unk.sj_evaluable = false;
+  unk.n_novel_junctions = 0;
+  unk.bam_evaluable = true;
+  unk.bam_n_spanning_total = 5;
+  unk.bam_max_frac_low_mapq = 0.9;
+  CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
+}
+
 TEST_CASE("rules: known/partial categories pass through", "[rules]") {
   EvidenceVector fsm;
   fsm.structural_category = "full-splice_match";

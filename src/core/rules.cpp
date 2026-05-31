@@ -26,6 +26,13 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
       c.perc_A_degradation_threshold =
           (*deg)["max_perc_A_downstream_TTS"].value_or(c.perc_A_degradation_threshold);
     }
+    if (auto map = (*art)["mapping"].as_table()) {
+      c.bam_min_mapq = static_cast<int>((*map)["min_mapq"].value_or<int64_t>(c.bam_min_mapq));
+      c.bam_softclip_min_bp = static_cast<int>((*map)["softclip_min_bp"].value_or<int64_t>(c.bam_softclip_min_bp));
+      c.bam_junction_window_bp = static_cast<int>((*map)["junction_window_bp"].value_or<int64_t>(c.bam_junction_window_bp));
+      c.bam_max_low_mapq_frac = (*map)["max_low_mapq_frac"].value_or(c.bam_max_low_mapq_frac);
+      c.bam_max_supplementary_frac = (*map)["max_supplementary_frac"].value_or(c.bam_max_supplementary_frac);
+    }
   }
   return engine;
 }
@@ -79,8 +86,21 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   v.novelty_support = sup;
 
   // --- Axis B: dominant artifact mechanism (priority order) --------------------
+  // Priority: mapping > noncanonical > rt_switch > degradation. Rationale:
+  // alignment reliability is the most upstream concern -- if the spanning reads
+  // do not map confidently (low MAPQ / supplementary / multimapping), the junction
+  // may be a mapping artifact and downstream motif/QC signals are moot. Only the
+  // first-matching mechanism is reported as primary (see rule_trace for all flags).
+  const bool mapping_flag = ev.bam_evaluable && ev.bam_n_spanning_total > 0 &&
+                            (ev.bam_max_frac_low_mapq > cfg_.bam_max_low_mapq_frac ||
+                             ev.bam_max_frac_supplementary > cfg_.bam_max_supplementary_frac);
   Mechanism mech = Mechanism::kNone;
-  if (ev.canon_evaluable && ev.noncanonical) {
+  if (mapping_flag) {
+    mech = Mechanism::kMapping;
+    trace("bam mapping artifact (low_mapq_frac=" + std::to_string(ev.bam_max_frac_low_mapq) +
+          ", supplementary_frac=" + std::to_string(ev.bam_max_frac_supplementary) +
+          ") -> mechanism=mapping_or_repeat");
+  } else if (ev.canon_evaluable && ev.noncanonical) {
     mech = Mechanism::kNoncanonical;
     trace("all_canonical=non_canonical -> mechanism=noncanonical");
   } else if (ev.rts_evaluable && ev.rts_stage) {
@@ -98,7 +118,9 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   // --- Projection: (support x mechanism) -> confidence class -------------------
   ConfidenceClass cls;
   if (sup == NoveltySupport::kUnknown) {
-    cls = ConfidenceClass::kAmbiguous;
+    // A strong mapping artifact is decisive even when short-read support is not
+    // evaluable; otherwise the call is held as AMBIGUOUS.
+    cls = (mech == Mechanism::kMapping) ? ConfidenceClass::kArtifact : ConfidenceClass::kAmbiguous;
   } else if (sup == NoveltySupport::kSupported) {
     cls = (mech == Mechanism::kNone) ? ConfidenceClass::kHighConfNovel
                                      : ConfidenceClass::kMediumConfNovel;

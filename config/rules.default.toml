@@ -33,6 +33,13 @@ use_sqanti_RTS_stage = true         # documented; engine uses SQANTI RTS_stage p
 [axis_artifact.noncanonical]
 use_sqanti_all_canonical = true     # documented; engine uses SQANTI all_canonical prior
 
+[axis_artifact.mapping]             # BAM read-level axis (engine-read; only when --bam supplied)
+min_mapq               = 20         # spanning reads below this MAPQ count as low-confidence
+softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction
+junction_window_bp     = 10         # indel proximity window around each splice boundary
+max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
+max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
+
 # --- Confidence classes ------------------------------------------------------
 # Output classes (ordinal within the novel tiers). The rescue classes require the
 # variant/pangenome axes and are therefore unreachable in Tier-0.

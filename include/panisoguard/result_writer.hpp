@@ -16,6 +16,7 @@ struct RunProvenance {
   std::string isoforms_path;
   std::string ref_gtf_path;   // "" if none
   std::string sj_tab_path;    // "" if none
+  std::string bam_path;       // "" if none
   std::string config_path;    // "" if built-in defaults
 };
 

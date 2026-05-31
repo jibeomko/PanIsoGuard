@@ -63,7 +63,13 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"n_novel_junctions\":" << e.n_novel_junctions << ","
         << "\"n_novel_jx_sr_supported\":" << e.n_novel_jx_sr_supported << ","
         << "\"rts_stage\":" << (e.rts_evaluable ? (e.rts_stage ? "true" : "false") : "null") << ","
-        << "\"noncanonical\":" << (e.canon_evaluable ? (e.noncanonical ? "true" : "false") : "null")
+        << "\"noncanonical\":" << (e.canon_evaluable ? (e.noncanonical ? "true" : "false") : "null") << ","
+        << "\"bam_evaluable\":" << (e.bam_evaluable ? "true" : "false") << ","
+        << "\"bam_n_spanning\":" << e.bam_n_spanning_total << ","
+        << "\"bam_frac_low_mapq\":" << e.bam_max_frac_low_mapq << ","
+        << "\"bam_frac_supplementary\":" << e.bam_max_frac_supplementary << ","
+        << "\"bam_frac_softclip\":" << e.bam_max_frac_softclip << ","
+        << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near
         << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
@@ -87,11 +93,12 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "isoforms\t" << prov.isoforms_path << '\n';
   out << "ref_gtf\t" << (prov.ref_gtf_path.empty() ? "<none>" : prov.ref_gtf_path) << '\n';
   out << "sj_tab\t" << (prov.sj_tab_path.empty() ? "<none>" : prov.sj_tab_path) << '\n';
+  out << "bam\t" << (prov.bam_path.empty() ? "<none>" : prov.bam_path) << '\n';
   // Evidence-axis capabilities for this run.
   out << "axis.short_read\t" << (prov.sj_tab_path.empty() ? "not_evaluable" : "on") << '\n';
   out << "axis.catalog\t" << (prov.ref_gtf_path.empty() ? "not_evaluable" : "on") << '\n';
-  out << "axis.bam\tnot_evaluable (Tier-0)\n";
-  out << "axis.variant\tnot_evaluable (Tier-0)\n";
+  out << "axis.bam\t" << (prov.bam_path.empty() ? "not_evaluable" : "on") << '\n';
+  out << "axis.variant\tnot_evaluable (later tier)\n";
   out << "axis.pangenome\tnot_evaluable (Tier-0)\n";
 
   std::map<std::string, std::size_t> class_counts;
