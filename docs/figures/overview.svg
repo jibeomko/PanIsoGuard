@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="648" viewBox="0 0 1680 648">
+<defs>
+<filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<filter id="shS" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<linearGradient id="teal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0f766e"/></linearGradient>
+<linearGradient id="arrowg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#eef2f7"/><stop offset="1" stop-color="#d3dbe6"/></linearGradient>
+</defs>
+<rect width="1680" height="648" fill="#ffffff"/>
+<text x="44" y="58" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#94a3b8" text-anchor="start" letter-spacing="3">INPUT</text>
+<text x="560" y="58" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#94a3b8" text-anchor="start" letter-spacing="3">ADJUDICATION ENGINE</text>
+<text x="1240" y="58" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#94a3b8" text-anchor="start" letter-spacing="3">VERDICT  ·  per isoform</text>
+<rect x="40" y="78" width="398" height="486" rx="16" ry="16" fill="#ffffff" stroke="#e6eaf1" stroke-width="1.2" filter="url(#sh)"/>
+<text x="64" y="112" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="17" font-weight="bold" fill="#0f172a" text-anchor="start">Long-read novel isoforms</text>
+<text x="64" y="134" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12.5" font-weight="normal" fill="#475569" text-anchor="start">unverified calls — real or artifact?</text>
+<polyline points="107.0,174 119.3,166.0 131.6,174" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="162.4,174 173.2,166.0 184.0,174" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="236.3,174 248.6,166.0 261.0,174" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="291.8,174 304.1,166.0 316.4,174" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="70.0" y="166.5" width="37.0" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="131.6" y="166.5" width="30.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="184.0" y="166.5" width="52.4" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="261.0" y="166.5" width="30.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="316.4" y="166.5" width="61.6" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<polyline points="119.3,236 134.7,228.0 150.1,236" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="217.8,236 236.3,228.0 254.8,236" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="291.8,236 304.1,228.0 316.4,236" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="70.0" y="228.5" width="49.3" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="150.1" y="228.5" width="67.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="254.8" y="228.5" width="37.0" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="316.4" y="228.5" width="61.6" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<polyline points="100.8,298 111.6,290.0 122.4,298" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="159.3,298 176.3,290.0 193.2,298" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="224.0,298 234.8,290.0 245.6,298" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="291.8,298 305.6,290.0 319.5,298" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="70.0" y="290.5" width="30.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="122.4" y="290.5" width="37.0" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="193.2" y="290.5" width="30.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="245.6" y="290.5" width="46.2" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="319.5" y="290.5" width="58.5" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<polyline points="131.6,360 148.5,352.0 165.5,360" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="205.5,360 219.4,352.0 233.2,360" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="264.0,360 277.9,352.0 291.8,360" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="70.0" y="352.5" width="61.6" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="165.5" y="352.5" width="40.0" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="233.2" y="352.5" width="30.8" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<rect x="291.8" y="352.5" width="77.0" height="15" rx="3.5" ry="3.5" fill="#cbd5e1"/>
+<circle cx="392" cy="236" r="11" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="392" y="240.5" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#f59e0b" text-anchor="middle">?</text>
+<circle cx="392" cy="360" r="11" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.6"/>
+<text x="392" y="364.5" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#f59e0b" text-anchor="middle">?</text>
+<rect x="64" y="408" width="58" height="26" rx="13" ry="13" fill="#f1f5f9" stroke="#dbe2ec" stroke-width="1"/>
+<text x="93.0" y="425" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle">FLAIR</text>
+<rect x="132" y="408" width="78" height="26" rx="13" ry="13" fill="#f1f5f9" stroke="#dbe2ec" stroke-width="1"/>
+<text x="171.0" y="425" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle">IsoQuant</text>
+<rect x="220" y="408" width="62" height="26" rx="13" ry="13" fill="#f1f5f9" stroke="#dbe2ec" stroke-width="1"/>
+<text x="251.0" y="425" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle">Bambu</text>
+<rect x="292" y="408" width="30" height="26" rx="13" ry="13" fill="#f1f5f9" stroke="#dbe2ec" stroke-width="1"/>
+<text x="307.0" y="425" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="bold" fill="#475569" text-anchor="middle">…</text>
+<text x="64" y="470" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13" font-weight="bold" fill="#475569" text-anchor="start">+ SQANTI3 classification</text>
+<text x="64" y="490" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#94a3b8" text-anchor="start">(priors consumed, not recomputed)</text>
+<path d="M454,316.0 L530,316.0 L530,307.0 L556,321.0 L530,335.0 L530,326.0 L454,326.0 Z" fill="url(#arrowg)" stroke="#cbd5e1" stroke-width="1"/>
+<text x="505.0" y="299.0" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11" font-weight="bold" fill="#94a3b8" text-anchor="middle" letter-spacing="2">INGEST</text>
+<rect x="556" y="78" width="562" height="486" rx="16" ry="16" fill="#ffffff" stroke="#e6eaf1" stroke-width="1.2" filter="url(#sh)"/>
+<rect x="556" y="78" width="562" height="64" rx="16" ry="16" fill="url(#teal)"/>
+<rect x="556" y="118" width="562" height="24" rx="0" ry="0" fill="#0f766e" opacity="0"/>
+<text x="582" y="111" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="22" font-weight="bold" fill="#ffffff" text-anchor="start">PanIsoGuard</text>
+<text x="582" y="131" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12.5" font-weight="normal" fill="#d1fae5" text-anchor="start">caller-agnostic adjudication</text>
+<rect x="580" y="162" width="514" height="40" rx="10" ry="10" fill="#f0fdfa" stroke="#99f6e4" stroke-width="1.2"/>
+<circle cx="602" cy="182" r="9" fill="none" stroke="#0d9488" stroke-width="2"/>
+<circle cx="602" cy="182" r="3" fill="#0d9488"/>
+<text x="622" y="180" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="13.5" font-weight="bold" fill="#0f172a" text-anchor="start">Intron-chain fingerprint</text>
+<text x="622" y="195" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#475569" text-anchor="start">unify identity + combine multiple callers</text>
+<text x="580" y="228" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12.5" font-weight="bold" fill="#94a3b8" text-anchor="start" letter-spacing="0.5">Weigh four orthogonal evidence axes</text>
+<rect x="580" y="248" width="514" height="58" rx="12" ry="12" fill="#fbfdff" stroke="#eef2f7" stroke-width="1"/>
+<rect x="594" y="261" width="32" height="32" rx="9" ry="9" fill="#f59e0b1f" stroke="#f59e0b" stroke-width="1.4"/>
+<rect x="603" y="268" width="14" height="18" rx="2" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
+<line x1="606" y1="273" x2="614" y2="273" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
+<line x1="606" y1="278" x2="614" y2="278" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
+<line x1="606" y1="283" x2="614" y2="283" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
+<text x="640" y="273" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="start">SQANTI priors</text>
+<text x="640" y="291" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#475569" text-anchor="start">QC flags · RTS · intra-priming</text>
+<rect x="580" y="320" width="514" height="58" rx="12" ry="12" fill="#fbfdff" stroke="#eef2f7" stroke-width="1"/>
+<rect x="594" y="333" width="32" height="32" rx="9" ry="9" fill="#0ea5e91f" stroke="#0ea5e9" stroke-width="1.4"/>
+<line x1="600" y1="354" x2="608" y2="354" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+<line x1="612" y1="354" x2="620" y2="354" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+<polyline points="608,354 610,342 612,354" fill="none" stroke="#0ea5e9" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="640" y="345" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="start">Short-read SJ support</text>
+<text x="640" y="363" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#475569" text-anchor="start">STAR junctions corroborate novel splices</text>
+<rect x="580" y="392" width="514" height="58" rx="12" ry="12" fill="#fbfdff" stroke="#eef2f7" stroke-width="1"/>
+<rect x="594" y="405" width="32" height="32" rx="9" ry="9" fill="#8b5cf61f" stroke="#8b5cf6" stroke-width="1.4"/>
+<rect x="601" y="422" width="4" height="7" rx="1" fill="#8b5cf6"/>
+<rect x="607" y="417" width="4" height="12" rx="1" fill="#8b5cf6"/>
+<rect x="613" y="420" width="4" height="9" rx="1" fill="#8b5cf6"/>
+<rect x="619" y="415" width="4" height="14" rx="1" fill="#8b5cf6"/>
+<text x="640" y="417" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="start">Long-read BAM mapping</text>
+<text x="640" y="435" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#475569" text-anchor="start">read-level spanning · soft-clip · MAPQ</text>
+<rect x="580" y="464" width="514" height="58" rx="12" ry="12" fill="#fbfdff" stroke="#eef2f7" stroke-width="1"/>
+<rect x="594" y="477" width="32" height="32" rx="9" ry="9" fill="#10b9811f" stroke="#10b981" stroke-width="1.4"/>
+<line x1="600" y1="493" x2="620" y2="493" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+<line x1="600" y1="489" x2="600" y2="497" stroke="#10b981" stroke-width="1.4"/>
+<line x1="605" y1="489" x2="605" y2="497" stroke="#10b981" stroke-width="1.4"/>
+<line x1="610" y1="489" x2="610" y2="497" stroke="#10b981" stroke-width="1.4"/>
+<line x1="615" y1="489" x2="615" y2="497" stroke="#10b981" stroke-width="1.4"/>
+<line x1="620" y1="489" x2="620" y2="497" stroke="#10b981" stroke-width="1.4"/>
+<circle cx="613" cy="493" r="3.2" fill="#10b981"/>
+<text x="640" y="489" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="start">Variant / reference-bias motif</text>
+<text x="640" y="507" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11.5" font-weight="normal" fill="#475569" text-anchor="start">haplotype splice-motif gain/loss</text>
+<path d="M1134,316.0 L1210,316.0 L1210,307.0 L1236,321.0 L1210,335.0 L1210,326.0 L1134,326.0 Z" fill="url(#arrowg)" stroke="#cbd5e1" stroke-width="1"/>
+<text x="1185.0" y="299.0" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="11" font-weight="bold" fill="#94a3b8" text-anchor="middle" letter-spacing="2">CLASSIFY</text>
+<rect x="1236" y="78" width="404" height="104" rx="16" ry="16" fill="#e9f9ef" filter="url(#shS)"/>
+<rect x="1236" y="78" width="7" height="104" rx="3.5" ry="3.5" fill="#15803d"/>
+<polyline points="1296.5,112 1306.6,104.0 1316.8,112" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1342.2,112 1351.1,104.0 1360.0,112" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1403.2,112 1413.3,104.0 1423.5,112" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1448.9,112 1459.0,104.0 1469.2,112" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1266.0" y="105.0" width="30.5" height="14" rx="3.5" ry="3.5" fill="#22c55e"/>
+<rect x="1316.8" y="105.0" width="25.4" height="14" rx="3.5" ry="3.5" fill="#22c55e"/>
+<rect x="1360.0" y="105.0" width="43.2" height="14" rx="3.5" ry="3.5" fill="#22c55e"/>
+<rect x="1423.5" y="105.0" width="25.4" height="14" rx="3.5" ry="3.5" fill="#22c55e"/>
+<rect x="1469.2" y="105.0" width="50.8" height="14" rx="3.5" ry="3.5" fill="#22c55e"/>
+<text x="1266" y="150" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14.5" font-weight="bold" fill="#15803d" text-anchor="start">HIGH / MEDIUM-CONF NOVEL</text>
+<text x="1266" y="168" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="normal" fill="#475569" text-anchor="start">corroborated genuine novel</text>
+<circle cx="1606" cy="112" r="14" fill="#15803d"/>
+<polyline points="1600,112 1604,117 1612,106" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1236" y="206" width="404" height="104" rx="16" ry="16" fill="#e8f0fe" filter="url(#shS)"/>
+<rect x="1236" y="206" width="7" height="104" rx="3.5" ry="3.5" fill="#1d4ed8"/>
+<polyline points="1306.6,240 1319.3,232.0 1332.0,240" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1387.9,240 1403.2,232.0 1418.4,240" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1448.9,240 1459.0,232.0 1469.2,240" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1266.0" y="233.0" width="40.6" height="14" rx="3.5" ry="3.5" fill="#3b82f6"/>
+<rect x="1332.0" y="233.0" width="55.9" height="14" rx="3.5" ry="3.5" fill="#3b82f6"/>
+<rect x="1418.4" y="233.0" width="30.5" height="14" rx="3.5" ry="3.5" fill="#3b82f6"/>
+<rect x="1469.2" y="233.0" width="50.8" height="14" rx="3.5" ry="3.5" fill="#3b82f6"/>
+<text x="1266" y="278" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14.5" font-weight="bold" fill="#1d4ed8" text-anchor="start">PAN_REF_RESCUED_FALSE_NOVEL</text>
+<text x="1266" y="296" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="normal" fill="#475569" text-anchor="start">ref-bias artifact, rescued</text>
+<circle cx="1606" cy="240" r="14" fill="#1d4ed8"/>
+<path d="M1606 233 a7 7 0 1 0 6 3.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+<polyline points="1612,233 1612,239 1607,237" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1236" y="334" width="404" height="104" rx="16" ry="16" fill="#eef1f5" filter="url(#shS)"/>
+<rect x="1236" y="334" width="7" height="104" rx="3.5" ry="3.5" fill="#475569"/>
+<polyline points="1291.4,368 1300.3,360.0 1309.2,368" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1339.7,368 1353.6,360.0 1367.6,368" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1393.0,368 1401.9,360.0 1410.8,368" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1448.9,368 1460.3,360.0 1471.7,368" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1266.0" y="361.0" width="25.4" height="14" rx="3.5" ry="3.5" fill="#94a3b8"/>
+<rect x="1309.2" y="361.0" width="30.5" height="14" rx="3.5" ry="3.5" fill="#94a3b8"/>
+<rect x="1367.6" y="361.0" width="25.4" height="14" rx="3.5" ry="3.5" fill="#94a3b8"/>
+<rect x="1410.8" y="361.0" width="38.1" height="14" rx="3.5" ry="3.5" fill="#94a3b8"/>
+<rect x="1471.7" y="361.0" width="48.3" height="14" rx="3.5" ry="3.5" fill="#94a3b8"/>
+<text x="1266" y="406" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14.5" font-weight="bold" fill="#475569" text-anchor="start">AMBIGUOUS</text>
+<text x="1266" y="424" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="normal" fill="#475569" text-anchor="start">held — + circularity flag</text>
+<circle cx="1606" cy="368" r="14" fill="#475569"/>
+<text x="1606" y="373" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle">?</text>
+<rect x="1236" y="462" width="404" height="104" rx="16" ry="16" fill="#ffe9ec" filter="url(#shS)"/>
+<rect x="1236" y="462" width="7" height="104" rx="3.5" ry="3.5" fill="#be123c"/>
+<polyline points="1316.8,496 1330.8,488.0 1344.7,496" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1377.8,496 1389.2,488.0 1400.6,496" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426.0,496 1437.5,488.0 1448.9,496" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1266.0" y="489.0" width="50.8" height="14" rx="3.5" ry="3.5" fill="#fb7185"/>
+<rect x="1344.7" y="489.0" width="33.0" height="14" rx="3.5" ry="3.5" fill="#fb7185"/>
+<rect x="1400.6" y="489.0" width="25.4" height="14" rx="3.5" ry="3.5" fill="#fb7185"/>
+<rect x="1448.9" y="489.0" width="63.5" height="14" rx="3.5" ry="3.5" fill="#fb7185"/>
+<text x="1266" y="534" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="14.5" font-weight="bold" fill="#be123c" text-anchor="start">ARTIFACT</text>
+<text x="1266" y="552" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12" font-weight="normal" fill="#475569" text-anchor="start">rejected — + mechanism</text>
+<circle cx="1606" cy="496" r="14" fill="#be123c"/>
+<line x1="1601" y1="491" x2="1611" y2="501" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1611" y1="491" x2="1601" y2="501" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+<text x="840.0" y="630" font-family="Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif" font-size="12.5" font-weight="normal" fill="#475569" text-anchor="middle" style="font-style:italic">Consumes caller + SQANTI3 output — does not replace them.  Adds an orthogonal, auditable verdict layer, each call carrying a machine-readable  rule_trace.</text>
+</svg>

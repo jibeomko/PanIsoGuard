@@ -17,42 +17,13 @@ and each verdict carries a `rule_trace`; see [docs/decision_engine.md](docs/deci
 
 ## At a glance
 
-```mermaid
-flowchart LR
-    subgraph IN["Long-read novel isoform calls"]
-        direction TB
-        C["FLAIR · IsoQuant · Bambu · …"]
-        SQ["SQANTI3 classification"]
-    end
+![PanIsoGuard adjudication overview: multi-caller novel isoform calls plus SQANTI3 are unified by intron-chain fingerprint and weighed across four orthogonal evidence axes into a confidence-graded per-isoform verdict.](docs/figures/overview.png)
 
-    subgraph PIG["PanIsoGuard — caller-agnostic adjudication"]
-        direction TB
-        FP["Intron-chain fingerprint<br/>(unify + combine callers)"]
-        A1["1 · SQANTI priors"]
-        A2["2 · Short-read SJ support"]
-        A3["3 · Long-read BAM mapping"]
-        A4["4 · Variant / reference-bias motif"]
-        FP --> A1 & A2 & A3 & A4
-    end
-
-    subgraph OUT["Per-isoform verdict (+ rule_trace)"]
-        direction TB
-        O1["HIGH / MEDIUM-CONF NOVEL"]:::genuine
-        O2["PAN_REF_RESCUED_FALSE_NOVEL"]:::rescued
-        O3["AMBIGUOUS (+ circularity flag)"]:::amb
-        O4["ARTIFACT (+ mechanism)"]:::artifact
-    end
-
-    IN ==> PIG ==> OUT
-
-    classDef genuine fill:#d6f5d6,stroke:#2e7d32,color:#0b3d0b
-    classDef rescued fill:#d6e8ff,stroke:#1565c0,color:#0a2d52
-    classDef amb fill:#ededed,stroke:#757575,color:#222222
-    classDef artifact fill:#ffd9d9,stroke:#c62828,color:#5a1212
-```
-
-*Consumes caller + SQANTI3 output (does not replace them); adds an orthogonal,
-auditable verdict layer. Output is simplified here — the full class set is below.*
+<sub>Consumes caller + SQANTI3 output (does not replace them); adds an orthogonal,
+auditable verdict layer, each call carrying a machine-readable `rule_trace`. The four
+output classes shown are a simplified grouping — the full set is listed
+[below](#confidence-classes). Vector source:
+[`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
 > **Status: alpha.** Four evidence axes (SQANTI priors, short-read junctions, BAM
 > read-level mapping, variant/reference-bias) and the `adjudicate` / `benchmark` /
