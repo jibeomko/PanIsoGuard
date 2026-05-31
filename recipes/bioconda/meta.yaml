@@ -1,0 +1,47 @@
+{% set name = "panisoguard" %}
+{% set version = "0.0.1" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  # At release, point to the tagged source tarball and fill in its sha256.
+  url: https://github.com/REPLACE_ORG/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - cmake >=3.20
+    - make
+  host:
+    - htslib >=1.18
+    - zlib
+  run:
+    - htslib >=1.18
+
+test:
+  commands:
+    - panisoguard --version
+
+about:
+  home: https://github.com/REPLACE_ORG/PanIsoGuard
+  license: MIT
+  license_file: LICENSE
+  summary: Caller-agnostic adjudication of long-read RNA-seq novel isoforms
+  description: |
+    PanIsoGuard ingests novel isoform calls from long-read RNA-seq callers
+    (FLAIR/IsoQuant/Bambu/...) and/or SQANTI3 output, plus a BAM and optional
+    short-read SJ.tab and personalized haplotype FASTAs, and re-classifies each
+    novel call into a confidence class with a mechanistic attribution and a
+    provenance/circularity flag. Depends only on htslib.
+
+extra:
+  recipe-maintainers:
+    - REPLACE_MAINTAINER
