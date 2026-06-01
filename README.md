@@ -53,16 +53,18 @@ output classes shown are a simplified grouping — the full set is listed
 
 `adjudicate` is the main entry point. The **only** hard requirements are a SQANTI3
 classification and an output prefix — every evidence input below is optional and
-simply switches on another axis (see [Evidence tiers](#evidence-tiers)).
+simply switches on another axis (see [Evidence tiers](#evidence-tiers)). PanIsoGuard
+is caller- and organism-agnostic; the paths below are placeholders for your own
+caller output, reference, and reads (any long-read caller, any genome build).
 
 **Baseline** — SQANTI priors only (no short/long-read evidence; novel calls are
 flagged or held, never positively confirmed):
 
 ```bash
 panisoguard adjudicate \
-  --classification sample_classification.txt \
-  --isoforms-bed   flair.isoforms.bed \
-  --ref-gtf        gencode.v49.annotation.gtf \
+  --classification classification.txt \
+  --isoforms-bed   isoforms.bed \
+  --ref-gtf        annotation.gtf \
   --out-prefix     out/sample
 ```
 
@@ -71,12 +73,12 @@ panisoguard adjudicate \
 
 ```bash
 panisoguard adjudicate \
-  --classification sample_classification.txt \
-  --isoforms-bed   flair.isoforms.bed \
-  --ref-gtf        gencode.v49.annotation.gtf \
-  --sj-tab         star.SJ.out.tab \
-  --bam            aligned.sorted.bam \
-  --reference      GRCh38.fa \
+  --classification classification.txt \
+  --isoforms-bed   isoforms.bed \
+  --ref-gtf        annotation.gtf \
+  --sj-tab         SJ.out.tab \
+  --bam            aligned.bam \
+  --reference      genome.fa \
   --out-prefix     out/sample
 ```
 
@@ -86,12 +88,12 @@ circularity firewall: `wgs`/`external` may promote to a rescue verdict, while
 
 ```bash
 panisoguard adjudicate \
-  --classification sample_classification.txt \
-  --isoforms-bed   flair.isoforms.bed \
-  --ref-gtf        gencode.v49.annotation.gtf \
-  --reference      GRCh38.fa \
-  --reference-haplotype sample.hap1.fa \
-  --reference-haplotype sample.hap2.fa \
+  --classification classification.txt \
+  --isoforms-bed   isoforms.bed \
+  --ref-gtf        annotation.gtf \
+  --reference      genome.fa \
+  --reference-haplotype haplotype1.fa \
+  --reference-haplotype haplotype2.fa \
   --haplotype-provenance wgs \
   --out-prefix     out/sample
 ```
@@ -106,10 +108,10 @@ firewall as the variant axis): `population`/`external` promote, while the defaul
 
 ```bash
 panisoguard adjudicate \
-  --classification sample_classification.txt \
-  --isoforms-bed   flair.isoforms.bed \
-  --ref-gtf        gencode.v49.annotation.gtf \
-  --pangenome-junctions hprc.graph_junctions.tsv \
+  --classification classification.txt \
+  --isoforms-bed   isoforms.bed \
+  --ref-gtf        annotation.gtf \
+  --pangenome-junctions pangenome_junctions.tsv \
   --pangenome-provenance population \
   --out-prefix     out/sample
 ```
@@ -122,7 +124,7 @@ panisoguard combine \
   --gtf flair:flair.gtf \
   --gtf isoquant:isoquant.gtf \
   --gtf bambu:bambu.gtf \
-  --ref-gtf gencode.v49.annotation.gtf \
+  --ref-gtf annotation.gtf \
   --out caller_support_matrix.tsv
 ```
 
