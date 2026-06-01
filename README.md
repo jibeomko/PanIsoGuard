@@ -214,7 +214,7 @@ PanIsoGuard/
 ## Architecture map
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
+%%{init: {"theme": "base", "themeCSS": "svg { background: #ffffff; }", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart LR
   CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
   Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
@@ -237,12 +237,12 @@ flowchart LR
   Rules ==> Decide
   Consensus -.-> Outputs
 
-  classDef command fill:#ffffff,stroke:#b7791f,stroke-width:1.8px,color:#3a2500,font-size:17px;
-  classDef input fill:#ffffff,stroke:#2f6fa8,stroke-width:1.8px,color:#0f2438,font-size:17px;
-  classDef process fill:#ffffff,stroke:#2f855a,stroke-width:1.8px,color:#102a16,font-size:17px;
-  classDef evidence fill:#ffffff,stroke:#6b46c1,stroke-width:2px,color:#241447,font-size:17px;
-  classDef decision fill:#ffffff,stroke:#c53030,stroke-width:2.2px,color:#3b0d0d,font-size:17px;
-  classDef output fill:#ffffff,stroke:#2c7a7b,stroke-width:1.8px,color:#0f2f2f,font-size:17px;
+  classDef command fill:#fff7e6,stroke:#b7791f,stroke-width:1.8px,color:#3a2500,font-size:17px;
+  classDef input fill:#edf6ff,stroke:#2f6fa8,stroke-width:1.8px,color:#0f2438,font-size:17px;
+  classDef process fill:#eefaf1,stroke:#2f855a,stroke-width:1.8px,color:#102a16,font-size:17px;
+  classDef evidence fill:#f5f0ff,stroke:#6b46c1,stroke-width:2px,color:#241447,font-size:17px;
+  classDef decision fill:#fff1f1,stroke:#c53030,stroke-width:2.2px,color:#3b0d0d,font-size:17px;
+  classDef output fill:#edfafa,stroke:#2c7a7b,stroke-width:1.8px,color:#0f2f2f,font-size:17px;
 
   class CLI command;
   class Iso,Context,Rules input;
