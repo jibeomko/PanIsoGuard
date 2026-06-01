@@ -136,7 +136,7 @@ panisoguard combine \
 | `<prefix>.attribution.jsonl` | per-isoform `rule_trace`: every rule that fired, in order (fully auditable) |
 | `<prefix>.provenance.log`    | which axes were active + circularity status of the run |
 
-### Reviewer-facing analyses
+### Benchmarking & ablation
 
 ```bash
 # non-redundancy vs the SQANTI3 filter on novel isoforms (2x2, Jaccard, McNemar)
