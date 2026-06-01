@@ -214,7 +214,7 @@ PanIsoGuard/
 ## Architecture map
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
+%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart LR
   CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
   Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
@@ -223,7 +223,7 @@ flowchart LR
 
   Normalize["<b>1. Normalize</b><br/>src/io readers<br/>typed transcript + junction models"]
   Consensus["<b>2. Merge callers</b><br/>intron-chain fingerprints<br/>caller support matrix"]
-  Evidence["<b>3. Build evidence</b><br/>SQANTI priors<br/>short&#8209;read&nbsp;SJ | BAM mapping<br/>motif | graph rescue"]
+  Evidence["<b>3. Build evidence</b><br/>SQANTI3 QC<br/>short‑read SJ<br/>Long Read BAM mapping<br/>Variant/Haplotype<br/>Pangenome"]
   Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
   Outputs["<b>Outputs</b><br/>*.adjudicated.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
 
@@ -237,12 +237,12 @@ flowchart LR
   Rules ==> Decide
   Consensus -.-> Outputs
 
-  classDef command fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#3a2500,font-size:17px;
-  classDef input fill:#eaf3ff,stroke:#2f6fa8,stroke-width:1.5px,color:#0f2438,font-size:17px;
-  classDef process fill:#eefaf1,stroke:#2f855a,stroke-width:1.5px,color:#102a16,font-size:17px;
-  classDef evidence fill:#f5f0ff,stroke:#6b46c1,stroke-width:1.5px,color:#241447,font-size:17px;
-  classDef decision fill:#ffecec,stroke:#c53030,stroke-width:2px,color:#3b0d0d,font-size:17px;
-  classDef output fill:#edf7f7,stroke:#2c7a7b,stroke-width:1.5px,color:#0f2f2f,font-size:17px;
+  classDef command fill:#ffffff,stroke:#b7791f,stroke-width:1.8px,color:#3a2500,font-size:17px;
+  classDef input fill:#ffffff,stroke:#2f6fa8,stroke-width:1.8px,color:#0f2438,font-size:17px;
+  classDef process fill:#ffffff,stroke:#2f855a,stroke-width:1.8px,color:#102a16,font-size:17px;
+  classDef evidence fill:#ffffff,stroke:#6b46c1,stroke-width:2px,color:#241447,font-size:17px;
+  classDef decision fill:#ffffff,stroke:#c53030,stroke-width:2.2px,color:#3b0d0d,font-size:17px;
+  classDef output fill:#ffffff,stroke:#2c7a7b,stroke-width:1.8px,color:#0f2f2f,font-size:17px;
 
   class CLI command;
   class Iso,Context,Rules input;
@@ -250,7 +250,7 @@ flowchart LR
   class Evidence evidence;
   class Decide decision;
   class Outputs output;
-  linkStyle default stroke:#334155,stroke-width:3px;
+  linkStyle default stroke:#334155,stroke-width:4.5px;
 ```
 
 ## Build
