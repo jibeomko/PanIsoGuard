@@ -28,14 +28,16 @@ requirements:
     - htslib >=1.18
 
 test:
-  source_files:
-    - tests/data/tiny/mini.gtf
   commands:
     - panisoguard --version
     - panisoguard --help > /dev/null
     - panisoguard adjudicate --help > /dev/null
     - panisoguard combine --help > /dev/null
-    - panisoguard combine --gtf flair:tests/data/tiny/mini.gtf --out combine_smoke.tsv
+    - >-
+      printf '%b'
+      'chr1\ttest\texon\t101\t200\t.\t+\t.\tgene_id "G1"; transcript_id "T1";\nchr1\ttest\texon\t301\t400\t.\t+\t.\tgene_id "G1"; transcript_id "T1";\nchr1\ttest\texon\t501\t600\t.\t+\t.\tgene_id "G1"; transcript_id "T1";\nchr1\ttest\texon\t101\t200\t.\t+\t.\tgene_id "G1"; transcript_id "T2";\nchr1\ttest\texon\t501\t600\t.\t+\t.\tgene_id "G1"; transcript_id "T2";\n'
+      > mini.gtf
+    - panisoguard combine --gtf flair:mini.gtf --out combine_smoke.tsv
     - test -s combine_smoke.tsv
 
 about:
