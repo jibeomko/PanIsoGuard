@@ -33,7 +33,7 @@ python score_axes.py work/truth.tsv work/full.adjudicated.tsv
 | A genuine | HIGH_CONF_NOVEL | HIGH | HIGH | HIGH |
 | B noncanon-artifact | ARTIFACT | ARTIFACT | ARTIFACT | ARTIFACT |
 | C mapping-artifact | LOW_CONF_PARTIAL | **ARTIFACT (mapping)** | LOW | **ARTIFACT** |
-| D reference-bias | ARTIFACT | ARTIFACT | **PAN_REF_RESCUED** | **PAN_REF_RESCUED** |
+| D reference-bias | ARTIFACT | ARTIFACT | **PAN_REF_RESCUED_FALSE_NOVEL** | **PAN_REF_RESCUED_FALSE_NOVEL** |
 
 All 160 isoforms are classified per truth in the full configuration (0 errors).
 The per-config deltas isolate each axis: the BAM axis alone moves C from

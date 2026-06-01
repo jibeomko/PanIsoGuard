@@ -32,8 +32,8 @@ output classes shown are a simplified grouping — the full set is listed
 > read-level mapping, variant/reference-bias) plus an **experimental** file-based
 > pangenome reference-bias tier, and the `adjudicate` / `benchmark` / `ablate` /
 > `combine` subcommands, are implemented and tested. Rule thresholds are
-> conservative defaults that are **not yet calibrated** against simulated truth
-> (SQANTI-SIM), and the pangenome tier is **not yet validated on real graph data**
+> conservative defaults that are **not yet tuned** against a full SQANTI-SIM
+> AUPRC sweep, and the pangenome tier is **not yet validated on real graph data**
 > (see GATE-1 in [docs/decision_engine.md](docs/decision_engine.md)); treat the
 > confidence classes as orthogonal evidence integration, not a calibrated probability.
 

@@ -8,7 +8,7 @@ truth (no real genome / simulator needed):
   A genuine            canonical ref motif + short-read support  -> HIGH_CONF_NOVEL
   B noncanon-artifact  non-canonical motif + no SR support       -> ARTIFACT (noncanonical)
   C mapping-artifact   canonical + no SR + low-MAPQ spanning BAM -> ARTIFACT (mapping)   [needs --bam]
-  D reference-bias     non-canonical on ref, canonical on hap    -> PAN_REF_RESCUED      [needs --reference-haplotype]
+  D reference-bias     non-canonical on ref, canonical on hap    -> PAN_REF_RESCUED_FALSE_NOVEL [needs --reference-haplotype]
 
 Each isoform is a 2-exon transcript with one test intron in its own 1 kb window.
 
