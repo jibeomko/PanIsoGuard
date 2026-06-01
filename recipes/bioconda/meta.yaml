@@ -6,11 +6,8 @@ package:
   version: {{ version }}
 
 source:
-  # The v{{ version }} tag's release.yml workflow publishes the authoritative tarball
-  # sha256 in the GitHub Release notes; copy it here and into the bioconda-recipes PR.
-  # (A tag's own frozen copy of this file cannot contain its own tarball's hash.)
   url: https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  sha256: b00b1f3067dc45cbc0d20708a25465c66c9df67128571f8c97cab2af9f283c0c
 
 build:
   number: 0
@@ -27,7 +24,6 @@ requirements:
     - make
   host:
     - htslib >=1.18
-    - zlib
   run:
     - htslib >=1.18
 
@@ -65,7 +61,5 @@ about:
 extra:
   recipe-maintainers:
     - jibeomko
-  # linux-64 / osx-64 build by default; osx-arm64 is verified ARM-clean by CI
-  # (macos-latest build+test green). linux-aarch64 is not yet CI-verified.
   additional-platforms:
     - osx-arm64
