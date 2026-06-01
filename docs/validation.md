@@ -34,6 +34,7 @@ against it. They validate the **adjudication logic** — given caller + SQANTI3 
 | [sirv](../benchmark/sirv) | Lexogen SIRV-Set4 spike-in control, dense overlapping isoforms | specificity(false)=0.944, recall=1.000; the 3 FPs are FLAIR mis-collapses of *individually real* junctions — a documented short-read-axis limitation |
 | [calibration](../benchmark/calibration) | class → empirical P(genuine), train/test split | **well-calibrated**: controlled Brier 0.0000 / ECE 0.0013; end-to-end Brier 0.0121 / ECE 0.0114 |
 | [multicaller](../benchmark/multicaller) | real FLAIR + IsoQuant output integrated by `combine` | 397 + 157 → **426 unique intron chains**, 128 agreed by both callers (validates running-ID integration on genuine multi-caller output) |
+| [sqanti_sim](../benchmark/sqanti_sim) | canonical SQANTI-SIM (GENCODE chr22): delete 769 transcripts → PBSIM3 HiFi → FLAIR → SQANTI3 → `adjudicate` | genuine-novel detection **precision 0.982, specificity 0.946, AUPRC 0.970** (baseline 0.831); NNC recall 1.000; known→HIGH_CONF_KNOWN 1.000; **0 genuine→ARTIFACT**. Moderate overall recall = honest abstention on NIC-combinatorial / ISM-partial, not misclassification |
 
 Together these cover the validated short-read, BAM mapping, and variant axes,
 the full pipeline (real FLAIR/SQANTI3), the headline reference-bias rescue on
@@ -44,12 +45,12 @@ pangenome axis has unit-level coverage and remains marked experimental until GAT
 
 | Item | Status | Why |
 |------|--------|-----|
-| **SQANTI-SIM AUPRC sweep** ([sqanti_sim/](../benchmark/sqanti_sim)) | not run | The canonical simulator would add a per-class precision/recall + **AUPRC / ΔAUPRC** threshold sweep (letting future benchmark tooling report AUPRC, not only contingency counts). Equivalent truth-based P/R is already shown by `controlled_truth` + `end2end`; this adds the standard-tool curve and a calibration anchor for the default thresholds. |
-| **Pangenome real-graph rescue (GATE-1)** | not run | The variant axis is validated on real HG002 variants; the **file-based pangenome tier** still needs HPRC v1.1 + `vg`/`rpvg` to extract graph-supported junctions for an out-of-graph individual. Heavy external tooling; the axis is marked *experimental*. |
+| **Pangenome real-graph rescue (GATE-1)** | in progress | The variant axis is validated on real HG002 variants; the **file-based pangenome tier** is being validated against the HPRC v1.1 Minigraph-Cactus graph (`vg deconstruct` of the GRCh38 chr22 path → graph-supported junctions → `--pangenome-junctions`). Heavy external tooling; the axis is marked *experimental*. |
 | **LRGASP real data** ([lrgasp/](../benchmark/lrgasp)) | blocked | The LRGASP pre-run caller GTFs are **Synapse-gated**. The multi-caller capability is already validated on genuine FLAIR+IsoQuant output (see `multicaller`). |
 | **HG002 long-read RNA** | blocked | No clean public HG002/GM24385 long-read RNA-seq dataset was found (ENCODE/ENA empty). The variant axis is instead validated on real HG002 *variants* + the full pipeline on `end2end`/`sirv`. |
 
 **Calibration caveat.** `config/rules.default.toml` thresholds are conservative
-defaults. They are well-calibrated on the run truth sets above (low ECE/Brier), but
-have **not** been tuned against a full SQANTI-SIM AUPRC sweep; treat the confidence
+defaults. They are well-calibrated on the run truth sets above (low ECE/Brier) and
+the SQANTI-SIM AUPRC (0.970) confirms strong genuine-vs-false ranking, but the
+thresholds have **not** been swept/tuned per dataset; treat the confidence
 classes as calibrated *ordinal* evidence integration, not a tuned probability.
