@@ -214,114 +214,39 @@ PanIsoGuard/
 ## Architecture map
 
 ```mermaid
-flowchart LR
-  subgraph Inputs["Inputs"]
-    SQANTI["SQANTI3<br/>classification"]
-    Isoforms["Caller isoforms<br/>GTF or BED12"]
-    RefGTF["Reference<br/>GTF"]
-    SJ["STAR<br/>SJ.tab"]
-    BAM["Long-read<br/>BAM/CRAM"]
-    FASTA["Reference +<br/>haplotype FASTA"]
-    Graph["Pangenome<br/>junction TSV"]
-    Rules["rules.default.toml"]
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#4b5563"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 30, "rankSpacing": 38}}}%%
+flowchart TB
+  Inputs["<b>Inputs</b><br/>SQANTI3 | GTF/BED12 | reference GTF<br/>SJ.tab | BAM/CRAM | FASTA | graph TSV | rules"]
+  CLI["<b>CLI</b><br/>adjudicate | combine | benchmark | ablate"]
+
+  subgraph Core["Core pipeline"]
+    direction LR
+    Normalize["<b>Normalize</b><br/>src/io readers<br/>typed transcript + junction models"]
+    Integrate["<b>Integrate</b><br/>ConsensusBuilder<br/>intron-chain fingerprints"]
+    Evidence["<b>Evidence axes</b><br/>SQANTI priors | short-read SJ<br/>BAM mapping | variant motif | pangenome"]
+    Decide["<b>Decision</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
   end
 
-  subgraph Commands["CLI boundary (src/cli)"]
-    Main["main.cpp<br/>subcommand dispatch"]
-    Adjudicate["adjudicate<br/>classify isoforms"]
-    Combine["combine<br/>caller-support matrix"]
-    Benchmark["benchmark<br/>SQANTI comparison"]
-    Ablate["ablate<br/>axis contribution"]
-  end
+  Outputs["<b>Outputs</b><br/>caller_support_matrix.tsv<br/>*.adjudicated.tsv | *.attribution.jsonl | *.provenance.log"]
 
-  subgraph Normalize["Input normalization (src/io + include/types)"]
-    SqantiTable["SqantiTable<br/>name-indexed rows"]
-    Tx["Transcript models<br/>0-based intron chains"]
-    Catalog["Reference catalog<br/>known chains/sites"]
-    SjTable["SjTable<br/>exact junction lookup"]
-    PgTable["PangenomeJunctions<br/>graph-supported junctions"]
-    RuleConfig["Rule config<br/>thresholds + gates"]
-  end
+  Inputs --> CLI --> Normalize --> Integrate --> Evidence --> Decide --> Outputs
+  Integrate -.-> Outputs
+  CLI -.-> Decide
 
-  subgraph ConsensusLayer["Multi-caller integration (src/core/consensus)"]
-    Fingerprint["Intron-chain<br/>fingerprint"]
-    Consensus["ConsensusBuilder<br/>merge caller IDs"]
-  end
+  classDef input fill:#eaf3ff,stroke:#2f6fa8,stroke-width:1.4px,color:#0f2438,font-size:16px;
+  classDef cli fill:#fff7e6,stroke:#b7791f,stroke-width:1.4px,color:#3a2500,font-size:16px;
+  classDef core fill:#eefaf1,stroke:#2f855a,stroke-width:1.4px,color:#102a16,font-size:16px;
+  classDef evidence fill:#f5f0ff,stroke:#6b46c1,stroke-width:1.4px,color:#241447,font-size:16px;
+  classDef decision fill:#ffecec,stroke:#c53030,stroke-width:1.8px,color:#3b0d0d,font-size:16px;
+  classDef output fill:#edf7f7,stroke:#2c7a7b,stroke-width:1.4px,color:#0f2f2f,font-size:16px;
 
-  subgraph Evidence["Evidence axes"]
-    Priors["SQANTI priors<br/>RTS/canonical/polyA"]
-    ShortRead["Short-read support<br/>exact SJ match"]
-    Mapping["Long-read mapping<br/>MAPQ/spanning/clips"]
-    Variant["Variant motif<br/>haplotype rescue"]
-    Pangenome["Pangenome path<br/>reference-bias rescue"]
-  end
-
-  subgraph Decision["Decision engine (src/core)"]
-    EvidenceVector["EvidenceVector<br/>one per isoform"]
-    RuleEngine["RuleEngine.evaluate<br/>deterministic projection"]
-    Verdict["Verdict<br/>class + mechanism + rule_trace"]
-  end
-
-  subgraph Outputs["Outputs"]
-    Matrix["caller_support_matrix.tsv"]
-    Adjudicated["*.adjudicated.tsv"]
-    Attribution["*.attribution.jsonl"]
-    Provenance["*.provenance.log"]
-  end
-
-  Main --> Adjudicate
-  Main --> Combine
-  Main --> Benchmark
-  Main --> Ablate
-
-  SQANTI -->|parse| SqantiTable
-  Isoforms -->|GTF/BED12 parse| Tx
-  RefGTF -->|catalog build| Catalog
-  SJ -->|parse| SjTable
-  Graph -->|parse| PgTable
-  Rules -->|load| RuleConfig
-
-  Tx --> Fingerprint
-  Fingerprint --> Consensus
-  Combine --> Consensus
-  Consensus --> Matrix
-
-  SqantiTable --> Priors
-  SjTable --> ShortRead
-  BAM --> Mapping
-  FASTA --> Variant
-  PgTable --> Pangenome
-
-  Adjudicate --> EvidenceVector
-  Benchmark --> EvidenceVector
-  Ablate --> EvidenceVector
-  Priors --> EvidenceVector
-  ShortRead --> EvidenceVector
-  Mapping --> EvidenceVector
-  Variant --> EvidenceVector
-  Pangenome --> EvidenceVector
-  Catalog --> EvidenceVector
-  Consensus --> EvidenceVector
-  RuleConfig --> RuleEngine
-  EvidenceVector --> RuleEngine
-  RuleEngine --> Verdict
-  Verdict --> Adjudicated
-  Verdict --> Attribution
-  Verdict --> Provenance
-
-  classDef input fill:#eaf3ff,stroke:#3b6ea8,stroke-width:1px,color:#0f2438;
-  classDef cli fill:#fff7e6,stroke:#b7791f,stroke-width:1px,color:#3a2500;
-  classDef normalize fill:#eefaf1,stroke:#2f855a,stroke-width:1px,color:#102a16;
-  classDef evidence fill:#f5f0ff,stroke:#6b46c1,stroke-width:1px,color:#241447;
-  classDef decision fill:#ffecec,stroke:#c53030,stroke-width:1.5px,color:#3b0d0d;
-  classDef output fill:#edf7f7,stroke:#2c7a7b,stroke-width:1px,color:#0f2f2f;
-
-  class SQANTI,Isoforms,RefGTF,SJ,BAM,FASTA,Graph,Rules input;
-  class Main,Adjudicate,Combine,Benchmark,Ablate cli;
-  class SqantiTable,Tx,Catalog,SjTable,PgTable,RuleConfig,Fingerprint,Consensus normalize;
-  class Priors,ShortRead,Mapping,Variant,Pangenome evidence;
-  class EvidenceVector,RuleEngine,Verdict decision;
-  class Matrix,Adjudicated,Attribution,Provenance output;
+  class Inputs input;
+  class CLI cli;
+  class Normalize,Integrate core;
+  class Evidence evidence;
+  class Decide decision;
+  class Outputs output;
+  style Core fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#111827;
 ```
 
 ## Build
