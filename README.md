@@ -214,7 +214,7 @@ PanIsoGuard/
 ## Architecture map
 
 ```mermaid
-%%{init: {"theme": "base", "themeCSS": "svg { background: #ffffff; } marker path, .arrowMarkerPath { fill: #334155 !important; stroke: #334155 !important; transform: scale(1.35); transform-origin: center; }", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
+%%{init: {"theme": "base", "themeCSS": "svg { background: #ffffff; }", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart LR
   CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
   Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
@@ -227,14 +227,14 @@ flowchart LR
   Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
   Outputs["<b>Outputs</b><br/>*.adjudicated.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
 
-  CLI ==> Normalize
-  Iso ==> Normalize
-  Normalize ==> Consensus
-  Consensus ==> Evidence
-  Evidence ==> Decide
-  Decide ==> Outputs
-  Context ==> Evidence
-  Rules ==> Decide
+  CLI --> Normalize
+  Iso --> Normalize
+  Normalize --> Consensus
+  Consensus --> Evidence
+  Evidence --> Decide
+  Decide --> Outputs
+  Context --> Evidence
+  Rules --> Decide
   Consensus -.-> Outputs
 
   classDef command fill:#fff7e6,stroke:#b7791f,stroke-width:1.8px,color:#3a2500,font-size:17px;
@@ -250,7 +250,7 @@ flowchart LR
   class Evidence evidence;
   class Decide decision;
   class Outputs output;
-  linkStyle default stroke:#334155,stroke-width:6px;
+  linkStyle default stroke:#334155,stroke-width:3.5px;
 ```
 
 ## Build
