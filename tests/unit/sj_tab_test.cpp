@@ -1,9 +1,19 @@
 #include "catch2/catch.hpp"
 
+#include <filesystem>
+#include <fstream>
+#include <stdexcept>
+
 #include "panisoguard/sj_tab.hpp"
 #include "test_util.hpp"
 
 using namespace panisoguard;
+
+TEST_CASE("SJ.tab reader reports a non-integer field with line context", "[sj_tab]") {
+  const auto p = std::filesystem::temp_directory_path() / "pig_sj_bad.SJ.tab";
+  std::ofstream(p) << "chr1\tNOPE\t300\t1\t1\t1\t10\t0\t30\n";
+  REQUIRE_THROWS_AS(read_sj_tab(p.string()), std::runtime_error);
+}
 
 TEST_CASE("SJ.tab parses and supports exact coordinate lookup", "[sj_tab]") {
   const SjTable t = read_sj_tab(tiny("mini.SJ.tab"));

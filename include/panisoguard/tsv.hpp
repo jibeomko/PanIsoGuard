@@ -1,10 +1,28 @@
 #pragma once
 
+#include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace panisoguard {
+
+// Parse a base-10 integer from a TSV field, throwing a context-rich error
+// (file kind + line number + offending field) rather than a bare std::stoll/stoi
+// "stoll" message, so a malformed row is diagnosable.
+inline long long parse_int_field(const std::string& s, const char* what,
+                                 const char* file_kind, std::size_t lineno) {
+  try {
+    std::size_t pos = 0;
+    const long long v = std::stoll(s, &pos);
+    if (pos != s.size()) throw std::invalid_argument("trailing characters");
+    return v;
+  } catch (const std::exception&) {
+    throw std::runtime_error(std::string(file_kind) + " line " + std::to_string(lineno) +
+                             ": " + what + " is not an integer: \"" + s + "\"");
+  }
+}
 
 // Split an (already newline-stripped) line on tab. Bioinformatics TSVs are
 // unquoted, so no quote handling is needed.

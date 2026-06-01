@@ -52,18 +52,19 @@ SjTable read_sj_tab(const std::string& path) {
     SjRecord rec;
     rec.chrom = f[0];
     // 1-based inclusive intron [s, e] -> 0-based half-open [s-1, e].
-    const int64_t s1 = std::stoll(f[1]);
-    const int64_t e1 = std::stoll(f[2]);
+    const int64_t s1 = parse_int_field(f[1], "intron_start", "SJ.tab", lineno);
+    const int64_t e1 = parse_int_field(f[2], "intron_end", "SJ.tab", lineno);
     rec.intron = Junction{s1 - 1, e1};
-    const int strand_code = std::stoi(f[3]);
+    // STAR strand: 0 = undefined (kept as Unknown), 1 = +, 2 = -.
+    const int strand_code = static_cast<int>(parse_int_field(f[3], "strand", "SJ.tab", lineno));
     rec.strand = strand_code == 1 ? Strand::kPlus
                : strand_code == 2 ? Strand::kMinus
                                   : Strand::kUnknown;
-    rec.motif = std::stoi(f[4]);
-    rec.annotated = std::stoi(f[5]) != 0;
-    rec.n_uniq = std::stoi(f[6]);
-    rec.n_multi = std::stoi(f[7]);
-    rec.max_overhang = std::stoi(f[8]);
+    rec.motif = static_cast<int>(parse_int_field(f[4], "motif", "SJ.tab", lineno));
+    rec.annotated = parse_int_field(f[5], "annotated", "SJ.tab", lineno) != 0;
+    rec.n_uniq = static_cast<int>(parse_int_field(f[6], "n_uniq", "SJ.tab", lineno));
+    rec.n_multi = static_cast<int>(parse_int_field(f[7], "n_multi", "SJ.tab", lineno));
+    rec.max_overhang = static_cast<int>(parse_int_field(f[8], "max_overhang", "SJ.tab", lineno));
     table.add(std::move(rec));
   }
   return table;

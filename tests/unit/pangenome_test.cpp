@@ -1,9 +1,23 @@
 #include "catch2/catch.hpp"
 
+#include <filesystem>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/rules.hpp"
 
 using namespace panisoguard;
+
+namespace {
+// Write a tiny pangenome-junction file to a temp path and return it.
+std::string write_tmp(const std::string& name, const std::string& body) {
+  const auto p = std::filesystem::temp_directory_path() / name;
+  std::ofstream(p) << body;
+  return p.string();
+}
+}  // namespace
 
 TEST_CASE("pangenome junction reader parses + exact strand-aware lookup", "[pangenome]") {
   const std::string path = std::string(PANISOGUARD_TEST_DATA_DIR) + "/mini.pangenome.tsv";
@@ -75,4 +89,18 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED",
     REQUIRE(v.confidence == ConfidenceClass::kAmbiguous);
     REQUIRE(v.circularity_flag);
   }
+}
+
+TEST_CASE("pangenome reader rejects malformed rows", "[pangenome]") {
+  // Unrecognized strand is rejected (not silently stored as never-matching Unknown).
+  REQUIRE_THROWS_AS(read_pangenome_junctions(write_tmp("pig_pg_strand.tsv", "chr1\t101\t200\t*\t3\n")),
+                    std::runtime_error);
+  // Non-integer coordinate throws with context instead of a bare 'stoll'.
+  REQUIRE_THROWS_AS(read_pangenome_junctions(write_tmp("pig_pg_coord.tsv", "chr1\tXX\t200\t+\n")),
+                    std::runtime_error);
+  // n_haplotypes must be >= 1.
+  REQUIRE_THROWS_AS(read_pangenome_junctions(write_tmp("pig_pg_nhap.tsv", "chr1\t101\t200\t+\t0\n")),
+                    std::runtime_error);
+  // A well-formed minimal (4-column) row is accepted.
+  REQUIRE(read_pangenome_junctions(write_tmp("pig_pg_ok.tsv", "chr1\t101\t200\t+\n")).size() == 1);
 }

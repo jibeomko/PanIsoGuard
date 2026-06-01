@@ -69,12 +69,18 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
     PangenomeJunctionRecord rec;
     rec.chrom = f[0];
     // 1-based inclusive intron [s, e] -> 0-based half-open [s-1, e].
-    const int64_t s1 = std::stoll(f[1]);
-    const int64_t e1 = std::stoll(f[2]);
+    const int64_t s1 = parse_int_field(f[1], "intron_start", "pangenome junctions", lineno);
+    const int64_t e1 = parse_int_field(f[2], "intron_end", "pangenome junctions", lineno);
     rec.intron = Junction{s1 - 1, e1};
     rec.strand = parse_strand(f[3]);
+    // A splice junction is strand-specific; reject a missing/typo'd strand instead of
+    // silently storing never-matching kUnknown data.
+    if (rec.strand == Strand::kUnknown) {
+      throw std::runtime_error("pangenome junctions line " + std::to_string(lineno) +
+                               ": unrecognized strand \"" + f[3] + "\" (expected +, -, 1, or 2)");
+    }
     if (f.size() >= 5 && !f[4].empty()) {
-      rec.n_haplotypes = std::stoi(f[4]);
+      rec.n_haplotypes = static_cast<int>(parse_int_field(f[4], "n_haplotypes", "pangenome junctions", lineno));
       if (rec.n_haplotypes < 1) {
         throw std::runtime_error("pangenome junctions line " + std::to_string(lineno) +
                                  ": n_haplotypes must be >= 1, got " + f[4]);
