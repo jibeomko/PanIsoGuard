@@ -214,23 +214,27 @@ PanIsoGuard/
 ## Architecture map
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#475569"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart LR
   CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
-  Iso["<b>Isoform inputs</b><br/>GTF/BED12 + SQANTI3"]
+  Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
   Context["<b>Evidence context</b><br/>reference GTF | SJ.tab<br/>BAM/CRAM | FASTA | graph TSV"]
   Rules["<b>Rule gates</b><br/>rules.default.toml"]
 
   Normalize["<b>1. Normalize</b><br/>src/io readers<br/>typed transcript + junction models"]
   Consensus["<b>2. Merge callers</b><br/>intron-chain fingerprints<br/>caller support matrix"]
-  Evidence["<b>3. Build evidence</b><br/>SQANTI priors | short-read SJ<br/>BAM mapping | motif | graph rescue"]
+  Evidence["<b>3. Build evidence</b><br/>SQANTI priors<br/>short&#8209;read&nbsp;SJ | BAM mapping<br/>motif | graph rescue"]
   Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
   Outputs["<b>Outputs</b><br/>*.adjudicated.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
 
-  CLI --> Normalize
-  Iso --> Normalize --> Consensus --> Evidence --> Decide --> Outputs
-  Context --> Evidence
-  Rules --> Decide
+  CLI ==> Normalize
+  Iso ==> Normalize
+  Normalize ==> Consensus
+  Consensus ==> Evidence
+  Evidence ==> Decide
+  Decide ==> Outputs
+  Context ==> Evidence
+  Rules ==> Decide
   Consensus -.-> Outputs
 
   classDef command fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#3a2500,font-size:17px;
@@ -246,6 +250,7 @@ flowchart LR
   class Evidence evidence;
   class Decide decision;
   class Outputs output;
+  linkStyle default stroke:#334155,stroke-width:3px;
 ```
 
 ## Build
