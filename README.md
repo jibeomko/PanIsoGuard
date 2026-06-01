@@ -167,6 +167,17 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
 | 3 | pangenome graph junctions (`--pangenome-junctions`) | optional, **experimental** | all novel junctions realizable on a graph haplotype path → reference bias (provenance-gated) |
 
+## Documentation
+
+| Doc | Contents |
+|-----|----------|
+| [docs/architecture.md](docs/architecture.md) | The five layers (CLI → readers → core data model → evidence → decision) and data flow. |
+| [docs/algorithm.md](docs/algorithm.md) | The per-isoform adjudication algorithm and the decision projection. |
+| [docs/function_io.md](docs/function_io.md) | Module-by-module input → output contracts and key data types. |
+| [docs/decision_engine.md](docs/decision_engine.md) | The 2-axis grid, rescue precedence, and the circularity firewall. |
+| [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
+| [docs/validation.md](docs/validation.md) | What is verified and the truth-based validation plan. |
+
 ## Build
 
 Requires a C++17 compiler, CMake ≥ 3.20, and **htslib ≥ 1.18**.
