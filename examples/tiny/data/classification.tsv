@@ -1,0 +1,4 @@
+isoform	chrom	strand	structural_category	associated_gene	associated_transcript	subcategory	RTS_stage	all_canonical	perc_A_downstream_TTS	n_indels_junc	dist_to_CAGE_peak	dist_to_polyA_site	filter_result
+iso_known	chr1	+	full-splice_match	GENE1	TX_REF	multi-exon	FALSE	canonical	10.0	0	5	8	Isoform
+iso_novel_supported	chr1	+	novel_not_in_catalog	GENE1	novel	at_least_one_novel_splicesite	FALSE	canonical	12.0	0	NA	NA	Isoform
+iso_novel_artifact	chr1	+	novel_not_in_catalog	GENE1	novel	at_least_one_novel_splicesite	TRUE	non_canonical	65.0	2	NA	NA	Artifact

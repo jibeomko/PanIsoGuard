@@ -1,0 +1,4 @@
+isoform_id	chrom	strand	structural_category	novelty_support	primary_mechanism	confidence_class	n_novel_junctions	n_novel_jx_sr_supported	circularity_flag
+iso_known	chr1	+	full-splice_match	SUPPORTED	none	HIGH_CONF_KNOWN	0	0	false
+iso_novel_supported	chr1	+	novel_not_in_catalog	SUPPORTED	none	HIGH_CONF_NOVEL	1	1	false
+iso_novel_artifact	chr1	+	novel_not_in_catalog	UNSUPPORTED	noncanonical	ARTIFACT	1	0	false

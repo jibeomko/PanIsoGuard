@@ -1,0 +1,6 @@
+chr1	example	exon	101	200	.	+	.	gene_id "GENE1"; transcript_id "iso_known";
+chr1	example	exon	301	400	.	+	.	gene_id "GENE1"; transcript_id "iso_known";
+chr1	example	exon	101	200	.	+	.	gene_id "GENE1"; transcript_id "iso_novel_supported";
+chr1	example	exon	501	600	.	+	.	gene_id "GENE1"; transcript_id "iso_novel_supported";
+chr1	example	exon	101	200	.	+	.	gene_id "GENE1"; transcript_id "iso_novel_artifact";
+chr1	example	exon	701	800	.	+	.	gene_id "GENE1"; transcript_id "iso_novel_artifact";

@@ -1,0 +1,20 @@
+# PanIsoGuard adjudicate provenance
+tool_version	0.0.2
+ruleset_version	builtin-0.0.1
+sqanti3_version_target	6.0
+config	<built-in defaults>
+classification	data/classification.tsv
+isoforms	data/caller.gtf
+ref_gtf	data/reference.gtf
+sj_tab	data/short_read.SJ.tab
+bam	<none>
+axis.short_read	on
+axis.catalog	on
+axis.bam	not_evaluable
+axis.variant	not_evaluable
+axis.pangenome	not_evaluable
+# confidence-class counts
+class.ARTIFACT	1
+class.HIGH_CONF_KNOWN	1
+class.HIGH_CONF_NOVEL	1
+total	3

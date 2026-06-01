@@ -148,6 +148,21 @@ panisoguard benchmark [adjudicate options] --out bench/
 panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
 ```
 
+## Quick example
+
+A tiny text-only dataset with checked-in expected outputs is available under
+[`examples/tiny/`](examples/tiny/). It exercises one known isoform, one
+short-read-supported novel isoform, and one unsupported artifact call.
+
+```bash
+cmake --build build -j
+cd examples/tiny
+./run.sh
+```
+
+The script writes `output/sample.{adjudicated.tsv,attribution.jsonl,provenance.log}`
+and compares them against [`examples/tiny/expected/`](examples/tiny/expected/).
+
 ## Confidence classes
 
 `HIGH_CONF_KNOWN` · `HIGH_CONF_NOVEL` · `MEDIUM_CONF_NOVEL` · `LOW_CONF_PARTIAL` ·
@@ -205,6 +220,7 @@ PanIsoGuard/
 |-- docs/figures/                    # overview figure source and rendered README image
 |-- workflow/                        # optional Snakemake orchestration around PanIsoGuard
 |-- benchmark/                       # synthetic axes, truth sets, SIRV, HG002, calibration notes
+|-- examples/tiny/                   # 5-minute dataset with expected adjudicate outputs
 |-- recipes/bioconda/                # Bioconda meta.yaml and build.sh
 |-- thirdparty/                      # vendored single-header components and licenses
 |-- LICENSE
