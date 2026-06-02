@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(panisoguard VERSION 0.0.2 LANGUAGES CXX C)
+project(panisoguard VERSION 0.0.3 LANGUAGES CXX C)
 
 # --- Standards ---------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
