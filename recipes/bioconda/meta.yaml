@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: b00b1f3067dc45cbc0d20708a25465c66c9df67128571f8c97cab2af9f283c0c
+  sha256: 96cfc1342fc68f6a70693d677973f9d56c32700f90f303be08074982cb07a647
 
 build:
   number: 0
