@@ -69,9 +69,12 @@ def run(cmd):
 
 
 def parse_score(out: str) -> dict:
-    m_prs = re.search(r"precision=([\d.]+)\s+recall=([\d.]+)\s+specificity\(false rejected\)=([\d.]+)", out)
-    m_auprc = re.search(r"AUPRC = ([\d.]+)\s+\(baseline = ([\d.]+)\)", out)
-    m_nnc = re.search(r"novel_not_in_catalog\s+\d+/\d+\s+recall=([\d.]+)", out)
+    # a degenerate config (e.g. sj_min_uniq_reads above the truth n_uniq -> nothing
+    # supported) makes score.py print precision=nan; accept it as a real sweep point.
+    num = r"(nan|[\d.]+)"
+    m_prs = re.search(rf"precision={num}\s+recall={num}\s+specificity\(false rejected\)={num}", out)
+    m_auprc = re.search(rf"AUPRC = {num}\s+\(baseline = {num}\)", out)
+    m_nnc = re.search(rf"novel_not_in_catalog\s+\d+/\d+\s+recall={num}", out)
     if not (m_prs and m_auprc):
         sys.stderr.write("could not parse score.py output:\n" + out + "\n")
         sys.exit(1)

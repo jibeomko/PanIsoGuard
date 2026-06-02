@@ -1,21 +1,20 @@
 {
-  "command": "bash benchmark/sqanti_sim/run.sh && python3 benchmark/sqanti_sim/score.py  (heavy: SQANTI-SIM + PBSIM3 + FLAIR + SQANTI3)",
-  "data_provenance": "SQANTI-SIM canonical protocol, GENCODE chr22: delete 769 transcripts -> PBSIM3 HiFi -> FLAIR -> SQANTI3 -> adjudicate",
+  "command": "bash benchmark/sqanti_sim/run.sh && python3 benchmark/sqanti_sim/sweep.py $PIG --work benchmark/sqanti_sim/work --emit-metrics benchmark/results/sqanti_sim/metrics.json",
+  "data_provenance": "SQANTI-SIM (gencode_v49_chr22); truth via run.sh (SQANTI-SIM/PBSIM3/FLAIR/SQANTI3)",
   "generated_utc": null,
   "metrics": {
-    "auprc_genuine": 0.970,
-    "auprc_baseline": 0.831,
+    "auprc_baseline": 0.8314,
+    "auprc_genuine": 0.9698,
+    "nnc_recall": 1.0,
     "precision_genuine": 0.982,
-    "specificity_false": 0.946,
-    "nnc_recall": 1.000,
-    "known_to_high_conf_known_recall": 1.000,
-    "genuine_to_artifact": 0
+    "recall_genuine": 0.589,
+    "specificity_false": 0.946
   },
-  "notes": "Headline genuine-novel detection result. Numbers transcribed from docs/validation.md pending a committed, tracked SQANTI-SIM run + the full threshold sweep (sweep.tsv). The operating point is the config/rules.default.toml default; thresholds are NOT yet swept/tuned.",
+  "notes": "Operating point = config/rules.default.toml (default-0.0.1). Full grid in sweep.tsv.",
   "protocol": "sqanti_sim",
   "ruleset_version": "builtin-0.0.1",
   "scope": "gencode_v49_chr22",
-  "source": "docs/validation.md (sqanti_sim row)",
-  "status": "transcribed_pending_tracked_run",
+  "source": null,
+  "status": "tracked",
   "tool_version": "0.0.2"
 }

@@ -31,7 +31,7 @@ Each `<protocol>/metrics.json` is one envelope: `protocol`, `scope`, `status`,
 
 | status | meaning |
 |--------|---------|
-| `tracked` | self-contained; `collect.py` regenerates it from the built binary and **drift-checks** it. Reproducible byte-for-byte (modulo timestamp). |
+| `tracked` | a real committed result. Self-contained protocols (`controlled_truth`, `synthetic_axes`) are regenerated and **drift-checked** by `collect.py`. Heavy protocols (`sqanti_sim`) are produced by their documented `command` (`run.sh` builds the truth set once, then `sweep.py`); `collect.py` validates their envelope for schema but cannot regenerate them without the external truth data. |
 | `transcribed_pending_tracked_run` | number copied from `docs/validation.md`; the protocol needs heavy external tooling, so it is **not yet** regenerated here. `source` records where it came from. |
 | `pending` | not yet produced. |
 

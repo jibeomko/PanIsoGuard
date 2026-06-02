@@ -7,10 +7,12 @@
 #
 # Status: the adjudication logic is validated against ground truth (SQANTI-SIM
 # AUPRC 0.970 vs 0.831 baseline; well-calibrated, ECE/Brier <= 0.013 -- see
-# docs/validation.md). The thresholds below are conservative defaults that have
-# NOT been swept/tuned per dataset, so treat the confidence classes as calibrated
-# ordinal evidence, not a tuned probability. The pangenome (reference-bias) tier
-# remains experimental pending GATE-1. Framing constraint: PanIsoGuard reports
+# docs/validation.md). The thresholds below are conservative defaults; a SQANTI-SIM
+# v49 chr22 sweep (benchmark/results/sqanti_sim/sweep.tsv) finds AUPRC robust
+# (0.969-0.970) across the grid and the default within 1e-4 of grid-best -- near-optimal
+# there, though not yet swept on additional datasets. Treat the confidence classes as
+# calibrated ordinal evidence, not a tuned probability. The pangenome (reference-bias)
+# tier remains experimental pending GATE-1. Framing constraint: PanIsoGuard reports
 # orthogonal attribution + confidence + provenance, never "beats" the SQANTI3 RF
 # filter or FLAIR2.
 

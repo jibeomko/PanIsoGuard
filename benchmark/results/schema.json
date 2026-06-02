@@ -18,7 +18,7 @@
     "status": {
       "type": "string",
       "enum": ["tracked", "transcribed_pending_tracked_run", "pending"],
-      "description": "tracked = regenerated & byte-checkable by collect.py (self-contained); transcribed_pending_tracked_run = number copied from docs/validation.md, awaiting a committed tracked run (heavy external tooling); pending = not yet produced."
+      "description": "tracked = a real committed result. Self-contained protocols are regenerated & drift-checked by collect.py; heavy protocols are produced by their documented `command` (e.g. run.sh + sweep.py) and validated for schema only. transcribed_pending_tracked_run = number copied from docs/validation.md, awaiting a committed tracked run; pending = not yet produced."
     },
     "tool_version": {"type": ["string", "null"], "description": "panisoguard --version, line 1."},
     "ruleset_version": {"type": ["string", "null"]},

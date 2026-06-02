@@ -69,6 +69,13 @@ under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
 
 **Calibration caveat.** `config/rules.default.toml` thresholds are conservative
 defaults. They are well-calibrated on the run truth sets above (low ECE/Brier) and
-the SQANTI-SIM AUPRC (0.970) confirms strong genuine-vs-false ranking, but the
-thresholds have **not** been swept/tuned per dataset; treat the confidence
-classes as calibrated *ordinal* evidence integration, not a tuned probability.
+the SQANTI-SIM AUPRC (0.970) confirms strong genuine-vs-false ranking. A threshold
+**sweep** on the SQANTI-SIM v49 chr22 truth set
+([`benchmark/results/sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv),
+produced by [`benchmark/sqanti_sim/sweep.py`](../benchmark/sqanti_sim/sweep.py)) shows
+AUPRC is **robust (0.969–0.970)** across the `sj_min_uniq_reads × require_canonical_motif
+× perc_A_degradation` grid and the shipped `default-0.0.1` config is within 1e-4 of the
+grid-best — the only degradation is the expected support cliff once `sj_min_uniq_reads`
+exceeds the data's coverage (AUPRC → 0.919). So the conservative defaults are
+**near-optimal there**; they are not yet swept on additional datasets. Treat the
+confidence classes as calibrated *ordinal* evidence integration, not a tuned probability.
