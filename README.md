@@ -31,11 +31,14 @@ output classes shown are a simplified grouping — the full set is listed
 > **Status: alpha.** Four evidence axes (SQANTI priors, short-read junctions, BAM
 > read-level mapping, variant/reference-bias) plus an **experimental** file-based
 > pangenome reference-bias tier, and the `adjudicate` / `benchmark` / `ablate` /
-> `combine` subcommands, are implemented and tested. Rule thresholds are
-> conservative defaults that are **not yet tuned** against a full SQANTI-SIM
-> AUPRC sweep, and the pangenome tier is **not yet validated on real graph data**
-> (see GATE-1 in [docs/decision_engine.md](docs/decision_engine.md)); treat the
-> confidence classes as orthogonal evidence integration, not a calibrated probability.
+> `combine` subcommands, are implemented and tested. The adjudication logic is
+> validated against ground truth (SQANTI-SIM **AUPRC 0.970** vs a 0.831 baseline,
+> and well-calibrated — ECE/Brier ≤ 0.013 on the run truth sets; see
+> [docs/validation.md](docs/validation.md)). Rule thresholds remain **conservative
+> defaults that have not been swept/tuned per dataset**, and the pangenome tier is
+> **not yet validated on real graph data** (see GATE-1 in
+> [docs/decision_engine.md](docs/decision_engine.md)); treat the confidence classes
+> as calibrated *ordinal* evidence integration, not a tuned probability.
 
 ## Subcommands
 

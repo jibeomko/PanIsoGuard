@@ -19,6 +19,9 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   if (auto ns = tbl["axis_novelty_support"].as_table()) {
     c.sj_min_uniq_reads = static_cast<int>((*ns)["sj_min_uniq_reads"].value_or<int64_t>(c.sj_min_uniq_reads));
     c.sj_require_canonical_motif = (*ns)["sj_require_canonical_motif"].value_or(c.sj_require_canonical_motif);
+    // RESERVED: parsed and stored, but the multi-caller agreement gate is not yet
+    // wired into evaluate() (consensus_evaluable/n_callers are not populated). Kept
+    // for forward config compatibility; remains inert until the gate is implemented.
     c.consensus_min_callers = static_cast<int>((*ns)["consensus_min_callers"].value_or<int64_t>(c.consensus_min_callers));
   }
   if (auto art = tbl["axis_artifact"].as_table()) {

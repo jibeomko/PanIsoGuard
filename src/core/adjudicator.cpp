@@ -57,6 +57,11 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       if (haplotype != nullptr) {
         const VariantVerdict vv = haplotype->classify(chain.chrom, intron, chain.strand);
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
+        // Only kCreated (non-canonical on reference, canonical on a haplotype) drives a
+        // reference-bias rescue. kDisrupted (canonical on reference, broken on every
+        // haplotype) is computed by HaplotypeProvider but intentionally NOT consumed
+        // yet -- its adjudication policy is undefined (see docs/decision_engine.md,
+        // "Future work: Variant-disrupted handling").
         if (vv == VariantVerdict::kCreated) ++n_variant_created;
       }
       if (pangenome != nullptr) {
@@ -84,6 +89,9 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           if (f.n_spanning > 0) {
             if (f.frac_low_mapq() > ev.bam_max_frac_low_mapq) ev.bam_max_frac_low_mapq = f.frac_low_mapq();
             if (f.frac_supplementary() > ev.bam_max_frac_supplementary) ev.bam_max_frac_supplementary = f.frac_supplementary();
+            // softclip / indel-near fractions are aggregated and emitted to
+            // attribution.jsonl for inspection, but currently do NOT gate a mechanism:
+            // RuleEngine::evaluate's mapping_flag uses only low_mapq/supplementary.
             if (f.frac_softclip() > ev.bam_max_frac_softclip) ev.bam_max_frac_softclip = f.frac_softclip();
             if (f.frac_indel_near() > ev.bam_max_frac_indel_near) ev.bam_max_frac_indel_near = f.frac_indel_near();
           }

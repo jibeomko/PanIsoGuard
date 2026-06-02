@@ -5,11 +5,14 @@
 # projection is documented in docs/decision_engine.md and echoed per-isoform in
 # the `rule_trace` field of <prefix>.attribution.jsonl.
 #
-# Status: Tier-0 (SQANTI priors + short-read junction corroboration). Thresholds
-# are conservative defaults, NOT yet calibrated on SQANTI-SIM (E1/E2); do not
-# treat them as validated. Framing constraint: PanIsoGuard reports orthogonal
-# attribution + confidence + provenance, never "beats" the SQANTI3 RF filter or
-# FLAIR2.
+# Status: the adjudication logic is validated against ground truth (SQANTI-SIM
+# AUPRC 0.970 vs 0.831 baseline; well-calibrated, ECE/Brier <= 0.013 -- see
+# docs/validation.md). The thresholds below are conservative defaults that have
+# NOT been swept/tuned per dataset, so treat the confidence classes as calibrated
+# ordinal evidence, not a tuned probability. The pangenome (reference-bias) tier
+# remains experimental pending GATE-1. Framing constraint: PanIsoGuard reports
+# orthogonal attribution + confidence + provenance, never "beats" the SQANTI3 RF
+# filter or FLAIR2.
 
 [meta]
 ruleset_version        = "default-0.0.1"
@@ -20,25 +23,33 @@ random_seed            = 1
 [axis_novelty_support]
 sj_min_uniq_reads          = 3      # STAR SJ.tab n_uniq to corroborate a novel junction
 sj_require_canonical_motif = true   # require SJ.tab motif code >= 1
-consensus_min_callers      = 999    # multi-caller agreement gate; 999 disables (single-caller)
+consensus_min_callers      = 999    # RESERVED: parsed but NOT yet consumed by the rule
+                                    # engine (multi-caller agreement gate unimplemented)
 
 # --- Axis B: artifact mechanism (engine-read where noted) --------------------
-# Priority order applied by the engine: noncanonical > rt_switch > degradation.
+# Priority order applied by the engine: mapping > noncanonical > rt_switch > degradation.
 [axis_artifact.degradation]
 max_perc_A_downstream_TTS = 60.0    # SQANTI3 intra-priming default: keep <60, flag >=60 (engine-read)
 
+# The rt_switch / noncanonical toggles below are INFORMATIONAL ONLY: the engine
+# always consults the corresponding SQANTI prior (RTS_stage / all_canonical), and
+# these keys are NOT read from TOML. The on/off switch lives in the built-in
+# RuleConfig and is flipped only by `ablate` (--axes rt_switch / noncanonical).
 [axis_artifact.rt_switch]
-use_sqanti_RTS_stage = true         # documented; engine uses SQANTI RTS_stage prior
+use_sqanti_RTS_stage = true         # informational (engine always uses SQANTI RTS_stage)
 
 [axis_artifact.noncanonical]
-use_sqanti_all_canonical = true     # documented; engine uses SQANTI all_canonical prior
+use_sqanti_all_canonical = true     # informational (engine always uses SQANTI all_canonical)
 
 [axis_artifact.mapping]             # BAM read-level axis (engine-read; only when --bam supplied)
 min_mapq               = 20         # spanning reads below this MAPQ count as low-confidence
-softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction
-junction_window_bp     = 10         # indel proximity window around each splice boundary
+softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction (reported-only*)
+junction_window_bp     = 10         # indel proximity window around each splice boundary (reported-only*)
 max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
+# *The mapping_flag gate uses only low_mapq_frac / supplementary_frac. The soft-clip
+#  and indel-near fractions are computed and emitted to attribution.jsonl for
+#  inspection, but do not yet contribute to the mapping mechanism decision.
 
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
 # When ALL of an isoform's novel-vs-linear-reference junctions are realizable on a

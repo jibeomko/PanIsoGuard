@@ -13,7 +13,8 @@ struct RuleConfig {
   int sj_min_uniq_reads = 3;             // STAR SJ.tab n_uniq to corroborate a novel junction
   bool sj_require_canonical_motif = true;
   double perc_A_degradation_threshold = 60.0;  // SQANTI3 intra-priming default: keep <60, flag >=60
-  int consensus_min_callers = 999;       // disabled by default (single-caller runs)
+  int consensus_min_callers = 999;       // RESERVED: parsed but not yet consumed by
+                                         // evaluate() (multi-caller gate unimplemented)
   // BAM (mapping) axis
   int bam_min_mapq = 20;
   int bam_softclip_min_bp = 20;
