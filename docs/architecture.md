@@ -44,7 +44,9 @@ In-house parsers (no external parsing deps) under [`src/io/`](../src/io/):
 Every transcript structure is normalized into a **0-based half-open intron chain**
 ([`include/panisoguard/types.hpp`](../include/panisoguard/types.hpp): `Junction`,
 `IntronChain`, `Strand`). This single convention lets `SJ.tab`, GTF, BED12, and
-pangenome coordinates be compared by exact equality. Two derived structures:
+pangenome coordinates be compared by exact equality. Equivalently, the intron chain is
+a **path through a gene-local splice graph** and the reference catalog is the **known
+graph**; that framing is in [method_graph.md](method_graph.md). Two derived structures:
 
 - **Intron-chain fingerprint** (`src/core/fingerprint.cpp`) — an FNV-1a hash over
   `chrom + strand + sorted introns`; used by `combine` to merge isoforms across
@@ -91,7 +93,7 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
                     EvidenceVector ─► [RuleEngine.evaluate] ─► Verdict
                               │
                               ▼
-              .adjudicated.tsv / .attribution.jsonl (rule_trace) / .provenance.log
+              .adjudicated.tsv / .attribution.jsonl (rule_trace + graph_trace) / .provenance.log
 ```
 
 ## Design properties

@@ -5,6 +5,12 @@ in [`src/core/adjudicator.cpp`](../src/core/adjudicator.cpp) (`build_evidence` +
 `adjudicate`); the decision step is in [`src/core/rules.cpp`](../src/core/rules.cpp)
 (`RuleEngine::evaluate`).
 
+> **Graph view.** Equivalently, each isoform is a *path* through a gene-local splice
+> graph (its intron chain), the reference catalog is the *known* graph, and a novel
+> junction is an *edge* absent from it; the engine adjudicates the evidence-annotated
+> path. This framing — and the per-isoform `graph_trace` it adds to the output — is in
+> [method_graph.md](method_graph.md). The algorithm below is unchanged by it.
+
 ## Per-isoform adjudication
 
 ```text

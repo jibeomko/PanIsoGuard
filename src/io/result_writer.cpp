@@ -78,6 +78,21 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"pangenome_circular\":" << (e.pangenome_circular ? "true" : "false") << ","
         << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome
         << "},";
+    // graph_trace: the same evidence re-expressed under the splice-graph framing
+    // (docs/method_graph.md) -- a candidate isoform is a path through the gene-local
+    // splice graph; novel junctions are edges absent from the known (reference) graph.
+    // No new computation: this is a view of the EvidenceVector above.
+    const char* site_type = "none";
+    if (r.structural_category == "novel_in_catalog") site_type = "known_site_recombination";
+    else if (r.structural_category == "novel_not_in_catalog") site_type = "novel_splice_site";
+    out << "\"graph_trace\":{"
+        << "\"novel_edges\":" << e.n_novel_junctions << ","
+        << "\"path_distance_to_reference\":" << e.n_novel_junctions << ","
+        << "\"edges_sr_supported\":" << e.n_novel_jx_sr_supported << ","
+        << "\"novel_site_type\":\"" << site_type << "\","
+        << "\"pangenome_edge_support\":" << (e.pangenome_rescue ? "true" : "false") << ","
+        << "\"variant_canonicalized_edge\":" << (e.variant_rescue ? "true" : "false")
+        << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
       if (i) out << ',';

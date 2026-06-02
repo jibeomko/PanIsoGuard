@@ -18,6 +18,13 @@ how orthogonal evidence axes are integrated into a transparent, auditable verdic
 (thresholds live in a runtime [`config/rules.default.toml`](config/rules.default.toml),
 and each verdict carries a `rule_trace`; see [docs/decision_engine.md](docs/decision_engine.md)).
 
+Equivalently, PanIsoGuard **represents each candidate isoform as a path through a
+gene-local splice graph and adjudicates that path using orthogonal edge- and
+path-level evidence** — novel junctions are edges absent from the known (reference)
+graph, and each verdict additionally carries a machine-readable `graph_trace`
+(novel-edge count, edge support, graph distance). See
+[docs/method_graph.md](docs/method_graph.md).
+
 ## At a glance
 
 ![PanIsoGuard overview: long-read novel isoform calls (real or artifact?) are checked against four kinds of evidence — SQANTI QC priors, short-read junctions, long-read mapping, and variants/reference bias — and sorted into plain-language verdicts: real novel, reference-bias rescued, uncertain (held), or artifact.](docs/figures/overview.png)
@@ -141,7 +148,7 @@ panisoguard combine \
 | File | Contents |
 |------|----------|
 | `<prefix>.adjudicated.tsv`   | one row per isoform — confidence class, primary mechanism, novel-junction support counts |
-| `<prefix>.attribution.jsonl` | per-isoform `rule_trace`: every rule that fired, in order (fully auditable) |
+| `<prefix>.attribution.jsonl` | per-isoform `rule_trace` (every rule that fired, in order) + `graph_trace` (splice-graph view: novel-edge count, edge support, graph distance — see [docs/method_graph.md](docs/method_graph.md)) |
 | `<prefix>.provenance.log`    | which axes were active + circularity status of the run |
 
 ### Benchmarking & ablation
@@ -196,6 +203,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | [docs/algorithm.md](docs/algorithm.md) | The per-isoform adjudication algorithm and the decision projection. |
 | [docs/function_io.md](docs/function_io.md) | Module-by-module input → output contracts and key data types. |
 | [docs/decision_engine.md](docs/decision_engine.md) | The 2-axis grid, rescue precedence, and the circularity firewall. |
+| [docs/method_graph.md](docs/method_graph.md) | The splice-graph framing: isoform = path, novel junction = edge, novelty = graph distance, and the `graph_trace`. |
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What is verified and the truth-based validation plan. |
 

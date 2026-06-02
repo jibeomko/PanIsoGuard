@@ -35,7 +35,7 @@ The main modules and their input → output contracts. Types are defined under
 
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
-| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts, per-isoform `rule_trace` (JSONL), and run provenance (active axes + circularity state). |
+| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts; per-isoform `rule_trace` + `graph_trace` (splice-graph view, see [method_graph.md](method_graph.md)) in the JSONL; and run provenance (active axes + circularity state). |
 
 ## Key data types
 
