@@ -23,12 +23,12 @@ transparent, auditable verdict (thresholds live in a runtime
 [`config/rules.default.toml`](config/rules.default.toml), and each verdict carries a
 `rule_trace`; see [docs/decision_engine.md](docs/decision_engine.md)).
 
-Equivalently, PanIsoGuard **represents each candidate isoform as a path through a
-gene-local splice graph and adjudicates that path using orthogonal edge- and
-path-level evidence** — novel junctions are edges absent from the known (reference)
-graph, and each verdict additionally carries a machine-readable `graph_trace`
-(novel-edge count, edge support, graph distance). See
-[docs/method_graph.md](docs/method_graph.md).
+Equivalently, each candidate isoform can be viewed as a **path through a gene-local
+splice graph** — novel junctions are edges absent from the known (reference) graph —
+and the same deterministic verdict can be read in those terms. This is a *framing*
+of the existing engine (no graph model or new algorithm); each verdict additionally
+carries a machine-readable `graph_trace` (novel-edge count, edge support, graph
+distance). See [docs/method_graph.md](docs/method_graph.md).
 
 ## At a glance
 
@@ -196,7 +196,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | Tier | Input | Required? | Mechanism |
 |------|-------|-----------|-----------|
 | 0 | SQANTI3 classification (priors) + STAR `SJ.tab` | recommended | short-read junction corroboration |
-| 1 | BAM (HiFi/ONT) | recommended | read-level mapping / chimera / soft-clip features |
+| 1 | BAM (HiFi/ONT) | recommended | read-level mapping (low-MAPQ / supplementary spanning-read fractions; soft-clip / indel-near also reported) |
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
 | 3 | pangenome graph junctions (`--pangenome-junctions`) | optional, **experimental** | all novel junctions realizable on a graph haplotype path → reference bias (provenance-gated) |
 

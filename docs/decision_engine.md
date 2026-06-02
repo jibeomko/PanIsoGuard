@@ -36,7 +36,7 @@ on two axes; the binned pair is projected to one confidence class.
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction (low MAPQ / supplementary / soft-clip / indel-near fractions) | `--bam` |
+| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary** fractions gate this mechanism; soft-clip / indel-near fractions are also computed and reported but do not currently drive the verdict | `--bam` |
 | noncanonical / rt_switch / degradation | SQANTI3 priors `all_canonical` / `RTS_stage` / `perc_A_downstream_TTS≥60` | always (from classification) |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 

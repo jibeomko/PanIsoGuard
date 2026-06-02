@@ -1,8 +1,8 @@
 # A splice-graph view of PanIsoGuard
 
-> **PanIsoGuard represents each candidate isoform as a path through a gene-local
-> splice graph and adjudicates that path using orthogonal edge- and path-level
-> evidence.**
+> **A candidate isoform can be viewed as a path through a gene-local splice graph;
+> PanIsoGuard's existing verdict can then be read as the adjudication of that path
+> using orthogonal edge- and path-level evidence.**
 
 This document is a *framing*, not a new algorithm. The deterministic rule engine
 described in [decision_engine.md](decision_engine.md) and [algorithm.md](algorithm.md)
