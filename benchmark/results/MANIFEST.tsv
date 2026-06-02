@@ -5,3 +5,4 @@ sqanti_sim	gencode_v49_chr22	sqanti_sim/metrics.json	tracked	benchmark/sqanti_si
 sqanti_sim	gencode_v49_chr22	sqanti_sim/sweep.tsv	tracked	benchmark/sqanti_sim/sweep.py	AUPRC threshold sweep, 30 configs (real v49 run)
 end2end	gencode_v49_chr22	end2end/metrics.json	tracked	benchmark/end2end/run_e2e.sh	GENCODE v49 chr22 PBSIM3/FLAIR3/SQANTI3 (seed 7); current binary reproduces spec 0.996
 hg002	gencode_v49_chr22_giab_hg002_v4.2.1	hg002/metrics.json	tracked	benchmark/hg002/run.sh	real GIAB HG002 v4.2.1 variants; current binary reproduces the rescue (0 false rescues)
+pangenome	hprc_v1.1_chr22	pangenome/metrics.json	tracked	benchmark/pangenome/derive_junctions.py + gate1_check.py	GATE-1: real HPRC v1.1 chr22 graph (vg deconstruct); 0 false rescues, rescue fires on real population deletions, firewall holds, HG002 out-of-graph

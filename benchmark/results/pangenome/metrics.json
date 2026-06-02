@@ -1,0 +1,23 @@
+{
+  "command": "vg deconstruct (HPRC v1.1 chr22) -> chr22.graph.vcf ; python3 benchmark/pangenome/derive_junctions.py chr22.graph.vcf jx.tsv 50 ; adjudicate --pangenome-junctions jx.tsv --pangenome-provenance population (specificity on real FLAIR) ; python3 benchmark/pangenome/gate1_check.py $PIG benchmark/pangenome/testdata/sample_junctions.tsv (sensitivity + firewall)",
+  "data_provenance": "HPRC v1.1 Minigraph-Cactus GRCh38 graph -> vg deconstruct (chr22) -> derive_junctions.py (population deletions >=50bp -> 1520 graph junctions). Adjudicated sample is OUT of the graph's 47 assembly samples (HG002/NA24385 absent -> non-circular).",
+  "generated_utc": null,
+  "metrics": {
+    "graph_junctions": 1520,
+    "specificity_total_isoforms": 1579,
+    "specificity_genuine_novel": 730,
+    "specificity_genuine_novel_false_rescues": 0,
+    "specificity_total_rescued": 0,
+    "sensitivity_rescued": "6/6",
+    "firewall_held_circular": "6/6",
+    "nearmiss_control_false_rescues": 0,
+    "hg002_out_of_graph": true
+  },
+  "notes": "GATE-1: the file-based pangenome reference-bias rescue, validated on the REAL HPRC v1.1 chr22 graph. Specificity = 0 false rescues on real FLAIR novel junctions; sensitivity = rescue fires when a novel intron is a real population deletion (population provenance); circularity firewall holds every rescue AMBIGUOUS under circular-risk provenance; near-miss/control never rescued. Current 0.0.3 binary reproduces gate1_check on the committed junction sample (integration_pangenome_gate1).",
+  "protocol": "pangenome",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "hprc_v1.1_chr22",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

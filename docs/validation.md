@@ -35,11 +35,14 @@ against it. They validate the **adjudication logic** — given caller + SQANTI3 
 | [calibration](../benchmark/calibration) | class → empirical P(genuine), train/test split | **well-calibrated**: controlled Brier 0.0000 / ECE 0.0013; end-to-end Brier 0.0121 / ECE 0.0114 |
 | [multicaller](../benchmark/multicaller) | real FLAIR + IsoQuant output integrated by `combine` | 397 + 157 → **426 unique intron chains**, 128 agreed by both callers (validates running-ID integration on genuine multi-caller output) |
 | [sqanti_sim](../benchmark/sqanti_sim) | canonical SQANTI-SIM (GENCODE chr22): delete 769 transcripts → PBSIM3 HiFi → FLAIR → SQANTI3 → `adjudicate` | genuine-novel detection **precision 0.982, specificity 0.946, AUPRC 0.970** (baseline 0.831); NNC recall 1.000; known→HIGH_CONF_KNOWN 1.000; **0 genuine→ARTIFACT**. Moderate overall recall = honest abstention on NIC-combinatorial / ISM-partial, not misclassification |
+| [pangenome](../benchmark/pangenome) (GATE-1) | real **HPRC v1.1** MC GRCh38 chr22 graph → `vg deconstruct` → population-deletion junctions; sample **out-of-graph** (non-circular) | **0 false rescues** on real FLAIR novel junctions; rescue **fires** when a novel intron is a real population deletion (population provenance); circularity firewall **holds** all rescues `AMBIGUOUS` under circular-risk provenance |
 
 Together these cover the validated short-read, BAM mapping, and variant axes,
 the full pipeline (real FLAIR/SQANTI3), the headline reference-bias rescue on
 real human variation, calibration, and multi-caller integration. The file-based
-pangenome axis has unit-level coverage and remains marked experimental until GATE-1.
+pangenome axis is now validated on the **real HPRC v1.1 chr22 graph** (GATE-1, below):
+0 false rescues on real FLAIR novel junctions, correct rescue on real population
+deletions, and the circularity firewall holding under circular-risk provenance.
 
 ## Tracked result artifacts
 
@@ -52,13 +55,15 @@ under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
   the same drivers run in CI as the `integration_controlled_truth` /
   `integration_synthetic_axes` CTests, so a metric and its pass/fail assertion share one
   code path.
-- **`status=tracked`, heavy pipeline** — `sqanti_sim`, `end2end`, and `hg002` carry the
-  result of a real GENCODE v49 chr22 run with the current binary, produced by their
+- **`status=tracked`, heavy pipeline** — `sqanti_sim`, `end2end`, `hg002`, and
+  `pangenome` carry the result of a real run with the current binary, produced by their
   documented `command`. The SQANTI-SIM **threshold sweep**
   ([`sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv), 30 configs via
   [`sweep.py`](../benchmark/sqanti_sim/sweep.py)) closed the calibration gate above;
   `end2end` reproduces spec 0.996 on a seeded pbsim run; `hg002` reproduces the
-  real-variant rescue with 0 false rescues.
+  real-variant rescue with 0 false rescues; `pangenome` is the GATE-1 result on the real
+  HPRC v1.1 chr22 graph (its `gate1_check` sensitivity/firewall half is the
+  `integration_pangenome_gate1` CTest).
 - **`status=transcribed_pending_tracked_run` / `pending`** — reserved for protocols
   whose number is still only transcribed from prose or not yet produced (none of the
   core axes are in this state now).
@@ -67,7 +72,7 @@ under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
 
 | Item | Status | Why |
 |------|--------|-----|
-| **Pangenome real-graph rescue (GATE-1)** | in progress | The variant axis is validated on real HG002 variants; the **file-based pangenome tier** is being validated against the HPRC v1.1 Minigraph-Cactus graph (`vg deconstruct` of the GRCh38 chr22 path → graph-supported junctions → `--pangenome-junctions`). Heavy external tooling; the axis is marked *experimental*. |
+| **Pangenome real-graph rescue (GATE-1)** | **done (chr22)** | Validated on the real HPRC v1.1 Minigraph-Cactus chr22 graph (`vg deconstruct` → population-deletion junctions → `--pangenome-junctions`); see [pangenome](../benchmark/pangenome). Remaining: genome-wide scale, insertion/inversion-based junctions, and the in-process GBZ traversal (`-DWITH_PANGENOME_LIB`). |
 | **LRGASP real data** ([lrgasp/](../benchmark/lrgasp)) | blocked | The LRGASP pre-run caller GTFs are **Synapse-gated**. The multi-caller capability is already validated on genuine FLAIR+IsoQuant output (see `multicaller`). |
 | **HG002 long-read RNA** | blocked | No clean public HG002/GM24385 long-read RNA-seq dataset was found (ENCODE/ENA empty). The variant axis is instead validated on real HG002 *variants* + the full pipeline on `end2end`/`sirv`. |
 

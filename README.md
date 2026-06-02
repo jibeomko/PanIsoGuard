@@ -41,8 +41,8 @@ output classes shown are a simplified grouping — the full set is listed
 [`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
 > **Status: alpha.** Four evidence axes (SQANTI priors, short-read junctions, BAM
-> read-level mapping, variant/reference-bias) plus an **experimental** file-based
-> pangenome reference-bias tier are implemented and tested, along with the
+> read-level mapping, variant/reference-bias) plus a file-based pangenome
+> reference-bias tier are implemented and tested, along with the
 > `adjudicate` / `benchmark` / `ablate` / `combine` subcommands.
 >
 > **Validation.** The adjudication logic is validated against ground truth
@@ -56,10 +56,12 @@ output classes shown are a simplified grouping — the full set is listed
 > ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)),
 > though not yet swept on additional datasets.
 >
-> **Pangenome caveat.** The pangenome tier is **not yet validated on real graph
-> data** (see GATE-1 in [docs/decision_engine.md](docs/decision_engine.md)); treat
-> the confidence classes as calibrated *ordinal* evidence integration, not a tuned
-> probability.
+> **Pangenome.** The file-based pangenome reference-bias rescue is **validated on the
+> real HPRC v1.1 chr22 graph** (GATE-1): 0 false rescues on real FLAIR novel junctions,
+> correct rescue on real population deletions, firewall holding under circular-risk
+> provenance ([benchmark/pangenome](benchmark/pangenome)). Validated at chr22 scale; the
+> in-process GBZ traversal remains future work. Treat the confidence classes as
+> calibrated *ordinal* evidence integration, not a tuned probability.
 
 ## Subcommands
 
@@ -122,7 +124,7 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
-**Pangenome reference-bias rescue** (experimental) — supply graph-supported splice
+**Pangenome reference-bias rescue** (file-based; validated on HPRC v1.1 chr22) — supply graph-supported splice
 junctions (pre-extracted from a pangenome graph such as HPRC with vg/rpvg). An isoform
 whose novel junctions are **all** realizable on a graph haplotype path is rescued as
 reference bias. This is independent evidence only if the junction set comes from
@@ -204,7 +206,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | 0 | SQANTI3 classification (priors) + STAR `SJ.tab` | recommended | short-read junction corroboration |
 | 1 | BAM (HiFi/ONT) | recommended | read-level mapping (low-MAPQ / supplementary spanning-read fractions; soft-clip / indel-near also reported) |
 | 2 | personalized haplotype FASTA (`--reference-haplotype`) | optional | variant-created/destroyed splice-site motif |
-| 3 | pangenome graph junctions (`--pangenome-junctions`) | optional, **experimental** | all novel junctions realizable on a graph haplotype path → reference bias (provenance-gated) |
+| 3 | pangenome graph junctions (`--pangenome-junctions`) | optional | all novel junctions realizable on a graph haplotype path → reference bias (provenance-gated; validated on HPRC v1.1 chr22) |
 
 ## Documentation
 

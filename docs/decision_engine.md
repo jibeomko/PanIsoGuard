@@ -63,7 +63,8 @@ fired conditions are listed in `rule_trace`.
      as the variant axis: `--pangenome-provenance population`/`external` promote,
      while `sample_derived`/`unknown` (the default) are held `AMBIGUOUS`. It is
      evaluated first, so an *independent* graph rescues even when the sample's own
-     haplotype provenance is circular-risk. **Experimental** (pending GATE-1).
+     haplotype provenance is circular-risk. **Validated** on the real HPRC v1.1 chr22
+     graph (GATE-1; see [benchmark/pangenome](../benchmark/pangenome)).
    - *Variant axis* (`--reference-haplotype`): the junction is non-canonical on the
      reference but canonical on a personalized haplotype (mechanism
      `variant_created`). **Circularity firewall:** if the haplotype provenance is
@@ -108,8 +109,14 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
 - **GATE-0**: the variant-injection proof-of-concept (does a variant create/destroy
   a canonical GT-AG?) is verified deterministically at the motif level
   (`tests/unit/variant_motif_test.cpp`; see [benchmark/variant_inject](../benchmark/variant_inject)).
-- **GATE-1**: the pangenome reference is pinned to **HPRC v1.1 (freeze1)** with HG002
-  confirmed out-of-graph before any real-data graph rescue is validated for use.
+- **GATE-1 (met)**: the pangenome reference is the **HPRC v1.1 Minigraph-Cactus
+  GRCh38** graph, with HG002/NA24385 confirmed **out-of-graph** (absent from the 47
+  assembly samples → non-circular). On chr22, `vg deconstruct` → population deletions →
+  graph-supported junctions: the rescue produces **0 false rescues** on real FLAIR novel
+  junctions, **fires correctly** when a novel intron is a real population deletion
+  (population provenance), and is **held by the circularity firewall** under
+  circular-risk provenance — see [benchmark/pangenome](../benchmark/pangenome) and
+  [benchmark/results/pangenome](../benchmark/results/pangenome).
 
 ## Future work
 

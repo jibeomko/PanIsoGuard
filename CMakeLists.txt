@@ -138,6 +138,13 @@ if(PANISOGUARD_BUILD_TESTS)
       COMMAND ${Python3_EXECUTABLE}
               "${CMAKE_SOURCE_DIR}/benchmark/synthetic_axes/ci_check.py"
               $<TARGET_FILE:panisoguard>)
+    # GATE-1 pangenome rescue on a committed sample of real HPRC v1.1 chr22 junctions
+    # (rescue fires under population provenance; circularity firewall holds otherwise).
+    add_test(NAME integration_pangenome_gate1
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/benchmark/pangenome/gate1_check.py"
+              $<TARGET_FILE:panisoguard>
+              "${CMAKE_SOURCE_DIR}/benchmark/pangenome/testdata/sample_junctions.tsv")
   else()
     message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")
   endif()
