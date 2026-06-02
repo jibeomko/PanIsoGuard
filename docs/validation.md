@@ -47,17 +47,21 @@ These numbers are no longer prose-only. The metric for every protocol is committ
 under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
 `metrics.json`, indexed by [`MANIFEST.tsv`](../benchmark/results/MANIFEST.tsv):
 
-- **`status=tracked`** — the two self-contained protocols (`controlled_truth`,
-  `synthetic_axes`) are regenerated and drift-checked by
-  [`collect.py`](../benchmark/results/collect.py), and the same drivers run in CI as
-  the `integration_controlled_truth` / `integration_synthetic_axes` CTests, so a
-  metric and its pass/fail assertion share one code path.
-- **`status=transcribed_pending_tracked_run`** — the heavy protocols (e.g.
-  `sqanti_sim`) carry the published number plus a `command` to reproduce it, pending a
-  committed tracked run. The SQANTI-SIM **threshold sweep** that turns the conservative
-  defaults into a tuned operating point is templated in
-  [`sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv) (the release
-  blocker below).
+- **`status=tracked`, self-contained** — `controlled_truth` and `synthetic_axes` are
+  regenerated and drift-checked by [`collect.py`](../benchmark/results/collect.py), and
+  the same drivers run in CI as the `integration_controlled_truth` /
+  `integration_synthetic_axes` CTests, so a metric and its pass/fail assertion share one
+  code path.
+- **`status=tracked`, heavy pipeline** — `sqanti_sim`, `end2end`, and `hg002` carry the
+  result of a real GENCODE v49 chr22 run with the current binary, produced by their
+  documented `command`. The SQANTI-SIM **threshold sweep**
+  ([`sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv), 30 configs via
+  [`sweep.py`](../benchmark/sqanti_sim/sweep.py)) closed the calibration gate above;
+  `end2end` reproduces spec 0.996 on a seeded pbsim run; `hg002` reproduces the
+  real-variant rescue with 0 false rescues.
+- **`status=transcribed_pending_tracked_run` / `pending`** — reserved for protocols
+  whose number is still only transcribed from prose or not yet produced (none of the
+  core axes are in this state now).
 
 ## What remains
 

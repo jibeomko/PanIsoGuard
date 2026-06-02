@@ -1,19 +1,22 @@
 {
-  "command": "bash benchmark/end2end/run_e2e.sh e2e_work  (heavy: PBSIM3 + minimap2 + FLAIR3 + SQANTI3)",
-  "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate",
+  "command": "GENOME=.../GRCh38.primary_assembly.genome.fa GTF=.../gencode.v49.annotation.gtf bash benchmark/end2end/run_e2e.sh e2e_work  (seeded: pbsim --seed 7)",
+  "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads (seed 7) -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate (+BAM mapping axis)",
   "generated_utc": null,
   "metrics": {
+    "n_sqanti_isoforms": 397,
     "specificity_false": 0.996,
     "recall_genuine_decisive": 1.000,
     "precision_genuine": 0.800,
-    "false_artifacts_rejected": "241/242",
-    "genuine_false_negatives": 0
+    "TP": 4,
+    "FP": 1,
+    "TN": 241,
+    "FN": 0
   },
-  "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads. Numbers transcribed from docs/validation.md (end2end row) and benchmark/end2end/README.md, pending a committed tracked run.",
+  "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads. Verified: a fresh seeded (pbsim --seed 7) v49 chr22 run with the current 0.0.2 binary reproduces the documented result exactly (397 isoforms; 241/242 false-novel artifacts rejected; no genuine novel wrongly rejected).",
   "protocol": "end2end",
   "ruleset_version": "builtin-0.0.1",
   "scope": "gencode_v49_chr22",
-  "source": "docs/validation.md (end2end row) + benchmark/end2end/README.md",
-  "status": "transcribed_pending_tracked_run",
+  "source": null,
+  "status": "tracked",
   "tool_version": "0.0.2"
 }

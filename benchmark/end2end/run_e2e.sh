@@ -12,9 +12,9 @@
 #   (ModuleNotFoundError: flair.bam2Bed12); bam2bed12.py here replaces it.
 set -euo pipefail
 
-# ---- config (edit to your environment) --------------------------------------
-GENOME=/path/to/GRCh38.primary_assembly.genome.fa     # + .fai
-GTF=/path/to/gencode.vNN.annotation.gtf
+# ---- config (edit, or override via environment) -----------------------------
+GENOME=${GENOME:-/path/to/GRCh38.primary_assembly.genome.fa}     # + .fai
+GTF=${GTF:-/path/to/gencode.vNN.annotation.gtf}
 CHR=chr22
 PBSIM=$HOME/miniconda3/envs/pigval/bin/pbsim
 PBSIM_MODEL=$HOME/miniconda3/envs/pigval/data/ERRHMM-SEQUEL.model
