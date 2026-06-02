@@ -41,6 +41,24 @@ the full pipeline (real FLAIR/SQANTI3), the headline reference-bias rescue on
 real human variation, calibration, and multi-caller integration. The file-based
 pangenome axis has unit-level coverage and remains marked experimental until GATE-1.
 
+## Tracked result artifacts
+
+These numbers are no longer prose-only. The metric for every protocol is committed
+under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
+`metrics.json`, indexed by [`MANIFEST.tsv`](../benchmark/results/MANIFEST.tsv):
+
+- **`status=tracked`** — the two self-contained protocols (`controlled_truth`,
+  `synthetic_axes`) are regenerated and drift-checked by
+  [`collect.py`](../benchmark/results/collect.py), and the same drivers run in CI as
+  the `integration_controlled_truth` / `integration_synthetic_axes` CTests, so a
+  metric and its pass/fail assertion share one code path.
+- **`status=transcribed_pending_tracked_run`** — the heavy protocols (e.g.
+  `sqanti_sim`) carry the published number plus a `command` to reproduce it, pending a
+  committed tracked run. The SQANTI-SIM **threshold sweep** that turns the conservative
+  defaults into a tuned operating point is templated in
+  [`sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv) (the release
+  blocker below).
+
 ## What remains
 
 | Item | Status | Why |

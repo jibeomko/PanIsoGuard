@@ -1,0 +1,12 @@
+# Track only the small result artifacts (metrics + sweep tables + manifest);
+# never the bulky regenerated intermediates a protocol may stage here.
+_work/
+*/_work/
+*.bam
+*.bam.bai
+*.cram
+*.fa
+*.fa.fai
+*.gtf
+*.sam
+*.SJ.tab

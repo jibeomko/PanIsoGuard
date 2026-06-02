@@ -1,0 +1,39 @@
+{
+  "command": "python3 benchmark/results/collect.py",
+  "data_provenance": "fully synthetic contig (benchmark/synthetic_axes/gen.py)",
+  "generated_utc": "2026-06-02T10:07:47+00:00",
+  "metrics": {
+    "axes_checked": [
+      "short_read",
+      "variant",
+      "mapping"
+    ],
+    "bam": {
+      "A": "HIGH_CONF_NOVEL",
+      "B": "ARTIFACT",
+      "C": "ARTIFACT",
+      "D": "ARTIFACT"
+    },
+    "base": {
+      "A": "HIGH_CONF_NOVEL",
+      "B": "ARTIFACT",
+      "C": "LOW_CONF_PARTIAL",
+      "D": "ARTIFACT"
+    },
+    "n_per_category": 10,
+    "samtools_used": true,
+    "variant": {
+      "A": "HIGH_CONF_NOVEL",
+      "B": "ARTIFACT",
+      "C": "LOW_CONF_PARTIAL",
+      "D": "PAN_REF_RESCUED_FALSE_NOVEL"
+    }
+  },
+  "notes": "Self-contained correctness check; regenerated and drift-checked by collect.py.",
+  "protocol": "synthetic_axes",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "ci_fixture",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.2"
+}

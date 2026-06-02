@@ -1,0 +1,9 @@
+# SQANTI-SIM threshold sweep (the release-blocking AUPRC sweep, see docs/validation.md "Calibration caveat").
+# One row per rules.default.toml threshold configuration evaluated on the SQANTI-SIM
+# truth set (GENCODE chr22: delete N transcripts -> PBSIM3 HiFi -> FLAIR -> SQANTI3 -> adjudicate).
+# AUPRC ranks genuine-vs-false (threshold-independent); precision/specificity/nnc_recall are at that
+# config's operating point. `operating_point=yes` marks the config shipped in config/rules.default.toml.
+# Populate additional rows with benchmark/sqanti_sim/run.sh + score.py per config, then re-run
+# `benchmark/results/collect.py` to refresh sqanti_sim/metrics.json from the chosen row.
+config_id	sj_min_uniq_reads	sj_require_canonical_motif	perc_A_degradation_threshold	bam_max_low_mapq_frac	bam_max_supplementary_frac	auprc	precision_genuine	specificity_false	nnc_recall	operating_point	source
+default-0.0.1	3	true	60.0	0.5	0.5	0.970	0.982	0.946	1.000	yes	docs/validation.md (transcribed; awaiting tracked run)

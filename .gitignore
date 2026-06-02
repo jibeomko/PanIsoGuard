@@ -53,3 +53,8 @@ benchmark/**/data/
 !tests/data/tiny/mini.bam.bai
 !tests/data/tiny/*.fa
 !tests/data/tiny/*.fai
+
+# ...and DO track the curated benchmark result artifacts (small metrics/tables only;
+# bulky regenerated intermediates stay ignored via benchmark/results/.gitignore +
+# the *.fa/*.bam/... rules above).
+!benchmark/results/

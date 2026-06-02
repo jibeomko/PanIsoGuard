@@ -1,0 +1,7 @@
+protocol	scope	tracked_file	status	regenerated_by	data_provenance
+controlled_truth	ci_fixture	controlled_truth/metrics.json	tracked	benchmark/results/collect.py	synthetic disjoint-window reference GTF (no external data)
+synthetic_axes	ci_fixture	synthetic_axes/metrics.json	tracked	benchmark/results/collect.py	fully synthetic contig (no external data)
+sqanti_sim	gencode_v49_chr22	sqanti_sim/metrics.json	transcribed_pending_tracked_run	benchmark/sqanti_sim/run.sh + sweep.py	SQANTI-SIM chr22 (PBSIM3/FLAIR/SQANTI3) — transcribed from docs/validation.md
+sqanti_sim	gencode_v49_chr22	sqanti_sim/sweep.tsv	transcribed_pending_tracked_run	benchmark/sqanti_sim/sweep.py	AUPRC threshold sweep — seed row; sweep.py fills it once truth artifacts exist
+end2end	gencode_v49_chr22	end2end/metrics.json	transcribed_pending_tracked_run	benchmark/end2end/run_e2e.sh	GENCODE chr22 PBSIM3/FLAIR3/SQANTI3 — transcribed from docs/validation.md
+hg002	gencode_v49_chr22_giab_hg002_v4.2.1	hg002/metrics.json	transcribed_pending_tracked_run	benchmark/hg002/run.sh	real GIAB HG002 v4.2.1 variants — transcribed from docs/validation.md

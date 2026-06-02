@@ -1,0 +1,18 @@
+{
+  "command": "bash benchmark/hg002/run.sh hg002_work  (heavy: GIAB HG002 v4.2.1 VCF + reference + GTF)",
+  "data_provenance": "GENCODE v49 chr22 + real GIAB HG002 v4.2.1 small-variant benchmark (NIST FTP) -> personalized haplotype, --haplotype-provenance wgs",
+  "generated_utc": null,
+  "metrics": {
+    "rescues_created": 1,
+    "false_rescues": 0,
+    "disrupted_held_ambiguous": 2,
+    "control_held_ambiguous": 5
+  },
+  "notes": "Acceptance-critical: the headline PAN_REF_RESCUED_FALSE_NOVEL rescue validated on real, independent (WGS-derived) variants (non-circular). Zero false rescues on disrupted/control loci. Numbers transcribed from docs/validation.md (hg002 row) + benchmark/hg002/README.md, pending a committed tracked run.",
+  "protocol": "hg002",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gencode_v49_chr22_giab_hg002_v4.2.1",
+  "source": "docs/validation.md (hg002 row) + benchmark/hg002/README.md",
+  "status": "transcribed_pending_tracked_run",
+  "tool_version": "0.0.2"
+}

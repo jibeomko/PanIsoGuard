@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/PanIsoGuard/benchmark/results/schema.json",
+  "title": "PanIsoGuard benchmark result envelope",
+  "description": "One committed, git-tracked metrics.json per benchmark protocol. The numeric claims that used to live only in README/validation prose live here, each stamped with how it was produced and how to reproduce it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "scope", "status", "data_provenance", "command", "metrics"],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "description": "Protocol directory name under benchmark/ (e.g. controlled_truth, synthetic_axes, sqanti_sim)."
+    },
+    "scope": {
+      "type": "string",
+      "description": "What input this result was computed on (e.g. ci_fixture, gencode_v49_chr22, hg002_giab_v4.2.1)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["tracked", "transcribed_pending_tracked_run", "pending"],
+      "description": "tracked = regenerated & byte-checkable by collect.py (self-contained); transcribed_pending_tracked_run = number copied from docs/validation.md, awaiting a committed tracked run (heavy external tooling); pending = not yet produced."
+    },
+    "tool_version": {"type": ["string", "null"], "description": "panisoguard --version, line 1."},
+    "ruleset_version": {"type": ["string", "null"]},
+    "generated_utc": {"type": ["string", "null"], "description": "When this snapshot was produced; informational, ignored by `collect.py --check`."},
+    "data_provenance": {"type": "string", "description": "Where the input came from, incl. accession/version for real data."},
+    "command": {"type": "string", "description": "The exact command that regenerates this result."},
+    "source": {"type": ["string", "null"], "description": "For transcribed status: the doc/section the number was copied from."},
+    "metrics": {"type": "object", "description": "Protocol-specific numeric results. Compared by `collect.py --check` for the self-contained protocols.", "minProperties": 1},
+    "notes": {"type": ["string", "null"]}
+  }
+}

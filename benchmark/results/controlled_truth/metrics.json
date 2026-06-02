@@ -1,0 +1,23 @@
+{
+  "command": "python3 benchmark/results/collect.py",
+  "data_provenance": "synthetic disjoint-window reference GTF (benchmark/controlled_truth/ci_check.py)",
+  "generated_utc": "2026-06-02T10:07:47+00:00",
+  "metrics": {
+    "FN": 0,
+    "FP": 0,
+    "TN": 7,
+    "TP": 12,
+    "abstain_genuine": 0,
+    "n_false": 7,
+    "n_genuine": 12,
+    "precision_genuine": 1.0,
+    "specificity_false": 1.0
+  },
+  "notes": "Self-contained correctness check; regenerated and drift-checked by collect.py.",
+  "protocol": "controlled_truth",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "ci_fixture",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.2"
+}

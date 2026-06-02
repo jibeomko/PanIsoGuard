@@ -1,0 +1,21 @@
+{
+  "command": "bash benchmark/sqanti_sim/run.sh && python3 benchmark/sqanti_sim/score.py  (heavy: SQANTI-SIM + PBSIM3 + FLAIR + SQANTI3)",
+  "data_provenance": "SQANTI-SIM canonical protocol, GENCODE chr22: delete 769 transcripts -> PBSIM3 HiFi -> FLAIR -> SQANTI3 -> adjudicate",
+  "generated_utc": null,
+  "metrics": {
+    "auprc_genuine": 0.970,
+    "auprc_baseline": 0.831,
+    "precision_genuine": 0.982,
+    "specificity_false": 0.946,
+    "nnc_recall": 1.000,
+    "known_to_high_conf_known_recall": 1.000,
+    "genuine_to_artifact": 0
+  },
+  "notes": "Headline genuine-novel detection result. Numbers transcribed from docs/validation.md pending a committed, tracked SQANTI-SIM run + the full threshold sweep (sweep.tsv). The operating point is the config/rules.default.toml default; thresholds are NOT yet swept/tuned.",
+  "protocol": "sqanti_sim",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gencode_v49_chr22",
+  "source": "docs/validation.md (sqanti_sim row)",
+  "status": "transcribed_pending_tracked_run",
+  "tool_version": "0.0.2"
+}
