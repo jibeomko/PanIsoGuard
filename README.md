@@ -322,14 +322,14 @@ conda install -c bioconda -c conda-forge panisoguard
 
 ## Runtime & memory
 
-Single-threaded, on one cohort's merged set (188,912 isoforms; GRCh38 + GENCODE v49):
+Single-threaded, on a whole-genome isoform set (GRCh38 + GENCODE v49):
 
 | Step | Wall | Peak RAM |
 |------|------|----------|
-| reference catalog (GENCODE v49) | ~3.2 s | ~0.34 GB |
+| reference catalog (GENCODE v49) | ~3 s | ~0.34 GB |
 | `adjudicate` (SQANTI priors + short-read SJ) | ~5 s | ~0.55 GB |
 | + variant axis (faidx motif) | ~40 s | ~0.6 GB |
-| + BAM mapping axis (4.5 GB BAM) | ~1.6 min | ~0.6 GB |
+| + BAM mapping axis | ~1.6 min | ~0.6 GB |
 
 The upstream callers + alignment dominate end-to-end time; PanIsoGuard's own
 adjudication is the fast tail.
