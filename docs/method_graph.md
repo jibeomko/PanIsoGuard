@@ -15,6 +15,13 @@ introduces no learned graph model, message passing, centrality, or PageRank: tho
 no biological signal here and would only invite "why is this needed?". The contribution
 remains the *deterministic adjudication of an evidence-annotated path*.
 
+![PanIsoGuard as a splice-graph view, in six panels. (1) Inputs: caller isoforms, SQANTI3 classification, reference GTF, short-read SJ.tab, long-read BAM, FASTA, and pangenome junctions. (2) Build splice graph: a candidate isoform is a path, splice junctions are edges, and the reference annotation is the known graph. (3) Detect novel edges: junctions absent from the known graph, split into known-site recombination (NIC) and novel splice site (NNC), with path distance to the reference equal to the number of novel edges. (4) Evidence annotation: per-edge SQANTI3 priors, short-read junction support, long-read mapping, variant/haplotype, and pangenome support, with a circularity firewall that flags same-sample-derived (circular) evidence edges. (5) Deterministic rule engine: the novelty-support by artifact-mechanism grid projected to a confidence class. (6) Outputs: adjudicated.tsv, attribution.jsonl, and provenance.log carrying rule_trace and graph_trace, plus the confidence-class legend.](figures/method_pipeline.png)
+
+<sub>The splice-graph *view* of the existing pipeline (a framing, not a new algorithm):
+inputs → inspect the gene-local splice graph → annotate each novel edge with orthogonal
+evidence → deterministic rule engine → auditable outputs. The verdict is the same
+deterministic projection described in [decision_engine.md](decision_engine.md).</sub>
+
 ## The gene-local splice graph
 
 For a locus, build a directed graph:
