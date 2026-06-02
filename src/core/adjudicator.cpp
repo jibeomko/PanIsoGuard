@@ -111,11 +111,13 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     // reference-bias evidence -- a single explained junction does not make a
     // multi-novel-junction isoform "false novel" (the others may be genuinely new).
     ev.variant_rescue = (n_novel > 0 && n_variant_created == n_novel);
-    ev.variant_circular = haplotype_circular;
+    // Keep the circular-risk flag consistent with evaluability (it is only read by the
+    // rescue branch, which already requires *_evaluable, so this is a clarity guard).
+    ev.variant_circular = ev.variant_evaluable && haplotype_circular;
     ev.pangenome_evaluable = (pangenome != nullptr) && any_pan_eval;
     ev.n_novel_jx_pangenome = n_pan;
     ev.pangenome_rescue = (n_novel > 0 && n_pan == n_novel);
-    ev.pangenome_circular = pangenome_circular;
+    ev.pangenome_circular = ev.pangenome_evaluable && pangenome_circular;
   }
   return ev;
 }
@@ -136,6 +138,11 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.chrom = r.chrom;
     res.strand = r.strand;
     res.structural_category = r.structural_category;
+    // Pass-through SQANTI3 descriptors for bio_flags (not used in the verdict).
+    res.bio_dist_to_CAGE_peak = r.dist_to_CAGE_peak;
+    res.bio_dist_to_polyA_site = r.dist_to_polyA_site;
+    res.bio_predicted_NMD = r.predicted_NMD;
+    res.bio_polyA_motif_found = r.polyA_motif_found;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
                                   engine.config(), bam_cache);

@@ -23,6 +23,13 @@ struct AdjudicationResult {
   std::string structural_category;
   EvidenceVector evidence;
   Verdict verdict;
+  // SQANTI3 QC descriptors passed through verbatim (consumed as priors, NEVER
+  // recomputed by PanIsoGuard) and emitted as `bio_flags`. They are biological-
+  // plausibility annotations only and do NOT enter the rule engine / verdict.
+  double bio_dist_to_CAGE_peak = SqantiRecord::kNaN;
+  double bio_dist_to_polyA_site = SqantiRecord::kNaN;
+  std::string bio_predicted_NMD;
+  std::string bio_polyA_motif_found;
 };
 
 struct AdjudicateInputs {

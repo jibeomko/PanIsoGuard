@@ -27,6 +27,8 @@ struct SqantiRecord {
   int n_indels_junc = kIntNA;
   double dist_to_CAGE_peak = kNaN;
   double dist_to_polyA_site = kNaN;
+  std::string predicted_NMD;      // SQANTI3 coding/NMD prediction ("TRUE"/"FALSE"), if present
+  std::string polyA_motif_found;  // SQANTI3 intra-priming polyA-motif flag, if present
   std::string filter_result;   // appended SQANTI3 filter column ("Isoform"/"Artifact"), if present
 
   static constexpr double kNaN = -1e300;  // sentinel; use is_na()

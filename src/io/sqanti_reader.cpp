@@ -1,5 +1,6 @@
 #include "panisoguard/sqanti.hpp"
 
+#include <cstdio>
 #include <fstream>
 #include <stdexcept>
 
@@ -18,20 +19,45 @@ bool is_na_token(const std::string& s) {
   return s.empty() || s == "NA" || s == "NaN" || s == "nan" || s == ".";
 }
 
-double parse_double_or_na(const std::string& s) {
+constexpr int kMaxParseWarnings = 5;
+
+// A non-NA token that does not fully parse as a number is genuinely malformed (not an
+// intentional NA). Fall back to the sentinel so a bad QC value degrades to
+// not_evaluable rather than a wrong prior, but warn (bounded) so it is not SILENT.
+void warn_unparseable(const char* what, std::size_t lineno, const std::string& s, int& warnings) {
+  if (warnings < kMaxParseWarnings) {
+    std::fprintf(stderr,
+                 "WARNING: SQANTI3 classification line %zu: %s value \"%s\" is not numeric; "
+                 "treated as NA (not_evaluable)\n",
+                 lineno, what, s.c_str());
+    if (++warnings == kMaxParseWarnings) {
+      std::fprintf(stderr, "WARNING: further SQANTI3 numeric-parse warnings suppressed\n");
+    }
+  }
+}
+
+double parse_double_or_na(const std::string& s, const char* what, std::size_t lineno, int& warnings) {
   if (is_na_token(s)) return SqantiRecord::kNaN;
   try {
-    return std::stod(s);
+    std::size_t pos = 0;
+    const double v = std::stod(s, &pos);
+    if (pos != s.size()) throw std::invalid_argument("trailing characters");
+    return v;
   } catch (...) {
+    warn_unparseable(what, lineno, s, warnings);
     return SqantiRecord::kNaN;
   }
 }
 
-int parse_int_or_na(const std::string& s) {
+int parse_int_or_na(const std::string& s, const char* what, std::size_t lineno, int& warnings) {
   if (is_na_token(s)) return SqantiRecord::kIntNA;
   try {
-    return std::stoi(s);
+    std::size_t pos = 0;
+    const long v = std::stol(s, &pos);
+    if (pos != s.size()) throw std::invalid_argument("trailing characters");
+    return static_cast<int>(v);
   } catch (...) {
+    warn_unparseable(what, lineno, s, warnings);
     return SqantiRecord::kIntNA;
   }
 }
@@ -71,6 +97,8 @@ SqantiTable read_sqanti_classification(const std::string& path) {
   const int c_indels_junc = header.col("n_indels_junc");
   const int c_cage = header.col("dist_to_CAGE_peak");
   const int c_polya = header.col("dist_to_polyA_site");
+  const int c_nmd = header.col("predicted_NMD");
+  const int c_polya_motif = header.col("polyA_motif_found");
   // SQANTI3 filter column has varied names across versions.
   int c_filter = header.col("filter_result");
   if (c_filter < 0) c_filter = header.col("filter");
@@ -81,7 +109,10 @@ SqantiTable read_sqanti_classification(const std::string& path) {
   }
 
   std::string line;
+  std::size_t lineno = 1;  // header was line 1
+  int warnings = 0;
   while (std::getline(in, line)) {
+    ++lineno;
     chomp(line);
     if (line.empty()) continue;
     std::vector<std::string> f = split_tsv(line);
@@ -97,10 +128,12 @@ SqantiTable read_sqanti_classification(const std::string& path) {
     r.associated_transcript = field_at(f, c_tx);
     r.RTS_stage = field_at(f, c_rts);
     r.all_canonical = field_at(f, c_canon);
-    r.perc_A_downstream_TTS = parse_double_or_na(field_at(f, c_percA));
-    r.n_indels_junc = parse_int_or_na(field_at(f, c_indels_junc));
-    r.dist_to_CAGE_peak = parse_double_or_na(field_at(f, c_cage));
-    r.dist_to_polyA_site = parse_double_or_na(field_at(f, c_polya));
+    r.perc_A_downstream_TTS = parse_double_or_na(field_at(f, c_percA), "perc_A_downstream_TTS", lineno, warnings);
+    r.n_indels_junc = parse_int_or_na(field_at(f, c_indels_junc), "n_indels_junc", lineno, warnings);
+    r.dist_to_CAGE_peak = parse_double_or_na(field_at(f, c_cage), "dist_to_CAGE_peak", lineno, warnings);
+    r.dist_to_polyA_site = parse_double_or_na(field_at(f, c_polya), "dist_to_polyA_site", lineno, warnings);
+    r.predicted_NMD = field_at(f, c_nmd);
+    r.polyA_motif_found = field_at(f, c_polya_motif);
     r.filter_result = field_at(f, c_filter);
 
     ++table.category_counts[r.structural_category];

@@ -93,6 +93,19 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"pangenome_edge_support\":" << (e.pangenome_rescue ? "true" : "false") << ","
         << "\"variant_canonicalized_edge\":" << (e.variant_rescue ? "true" : "false")
         << "},";
+    // bio_flags: SQANTI3 QC descriptors passed through verbatim (consumed as priors,
+    // NEVER recomputed) -- biological-plausibility annotations that do NOT affect the
+    // verdict. PanIsoGuard does not reimplement SQANTI3's TSS/TTS/ORF/NMD/polyA QC; it
+    // surfaces it alongside the independent path-level verdict (docs/relationship_to_sqanti3.md).
+    out << "\"bio_flags\":{\"dist_to_CAGE_peak\":";
+    if (sqanti_is_na(r.bio_dist_to_CAGE_peak)) out << "null"; else out << r.bio_dist_to_CAGE_peak;
+    out << ",\"dist_to_polyA_site\":";
+    if (sqanti_is_na(r.bio_dist_to_polyA_site)) out << "null"; else out << r.bio_dist_to_polyA_site;
+    out << ",\"predicted_NMD\":"
+        << (r.bio_predicted_NMD.empty() ? "null" : "\"" + json_escape(r.bio_predicted_NMD) + "\"")
+        << ",\"polyA_motif_found\":"
+        << (r.bio_polyA_motif_found.empty() ? "null" : "\"" + json_escape(r.bio_polyA_motif_found) + "\"")
+        << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
       if (i) out << ',';

@@ -11,6 +11,10 @@ and the engine emits a per-isoform `rule_trace`.
 - It **never** claims to beat the SQANTI3 random-forest filter or FLAIR2. The
   `benchmark` module reports *non-redundancy* (McNemar / 2×2 / Jaccard), not
   superiority.
+- It **does not recompute SQANTI3 QC descriptors** (TSS/TTS, ORF/NMD, polyA/splice
+  motif): those are consumed as priors and surfaced verbatim as `bio_flags`, while the
+  verdict rests on independent path-level evidence
+  ([relationship_to_sqanti3.md](relationship_to_sqanti3.md)).
 - Validation uses **public + simulated** data (SQANTI-SIM; HG002/HPRC; LRGASP). A
   clinical cohort is at most a real-world demo / engineering scale test, never the
   source of mechanistic ground truth.

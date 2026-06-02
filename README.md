@@ -12,11 +12,16 @@ with a BAM and **optional** evidence inputs (short-read `SJ.tab`, personalized
 haplotype FASTA), and re-classifies each novel call into a confidence class with a
 **machine-readable mechanistic attribution** and a **provenance / circularity flag**.
 
-It does not recompute SQANTI3's QC features and does not claim to beat the SQANTI3
-random-forest filter or FLAIR2. Its contribution is the **adjudication logic** —
-how orthogonal evidence axes are integrated into a transparent, auditable verdict
-(thresholds live in a runtime [`config/rules.default.toml`](config/rules.default.toml),
-and each verdict carries a `rule_trace`; see [docs/decision_engine.md](docs/decision_engine.md)).
+**PanIsoGuard does not recompute SQANTI3 QC descriptors.** It consumes them as priors
+and integrates them with independent path-level evidence from caller consensus,
+short-read junction support, long-read mapping, personalized haplotypes, and
+pangenome-supported junctions — it does not re-derive TSS/TTS, ORF/NMD, polyA, or
+splice motifs, and is not a SQANTI3-style QC filter (see
+[docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)). Its contribution is
+the **adjudication logic** — how those orthogonal evidence axes are integrated into a
+transparent, auditable verdict (thresholds live in a runtime
+[`config/rules.default.toml`](config/rules.default.toml), and each verdict carries a
+`rule_trace`; see [docs/decision_engine.md](docs/decision_engine.md)).
 
 Equivalently, PanIsoGuard **represents each candidate isoform as a path through a
 gene-local splice graph and adjudicates that path using orthogonal edge- and
@@ -148,7 +153,7 @@ panisoguard combine \
 | File | Contents |
 |------|----------|
 | `<prefix>.adjudicated.tsv`   | one row per isoform — confidence class, primary mechanism, novel-junction support counts |
-| `<prefix>.attribution.jsonl` | per-isoform `rule_trace` (every rule that fired, in order) + `graph_trace` (splice-graph view: novel-edge count, edge support, graph distance — see [docs/method_graph.md](docs/method_graph.md)) |
+| `<prefix>.attribution.jsonl` | per-isoform `rule_trace` (every rule that fired, in order) + `graph_trace` (splice-graph view — see [docs/method_graph.md](docs/method_graph.md)) + `bio_flags` (SQANTI3 QC descriptors passed through, verdict-neutral — see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
 | `<prefix>.provenance.log`    | which axes were active + circularity status of the run |
 
 ### Benchmarking & ablation
@@ -204,6 +209,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | [docs/function_io.md](docs/function_io.md) | Module-by-module input → output contracts and key data types. |
 | [docs/decision_engine.md](docs/decision_engine.md) | The 2-axis grid, rescue precedence, and the circularity firewall. |
 | [docs/method_graph.md](docs/method_graph.md) | The splice-graph framing: isoform = path, novel junction = edge, novelty = graph distance, and the `graph_trace`. |
+| [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md) | What PanIsoGuard consumes from SQANTI3 vs does not recompute; the `bio_flags` pass-through. |
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What is verified and the truth-based validation plan. |
 
