@@ -42,18 +42,24 @@ output classes shown are a simplified grouping — the full set is listed
 
 > **Status: alpha.** Four evidence axes (SQANTI priors, short-read junctions, BAM
 > read-level mapping, variant/reference-bias) plus an **experimental** file-based
-> pangenome reference-bias tier, and the `adjudicate` / `benchmark` / `ablate` /
-> `combine` subcommands, are implemented and tested. The adjudication logic is
-> validated against ground truth (SQANTI-SIM **AUPRC 0.970** vs a 0.831 baseline,
-> and well-calibrated — ECE/Brier ≤ 0.013 on the run truth sets; see
-> [docs/validation.md](docs/validation.md)). A SQANTI-SIM (v49 chr22) threshold
-> **sweep** finds AUPRC **robust (0.969–0.970)** across the grid with the shipped
-> default within 1e-4 of grid-best — the conservative defaults are near-optimal
-> there ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)),
-> though not yet swept on additional datasets. The pangenome tier is **not yet
-> validated on real graph data** (see GATE-1 in
-> [docs/decision_engine.md](docs/decision_engine.md)); treat the confidence classes
-> as calibrated *ordinal* evidence integration, not a tuned probability.
+> pangenome reference-bias tier are implemented and tested, along with the
+> `adjudicate` / `benchmark` / `ablate` / `combine` subcommands.
+>
+> **Validation.** The adjudication logic is validated against ground truth
+> (SQANTI-SIM **AUPRC 0.970** vs a 0.831 baseline, and well-calibrated —
+> ECE/Brier ≤ 0.013 on the run truth sets; see
+> [docs/validation.md](docs/validation.md)).
+>
+> **Thresholds.** A SQANTI-SIM (v49 chr22) threshold **sweep** finds AUPRC
+> **robust (0.969–0.970)** across the grid with the shipped default within 1e-4 of
+> grid-best — the conservative defaults are near-optimal there
+> ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)),
+> though not yet swept on additional datasets.
+>
+> **Pangenome caveat.** The pangenome tier is **not yet validated on real graph
+> data** (see GATE-1 in [docs/decision_engine.md](docs/decision_engine.md)); treat
+> the confidence classes as calibrated *ordinal* evidence integration, not a tuned
+> probability.
 
 ## Subcommands
 
