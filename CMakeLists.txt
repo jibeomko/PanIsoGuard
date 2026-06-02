@@ -121,4 +121,23 @@ if(PANISOGUARD_BUILD_TESTS)
   target_compile_definitions(panisoguard_tests PRIVATE
     PANISOGUARD_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/tests/data/tiny")
   add_test(NAME unit COMMAND panisoguard_tests)
+
+  # --- Truth-based integration tests (drive the built binary) ----------------
+  # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,
+  # and assert the verdicts are correct. controlled_truth is pure text; the
+  # synthetic_axes BAM sub-check self-skips when samtools is absent (CI has only
+  # htslib), so both stay green in a minimal environment.
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+  if(Python3_Interpreter_FOUND)
+    add_test(NAME integration_controlled_truth
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/benchmark/controlled_truth/ci_check.py"
+              $<TARGET_FILE:panisoguard>)
+    add_test(NAME integration_synthetic_axes
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/benchmark/synthetic_axes/ci_check.py"
+              $<TARGET_FILE:panisoguard>)
+  else()
+    message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")
+  endif()
 endif()
