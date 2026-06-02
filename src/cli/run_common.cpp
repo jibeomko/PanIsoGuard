@@ -43,6 +43,10 @@ bool common_args_ok(const CommonArgs& c, std::string& err) {
     err = "one of --isoforms-bed / --isoforms-gtf is required";
     return false;
   }
+  if (!c.isoforms_bed.empty() && !c.isoforms_gtf.empty()) {
+    err = "--isoforms-bed and --isoforms-gtf are mutually exclusive; supply exactly one";
+    return false;
+  }
   return true;
 }
 
@@ -66,6 +70,18 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     std::fprintf(stderr, "building reference catalog...\n");
     catalog = build_catalog_from_gtf(c.ref_gtf);
     catalog_ptr = &catalog;
+  } else {
+    // Without a reference catalog there is no way to tell which junctions are novel,
+    // so the whole novel-junction block is skipped: every novel isoform is held
+    // UNKNOWN/AMBIGUOUS and the short-read/BAM/variant/pangenome axes contribute
+    // NOTHING even when their inputs are supplied. Warn loudly rather than fail soft.
+    const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() ||
+                                     !c.reference_haplotypes.empty() || !c.pangenome_junctions.empty();
+    std::fprintf(stderr,
+        "WARNING: --ref-gtf not supplied: novel-junction classification is disabled; "
+        "every novel isoform is held AMBIGUOUS%s.\n",
+        novel_axes_supplied ? " and the supplied SJ/BAM/haplotype/pangenome evidence "
+                              "will NOT be used" : "");
   }
 
   SjTable sj;

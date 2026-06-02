@@ -48,7 +48,9 @@ IntronChain chain_from_exons(const ExonAcc& acc) {
   std::vector<std::pair<int64_t, int64_t>> exons = acc.exons;
   std::sort(exons.begin(), exons.end());
   for (std::size_t i = 0; i + 1 < exons.size(); ++i) {
-    // exon_i 1-based [s_i, e_i]; intron = [e_i (0-based excl. end), s_{i+1}-1).
+    // GTF exons are 1-based inclusive [s, e]. In 0-based half-open coords the intron
+    // between exon_i and exon_{i+1} is [e_i, s_{i+1}-1): the 1-based-inclusive exon end
+    // e_i is the first intronic base (0-based), and s_{i+1}-1 is one past the last.
     const int64_t intron_start = exons[i].second;        // = e_i
     const int64_t intron_end = exons[i + 1].first - 1;   // = s_{i+1} - 1
     if (intron_end > intron_start) {
@@ -69,7 +71,9 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
   std::unordered_map<std::string, ExonAcc> acc;
   std::vector<std::string> order;
   std::string line;
+  std::size_t lineno = 0;
   while (std::getline(in, line)) {
+    ++lineno;
     chomp(line);
     if (line.empty() || line[0] == '#') continue;
     std::vector<std::string> f = split_tsv(line);
@@ -85,7 +89,10 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
       it = acc.emplace(tid, std::move(a)).first;
       order.push_back(tid);
     }
-    it->second.exons.emplace_back(std::stoll(f[3]), std::stoll(f[4]));
+    // Context-rich error on a malformed exon coordinate instead of a bare stoll terminate.
+    const int64_t es = parse_int_field(f[3], "exon start", "GTF", lineno);
+    const int64_t ee = parse_int_field(f[4], "exon end", "GTF", lineno);
+    it->second.exons.emplace_back(es, ee);
   }
 
   std::vector<Transcript> out;

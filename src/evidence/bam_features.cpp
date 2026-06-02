@@ -70,6 +70,10 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom,
   if (itr == nullptr) return f;
 
   bam1_t* b = bam_init1();
+  if (b == nullptr) {  // allocation failure: clean up the iterator, do not dereference null
+    hts_itr_destroy(itr);
+    return f;
+  }
   while (sam_itr_next(impl_->fp, itr, b) >= 0) {
     if (b->core.flag & BAM_FUNMAP) continue;
 

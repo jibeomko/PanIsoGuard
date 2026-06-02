@@ -35,11 +35,13 @@ bool FastaFetcher::has_chrom(const std::string& chrom) const {
 std::string FastaFetcher::fetch(const std::string& chrom, int64_t start, int64_t end) const {
   if (end <= start || start < 0) return "";
   if (!faidx_has_seq(impl_->fai, chrom.c_str())) return "";
-  int len = 0;
+  hts_pos_t len = 0;
   // faidx uses 0-based inclusive coordinates [beg, end]; free() guaranteed via RAII.
+  // Use the 64-bit fetch so coordinates past INT_MAX (chromosomes > ~2.1 Gbp) are not
+  // silently truncated to a wrong (in-range) position.
   std::unique_ptr<char, void (*)(void*)> seq(
-      faidx_fetch_seq(impl_->fai, chrom.c_str(), static_cast<int>(start),
-                      static_cast<int>(end - 1), &len),
+      faidx_fetch_seq64(impl_->fai, chrom.c_str(), static_cast<hts_pos_t>(start),
+                        static_cast<hts_pos_t>(end - 1), &len),
       std::free);
   if (!seq || len <= 0) return "";
   std::string out(seq.get(), static_cast<std::size_t>(len));

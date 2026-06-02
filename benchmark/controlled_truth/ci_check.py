@@ -93,6 +93,10 @@ def main() -> int:
             cls[f[header["isoform_id"]]] = f[header["confidence_class"]]
 
         TP = FP = FN = TN = ab_g = 0
+        # A truth isoform absent from the adjudicated output is a COVERAGE failure
+        # (the tool emitted no verdict), not a benign abstention -- flag it explicitly.
+        missing = [i for i in truth if i not in cls]
+
         for i, t in truth.items():
             p = pred(cls.get(i, "MISSING"))
             if t == "genuine":
@@ -108,6 +112,7 @@ def main() -> int:
 
         ok = True
         for name, cond in [
+            ("every truth isoform adjudicated (no missing output)", not missing),
             ("at least one decisive genuine call", TP > 0),
             ("at least one decisive false call", TN > 0),
             ("precision(genuine) == 1.0", prec == 1.0),

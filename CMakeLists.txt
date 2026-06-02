@@ -107,6 +107,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/pangenome_test.cpp
     tests/unit/gtf_test.cpp
     tests/unit/bed12_test.cpp
+    tests/unit/io_robustness_test.cpp
     tests/unit/sqanti_test.cpp
     tests/unit/consensus_test.cpp
     tests/unit/rules_test.cpp

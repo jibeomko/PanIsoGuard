@@ -6,6 +6,16 @@
 #include <stdexcept>
 
 namespace panisoguard {
+namespace {
+
+// Intron chains are stored sorted by every reader (sort_introns()), so exact vector
+// equality is a correct and cheap identity test -- used below to reject the
+// astronomically-rare 64-bit fingerprint collision instead of silently merging.
+bool same_chain(const IntronChain& a, const IntronChain& b) {
+  return a.chrom == b.chrom && a.strand == b.strand && a.introns == b.introns;
+}
+
+}  // namespace
 
 void ConsensusBuilder::add(const std::string& caller, const std::string& native_id,
                            const IntronChain& chain) {
@@ -23,16 +33,28 @@ void ConsensusBuilder::add(const std::string& caller, const std::string& native_
   }
 
   const Fingerprint fp = fingerprint_intron_chain(chain);
-  key = "FP:" + std::to_string(fp);
-  auto it = groups_.find(key);
-  if (it == groups_.end()) {
-    Group g;
-    g.fp = fp;
-    g.monoexonic = false;
-    g.chain = chain;
-    it = groups_.emplace(std::move(key), std::move(g)).first;
+  // Merge only when the actual intron chain is identical. A 64-bit fingerprint
+  // collision (different chains, same hash) would otherwise SILENTLY merge two
+  // distinct isoforms; instead it is disambiguated by probing a suffixed key so the
+  // colliding chains stay in separate groups.
+  for (int probe = 0;; ++probe) {
+    key = probe == 0 ? "FP:" + std::to_string(fp)
+                     : "FP:" + std::to_string(fp) + "#" + std::to_string(probe);
+    auto it = groups_.find(key);
+    if (it == groups_.end()) {
+      Group g;
+      g.fp = fp;
+      g.monoexonic = false;
+      g.chain = chain;
+      groups_.emplace(key, std::move(g)).first->second.support[caller].push_back(native_id);
+      return;
+    }
+    if (same_chain(it->second.chain, chain)) {
+      it->second.support[caller].push_back(native_id);
+      return;
+    }
+    // collision: this key holds a different chain -> try the next probe key
   }
-  it->second.support[caller].push_back(native_id);
 }
 
 std::vector<ConsensusIsoform> ConsensusBuilder::build(const Catalog* catalog) const {
@@ -49,6 +71,10 @@ std::vector<ConsensusIsoform> ConsensusBuilder::build(const Catalog* catalog) co
     iso.support = g.support;
     if (catalog != nullptr && !g.monoexonic) {
       iso.catalog_checked = true;
+      // NOTE: catalog membership is by fingerprint only, so a 64-bit collision could
+      // mislabel known/novel here. This affects only the combine support-matrix
+      // annotation (~1e-9 at realistic catalog sizes), not the adjudicate verdict,
+      // which classifies novelty per-intron via Catalog::has_intron.
       iso.known_in_catalog = catalog->has_chain(g.fp);
     }
     out.push_back(std::move(iso));

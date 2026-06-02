@@ -17,6 +17,7 @@ with status="transcribed_pending_tracked_run" until a tracked run replaces it.
 Exit code is non-zero on drift or schema failure, so it can be wired into CI/CTest.
 """
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -54,6 +55,18 @@ def tool_version(pig: str) -> str:
         return first.split()[-1] if first else None
     except Exception:
         return None
+
+
+def metrics_equal(a, b) -> bool:
+    """Deep-compare metric values, treating NaN == NaN as equal so a degenerate
+    (e.g. precision=nan) metric does not report spurious drift on every run."""
+    if isinstance(a, float) and isinstance(b, float):
+        return a == b or (math.isnan(a) and math.isnan(b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(metrics_equal(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(metrics_equal(x, y) for x, y in zip(a, b))
+    return a == b
 
 
 def regen_metrics(proto: str, pig: str) -> dict:
@@ -117,12 +130,12 @@ def main() -> int:
         if check:
             if prev is None:
                 drift.append(f"{proto}: no committed metrics.json (run collect.py)")
-            elif prev.get("metrics") != metrics:
+            elif not metrics_equal(prev.get("metrics"), metrics):
                 drift.append(f"{proto}: metrics drifted\n    committed={prev.get('metrics')}\n    fresh    ={metrics}")
             continue
 
         # write mode: preserve generated_utc when the numbers are unchanged
-        same = prev is not None and prev.get("metrics") == metrics
+        same = prev is not None and metrics_equal(prev.get("metrics"), metrics)
         stamp = prev.get("generated_utc") if same else datetime.now(timezone.utc).replace(microsecond=0).isoformat()
         envelope = {
             "protocol": proto,

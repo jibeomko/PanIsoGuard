@@ -54,6 +54,11 @@ SjTable read_sj_tab(const std::string& path) {
     // 1-based inclusive intron [s, e] -> 0-based half-open [s-1, e].
     const int64_t s1 = parse_int_field(f[1], "intron_start", "SJ.tab", lineno);
     const int64_t e1 = parse_int_field(f[2], "intron_end", "SJ.tab", lineno);
+    if (s1 > e1) {
+      throw std::runtime_error("SJ.tab line " + std::to_string(lineno) +
+                               ": intron_start (" + std::to_string(s1) + ") > intron_end (" +
+                               std::to_string(e1) + ")");
+    }
     rec.intron = Junction{s1 - 1, e1};
     // STAR strand: 0 = undefined (kept as Unknown), 1 = +, 2 = -.
     const int strand_code = static_cast<int>(parse_int_field(f[3], "strand", "SJ.tab", lineno));

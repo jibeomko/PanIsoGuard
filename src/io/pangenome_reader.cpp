@@ -71,6 +71,11 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
     // 1-based inclusive intron [s, e] -> 0-based half-open [s-1, e].
     const int64_t s1 = parse_int_field(f[1], "intron_start", "pangenome junctions", lineno);
     const int64_t e1 = parse_int_field(f[2], "intron_end", "pangenome junctions", lineno);
+    if (s1 > e1) {
+      throw std::runtime_error("pangenome junctions line " + std::to_string(lineno) +
+                               ": intron_start (" + std::to_string(s1) + ") > intron_end (" +
+                               std::to_string(e1) + ")");
+    }
     rec.intron = Junction{s1 - 1, e1};
     rec.strand = parse_strand(f[3]);
     // A splice junction is strand-specific; reject a missing/typo'd strand instead of

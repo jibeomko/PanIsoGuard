@@ -9,14 +9,15 @@ namespace panisoguard {
 namespace {
 
 // Parse a comma-separated list of integers (BED blockSizes / blockStarts;
-// a trailing comma is allowed).
-std::vector<int64_t> parse_int_list(const std::string& s) {
+// a trailing comma is allowed). Malformed tokens raise a context-rich error
+// (file + line + field) instead of a bare std::stoll "stoll" terminate.
+std::vector<int64_t> parse_int_list(const std::string& s, const char* what, std::size_t lineno) {
   std::vector<int64_t> out;
   std::size_t start = 0;
   while (start < s.size()) {
     std::size_t comma = s.find(',', start);
     const std::string tok = s.substr(start, (comma == std::string::npos ? s.size() : comma) - start);
-    if (!tok.empty()) out.push_back(std::stoll(tok));
+    if (!tok.empty()) out.push_back(parse_int_field(tok, what, "BED12", lineno));
     if (comma == std::string::npos) break;
     start = comma + 1;
   }
@@ -45,17 +46,17 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
 
     Bed12Record rec;
     const std::string chrom = f[0];
-    const int64_t chrom_start = std::stoll(f[1]);  // 0-based
+    const int64_t chrom_start = parse_int_field(f[1], "chromStart", "BED12", lineno);  // 0-based
     rec.name = f[3];
     rec.id_prefix = flair_id_prefix(rec.name);
-    rec.score = f[4] == "." ? 0 : std::stoi(f[4]);
+    rec.score = f[4] == "." ? 0 : static_cast<int>(parse_int_field(f[4], "score", "BED12", lineno));
 
     rec.chain.chrom = chrom;
     rec.chain.strand = parse_strand(f[5].empty() ? '.' : f[5][0]);
 
-    const int block_count = std::stoi(f[9]);
-    const std::vector<int64_t> sizes = parse_int_list(f[10]);
-    const std::vector<int64_t> starts = parse_int_list(f[11]);
+    const int block_count = static_cast<int>(parse_int_field(f[9], "blockCount", "BED12", lineno));
+    const std::vector<int64_t> sizes = parse_int_list(f[10], "blockSizes", lineno);
+    const std::vector<int64_t> starts = parse_int_list(f[11], "blockStarts", lineno);
     if (static_cast<int>(sizes.size()) != block_count ||
         static_cast<int>(starts.size()) != block_count) {
       throw std::runtime_error("BED12 line " + std::to_string(lineno) +

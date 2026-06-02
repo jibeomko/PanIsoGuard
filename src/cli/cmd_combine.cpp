@@ -85,6 +85,7 @@ int cmd_combine(int argc, char** argv) {
   }
 
   using namespace panisoguard;
+  try {  // surface I/O and parse errors as a clean message + exit code (like the other subcommands)
   ConsensusBuilder builder;
 
   for (const auto& in : gtfs) {
@@ -125,4 +126,8 @@ int cmd_combine(int argc, char** argv) {
   if (mono) std::fprintf(stderr, ", monoexonic: %zu", mono);
   std::fprintf(stderr, ")\nwrote %s\n", out_path.c_str());
   return 0;
+  } catch (const std::exception& e) {
+    std::fprintf(stderr, "combine: %s\n", e.what());
+    return 1;
+  }
 }
