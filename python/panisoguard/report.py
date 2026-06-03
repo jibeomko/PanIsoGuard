@@ -90,6 +90,11 @@ SUPPORT_COLORS = {"SUPPORTED": "#2E9E5B", "PARTIAL": "#86BC4C",
 AXIS_ON = "#17A2A2"
 AXIS_OFF = "#CBD2D9"
 NOVEL_CATS = {"novel_in_catalog", "novel_not_in_catalog"}
+# The (support × mechanism) projection grid covers only ARTIFACT mechanisms. The two
+# rescue mechanisms (variant_created / population_known) are set in the engine's early
+# reference-bias-rescue branch and bypass the grid entirely, so they are shown on the
+# rescue/firewall page, not here (including them would mis-colour the grid borders).
+ARTIFACT_MECHS = ["none", "mapping_or_repeat", "noncanonical", "rt_switch", "degradation"]
 SEQ_CMAP = LinearSegmentedColormap.from_list("pig_seq", ["#F4F8FB", "#2D7DD2", "#16456E"])
 
 
@@ -403,8 +408,11 @@ def page2(pdf, ctx, prefix):
     nov = ctx.novel
 
     ax = fig.add_subplot(gs[0, 0])
-    rows, cols = D.NOVELTY_ORDER, D.MECHANISM_ORDER
-    ct = D.crosstab(nov, "novelty_support", "primary_mechanism")
+    # Rescue records (variant_created / population_known) bypass the projection grid in
+    # the engine, so they are excluded here (shown on the rescue page instead).
+    grid_recs = [r for r in nov if D.get_path(r, "primary_mechanism") in ARTIFACT_MECHS]
+    rows, cols = D.NOVELTY_ORDER, ARTIFACT_MECHS
+    ct = D.crosstab(grid_recs, "novelty_support", "primary_mechanism")
     mat = [[ct.get((rl, cl), 0) for cl in cols] for rl in rows]
     borders = [[CLASS_COLORS.get(projected_class(rl, cl)) for cl in cols] for rl in rows]
     _heatmap(ax, mat, [SUPPORT_LABEL[r] for r in rows], [MECH_LABEL[c] for c in cols],
@@ -429,7 +437,7 @@ def page2(pdf, ctx, prefix):
 
     ax = fig.add_subplot(gs[1, 0])
     mc = D.count_field(nov, "primary_mechanism")
-    present = [m for m in D.MECHANISM_ORDER if mc.get(m, 0) > 0]
+    present = [m for m in ARTIFACT_MECHS if mc.get(m, 0) > 0]
     _hbar(ax, [MECH_LABEL[m] for m in present], [mc.get(m, 0) for m in present],
           [MECH_COLORS[m] for m in present], "Dominant artifact mechanism",
           "engine priority: mapping > non-canonical > RT-switch > intra-priming")

@@ -25,8 +25,11 @@ random_seed            = 1
 [axis_novelty_support]
 sj_min_uniq_reads          = 3      # STAR SJ.tab n_uniq to corroborate a novel junction
 sj_require_canonical_motif = true   # require SJ.tab motif code >= 1
-consensus_min_callers      = 999    # RESERVED: parsed but NOT yet consumed by the rule
-                                    # engine (multi-caller agreement gate unimplemented)
+consensus_min_callers      = 2      # a novel chain recovered by >= this many callers is
+                                    # consensus-supported; consumed by evaluate() when
+                                    # --caller-support (a `combine` matrix) is supplied and
+                                    # short-read support is UNKNOWN (promotes to MEDIUM, never
+                                    # HIGH). Matches the built-in default; raise to disable.
 
 # --- Axis B: artifact mechanism (engine-read where noted) --------------------
 # Priority order applied by the engine: mapping > noncanonical > rt_switch > degradation.

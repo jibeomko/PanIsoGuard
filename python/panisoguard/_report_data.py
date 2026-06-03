@@ -11,16 +11,8 @@ import os
 from collections import Counter, defaultdict
 
 
-# Canonical ordering / tiering of the 7 confidence classes (engine order).
-CONFIDENCE_ORDER = [
-    "HIGH_CONF_KNOWN",
-    "HIGH_CONF_NOVEL",
-    "MEDIUM_CONF_NOVEL",
-    "LOW_CONF_PARTIAL",
-    "PAN_REF_RESCUED_FALSE_NOVEL",
-    "AMBIGUOUS",
-    "ARTIFACT",
-]
+# Confidence-class display order lives in report.py (CLASS_ORDER), the single source of
+# truth for ordering/colour; the data layer stays presentation-agnostic.
 NOVELTY_ORDER = ["SUPPORTED", "PARTIAL", "UNSUPPORTED", "UNKNOWN"]
 MECHANISM_ORDER = [
     "none", "mapping_or_repeat", "noncanonical", "rt_switch",
