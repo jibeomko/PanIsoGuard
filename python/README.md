@@ -26,6 +26,9 @@ python -m panisoguard.report --prefix run --out run.report.pdf
 It reads `<prefix>.attribution.jsonl` (per-isoform verdict + evidence + rule_trace) and
 `<prefix>.provenance.log` (run metadata + the authoritative class tally).
 
+**See an example:** [`examples/report/showcase.report.pdf`](../examples/report/) — an 8-page
+report rendered from a fixture that exercises every page and axis.
+
 ## What the report shows
 
 | Page | Content |

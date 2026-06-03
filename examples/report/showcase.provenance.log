@@ -1,0 +1,24 @@
+# PanIsoGuard adjudicate provenance (SYNTHETIC SHOWCASE FIXTURE)
+tool_version	0.0.3
+ruleset_version	builtin-0.0.1
+sqanti3_version_target	6.0
+config	<built-in defaults>
+classification	showcase (synthetic demo)
+isoforms	showcase (synthetic demo)
+ref_gtf	showcase (synthetic demo)
+sj_tab	showcase (synthetic demo)
+bam	showcase (synthetic demo)
+axis.short_read	on
+axis.catalog	on
+axis.bam	on
+axis.variant	on
+axis.pangenome	on
+# confidence-class counts
+class.HIGH_CONF_KNOWN	9
+class.HIGH_CONF_NOVEL	7
+class.MEDIUM_CONF_NOVEL	14
+class.LOW_CONF_PARTIAL	14
+class.ARTIFACT	6
+class.PAN_REF_RESCUED_FALSE_NOVEL	5
+class.AMBIGUOUS	7
+total	62
