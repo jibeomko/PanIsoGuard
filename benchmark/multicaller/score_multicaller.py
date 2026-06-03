@@ -169,6 +169,19 @@ def main():
     union = agg(1)
     consensus = agg(args.min_callers)
 
+    # ---- precision/recall curve as the consensus threshold sweeps 1..n_callers ----
+    # Each operating point is the novel set retained by requiring ">= k callers".
+    # Raising k trades recall for precision; this is the curve a confidence layer
+    # should expose. f1 included so a single best operating point is identifiable.
+    max_k = max(by_support) if by_support else 1
+    pr_curve = []
+    for k in range(1, max_k + 1):
+        a = agg(k)
+        p, r = a['precision'], a['recall']
+        f1 = (2 * p * r / (p + r)) if (p == p and r == r and (p + r) > 0) else None
+        pr_curve.append(dict(min_callers=k, genuine=a['genuine'], false=a['false'],
+                             precision=p, recall=r, f1=f1))
+
     # ---- report ----
     print("=== per-caller novel discovery (vs SQANTI-SIM truth) ===")
     print(f"{'caller':10s} {'novel':>7s} {'genuine':>8s} {'false':>7s} "
@@ -195,6 +208,16 @@ def main():
           f"({union['precision']:.3f} -> {consensus['precision']:.3f}) "
           f"at recall {consensus['recall']:.3f} (of {total_genuine} truth genuine novels).")
 
+    print(f"\n=== precision/recall curve over consensus_min_callers ===")
+    print(f"{'>=k callers':>11s} {'genuine':>8s} {'false':>7s} {'precision':>10s} "
+          f"{'recall':>8s} {'F1':>7s}")
+    best = max(pr_curve, key=lambda p: (p['f1'] if p['f1'] is not None else -1))
+    for p in pr_curve:
+        star = "  <- max F1" if p is best else ""
+        f1s = f"{p['f1']:.3f}" if p['f1'] is not None else "   nan"
+        print(f"{p['min_callers']:11d} {p['genuine']:8d} {p['false']:7d} "
+              f"{p['precision']:10.3f} {p['recall']:8.3f} {f1s:>7s}{star}")
+
     if args.emit_metrics:
         metrics = dict(
             total_truth_genuine_novel=total_genuine,
@@ -209,40 +232,47 @@ def main():
             union=union,
             consensus=consensus,
             min_callers=args.min_callers,
+            pr_curve=pr_curve,
         )
         if args.engine_demo:
             metrics["engine_demo"] = json.loads(args.engine_demo)
+        callers = ",".join(sorted(per_caller))
         envelope = dict(
             protocol="multicaller",
-            scope="gencode_v49_chr22_3caller",
+            scope="gencode_v49_chr22_%dcaller" % len(per_caller),
             status="tracked",
             tool_version=args.tool_version,
             ruleset_version=args.ruleset_version,
             generated_utc=None,
             data_provenance=(
                 "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 simulated reads, one shared "
-                "minimap2 alignment). Three long-read callers run on that alignment: "
-                "FLAIR collapse, IsoQuant 3.x transcript models, Bambu 3.x novel "
-                "transcripts (NDR=0.5). Truth = SQANTI-SIM genuine_novel/known labels "
-                "(transcripts deleted-from vs kept-in the reduced annotation). No "
-                "private data."),
+                "minimap2 alignment). Long-read callers run on that alignment: "
+                "FLAIR collapse, IsoQuant 3.x transcript_models, Bambu 3.x novel "
+                "transcripts (NDR=0.5), ESPRESSO 1.4 novel_isoform, TALON 6.0 "
+                "(filtered whitelist, minCount 5). Truth = SQANTI-SIM "
+                "genuine_novel/known labels (transcripts deleted-from vs kept-in the "
+                "reduced annotation). Callers present in this run: " + callers +
+                ". No private data."),
             command=(
-                "panisoguard combine --gtf flair:F --gtf isoquant:I --gtf bambu:B "
-                "--ref-gtf chr22_modified.gtf --out matrix.tsv; "
-                "benchmark/multicaller/score_multicaller.py --matrix matrix.tsv "
-                "--truth truth.truth.tsv --gtf flair:F --gtf isoquant:I --gtf bambu:B "
-                "--emit-metrics metrics.json"),
+                "panisoguard combine --gtf <caller:gtf>... --ref-gtf chr22_modified.gtf "
+                "--out matrix.tsv; benchmark/multicaller/score_multicaller.py "
+                "--matrix matrix.tsv --truth truth.truth.tsv --gtf <caller:gtf>... "
+                "--emit-metrics metrics.json  (see benchmark/multicaller/run.sh)"),
             source=None,
             metrics=metrics,
             notes=(
-                "Caller-agnostic multi-caller integration. Single-caller novel calls "
-                "are mostly artifacts (precision rises monotonically with the number of "
-                "supporting callers); requiring >= min_callers raises novel-call "
-                "precision sharply at a modest recall cost. engine_demo confirms the "
-                "wired consensus axis reproduces this through `adjudicate "
+                "Caller-agnostic multi-caller integration over %d callers. "
+                "Single-caller novel calls are overwhelmingly artifacts (precision "
+                "rises monotonically with the number of supporting callers); requiring "
+                ">= min_callers raises novel-call precision sharply. The pr_curve sweeps "
+                "the consensus threshold 1..n: the F1-optimal threshold SCALES with the "
+                "number of callers (more callers -> require more agreement). engine_demo "
+                "confirms the wired consensus axis reproduces this through `adjudicate "
                 "--caller-support` on real caller output (long-read only, no short-read "
                 "SJ): a single caller yields 0 confident novel calls (all AMBIGUOUS), "
-                "while consensus promotes the cross-caller-agreed novels."),
+                "while consensus promotes the cross-caller-agreed novels. "
+                "consensus_min_callers is configurable (TOML); the default is 2." %
+                len(per_caller)),
         )
         with open(args.emit_metrics, 'w') as fh:
             json.dump(envelope, fh, indent=2, sort_keys=True)

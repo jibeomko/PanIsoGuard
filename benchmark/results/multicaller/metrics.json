@@ -1,29 +1,30 @@
 {
-  "command": "panisoguard combine --gtf flair:F --gtf isoquant:I --gtf bambu:B --ref-gtf chr22_modified.gtf --out matrix.tsv; benchmark/multicaller/score_multicaller.py --matrix matrix.tsv --truth truth.truth.tsv --gtf flair:F --gtf isoquant:I --gtf bambu:B --emit-metrics metrics.json",
-  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 simulated reads, one shared minimap2 alignment). Three long-read callers run on that alignment: FLAIR collapse, IsoQuant 3.x transcript models, Bambu 3.x novel transcripts (NDR=0.5). Truth = SQANTI-SIM genuine_novel/known labels (transcripts deleted-from vs kept-in the reduced annotation). No private data.",
+  "command": "panisoguard combine --gtf <caller:gtf>... --ref-gtf chr22_modified.gtf --out matrix.tsv; benchmark/multicaller/score_multicaller.py --matrix matrix.tsv --truth truth.truth.tsv --gtf <caller:gtf>... --emit-metrics metrics.json  (see benchmark/multicaller/run.sh)",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 simulated reads, one shared minimap2 alignment). Long-read callers run on that alignment: FLAIR collapse, IsoQuant 3.x transcript_models, Bambu 3.x novel transcripts (NDR=0.5), ESPRESSO 1.4 novel_isoform, TALON 6.0 (filtered whitelist, minCount 5). Truth = SQANTI-SIM genuine_novel/known labels (transcripts deleted-from vs kept-in the reduced annotation). Callers present in this run: bambu,espresso,flair,isoquant,talon. No private data.",
   "generated_utc": null,
   "metrics": {
     "consensus": {
-      "false": 13,
-      "genuine": 606,
-      "precision": 0.9789983844911146,
-      "recall": 0.788036410923277
+      "false": 130,
+      "genuine": 747,
+      "precision": 0.8517673888255416,
+      "recall": 0.9713914174252276
     },
     "engine_demo": {
       "baseline_confident_novel_precision": null,
       "baseline_confident_novel_recall": 0.0,
       "caller": "flair",
-      "consensus_confident_novel_precision": 0.978,
-      "consensus_confident_novel_recall": 0.56,
-      "consensus_false_rejected_specificity": 0.939,
+      "consensus_confident_novel_precision": 0.975,
+      "consensus_confident_novel_recall": 0.685,
+      "consensus_false_rejected_specificity": 0.912,
       "flair_false_novel": 148,
       "flair_genuine_novel": 730,
-      "promoted_ambiguous_to_low_conf_partial": 65,
-      "promoted_ambiguous_to_medium_conf_novel": 418,
+      "n_callers_in_matrix": 5,
+      "promoted_ambiguous_to_low_conf_partial": 80,
+      "promoted_ambiguous_to_medium_conf_novel": 513,
       "setting": "long_read_only_no_short_read_SJ"
     },
     "min_callers": 2,
-    "n_novel_chains": 1023,
+    "n_novel_chains": 1982,
     "per_caller": {
       "bambu": {
         "false": 143,
@@ -31,6 +32,13 @@
         "novel": 552,
         "precision": 0.7409420289855072,
         "recall": 0.5318595578673602
+      },
+      "espresso": {
+        "false": 18,
+        "genuine": 555,
+        "novel": 573,
+        "precision": 0.9685863874345549,
+        "recall": 0.7217165149544863
       },
       "flair": {
         "false": 139,
@@ -45,37 +53,96 @@
         "novel": 618,
         "precision": 0.982200647249191,
         "recall": 0.7893368010403121
+      },
+      "talon": {
+        "false": 1063,
+        "genuine": 697,
+        "novel": 1760,
+        "precision": 0.39602272727272725,
+        "recall": 0.9063719115734721
       }
     },
+    "pr_curve": [
+      {
+        "f1": 0.5525263540530717,
+        "false": 1222,
+        "genuine": 760,
+        "min_callers": 1,
+        "precision": 0.3834510595358224,
+        "recall": 0.988296488946684
+      },
+      {
+        "f1": 0.9076549210206561,
+        "false": 130,
+        "genuine": 747,
+        "min_callers": 2,
+        "precision": 0.8517673888255416,
+        "recall": 0.9713914174252276
+      },
+      {
+        "f1": 0.9440323668240054,
+        "false": 14,
+        "genuine": 700,
+        "min_callers": 3,
+        "precision": 0.9803921568627451,
+        "recall": 0.9102730819245773
+      },
+      {
+        "f1": 0.7404393816110659,
+        "false": 5,
+        "genuine": 455,
+        "min_callers": 4,
+        "precision": 0.9891304347826086,
+        "recall": 0.5916775032509753
+      },
+      {
+        "f1": 0.5976385104450499,
+        "false": 3,
+        "genuine": 329,
+        "min_callers": 5,
+        "precision": 0.9909638554216867,
+        "recall": 0.42782834850455137
+      }
+    ],
     "stratification": {
       "1": {
-        "false": 263,
-        "genuine": 141,
-        "precision": 0.349009900990099
+        "false": 1092,
+        "genuine": 13,
+        "precision": 0.011764705882352941
       },
       "2": {
-        "false": 9,
-        "genuine": 220,
-        "precision": 0.9606986899563319
+        "false": 116,
+        "genuine": 47,
+        "precision": 0.2883435582822086
       },
       "3": {
-        "false": 4,
-        "genuine": 386,
-        "precision": 0.9897435897435898
+        "false": 9,
+        "genuine": 245,
+        "precision": 0.9645669291338582
+      },
+      "4": {
+        "false": 2,
+        "genuine": 126,
+        "precision": 0.984375
+      },
+      "5": {
+        "false": 3,
+        "genuine": 329,
+        "precision": 0.9909638554216867
       }
     },
     "total_truth_genuine_novel": 769,
     "union": {
-      "false": 276,
-      "genuine": 747,
-      "precision": 0.7302052785923754,
-      "recall": 0.9713914174252276
+      "false": 1222,
+      "genuine": 760,
+      "precision": 0.3834510595358224,
+      "recall": 0.988296488946684
     }
   },
-  "notes": "Caller-agnostic multi-caller integration. Single-caller novel calls are mostly artifacts (precision rises monotonically with the number of supporting callers); requiring >= min_callers raises novel-call precision sharply at a modest recall cost. engine_demo confirms the wired consensus axis reproduces this through `adjudicate --caller-support` on real caller output (long-read only, no short-read SJ): a single caller yields 0 confident novel calls (all AMBIGUOUS), while consensus promotes the cross-caller-agreed novels.",
+  "notes": "Caller-agnostic multi-caller integration over 5 callers. Single-caller novel calls are overwhelmingly artifacts (precision rises monotonically with the number of supporting callers); requiring >= min_callers raises novel-call precision sharply. The pr_curve sweeps the consensus threshold 1..n: the F1-optimal threshold SCALES with the number of callers (more callers -> require more agreement). engine_demo confirms the wired consensus axis reproduces this through `adjudicate --caller-support` on real caller output (long-read only, no short-read SJ): a single caller yields 0 confident novel calls (all AMBIGUOUS), while consensus promotes the cross-caller-agreed novels. consensus_min_callers is configurable (TOML); the default is 2.",
   "protocol": "multicaller",
   "ruleset_version": "builtin-0.0.1",
-  "scope": "gencode_v49_chr22_3caller",
+  "scope": "gencode_v49_chr22_5caller",
   "source": null,
   "status": "tracked",
   "tool_version": "0.0.3"
