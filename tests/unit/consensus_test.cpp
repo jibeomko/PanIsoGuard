@@ -52,6 +52,30 @@ TEST_CASE("consensus merges callers by intron chain, preserving native IDs", "[c
   CHECK(iso[0].pig_id.rfind("PIG.", 0) == 0);
 }
 
+TEST_CASE("read_caller_support round-trips the combine matrix to native_id -> n_callers",
+          "[consensus]") {
+  // chainA: 2 callers (flair, isoquant); chainB: 1 caller; flair has two native IDs on
+  // chainA's caller to exercise the '|' id-join split.
+  const auto chainA = chain("chr1", Strand::kPlus, {{200, 300}, {400, 500}});
+  const auto chainB = chain("chr1", Strand::kPlus, {{200, 500}});
+  ConsensusBuilder b;
+  b.add("flair", "1-1_x", chainA);
+  b.add("flair", "1-2_x", chainA);  // second flair id on the same chain
+  b.add("isoquant", "transcript.9", chainA);
+  b.add("bambu", "n1", chainB);
+
+  const std::string path = "caller_support_roundtrip.tsv";
+  write_caller_support_matrix(path, b.build());
+
+  const auto support = read_caller_support(path);
+  // Every native running id on chainA maps to n_callers=2; chainB's id maps to 1.
+  CHECK(support.at("1-1_x") == 2);
+  CHECK(support.at("1-2_x") == 2);
+  CHECK(support.at("transcript.9") == 2);
+  CHECK(support.at("n1") == 1);
+  CHECK(support.count("absent") == 0);
+}
+
 TEST_CASE("consensus annotates known/novel against a catalog", "[consensus][catalog]") {
   const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
   const auto known = chain("chr1", Strand::kPlus, {{200, 300}, {400, 500}});  // T1: known

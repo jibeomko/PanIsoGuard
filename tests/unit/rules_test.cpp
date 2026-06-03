@@ -85,6 +85,48 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
 }
 
+TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel chain", "[rules]") {
+  const RuleEngine eng;  // defaults: consensus_min_callers = 2
+
+  // A novel isoform with NO short-read/catalog axis (UNKNOWN support) and no artifact
+  // mechanism is held AMBIGUOUS by default...
+  EvidenceVector base = novel_ev(0, 0);
+  base.sj_evaluable = false;
+  base.n_novel_junctions = 0;
+  CHECK(eng.evaluate(base).confidence == ConfidenceClass::kAmbiguous);
+
+  // ...but >= 2 independent callers recovering the chain promotes it to MEDIUM (never HIGH:
+  // caller agreement is methodological, not experimental, corroboration).
+  EvidenceVector consensus = base;
+  consensus.consensus_evaluable = true;
+  consensus.n_callers = 3;
+  Verdict vc = eng.evaluate(consensus);
+  CHECK(vc.confidence == ConfidenceClass::kMediumConfNovel);
+  CHECK_FALSE(vc.rule_trace.empty());
+
+  // A single caller does not reach the gate -> still AMBIGUOUS.
+  EvidenceVector single = base;
+  single.consensus_evaluable = true;
+  single.n_callers = 1;
+  CHECK(eng.evaluate(single).confidence == ConfidenceClass::kAmbiguous);
+
+  // Consensus + an artifact mechanism (non-canonical) -> LOW_CONF_PARTIAL, not MEDIUM.
+  EvidenceVector mech = consensus;
+  mech.noncanonical = true;
+  CHECK(eng.evaluate(mech).confidence == ConfidenceClass::kLowConfPartial);
+
+  // A strong mapping artifact still dominates consensus -> ARTIFACT.
+  EvidenceVector mapping = consensus;
+  mapping.bam_evaluable = true;
+  mapping.bam_n_spanning_total = 10;
+  mapping.bam_max_frac_low_mapq = 0.9;
+  CHECK(eng.evaluate(mapping).confidence == ConfidenceClass::kArtifact);
+
+  // Ablating the consensus axis reverts the promotion (AMBIGUOUS again).
+  CHECK(eng.with_axis_disabled("consensus").evaluate(consensus).confidence ==
+        ConfidenceClass::kAmbiguous);
+}
+
 TEST_CASE("rules: known/partial categories pass through", "[rules]") {
   EvidenceVector fsm;
   fsm.structural_category = "full-splice_match";

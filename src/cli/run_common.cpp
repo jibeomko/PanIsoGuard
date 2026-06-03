@@ -4,9 +4,11 @@
 #include <map>
 #include <memory>
 #include <stdexcept>
+#include <unordered_map>
 #include <utility>
 
 #include "panisoguard/bed12.hpp"
+#include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/sj_tab.hpp"
@@ -33,6 +35,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--haplotype-provenance"){ c.haplotype_provenance = next("--haplotype-provenance"); return true; }
   if (a == "--pangenome-junctions"){ c.pangenome_junctions = next("--pangenome-junctions"); return true; }
   if (a == "--pangenome-provenance"){ c.pangenome_provenance = next("--pangenome-provenance"); return true; }
+  if (a == "--caller-support")     { c.caller_support = next("--caller-support"); return true; }
   if (a == "--config")             { c.config = next("--config"); return true; }
   return false;
 }
@@ -121,6 +124,15 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
                  pangenome.size(), c.pangenome_provenance.c_str());
   }
 
+  std::unordered_map<std::string, int> caller_support;
+  const std::unordered_map<std::string, int>* caller_support_ptr = nullptr;
+  if (!c.caller_support.empty()) {
+    caller_support = read_caller_support(c.caller_support);
+    caller_support_ptr = &caller_support;
+    std::fprintf(stderr, "read caller-support for %zu native isoform id(s) (consensus axis)\n",
+                 caller_support.size());
+  }
+
   run.engine = c.config.empty() ? RuleEngine() : RuleEngine::from_toml(c.config);
 
   AdjudicateInputs in;
@@ -133,6 +145,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.haplotype_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
   in.pangenome = pangenome_ptr;
   in.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);
+  in.caller_support = caller_support_ptr;
   run.results = adjudicate(in, run.engine);
   return run;
 }

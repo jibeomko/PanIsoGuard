@@ -22,6 +22,7 @@ struct CommonArgs {
   std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown
   std::string pangenome_junctions;                // graph-supported junction file (pangenome axis)
   std::string pangenome_provenance = "unknown";   // population|external|sample_derived|unknown
+  std::string caller_support;                     // `combine` matrix (multi-caller consensus axis)
   std::string config;
 };
 

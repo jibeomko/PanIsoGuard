@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "panisoguard/fingerprint.hpp"
@@ -58,5 +59,12 @@ class ConsensusBuilder {
 // Write the caller-support matrix TSV (one row per ConsensusIsoform).
 void write_caller_support_matrix(const std::string& path,
                                  const std::vector<ConsensusIsoform>& isoforms);
+
+// Load a `combine` caller-support matrix into a native_id -> n_callers map, for
+// feeding the multi-caller consensus axis into `adjudicate` (--caller-support).
+// Every native running ID (across all callers, parsed from the native_ids column)
+// maps to the number of distinct callers that recovered its integrated intron chain,
+// so adjudicate can look up the caller-support of each SQANTI record by its id.
+std::unordered_map<std::string, int> read_caller_support(const std::string& path);
 
 }  // namespace panisoguard

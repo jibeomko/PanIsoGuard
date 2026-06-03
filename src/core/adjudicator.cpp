@@ -22,6 +22,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
                               const HaplotypeProvider* haplotype, bool haplotype_circular,
                               const PangenomeJunctions* pangenome, bool pangenome_circular,
+                              const std::unordered_map<std::string, int>* caller_support,
                               const RuleConfig& cfg,
                               std::unordered_map<std::string, JunctionBamFeatures>& bam_cache) {
   EvidenceVector ev;
@@ -35,6 +36,17 @@ EvidenceVector build_evidence(const SqantiRecord& r,
   ev.noncanonical = (r.all_canonical == "non_canonical");
   ev.percA_evaluable = !sqanti_is_na(r.perc_A_downstream_TTS);
   ev.perc_A_downstream_TTS = r.perc_A_downstream_TTS;
+
+  // Multi-caller consensus axis: how many independent callers recovered this isoform's
+  // intron chain (from a `combine` matrix). Keyed by the native id, independent of the
+  // reference catalog -- it is methodological corroboration, not a novel-junction check.
+  if (caller_support != nullptr) {
+    auto cs = caller_support->find(r.isoform);
+    if (cs != caller_support->end()) {
+      ev.consensus_evaluable = true;
+      ev.n_callers = cs->second;
+    }
+  }
 
   // Novel-junction axes (short-read corroboration + BAM mapping features) require
   // the caller chain AND a catalog to know which junctions are novel.
@@ -145,7 +157,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.bio_polyA_motif_found = r.polyA_motif_found;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
-                                  engine.config(), bam_cache);
+                                  in.caller_support, engine.config(), bam_cache);
     res.verdict = engine.evaluate(res.evidence);
     out.push_back(std::move(res));
   }

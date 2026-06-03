@@ -19,9 +19,9 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   if (auto ns = tbl["axis_novelty_support"].as_table()) {
     c.sj_min_uniq_reads = static_cast<int>((*ns)["sj_min_uniq_reads"].value_or<int64_t>(c.sj_min_uniq_reads));
     c.sj_require_canonical_motif = (*ns)["sj_require_canonical_motif"].value_or(c.sj_require_canonical_motif);
-    // RESERVED: parsed and stored, but the multi-caller agreement gate is not yet
-    // wired into evaluate() (consensus_evaluable/n_callers are not populated). Kept
-    // for forward config compatibility; remains inert until the gate is implemented.
+    // Multi-caller agreement gate: a novel chain recovered by >= this many callers is
+    // consensus-supported (consumed by evaluate() when --caller-support populates
+    // consensus_evaluable/n_callers; inert otherwise).
     c.consensus_min_callers = static_cast<int>((*ns)["consensus_min_callers"].value_or<int64_t>(c.consensus_min_callers));
   }
   if (auto art = tbl["axis_artifact"].as_table()) {
@@ -176,8 +176,22 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   ConfidenceClass cls;
   if (sup == NoveltySupport::kUnknown) {
     // A strong mapping artifact is decisive even when short-read support is not
-    // evaluable; otherwise the call is held as AMBIGUOUS.
-    cls = (mech == Mechanism::kMapping) ? ConfidenceClass::kArtifact : ConfidenceClass::kAmbiguous;
+    // evaluable. Otherwise, multi-caller consensus can corroborate the novel chain:
+    // >= consensus_min_callers independent callers recovering the same intron chain is
+    // methodological (not experimental) support, so it promotes only to MEDIUM at best,
+    // never HIGH. With neither signal the call is held AMBIGUOUS.
+    if (mech == Mechanism::kMapping) {
+      cls = ConfidenceClass::kArtifact;
+    } else if (cfg_.use_consensus && ev.consensus_evaluable &&
+               ev.n_callers >= cfg_.consensus_min_callers) {
+      cls = (mech == Mechanism::kNone) ? ConfidenceClass::kMediumConfNovel
+                                       : ConfidenceClass::kLowConfPartial;
+      trace("caller-consensus n_callers=" + std::to_string(ev.n_callers) + " >= " +
+            std::to_string(cfg_.consensus_min_callers) +
+            " corroborates the novel chain (no short-read axis) -> consensus-supported");
+    } else {
+      cls = ConfidenceClass::kAmbiguous;
+    }
   } else if (sup == NoveltySupport::kSupported) {
     cls = (mech == Mechanism::kNone) ? ConfidenceClass::kHighConfNovel
                                      : ConfidenceClass::kMediumConfNovel;
@@ -207,6 +221,7 @@ RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
   else if (axis == "degradation")  e.cfg_.use_degradation = false;
   else if (axis == "variant")      e.cfg_.use_variant = false;
   else if (axis == "pangenome")    e.cfg_.use_pangenome = false;
+  else if (axis == "consensus")    e.cfg_.use_consensus = false;
   return e;
 }
 

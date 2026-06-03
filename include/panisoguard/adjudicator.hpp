@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "panisoguard/bam_features.hpp"
@@ -42,6 +43,7 @@ struct AdjudicateInputs {
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
   const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)
   bool pangenome_circular = false;                           // true if junction-set provenance is sample-derived/unknown
+  const std::unordered_map<std::string, int>* caller_support = nullptr;  // optional: native_id -> n_callers (consensus axis)
 };
 
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller

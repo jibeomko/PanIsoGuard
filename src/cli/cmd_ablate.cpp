@@ -28,7 +28,7 @@ void usage() {
       "Re-runs the rule engine with one evidence axis disabled at a time and reports\n"
       "per-axis confidence-class changes vs the full model.\n"
       "Axes: short_read, mapping, noncanonical, rt_switch, degradation, variant,\n"
-      "      pangenome (default: all; an axis with no input simply yields 0 changes).\n");
+      "      pangenome, consensus (default: all; an axis with no input simply yields 0 changes).\n");
 }
 
 }  // namespace
@@ -59,7 +59,7 @@ int cmd_ablate(int argc, char** argv) {
     return 1;
   }
   if (axes.empty()) {
-    axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome"};
+    axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome", "consensus"};
   }
 
   try {

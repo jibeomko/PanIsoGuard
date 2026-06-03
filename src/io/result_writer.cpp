@@ -76,7 +76,9 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
         << "\"pangenome_rescue\":" << (e.pangenome_rescue ? "true" : "false") << ","
         << "\"pangenome_circular\":" << (e.pangenome_circular ? "true" : "false") << ","
-        << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome
+        << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome << ","
+        << "\"consensus_evaluable\":" << (e.consensus_evaluable ? "true" : "false") << ","
+        << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null")
         << "},";
     // graph_trace: the same evidence re-expressed under the splice-graph framing
     // (docs/method_graph.md) -- a candidate isoform is a path through the gene-local

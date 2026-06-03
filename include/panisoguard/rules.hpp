@@ -13,8 +13,8 @@ struct RuleConfig {
   int sj_min_uniq_reads = 3;             // STAR SJ.tab n_uniq to corroborate a novel junction
   bool sj_require_canonical_motif = true;
   double perc_A_degradation_threshold = 60.0;  // SQANTI3 intra-priming default: keep <60, flag >=60
-  int consensus_min_callers = 999;       // RESERVED: parsed but not yet consumed by
-                                         // evaluate() (multi-caller gate unimplemented)
+  int consensus_min_callers = 2;         // a novel chain recovered by >= this many callers
+                                         // is consensus-supported (when --caller-support given)
   // BAM (mapping) axis
   int bam_min_mapq = 20;
   int bam_softclip_min_bp = 20;
@@ -31,6 +31,7 @@ struct RuleConfig {
   bool use_degradation = true;
   bool use_variant = true;
   bool use_pangenome = true;
+  bool use_consensus = true;
   std::string sqanti3_version_target = "6.0";
   std::string ruleset_version = "builtin-0.0.1";
 };

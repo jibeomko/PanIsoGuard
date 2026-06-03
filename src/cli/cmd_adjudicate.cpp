@@ -27,6 +27,7 @@ void usage() {
       "  --haplotype-provenance X     rna_derived|wgs|external|unknown (default unknown=circular-risk)\n"
       "  --pangenome-junctions PATH   graph-supported splice junctions (pangenome reference-bias axis; optional)\n"
       "  --pangenome-provenance X     population|external|sample_derived|unknown (default unknown=circular-risk)\n"
+      "  --caller-support PATH        `panisoguard combine` matrix for the multi-caller consensus axis (optional)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n");
 }

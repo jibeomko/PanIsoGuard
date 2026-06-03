@@ -26,7 +26,12 @@ on two axes; the binned pair is projected to one confidence class.
 
 - **Axis A — novelty support** (from short-read `SJ.tab` corroboration of the
   isoform's novel junctions): `SUPPORTED` / `PARTIAL` / `UNSUPPORTED`, or `UNKNOWN`
-  when the axis is not evaluable.
+  when the axis is not evaluable. When short-read corroboration is `UNKNOWN`,
+  **multi-caller consensus** (`--caller-support`, from a `panisoguard combine`
+  matrix) can stand in as a *weaker, methodological* form of support: a novel chain
+  independently recovered by ≥ `consensus_min_callers` callers is corroborated, but
+  only enough to reach `MEDIUM_CONF_NOVEL`, never `HIGH` (caller agreement is not
+  orthogonal experimental evidence).
 - **Axis B — artifact mechanism**: `none` / `mapping_or_repeat` / `noncanonical` /
   `rt_switch` / `degradation` / `variant_created`. An axis whose input is absent is
   `not_evaluable` — a soft-skip, never silently counted for or against.
@@ -39,6 +44,7 @@ on two axes; the binned pair is projected to one confidence class.
 | mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary** fractions gate this mechanism; soft-clip / indel-near fractions are also computed and reported but do not currently drive the verdict | `--bam` |
 | noncanonical / rt_switch / degradation | SQANTI3 priors `all_canonical` / `RTS_stage` / `perc_A_downstream_TTS≥60` | always (from classification) |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
+| caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
 
 ## Mechanism priority and its rationale
 
@@ -78,8 +84,14 @@ fired conditions are listed in `rule_trace`.
    - `PARTIAL × mechanism → LOW_CONF_PARTIAL`
    - `UNSUPPORTED × none → LOW_CONF_PARTIAL`
    - `UNSUPPORTED × mechanism → ARTIFACT`
-   - `UNKNOWN` support → `AMBIGUOUS`, except `UNKNOWN × strong mapping artifact →
-     ARTIFACT` (a decisive mapping signal stands without short-read support).
+   - `UNKNOWN` support → `AMBIGUOUS`, except:
+     - `UNKNOWN × strong mapping artifact → ARTIFACT` (a decisive mapping signal
+       stands without short-read support); and
+     - `UNKNOWN × caller-consensus (≥ consensus_min_callers, no mapping artifact) →
+       MEDIUM_CONF_NOVEL` (mechanism `none`) or `LOW_CONF_PARTIAL` (any other
+       mechanism). Multi-caller agreement corroborates the chain methodologically
+       when the short-read axis is silent; a strong mapping artifact still preempts
+       it. Disable with `ablate --without consensus`.
 - Pass-through: `full-splice_match → HIGH_CONF_KNOWN`; `incomplete-splice_match →
   LOW_CONF_PARTIAL`; non-targeted categories → `AMBIGUOUS`.
 

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "panisoguard/tsv.hpp"
+
 namespace panisoguard {
 namespace {
 
@@ -146,6 +148,65 @@ void write_caller_support_matrix(const std::string& path,
         << '\t' << join_callers(iso.support) << '\t' << novelty << '\t'
         << join_native_ids(iso.support) << '\n';
   }
+}
+
+std::unordered_map<std::string, int> read_caller_support(const std::string& path) {
+  std::ifstream in(path);
+  if (!in) throw std::runtime_error("cannot open caller-support matrix: " + path);
+
+  std::unordered_map<std::string, int> support;
+  std::string line;
+  std::size_t lineno = 0;
+  int col_callers = -1, col_native = -1;
+  while (std::getline(in, line)) {
+    ++lineno;
+    chomp(line);
+    if (line.empty() || line[0] == '#') continue;
+    std::vector<std::string> f = split_tsv(line);
+    if (lineno == 1 || col_callers < 0) {
+      // Header is name-indexed so the matrix survives column reordering / additions.
+      TsvHeader h(f);
+      col_callers = h.col("n_callers");
+      col_native = h.col("native_ids");
+      if (col_callers < 0 || col_native < 0) {
+        throw std::runtime_error("caller-support matrix " + path +
+                                 ": missing required column(s) n_callers/native_ids "
+                                 "(is this a `panisoguard combine` matrix?)");
+      }
+      continue;
+    }
+    if (static_cast<int>(f.size()) <= std::max(col_callers, col_native)) continue;
+    const int n_callers =
+        static_cast<int>(parse_int_field(f[col_callers], "n_callers", "caller-support matrix", lineno));
+    // native_ids column is "caller1=id1|id2;caller2=id3" -- explode it so every native
+    // running id maps to the per-chain caller count.
+    const std::string& native = f[col_native];
+    std::size_t gstart = 0;
+    while (gstart <= native.size()) {
+      const std::size_t semi = native.find(';', gstart);
+      const std::string group =
+          native.substr(gstart, semi == std::string::npos ? std::string::npos : semi - gstart);
+      const std::size_t eq = group.find('=');
+      if (eq != std::string::npos) {
+        const std::string ids = group.substr(eq + 1);
+        std::size_t istart = 0;
+        while (istart <= ids.size()) {
+          const std::size_t bar = ids.find('|', istart);
+          const std::string id =
+              ids.substr(istart, bar == std::string::npos ? std::string::npos : bar - istart);
+          if (!id.empty()) {
+            int& cur = support[id];
+            if (n_callers > cur) cur = n_callers;  // an id should be unique, but keep the max defensively
+          }
+          if (bar == std::string::npos) break;
+          istart = bar + 1;
+        }
+      }
+      if (semi == std::string::npos) break;
+      gstart = semi + 1;
+    }
+  }
+  return support;
 }
 
 }  // namespace panisoguard
