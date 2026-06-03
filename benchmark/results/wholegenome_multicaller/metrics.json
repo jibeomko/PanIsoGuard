@@ -1,0 +1,54 @@
+{
+  "command": "panisoguard combine --gtf <caller:gtf>... --ref-gtf gencode.v49.gtf --out matrix.tsv; benchmark/wholegenome_multicaller/score_wholegenome.py --matrix matrix.tsv --genome GRCh38.fa --gtf <caller:gtf>... --emit-metrics metrics.json",
+  "data_provenance": "REAL public sample gm12878, whole-genome, GRCh38/GENCODE v49. Callers run fresh on the one shared minimap2 genome alignment. No ground truth on real data: consensus is validated by an ORTHOGONAL, caller-independent signal -- splice-motif canonicality (GT-AG/GC-AG/AT-AC). No private data.",
+  "generated_utc": null,
+  "metrics": {
+    "all_novel": {
+      "all_canonical": 279,
+      "frac_canonical": 0.9789473684210527,
+      "n": 285
+    },
+    "consensus_ge2": {
+      "all_canonical": 31,
+      "frac_canonical": 1.0,
+      "n": 31
+    },
+    "n_resolved_novel_chains": 285,
+    "n_unresolved": 0,
+    "per_caller_novel": {
+      "bambu": 195,
+      "espresso": 9,
+      "isoquant": 113
+    },
+    "sample": "gm12878",
+    "single_caller": {
+      "all_canonical": 248,
+      "frac_canonical": 0.9763779527559056,
+      "n": 254
+    },
+    "stratification": {
+      "1": {
+        "all_canonical": 248,
+        "frac_canonical": 0.9763779527559056,
+        "n_chains": 254
+      },
+      "2": {
+        "all_canonical": 30,
+        "frac_canonical": 1.0,
+        "n_chains": 30
+      },
+      "3": {
+        "all_canonical": 1,
+        "frac_canonical": 1.0,
+        "n_chains": 1
+      }
+    }
+  },
+  "notes": "Whole-genome real-data extension of the chr22 multicaller protocol; HONEST result, read with its caveats. (1) DISAGREEMENT holds at genome scale: of the novel chains, the large majority are single-caller and only a small minority are recovered by >= 2 callers -- callers disagree on most novel calls even on real data, the same motivation as chr22. (2) QUALITY direction is correct but the headroom is SMALL: multi-caller novel chains are 100% canonical while single-caller are already ~97.6% canonical. Production callers at recommended settings (IsoQuant, Bambu, ESPRESSO) are internally stringent, so they emit few non-canonical artifacts for consensus to filter -- a ceiling effect, and the absolute novel count is small (real cell line, most transcripts are known). The strong artifact-filtering on chr22 (single-caller precision 0.012) came largely from the LIBERAL end (unfiltered TALON's false novels); at recommended settings callers are cleaner. On real data with stringent callers, the practical value of consensus is the reproducible high-confidence core + confidence stratification, not large-scale artifact removal. Small N: interpret the +canonical delta directionally.",
+  "protocol": "wholegenome_multicaller",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gm12878_wholegenome_3caller",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}
