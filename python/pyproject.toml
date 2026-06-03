@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "panisoguard-report"
+version = "0.0.3"
+description = "PDF report generator for PanIsoGuard adjudication output (SQANTI3-style summary)"
+readme = "README.md"
+requires-python = ">=3.8"
+# matplotlib is the only third-party dependency; the C++ core stays dependency-free.
+dependencies = ["matplotlib>=3.4"]
+
+[project.scripts]
+panisoguard-report = "panisoguard.report:main"
+
+[tool.setuptools]
+packages = ["panisoguard"]

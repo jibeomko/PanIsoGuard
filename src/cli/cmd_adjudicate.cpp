@@ -29,7 +29,10 @@ void usage() {
       "  --pangenome-provenance X     population|external|sample_derived|unknown (default unknown=circular-risk)\n"
       "  --caller-support PATH        `panisoguard combine` matrix for the multi-caller consensus axis (optional)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
-      "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n");
+      "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n"
+      "\n"
+      "For a SQANTI3-style PDF summary of the output:\n"
+      "  pip install ./python && panisoguard-report --prefix PREFIX   (-> PREFIX.report.pdf)\n");
 }
 
 }  // namespace
