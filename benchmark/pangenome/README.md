@@ -60,33 +60,37 @@ python3 gate1_check.py /path/to/panisoguard testdata/sample_junctions.tsv
 (genomic coordinates only) so `gate1_check.py` runs self-contained (it is also the
 `integration_pangenome_gate1` CTest).
 
-## Whole-genome specificity on real public data (GM12878)
+## Whole-genome specificity on real public data (GM12878 + K562)
 
-Extends the GATE-1 specificity from chr22 to **whole-genome** on a **real, fully public**
-sample: GM12878 (NA12878) ONT direct-RNA from ENCODE (ENCSR368UNC), classified with
-SQANTI3 vs GENCODE v49 → **13,017 novel isoforms**, adjudicated against the
-**whole-genome** HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
-chr1-22/X/Y paths → 71,435 junctions). NA12878 is out of the HPRC graph (non-circular).
+Extends the GATE-1 specificity from chr22 to **whole-genome** on **two independent,
+fully public** samples: GM12878 (NA12878) and K562 ONT direct-RNA from ENCODE
+(ENCSR368UNC, ENCSR917JIA), each classified with SQANTI3 vs GENCODE v49 and adjudicated
+against the **whole-genome** HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
+chr1-22/X/Y paths → 71,435 junctions). Both samples are out of the HPRC graph (non-circular).
 
 ```text
-pangenome false rescues:                0 / 13,017 novel isoforms
-novel junctions within +/-2 bp of a population deletion:  0   (genuinely no coincidence)
-BAM mapping axis: novel isoforms flagged as mapping artifacts:  390
+                       novel isoforms   pangenome false rescues   novel jx within +/-2bp of a deletion
+GM12878                    13,017                  0                          0
+K562                       62,723                  0                          2  (of 139,469 introns; chance level)
+combined                   75,740                  0                          ~chance
+GM12878 BAM mapping axis: 390 novel isoforms flagged as mapping artifacts.
 ```
 
-**Honest reading.** Zero false rescues confirms whole-genome specificity on real data.
-A proximity scan shows the novel junctions are *not* near population deletions at all —
-they are real splice sites, not reference bias. So **reference-bias-via-population-deletion
-is rare in typical samples**, and the pangenome axis is best understood as a
-**high-specificity guardrail** (it will not over-promote) rather than a high-yield
-discovery axis. Recorded in
-[../results/pangenome_gm12878](../results/pangenome_gm12878); fully reproducible from
-public ENCODE/HPRC inputs.
+**Honest reading.** Zero false rescues across **75,740 novel isoforms** (two samples)
+confirms whole-genome specificity on real data. A proximity scan shows novel junctions
+do **not** coincide with population deletions (the handful within a few bp are at chance
+level among ~190k introns) — they are real splice sites, not reference bias. So
+**reference-bias-via-population-deletion is genuinely rare in typical samples**, and the
+pangenome axis is best understood as a **high-specificity guardrail** (it will not
+over-promote) rather than a high-yield discovery axis. Recorded in
+[../results/pangenome_public](../results/pangenome_public); fully reproducible from
+public ENCODE/HPRC inputs (no private data).
 
 ## Scope / what remains
 
 Validated for **specificity** at chr22 (constructed sensitivity/firewall) and
-**whole-genome** scale (real public GM12878) on real HPRC v1.1. The derivation uses graph
+**whole-genome** scale (two real public samples, GM12878 + K562) on real HPRC v1.1. The
+derivation uses graph
 **deletions** (the dominant reference-bias mechanism); insertion/inversion-based
 junctions and an **in-process** graph traversal (`-DWITH_PANGENOME_LIB`, gbwtgraph/GBZ)
 remain future work — today the axis consumes the pre-extracted junction file.

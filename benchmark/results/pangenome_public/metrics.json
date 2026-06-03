@@ -1,0 +1,27 @@
+{
+  "command": "ENCODE long-read RNA GTF -> SQANTI3 qc -> panisoguard adjudicate --pangenome-junctions <whole-genome HPRC deletions> --pangenome-provenance population",
+  "data_provenance": "TWO real PUBLIC samples: GM12878 (NA12878) ONT dRNA (ENCODE ENCSR368UNC) and K562 ONT dRNA (ENCSR917JIA); SQANTI3 vs GENCODE v49. Pangenome junctions = whole-genome HPRC v1.1 Minigraph-Cactus deletions >=50bp (71,435 junctions, all chr1-22/X/Y). Both samples are OUT of the HPRC graph's 47 assembly samples (non-circular).",
+  "generated_utc": null,
+  "metrics": {
+    "samples": 2,
+    "combined_novel_isoforms": 75740,
+    "combined_novel_introns": 190713,
+    "wholegenome_graph_junctions": 71435,
+    "pangenome_false_rescues": 0,
+    "exact_junction_coincidences": 0,
+    "gm12878_novel": 13017,
+    "gm12878_false_rescues": 0,
+    "gm12878_proximity_within_2bp": 0,
+    "gm12878_mapping_artifacts": 390,
+    "k562_novel": 62723,
+    "k562_false_rescues": 0,
+    "k562_proximity_within_2bp": 2
+  },
+  "notes": "Whole-genome pangenome SPECIFICITY on TWO independent real public samples (GM12878 + K562), extending GATE-1 from chr22 to whole-genome on real data: 0 false rescues across 75,740 novel isoforms / 190,713 novel introns vs 71,435 whole-genome HPRC population-deletion junctions. NO novel junction exactly coincides with a population deletion (near-misses at chance level), so reference-bias-via-population-deletion is genuinely rare -- the pangenome axis is a high-specificity guardrail, not a high-yield discovery axis. Honest null on the discovery question, with strong specificity. Fully reproducible from public ENCODE/HPRC inputs (no private data).",
+  "protocol": "pangenome_public",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gm12878_k562_hprc_v1.1_wholegenome",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}
