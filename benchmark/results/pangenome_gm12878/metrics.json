@@ -1,0 +1,23 @@
+{
+  "command": "ENCODE ENCSR368UNC GM12878 ONT dRNA GTF -> SQANTI3 qc -> panisoguard adjudicate --pangenome-junctions <whole-genome HPRC deletions> --pangenome-provenance population --bam <ONT dRNA>",
+  "data_provenance": "REAL PUBLIC data: GM12878 (NA12878) ONT direct-RNA, ENCODE ENCSR368UNC (rep1 ENCFF957IFS); SQANTI3 vs GENCODE v49. Pangenome junctions = whole-genome HPRC v1.1 Minigraph-Cactus deletions >=50bp (71,435 junctions, all chr1-22/X/Y). NA12878 is OUT of the HPRC graph's 47 assembly samples (non-circular).",
+  "generated_utc": null,
+  "metrics": {
+    "novel_isoforms": 13017,
+    "novel_isoform_introns": 51244,
+    "wholegenome_graph_junctions": 71435,
+    "pangenome_false_rescues": 0,
+    "proximity_within_0bp": 0,
+    "proximity_within_2bp": 0,
+    "proximity_within_5bp": 1,
+    "mapping_artifacts_flagged": 390,
+    "sample_out_of_graph": true
+  },
+  "notes": "Whole-genome pangenome SPECIFICITY on real public data (extends GATE-1 chr22 -> whole-genome): 0 false rescues among 13,017 real GM12878 novel isoforms vs 71,435 whole-genome HPRC population-deletion junctions. A proximity scan found NO novel junction within +/-2 bp of a population deletion -> genuinely no coincidence (not a matching-strictness artifact): the novel junctions are real splice sites, not population-deletion reference bias. So the pangenome axis is a high-specificity guardrail, not a high-yield discovery axis -- reference-bias-via-population-deletion is rare in typical samples. The BAM mapping axis additionally flagged 390 novel isoforms as mapping artifacts. Fully public/reproducible (no private data).",
+  "protocol": "pangenome_gm12878",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gm12878_ont_drna_hprc_v1.1_wholegenome",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

@@ -60,9 +60,33 @@ python3 gate1_check.py /path/to/panisoguard testdata/sample_junctions.tsv
 (genomic coordinates only) so `gate1_check.py` runs self-contained (it is also the
 `integration_pangenome_gate1` CTest).
 
+## Whole-genome specificity on real public data (GM12878)
+
+Extends the GATE-1 specificity from chr22 to **whole-genome** on a **real, fully public**
+sample: GM12878 (NA12878) ONT direct-RNA from ENCODE (ENCSR368UNC), classified with
+SQANTI3 vs GENCODE v49 → **13,017 novel isoforms**, adjudicated against the
+**whole-genome** HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
+chr1-22/X/Y paths → 71,435 junctions). NA12878 is out of the HPRC graph (non-circular).
+
+```text
+pangenome false rescues:                0 / 13,017 novel isoforms
+novel junctions within +/-2 bp of a population deletion:  0   (genuinely no coincidence)
+BAM mapping axis: novel isoforms flagged as mapping artifacts:  390
+```
+
+**Honest reading.** Zero false rescues confirms whole-genome specificity on real data.
+A proximity scan shows the novel junctions are *not* near population deletions at all —
+they are real splice sites, not reference bias. So **reference-bias-via-population-deletion
+is rare in typical samples**, and the pangenome axis is best understood as a
+**high-specificity guardrail** (it will not over-promote) rather than a high-yield
+discovery axis. Recorded in
+[../results/pangenome_gm12878](../results/pangenome_gm12878); fully reproducible from
+public ENCODE/HPRC inputs.
+
 ## Scope / what remains
 
-Validated at **chr22 scale** on real HPRC v1.1. The derivation currently uses graph
+Validated for **specificity** at chr22 (constructed sensitivity/firewall) and
+**whole-genome** scale (real public GM12878) on real HPRC v1.1. The derivation uses graph
 **deletions** (the dominant reference-bias mechanism); insertion/inversion-based
 junctions and an **in-process** graph traversal (`-DWITH_PANGENOME_LIB`, gbwtgraph/GBZ)
 remain future work — today the axis consumes the pre-extracted junction file.
