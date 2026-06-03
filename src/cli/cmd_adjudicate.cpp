@@ -31,7 +31,7 @@ void usage() {
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n"
       "\n"
-      "For a SQANTI3-style PDF summary of the output:\n"
+      "For a visual PDF summary of the output:\n"
       "  pip install ./python && panisoguard-report --prefix PREFIX   (-> PREFIX.report.pdf)\n");
 }
 

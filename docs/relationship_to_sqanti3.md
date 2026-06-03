@@ -73,3 +73,24 @@ classification, never computed by PanIsoGuard, and they do **not** enter the rul
 or change the verdict (which remains the deterministic path-level projection in
 [decision_engine.md](decision_engine.md)). They let a downstream user weigh SQANTI3's QC
 context alongside PanIsoGuard's independent verdict without PanIsoGuard re-deriving it.
+
+## Attribution, licensing & citation
+
+PanIsoGuard is an **independent project** and is **not affiliated with, endorsed by, or
+a derivative work of** SQANTI3 or its authors. It interoperates with SQANTI3 only by
+**reading SQANTI3's output file** (the classification TSV) as input: it bundles no
+SQANTI3 code, links to no SQANTI3 library, and does not invoke or redistribute SQANTI3.
+SQANTI3 is licensed **GPL-3.0**; because PanIsoGuard consumes SQANTI3's *output* (data
+about the user's own isoforms) at the file boundary rather than incorporating SQANTI3's
+source code, the GPL's copyleft does not extend to PanIsoGuard, whose own **MIT** license
+is unaffected. Any "in the style of SQANTI3" phrasing in this repository is purely
+descriptive (interoperability / comparison) and is not a claim of affiliation.
+
+If you use PanIsoGuard alongside SQANTI3 in a pipeline, please **cite SQANTI3**:
+
+> Pardo-Palacios, F.J., Arzalluz-Luque, A., *et al.* **SQANTI3: curation of long-read
+> transcriptomes for accurate identification of known and novel isoforms.** *Nature
+> Methods* (2024). <https://doi.org/10.1038/s41592-024-02229-2>
+
+(SQANTI and "SQANTI3" are names of their respective authors' work; used here only to
+identify the tool whose output PanIsoGuard consumes.)

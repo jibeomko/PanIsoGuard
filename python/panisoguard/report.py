@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """PanIsoGuard adjudication report -- a publication-grade multi-page PDF summary.
 
-Companion tool (keeps the C++ core dependency-free, like SQANTI3's separate report
-step). Consumes the files `panisoguard adjudicate` already writes -- it recomputes
-nothing about the isoforms, it only visualizes the verdicts and the evidence behind
-them:
+Companion tool (keeps the C++ core dependency-free): an optional Python post-process, in
+the spirit of -- but independent from, and copying no design or code of -- SQANTI3's
+separate report step. Consumes the files `panisoguard adjudicate` already writes -- it
+recomputes nothing about the isoforms, it only visualizes the verdicts and the evidence
+behind them:
 
     <prefix>.attribution.jsonl   per-isoform verdict + evidence + rule_trace (richest)
     <prefix>.provenance.log      run metadata, axis on/off, authoritative class tally

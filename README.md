@@ -23,6 +23,12 @@ transparent, auditable verdict (thresholds live in a runtime
 [`config/rules.default.toml`](config/rules.default.toml), and each verdict carries a
 `rule_trace`; see [docs/decision_engine.md](docs/decision_engine.md)).
 
+> PanIsoGuard is an **independent project**, not affiliated with or endorsed by the
+> SQANTI3 authors. It interoperates with SQANTI3 by reading its output file only (no
+> SQANTI3 code is bundled or linked; SQANTI3's GPL-3.0 does not reach PanIsoGuard's MIT
+> code). If you use SQANTI3 in your pipeline, please cite it — see
+> [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md#attribution-licensing--citation).
+
 Equivalently, each candidate isoform can be viewed as a **path through a gene-local
 splice graph** — novel junctions are edges absent from the known (reference) graph —
 and the same deterministic verdict can be read in those terms. This is a *framing*

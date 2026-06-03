@@ -1,10 +1,15 @@
 # `panisoguard-report` — PDF report for adjudication output
 
-A SQANTI3-style multi-page PDF that summarizes a `panisoguard adjudicate` run at a
-glance. It is a **companion tool**: the C++ core stays dependency-free (htslib only),
-and the report — like SQANTI3's own report step — is an optional Python post-process.
-It **recomputes nothing**; it only visualizes the verdicts and the evidence the engine
-already wrote.
+A multi-page PDF that summarizes a `panisoguard adjudicate` run at a glance — a visual
+QC report in the spirit of (but independent from) SQANTI3's separate report step. It is
+a **companion tool**: the C++ core stays dependency-free (htslib only), and the report
+is an optional Python post-process. It **recomputes nothing**; it only visualizes the
+verdicts and the evidence the engine already wrote.
+
+> PanIsoGuard is independent of and not affiliated with SQANTI3; this report visualizes
+> PanIsoGuard's *own* output and copies no SQANTI3 design or code. See
+> [../docs/relationship_to_sqanti3.md](../docs/relationship_to_sqanti3.md#attribution-licensing--citation)
+> for attribution and the SQANTI3 citation.
 
 ## Install
 
