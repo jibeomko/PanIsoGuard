@@ -263,8 +263,10 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | [docs/decision_engine.md](docs/decision_engine.md) | The 2-axis grid, rescue precedence, and the circularity firewall. |
 | [docs/method_graph.md](docs/method_graph.md) | The splice-graph framing: isoform = path, novel junction = edge, novelty = graph distance, and the `graph_trace`. |
 | [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md) | What PanIsoGuard consumes from SQANTI3 vs does not recompute; the `bio_flags` pass-through. |
+| [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md) | How `combine` relates to gffcompare / TAMA / Bambu-NDR, and where PanIsoGuard is actually differentiated. |
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What is verified and the truth-based validation plan. |
+| [CHANGELOG.md](CHANGELOG.md) · [docs/releasing.md](docs/releasing.md) | Changelog, and the release / bioconda runbook. |
 
 ## Repository layout
 
