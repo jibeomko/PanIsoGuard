@@ -28,6 +28,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Check version sync (CMake == pyproject == bioconda recipe)
+        run: python3 scripts/check_version_sync.py
+
       - name: Set up toolchain + htslib (micromamba)
         uses: mamba-org/setup-micromamba@v3
         with:

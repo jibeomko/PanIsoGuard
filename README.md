@@ -36,6 +36,13 @@ of the existing engine (no graph model or new algorithm); each verdict additiona
 carries a machine-readable `graph_trace` (novel-edge count, edge support, graph
 distance). See [docs/method_graph.md](docs/method_graph.md).
 
+## Contents
+
+- [When to use PanIsoGuard](#when-to-use-panisoguard) · [At a glance](#at-a-glance)
+- [Subcommands](#subcommands) · [Usage](#usage) · [Quick example](#quick-example)
+- [Confidence classes](#confidence-classes) · [Evidence tiers](#evidence-tiers)
+- [Build](#build) · [Install (conda)](#install-conda) · [Validation](#validation) · [Documentation](#documentation)
+
 ## At a glance
 
 ![PanIsoGuard overview: long-read novel isoform calls (real or artifact?) are checked against four kinds of evidence — SQANTI QC priors, short-read junctions, long-read mapping, and variants/reference bias — and sorted into plain-language verdicts: real novel, reference-bias rescued, uncertain (held), or artifact.](docs/figures/overview.png)
@@ -68,6 +75,31 @@ output classes shown are a simplified grouping — the full set is listed
 > provenance ([benchmark/pangenome](benchmark/pangenome)). Validated at chr22 scale; the
 > in-process GBZ traversal remains future work. Treat the confidence classes as
 > calibrated *ordinal* evidence integration, not a tuned probability.
+
+## When to use PanIsoGuard
+
+Use it when you have **novel** long-read isoform calls and need to decide which to trust:
+
+- **You ran more than one isoform caller** (FLAIR / IsoQuant / Bambu / ESPRESSO / TALON, …)
+  and have several *disagreeing* novel-isoform sets. PanIsoGuard integrates them
+  caller-agnostically by splice chain and stratifies each novel call by cross-caller
+  agreement — single-caller novels are mostly artifacts, multi-caller agreement is a strong,
+  matcher-robust confidence signal ([benchmark/multicaller](benchmark/multicaller)).
+- **You want a transparent confidence class per novel call**, not a flat GTF — each verdict
+  is one of 7 classes with a machine-readable `rule_trace` (and an optional
+  [PDF report](python/README.md)), so you can filter `HIGH`/`MEDIUM_CONF_NOVEL` and audit the
+  rest instead of eyeballing reads.
+- **You have a personalized haplotype or a pangenome** and want to catch *reference-bias*
+  false novelty — a junction that looks novel only because the sample differs from the linear
+  reference. The rescue is a **high-specificity guardrail** (it never over-promotes; a
+  circularity firewall blocks rescues that would rest on the sample's own RNA), most useful
+  for non-reference / personalized-genome samples ([benchmark/hg002](benchmark/hg002)).
+
+**It is *not* a caller or a QC re-implementation.** It sits *above* the callers and consumes
+SQANTI3 QC as priors — it does not re-derive TSS/TTS, ORF/NMD, polyA, or splice motifs
+([docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)), and its `combine` step
+is a clean re-implementation of `gffcompare -i`, not a new merge
+([docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md)).
 
 ## Subcommands
 

@@ -145,6 +145,12 @@ if(PANISOGUARD_BUILD_TESTS)
               "${CMAKE_SOURCE_DIR}/benchmark/pangenome/gate1_check.py"
               $<TARGET_FILE:panisoguard>
               "${CMAKE_SOURCE_DIR}/benchmark/pangenome/testdata/sample_junctions.tsv")
+    # The shipped config/rules.default.toml must equal the built-in defaults (and the
+    # consensus axis must fire) -- guards the silent-disable bug class.
+    add_test(NAME integration_config_equivalence
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/benchmark/config_equivalence/ci_check.py"
+              $<TARGET_FILE:panisoguard>)
   else()
     message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")
   endif()
