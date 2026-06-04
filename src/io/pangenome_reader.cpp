@@ -1,5 +1,6 @@
 #include "panisoguard/pangenome.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <stdexcept>
 
@@ -22,6 +23,15 @@ std::string PangenomeJunctions::key(const std::string& chrom, Strand strand, con
 
 void PangenomeJunctions::add(PangenomeJunctionRecord rec) {
   const std::string k = key(rec.chrom, rec.strand, rec.intron);
+  auto it = by_coord_.find(k);
+  if (it != by_coord_.end()) {
+    // Duplicate graph-junction rows should not create unreachable shadow records.
+    // Treat n_haplotypes as an already-aggregated support count and preserve the
+    // strongest support seen for this coordinate.
+    records_[it->second].n_haplotypes =
+        std::max(records_[it->second].n_haplotypes, rec.n_haplotypes);
+    return;
+  }
   records_.push_back(std::move(rec));
   by_coord_.emplace(k, records_.size() - 1);
 }

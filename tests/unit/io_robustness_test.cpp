@@ -8,6 +8,7 @@
 #include "panisoguard/bed12.hpp"
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
+#include "panisoguard/result_writer.hpp"
 #include "panisoguard/sj_tab.hpp"
 
 using namespace panisoguard;
@@ -26,6 +27,16 @@ struct TempFile {
 };
 
 // True iff `fn` throws a std::exception whose message contains every `needle`.
+std::string slurp(const std::string& path) {
+  std::ifstream in(path);
+  std::string out, line;
+  while (std::getline(in, line)) {
+    out += line;
+    out += '\n';
+  }
+  return out;
+}
+
 bool throws_containing(const std::function<void()>& fn, std::initializer_list<const char*> needles) {
   try {
     fn();
@@ -40,6 +51,25 @@ bool throws_containing(const std::function<void()>& fn, std::initializer_list<co
 }
 
 }  // namespace
+
+TEST_CASE("result writer records caller-support provenance", "[io][result_writer]") {
+  const std::string pfx = "./.__pig_writer_prov";
+  RunProvenance prov;
+  prov.tool_version = "test";
+  prov.ruleset_version = "rules";
+  prov.sqanti3_version_target = "6.0";
+  prov.caller_support_path = "caller_support.tsv";
+  prov.consensus_axis_on = true;
+
+  write_adjudication_outputs(pfx, {}, prov);
+  const std::string log = slurp(pfx + ".provenance.log");
+  CHECK(log.find("caller_support\tcaller_support.tsv") != std::string::npos);
+  CHECK(log.find("axis.consensus\ton") != std::string::npos);
+
+  std::remove((pfx + ".adjudicated.tsv").c_str());
+  std::remove((pfx + ".attribution.jsonl").c_str());
+  std::remove((pfx + ".provenance.log").c_str());
+}
 
 TEST_CASE("BED12: malformed numeric fields throw with file/line/field context", "[io][robustness]") {
   // chromStart not an integer

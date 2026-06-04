@@ -131,6 +131,8 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "ref_gtf\t" << (prov.ref_gtf_path.empty() ? "<none>" : prov.ref_gtf_path) << '\n';
   out << "sj_tab\t" << (prov.sj_tab_path.empty() ? "<none>" : prov.sj_tab_path) << '\n';
   out << "bam\t" << (prov.bam_path.empty() ? "<none>" : prov.bam_path) << '\n';
+  out << "caller_support\t"
+      << (prov.caller_support_path.empty() ? "<none>" : prov.caller_support_path) << '\n';
   // Evidence-axis capabilities for this run.
   out << "axis.short_read\t" << (prov.sj_tab_path.empty() ? "not_evaluable" : "on") << '\n';
   out << "axis.catalog\t" << (prov.ref_gtf_path.empty() ? "not_evaluable" : "on") << '\n';
@@ -144,6 +146,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
               ? (prov.pangenome_circular ? "on (circular-risk: held, not promoted)" : "on")
               : "not_evaluable")
       << '\n';
+  out << "axis.consensus\t" << (prov.consensus_axis_on ? "on" : "not_evaluable") << '\n';
 
   std::map<std::string, std::size_t> class_counts;
   for (const auto& r : results) ++class_counts[to_string(r.verdict.confidence)];

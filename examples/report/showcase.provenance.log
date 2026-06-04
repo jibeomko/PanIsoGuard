@@ -8,11 +8,13 @@ isoforms	showcase (synthetic demo)
 ref_gtf	showcase (synthetic demo)
 sj_tab	showcase (synthetic demo)
 bam	showcase (synthetic demo)
+caller_support	showcase (synthetic demo)
 axis.short_read	on
 axis.catalog	on
 axis.bam	on
 axis.variant	on
 axis.pangenome	on
+axis.consensus	on
 # confidence-class counts
 class.HIGH_CONF_KNOWN	9
 class.HIGH_CONF_NOVEL	7

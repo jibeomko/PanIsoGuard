@@ -42,6 +42,21 @@ TEST_CASE("SJ.tab parses and supports exact coordinate lookup", "[sj_tab]") {
   CHECK(t.find_exact("chr2", Strand::kPlus, Junction{200, 300}) == nullptr);
 }
 
+TEST_CASE("SJ.tab duplicate junction rows are aggregated", "[sj_tab]") {
+  SjTable t;
+  t.add(SjRecord{"chr1", Junction{200, 360}, Strand::kPlus, 0, false, 2, 1, 18});
+  t.add(SjRecord{"chr1", Junction{200, 360}, Strand::kPlus, 1, true, 4, 3, 31});
+
+  REQUIRE(t.size() == 1);
+  const SjRecord* hit = t.find_exact("chr1", Strand::kPlus, Junction{200, 360});
+  REQUIRE(hit != nullptr);
+  CHECK(hit->canonical());
+  CHECK(hit->annotated);
+  CHECK(hit->n_uniq == 6);
+  CHECK(hit->n_multi == 4);
+  CHECK(hit->max_overhang == 31);
+}
+
 TEST_CASE("SJ lookup is strand-aware (no cross-strand corroboration)", "[sj_tab]") {
   SjTable t;
   t.add(SjRecord{"chr1", Junction{200, 360}, Strand::kPlus, 1, true, 10, 0, 30});

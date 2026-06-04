@@ -34,6 +34,17 @@ TEST_CASE("pangenome junction reader parses + exact strand-aware lookup", "[pang
   REQUIRE(pj.find_exact("chrX", Strand::kPlus, Junction{100, 200}) == nullptr);
 }
 
+TEST_CASE("pangenome duplicate junction rows keep strongest haplotype support", "[pangenome]") {
+  PangenomeJunctions pj;
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 2});
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 5});
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 3});
+
+  REQUIRE(pj.size() == 1);
+  REQUIRE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 5));
+  REQUIRE_FALSE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 6));
+}
+
 TEST_CASE("pangenome supports() honours the haplotype-count threshold", "[pangenome]") {
   const std::string path = std::string(PANISOGUARD_TEST_DATA_DIR) + "/mini.pangenome.tsv";
   const PangenomeJunctions pj = read_pangenome_junctions(path);

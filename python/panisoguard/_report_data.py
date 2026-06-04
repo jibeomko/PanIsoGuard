@@ -113,10 +113,19 @@ def axis_evaluability(records):
 def rescue_firewall(records):
     """Reference-bias rescue accounting: promoted vs held-by-firewall, per axis."""
     out = {}
+    mechanisms = {"variant": "variant_created", "pangenome": "population_known"}
     for axis in ("variant", "pangenome"):
+        mech = mechanisms[axis]
         rescue = sum(1 for r in records if get_path(r, f"evidence.{axis}_rescue") is True)
-        circ = sum(1 for r in records if get_path(r, f"evidence.{axis}_circular") is True)
-        out[axis] = dict(rescue_fired=rescue, held_circular=circ)
+        promoted = sum(1 for r in records
+                       if get_path(r, "confidence_class") == "PAN_REF_RESCUED_FALSE_NOVEL"
+                       and get_path(r, "primary_mechanism") == mech)
+        held = sum(1 for r in records
+                   if get_path(r, f"evidence.{axis}_rescue") is True
+                   and get_path(r, f"evidence.{axis}_circular") is True
+                   and get_path(r, "circularity_flag") is True
+                   and get_path(r, "primary_mechanism") == mech)
+        out[axis] = dict(rescue_fired=rescue, promoted=promoted, held_circular=held)
     promoted = sum(1 for r in records
                    if get_path(r, "confidence_class") == "PAN_REF_RESCUED_FALSE_NOVEL")
     held = sum(1 for r in records if get_path(r, "circularity_flag") is True)

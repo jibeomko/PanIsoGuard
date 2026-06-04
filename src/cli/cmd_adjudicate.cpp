@@ -77,10 +77,12 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.ref_gtf_path = common.ref_gtf;
     prov.sj_tab_path = common.sj_tab;
     prov.bam_path = common.bam_path;
+    prov.caller_support_path = common.caller_support;
     prov.variant_axis_on = !common.reference_haplotypes.empty();
     prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
     prov.pangenome_axis_on = !common.pangenome_junctions.empty();
     prov.pangenome_circular = pangenome_provenance_is_circular(common.pangenome_provenance);
+    prov.consensus_axis_on = !common.caller_support.empty();
     prov.config_path = common.config;
     write_adjudication_outputs(out_prefix, run.results, prov);
 

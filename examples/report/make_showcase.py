@@ -17,7 +17,7 @@ from collections import Counter
 prefix = sys.argv[1] if len(sys.argv) > 1 else "showcase"
 
 # axis toggles for this fixture (all on, so every page renders)
-AXES = dict(short_read="on", catalog="on", bam="on", variant="on", pangenome="on")
+AXES = dict(short_read="on", catalog="on", bam="on", variant="on", pangenome="on", consensus="on")
 
 
 def rec(iso, cat, cls, support, mech, *, n_nov=0, n_sr=0,
@@ -152,7 +152,7 @@ with open(f"{prefix}.provenance.log", "w") as fh:
     fh.write("# PanIsoGuard adjudicate provenance (SYNTHETIC SHOWCASE FIXTURE)\n")
     fh.write("tool_version\t0.0.3\nruleset_version\tbuiltin-0.0.1\nsqanti3_version_target\t6.0\n")
     fh.write("config\t<built-in defaults>\n")
-    for k in ("classification", "isoforms", "ref_gtf", "sj_tab", "bam"):
+    for k in ("classification", "isoforms", "ref_gtf", "sj_tab", "bam", "caller_support"):
         fh.write(f"{k}\tshowcase (synthetic demo)\n")
     for a, st in AXES.items():
         fh.write(f"axis.{a}\t{st}\n")

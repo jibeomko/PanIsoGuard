@@ -1,5 +1,6 @@
 #include "panisoguard/sj_tab.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <stdexcept>
 
@@ -22,6 +23,19 @@ std::string SjTable::key(const std::string& chrom, Strand strand, const Junction
 
 void SjTable::add(SjRecord rec) {
   const std::string k = key(rec.chrom, rec.strand, rec.intron);
+  auto it = by_coord_.find(k);
+  if (it != by_coord_.end()) {
+    SjRecord& cur = records_[it->second];
+    // Merged SJ.tab files can contain the same strand-aware junction more than once.
+    // Keep one lookup record and aggregate read support instead of letting the first
+    // row silently win.
+    cur.annotated = cur.annotated || rec.annotated;
+    cur.n_uniq += rec.n_uniq;
+    cur.n_multi += rec.n_multi;
+    cur.max_overhang = std::max(cur.max_overhang, rec.max_overhang);
+    if (!cur.canonical() && rec.canonical()) cur.motif = rec.motif;
+    return;
+  }
   records_.push_back(std::move(rec));
   by_coord_.emplace(k, records_.size() - 1);
 }

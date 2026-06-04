@@ -555,14 +555,14 @@ def page4(pdf, ctx, prefix):
     ], title="The thesis: nothing is promoted on circular evidence")
 
     ax = fig.add_subplot(gs[1, 0])
-    groups, fired, heldb = [], [], []
+    groups, promotedb, heldb = [], [], []
     if ctx.has_variant:
-        groups.append("Variant"); fired.append(fw["variant"]["rescue_fired"]); heldb.append(fw["variant"]["held_circular"])
+        groups.append("Variant"); promotedb.append(fw["variant"]["promoted"]); heldb.append(fw["variant"]["held_circular"])
     if ctx.has_pangenome:
-        groups.append("Pangenome"); fired.append(fw["pangenome"]["rescue_fired"]); heldb.append(fw["pangenome"]["held_circular"])
+        groups.append("Pangenome"); promotedb.append(fw["pangenome"]["promoted"]); heldb.append(fw["pangenome"]["held_circular"])
     if groups:
         x = np.arange(len(groups))
-        ax.bar(x - 0.19, fired, 0.36, label="promoted", color="#2E9E5B", zorder=3)
+        ax.bar(x - 0.19, promotedb, 0.36, label="promoted", color="#2E9E5B", zorder=3)
         ax.bar(x + 0.19, heldb, 0.36, label="held (circular-risk)", color="#2D7DD2", zorder=3)
         ax.set_xticks(x); ax.set_xticklabels(groups)
         _despine(ax); ax.set_axisbelow(True); ax.yaxis.grid(True, color=HAIR, lw=0.8)
@@ -702,7 +702,7 @@ def page7(pdf, ctx, prefix):
 
     ax = fig.add_subplot(gs[:, 0])
     keys = ["tool_version", "ruleset_version", "sqanti3_version_target", "config",
-            "classification", "isoforms", "ref_gtf", "sj_tab", "bam"]
+            "classification", "isoforms", "ref_gtf", "sj_tab", "bam", "caller_support"]
     rows_r = [[k, str(m.get(k, "—"))[:36]] for k in keys if k in m]
     for a, st in ax_states.items():
         rows_r.append([f"axis.{a}", st[:36]])
