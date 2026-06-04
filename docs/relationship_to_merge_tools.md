@@ -35,7 +35,14 @@ surveyed merge/QC tool provides, are:
 
 1. **Reference-bias rescue + circularity firewall** — reclassifying a *sample* novel call
    as reference bias on **independent** (variant / pangenome) evidence, never on circular
-   RNA-derived data. This is the moat.
+   RNA-derived data. No surveyed merge/QC tool does this. *Honestly scoped:* it is a
+   **high-specificity, high-sensitivity guardrail with a low base rate**, not a high-yield
+   discovery engine — reference bias at splice junctions is rare (whole-genome HG002:
+   **33** genuine cases, all rescued, 0 false; population-deletion reference bias in typical
+   cell lines: ~0). Its value is *correctness* (it never over-promotes, and catches the
+   genuine cases when they occur), and it rises for non-reference / personalized-genome
+   samples. See [benchmark/hg002](../benchmark/hg002) and
+   [benchmark/pangenome](../benchmark/pangenome).
 2. **One unified, auditable verdict** — consensus, short-read, long-read-mapping, variant,
    and pangenome evidence projected into a single confidence class with a machine-readable
    `rule_trace`, rather than leaving the user to reconcile a `.tracking` file, an NDR

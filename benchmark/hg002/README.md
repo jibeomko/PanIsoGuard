@@ -49,3 +49,27 @@ headline mechanism on real human-genome variation.
 (For a controlled, high-N version of the same rescue logic see
 [../synthetic_axes](../synthetic_axes); for the short-read axis see
 [../controlled_truth](../controlled_truth).)
+
+## Whole-genome yield — how often does the rescue actually fire? ([run_wholegenome.sh](run_wholegenome.sh))
+
+The chr22 result above is one genuine case (N=1). Extending the **same annotation +
+variant scan to the whole genome** (HG002 v4.2.1, GENCODE v49, chr1–22; no RNA-seq, no
+caller runs) answers the obvious follow-up — *is the rescue a real, recurring mechanism,
+or a guardrail that never fires?*
+
+| genome-wide (597,781 GENCODE introns scanned) | |
+|---|---|
+| genuine **reference-bias** junctions (CREATED) | **33** |
+| rescued under `wgs` provenance (**sensitivity**) | **33 / 33** |
+| **false rescues** (specificity) | **0** |
+| held by the **circularity firewall** under circular-risk provenance | **33 / 33** |
+
+**Honest reading.** Reference bias at splice junctions is **rare but not zero** — 33 cases
+across ~600k introns (~1 in 18,000). When a genuine case exists the axis **catches every
+one (100 % sensitivity)** and **never over-promotes (0 false)**, and the firewall holds all
+33 under circular-risk provenance. So the reference-bias rescue is a **high-specificity,
+high-sensitivity guardrail with a low base rate** — a correctness safeguard, not a
+high-yield discovery engine. Its yield rises for samples from non-reference individuals or
+personalized-genome contexts. (DISRUPTED — 236 canonical→non-canonical junctions — is
+computed but intentionally not consumed by the engine, so it is correctly never rescued.)
+Recorded in [../results/hg002_wholegenome](../results/hg002_wholegenome).
