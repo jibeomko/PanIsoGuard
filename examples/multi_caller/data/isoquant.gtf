@@ -1,0 +1,4 @@
+chr1	isoquant	exon	100	200	.	+	.	gene_id "g1"; transcript_id "iq.A";
+chr1	isoquant	exon	400	500	.	+	.	gene_id "g1"; transcript_id "iq.A";
+chr1	isoquant	exon	500	600	.	+	.	gene_id "g2"; transcript_id "iq.B";
+chr1	isoquant	exon	800	900	.	+	.	gene_id "g2"; transcript_id "iq.B";

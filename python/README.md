@@ -51,3 +51,17 @@ than an empty plot, so the *absence* of evidence is itself legible to a reviewer
 single semantic color ramp is reused on every page (green→red confidence, blue =
 reference-bias reclassification, grey = honest abstention, teal/grey-hatch = axis
 on/absent).
+
+## Publishing (maintainers)
+
+The package is publish-ready (PEP 621 `pyproject.toml`, console entry point); CI smoke-tests
+it on every push (`pip install ./python` + render the showcase). To cut a release:
+
+```bash
+python -m build python/                 # sdist + wheel -> python/dist/
+python -m twine upload python/dist/*    # needs a PyPI account/token
+```
+
+A bioconda recipe for `panisoguard-report` (noarch python, `matplotlib` dep) can follow once
+it is on PyPI. Keep its version in lockstep with the C++ package — CI enforces this via
+`scripts/check_version_sync.py`.

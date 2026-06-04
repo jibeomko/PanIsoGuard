@@ -1,0 +1,2 @@
+chr1	bambu	exon	100	200	.	+	.	gene_id "b1"; transcript_id "BambuTx.A";
+chr1	bambu	exon	400	500	.	+	.	gene_id "b1"; transcript_id "BambuTx.A";

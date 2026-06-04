@@ -1,0 +1,4 @@
+isoform	chrom	strand	structural_category	associated_gene	associated_transcript	subcategory	RTS_stage	all_canonical	perc_A_downstream_TTS	n_indels_junc	dist_to_CAGE_peak	dist_to_polyA_site	filter_result
+isoA	chr1	+	novel_not_in_catalog	G	novel	at_least_one_novel_splicesite	FALSE	canonical	10.0	0	NA	NA	Isoform
+isoB	chr1	+	novel_not_in_catalog	G	novel	at_least_one_novel_splicesite	FALSE	canonical	10.0	0	NA	NA	Isoform
+isoC	chr1	+	novel_not_in_catalog	G	novel	at_least_one_novel_splicesite	FALSE	canonical	10.0	0	NA	NA	Isoform

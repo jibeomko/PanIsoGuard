@@ -1,0 +1,10 @@
+.git
+build
+build_ci
+pigci-check
+**/__pycache__
+**/output
+**/data/work
+*.pdf
+examples/report/showcase.report.pdf
+.github

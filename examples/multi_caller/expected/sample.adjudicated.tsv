@@ -1,0 +1,4 @@
+isoform_id	chrom	strand	structural_category	novelty_support	primary_mechanism	confidence_class	n_novel_junctions	n_novel_jx_sr_supported	circularity_flag
+isoA	chr1	+	novel_not_in_catalog	UNKNOWN	none	MEDIUM_CONF_NOVEL	1	0	false
+isoB	chr1	+	novel_not_in_catalog	UNKNOWN	none	MEDIUM_CONF_NOVEL	1	0	false
+isoC	chr1	+	novel_not_in_catalog	UNKNOWN	none	AMBIGUOUS	1	0	false

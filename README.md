@@ -365,6 +365,28 @@ released:
 conda install -c bioconda -c conda-forge panisoguard
 ```
 
+## Container
+
+Build a self-contained image (the C++ binary + the optional PDF report tool) — works today
+without waiting on the conda release:
+
+```bash
+docker build -t panisoguard .
+docker run --rm panisoguard panisoguard --version
+docker run --rm -v "$PWD":/data -w /data panisoguard \
+    adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
+```
+
+## Try it (no downloads)
+
+```bash
+examples/multi_caller/run.sh    # combine 3 callers -> consensus verdict, on tiny fixtures (<1 s)
+examples/tiny/run.sh            # single-caller adjudication
+```
+
+The optional PDF report (SQANTI3-style) is a Python companion — `pip install ./python`,
+then `panisoguard-report --prefix run` (see [python/](python/)).
+
 ## Runtime & memory
 
 Single-threaded, on a whole-genome isoform set (GRCh38 + GENCODE v49):

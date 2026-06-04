@@ -1,0 +1,6 @@
+chr1	flair	exon	100	200	.	+	.	gene_id "G1"; transcript_id "isoA";
+chr1	flair	exon	400	500	.	+	.	gene_id "G1"; transcript_id "isoA";
+chr1	flair	exon	500	600	.	+	.	gene_id "G2"; transcript_id "isoB";
+chr1	flair	exon	800	900	.	+	.	gene_id "G2"; transcript_id "isoB";
+chr1	flair	exon	900	1000	.	+	.	gene_id "G3"; transcript_id "isoC";
+chr1	flair	exon	1200	1300	.	+	.	gene_id "G3"; transcript_id "isoC";
