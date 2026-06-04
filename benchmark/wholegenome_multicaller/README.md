@@ -61,6 +61,34 @@ disagreement itself (89 % single-caller) is the headline finding that generalize
 simulation to real, whole-genome data. (Consistent with the project's honest-results ethos,
 cf. [pangenome_public](../results/pangenome_public).)
 
+## Decision impact — what you would *report* changes 9× with the policy
+
+The point above, stated as the decision a user actually faces. On this **real** GM12878
+data, the number of novel isoforms you would put in a paper depends entirely on how you
+integrate the three callers:
+
+| integration policy | novel isoforms reported |
+|---------------------|------------------------:|
+| Bambu alone | 195 |
+| IsoQuant alone | 113 |
+| ESPRESSO alone | 9 |
+| **naive union** (trust *any* caller) | **285** |
+| **PanIsoGuard consensus** (≥ 2 callers) | **31** |
+
+The reported count swings **31 → 285 (9.2×)** purely on policy. The gap is **caller-private
+novels** — calls made by exactly one of the three callers and corroborated by **none** of
+the others: **254 of the 285 union chains (89 %)** are private (Bambu 164, IsoQuant 84,
+ESPRESSO 6). Cross-caller agreement is sparse and asymmetric — the 31-chain consensus core
+is co-supported mostly by Bambu+IsoQuant (29), with Bambu+ESPRESSO (3) and ESPRESSO+IsoQuant
+(1) almost never agreeing, and a single unanimous chain.
+
+This is the **conclusions-change case**: a naive multi-caller merge would report 285 novel
+isoforms, 89 % of which no second method reproduces; PanIsoGuard reports the **31-chain
+reproducible core** (also the only 100 %-canonical subset) and makes the policy **explicit
+and auditable** via `n_callers` in the verdict, instead of burying a 9× discretion behind
+an undocumented union. The choice is no longer hidden — it is a logged rule threshold
+(`consensus_min_callers`).
+
 ## Reproduce
 
 All inputs are fully public (ENCODE GM12878 ONT dRNA `ENCSR368UNC`; GRCh38/GENCODE v49);

@@ -13,6 +13,29 @@
       "frac_canonical": 1.0,
       "n": 31
     },
+    "decision_impact": {
+      "reported_novel_by_policy": {
+        "naive_union_any_caller": 285,
+        "single_caller_bambu_alone": 195,
+        "single_caller_isoquant_alone": 113,
+        "single_caller_espresso_alone": 9,
+        "panisoguard_consensus_ge2": 31
+      },
+      "caller_private_novels": {
+        "bambu": 164,
+        "isoquant": 84,
+        "espresso": 6,
+        "total": 254
+      },
+      "pairwise_co_support_in_consensus": {
+        "bambu+isoquant": 29,
+        "bambu+espresso": 3,
+        "espresso+isoquant": 1
+      },
+      "union_over_consensus_fold": 9.2,
+      "frac_single_caller": 0.891,
+      "interpretation": "Decision impact on REAL GM12878: the reported novel-isoform count swings 31 -> 285 (9.2x) purely by integration policy. 254/285 (89%) of the naive-union novels are caller-PRIVATE -- claimed by exactly one of three callers and corroborated by none of the others (bambu 164, isoquant 84, espresso 6). The >= 2-caller consensus core is 31 chains (also the only 100%-canonical subset). PanIsoGuard reports that reproducible core and makes the policy explicit/auditable, rather than the 285-chain union a naive multi-caller merge would report. This is the conclusions-change case: which novels you would report depends entirely on whether you require cross-caller agreement."
+    },
     "n_resolved_novel_chains": 285,
     "n_unresolved": 0,
     "per_caller_novel": {
