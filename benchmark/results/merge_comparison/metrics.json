@@ -1,0 +1,407 @@
+{
+  "command": "gffcompare -i gtflist.txt -o gffcmp; tama_merge.py ...; benchmark/merge_comparison/score_merge.py --callers callers.tsv --truth truth.tsv --ref ref.gtf --paniso matrix5.tsv --gffcompare gffcmp.tracking --tama tama.bed --wobble 0,2,5,10,20 --emit-metrics metrics.json",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22, the SAME 5 caller GTFs as the multicaller protocol (FLAIR/IsoQuant/Bambu/ESPRESSO/TALON). Matchers: PanIsoGuard combine (exact intron-chain), gffcompare -i (incumbent N-way), TAMA merge (fuzzy), and a controlled exact->fuzzy junction-wobble sweep. No private data.",
+  "generated_utc": null,
+  "metrics": {
+    "agreement_split_vs_exact": {
+      "gffcompare": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 0
+      },
+      "tama": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 55
+      },
+      "wobble_0bp": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 0
+      },
+      "wobble_10bp": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 52
+      },
+      "wobble_20bp": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 67
+      },
+      "wobble_5bp": {
+        "genuine_reaching_ge2_but_le1_in_exact": 0,
+        "genuine_upgraded": 38
+      }
+    },
+    "methods": {
+      "gffcompare": {
+        "n_callers_distribution": {
+          "1": 1105,
+          "2": 163,
+          "3": 254,
+          "4": 128,
+          "5": 332
+        },
+        "novel_chains": 1982,
+        "pr_curve": [
+          {
+            "f1": 0.5525263540530717,
+            "false": 1222,
+            "genuine": 760,
+            "min_callers": 1,
+            "precision": 0.3834510595358224,
+            "recall": 0.988296488946684
+          },
+          {
+            "f1": 0.9076549210206561,
+            "false": 130,
+            "genuine": 747,
+            "min_callers": 2,
+            "precision": 0.8517673888255416,
+            "recall": 0.9713914174252276
+          },
+          {
+            "f1": 0.9440323668240054,
+            "false": 14,
+            "genuine": 700,
+            "min_callers": 3,
+            "precision": 0.9803921568627451,
+            "recall": 0.9102730819245773
+          },
+          {
+            "f1": 0.7404393816110659,
+            "false": 5,
+            "genuine": 455,
+            "min_callers": 4,
+            "precision": 0.9891304347826086,
+            "recall": 0.5916775032509753
+          },
+          {
+            "f1": 0.5976385104450499,
+            "false": 3,
+            "genuine": 329,
+            "min_callers": 5,
+            "precision": 0.9909638554216867,
+            "recall": 0.42782834850455137
+          }
+        ]
+      },
+      "panisoguard_exact": {
+        "n_callers_distribution": {
+          "1": 1105,
+          "2": 163,
+          "3": 254,
+          "4": 128,
+          "5": 332
+        },
+        "novel_chains": 1982,
+        "pr_curve": [
+          {
+            "f1": 0.5525263540530717,
+            "false": 1222,
+            "genuine": 760,
+            "min_callers": 1,
+            "precision": 0.3834510595358224,
+            "recall": 0.988296488946684
+          },
+          {
+            "f1": 0.9076549210206561,
+            "false": 130,
+            "genuine": 747,
+            "min_callers": 2,
+            "precision": 0.8517673888255416,
+            "recall": 0.9713914174252276
+          },
+          {
+            "f1": 0.9440323668240054,
+            "false": 14,
+            "genuine": 700,
+            "min_callers": 3,
+            "precision": 0.9803921568627451,
+            "recall": 0.9102730819245773
+          },
+          {
+            "f1": 0.7404393816110659,
+            "false": 5,
+            "genuine": 455,
+            "min_callers": 4,
+            "precision": 0.9891304347826086,
+            "recall": 0.5916775032509753
+          },
+          {
+            "f1": 0.5976385104450499,
+            "false": 3,
+            "genuine": 329,
+            "min_callers": 5,
+            "precision": 0.9909638554216867,
+            "recall": 0.42782834850455137
+          }
+        ]
+      },
+      "tama": {
+        "n_callers_distribution": {
+          "1": 194,
+          "2": 125,
+          "3": 188,
+          "4": 179,
+          "5": 288
+        },
+        "novel_chains": 974,
+        "pr_curve": [
+          {
+            "f1": 0.8548479632816982,
+            "false": 229,
+            "genuine": 745,
+            "min_callers": 1,
+            "precision": 0.7648870636550308,
+            "recall": 0.9687906371911573
+          },
+          {
+            "f1": 0.9399612653324726,
+            "false": 52,
+            "genuine": 728,
+            "min_callers": 2,
+            "precision": 0.9333333333333333,
+            "recall": 0.9466840052015605
+          },
+          {
+            "f1": 0.8974719101123595,
+            "false": 16,
+            "genuine": 639,
+            "min_callers": 3,
+            "precision": 0.9755725190839695,
+            "recall": 0.8309492847854356
+          },
+          {
+            "f1": 0.7459546925566343,
+            "false": 6,
+            "genuine": 461,
+            "min_callers": 4,
+            "precision": 0.987152034261242,
+            "recall": 0.599479843953186
+          },
+          {
+            "f1": 0.5411542100283823,
+            "false": 2,
+            "genuine": 286,
+            "min_callers": 5,
+            "precision": 0.9930555555555556,
+            "recall": 0.3719115734720416
+          }
+        ]
+      },
+      "wobble_0bp": {
+        "n_callers_distribution": {
+          "1": 1105,
+          "2": 163,
+          "3": 254,
+          "4": 128,
+          "5": 332
+        },
+        "novel_chains": 1982,
+        "pr_curve": [
+          {
+            "f1": 0.5525263540530717,
+            "false": 1222,
+            "genuine": 760,
+            "min_callers": 1,
+            "precision": 0.3834510595358224,
+            "recall": 0.988296488946684
+          },
+          {
+            "f1": 0.9076549210206561,
+            "false": 130,
+            "genuine": 747,
+            "min_callers": 2,
+            "precision": 0.8517673888255416,
+            "recall": 0.9713914174252276
+          },
+          {
+            "f1": 0.9440323668240054,
+            "false": 14,
+            "genuine": 700,
+            "min_callers": 3,
+            "precision": 0.9803921568627451,
+            "recall": 0.9102730819245773
+          },
+          {
+            "f1": 0.7404393816110659,
+            "false": 5,
+            "genuine": 455,
+            "min_callers": 4,
+            "precision": 0.9891304347826086,
+            "recall": 0.5916775032509753
+          },
+          {
+            "f1": 0.5976385104450499,
+            "false": 3,
+            "genuine": 329,
+            "min_callers": 5,
+            "precision": 0.9909638554216867,
+            "recall": 0.42782834850455137
+          }
+        ]
+      },
+      "wobble_10bp": {
+        "n_callers_distribution": {
+          "1": 992,
+          "2": 166,
+          "3": 207,
+          "4": 175,
+          "5": 334
+        },
+        "novel_chains": 1874,
+        "pr_curve": [
+          {
+            "f1": 0.5675368898978435,
+            "false": 1124,
+            "genuine": 750,
+            "min_callers": 1,
+            "precision": 0.400213447171825,
+            "recall": 0.9752925877763329
+          },
+          {
+            "f1": 0.8940036341611144,
+            "false": 144,
+            "genuine": 738,
+            "min_callers": 2,
+            "precision": 0.8367346938775511,
+            "recall": 0.9596879063719116
+          },
+          {
+            "f1": 0.9400673400673399,
+            "false": 18,
+            "genuine": 698,
+            "min_callers": 3,
+            "precision": 0.9748603351955307,
+            "recall": 0.9076723016905072
+          },
+          {
+            "f1": 0.7840375586854461,
+            "false": 8,
+            "genuine": 501,
+            "min_callers": 4,
+            "precision": 0.9842829076620825,
+            "recall": 0.6514954486345904
+          },
+          {
+            "f1": 0.600181323662738,
+            "false": 3,
+            "genuine": 331,
+            "min_callers": 5,
+            "precision": 0.9910179640718563,
+            "recall": 0.4304291287386216
+          }
+        ]
+      },
+      "wobble_20bp": {
+        "n_callers_distribution": {
+          "1": 989,
+          "2": 163,
+          "3": 193,
+          "4": 189,
+          "5": 334
+        },
+        "novel_chains": 1868,
+        "pr_curve": [
+          {
+            "f1": 0.5665529010238909,
+            "false": 1121,
+            "genuine": 747,
+            "min_callers": 1,
+            "precision": 0.3998929336188437,
+            "recall": 0.9713914174252276
+          },
+          {
+            "f1": 0.891990291262136,
+            "false": 144,
+            "genuine": 735,
+            "min_callers": 2,
+            "precision": 0.8361774744027304,
+            "recall": 0.9557867360208062
+          },
+          {
+            "f1": 0.9400673400673399,
+            "false": 18,
+            "genuine": 698,
+            "min_callers": 3,
+            "precision": 0.9748603351955307,
+            "recall": 0.9076723016905072
+          },
+          {
+            "f1": 0.7972136222910217,
+            "false": 8,
+            "genuine": 515,
+            "min_callers": 4,
+            "precision": 0.9847036328871893,
+            "recall": 0.6697009102730819
+          },
+          {
+            "f1": 0.600181323662738,
+            "false": 3,
+            "genuine": 331,
+            "min_callers": 5,
+            "precision": 0.9910179640718563,
+            "recall": 0.4304291287386216
+          }
+        ]
+      },
+      "wobble_5bp": {
+        "n_callers_distribution": {
+          "1": 1000,
+          "2": 165,
+          "3": 221,
+          "4": 162,
+          "5": 334
+        },
+        "novel_chains": 1882,
+        "pr_curve": [
+          {
+            "f1": 0.5673330818559035,
+            "false": 1130,
+            "genuine": 752,
+            "min_callers": 1,
+            "precision": 0.3995749202975558,
+            "recall": 0.9778933680104032
+          },
+          {
+            "f1": 0.8964264082374319,
+            "false": 142,
+            "genuine": 740,
+            "min_callers": 2,
+            "precision": 0.8390022675736961,
+            "recall": 0.9622886866059818
+          },
+          {
+            "f1": 0.9407806191117093,
+            "false": 18,
+            "genuine": 699,
+            "min_callers": 3,
+            "precision": 0.9748953974895398,
+            "recall": 0.9089726918075423
+          },
+          {
+            "f1": 0.7715415019762847,
+            "false": 8,
+            "genuine": 488,
+            "min_callers": 4,
+            "precision": 0.9838709677419355,
+            "recall": 0.6345903771131339
+          },
+          {
+            "f1": 0.600181323662738,
+            "false": 3,
+            "genuine": 331,
+            "min_callers": 5,
+            "precision": 0.9910179640718563,
+            "recall": 0.4304291287386216
+          }
+        ]
+      }
+    },
+    "total_truth_genuine_novel": 769
+  },
+  "notes": "Head-to-head vs the incumbent multi-caller merge tools. (1) PanIsoGuard `combine` (exact intron-chain) produces a caller-support grouping IDENTICAL to gffcompare -i (same novel count, same n_callers distribution, same PR curve) -> combine is a clean, htslib-native re-implementation of the established N-way intron-chain comparison that feeds the adjudicator directly, NOT a novel merge algorithm. (2) The consensus precision claim is MATCHER-ROBUST: >=3-caller novel precision is ~0.975-0.980 across exact (combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled exact->fuzzy wobble sweep (0-20bp). (3) Critically, the agreement-split metric is 0 for every fuzzy matcher: NO genuine novel that exact matching calls single-caller is upgraded to >=2 callers by any fuzzy matcher -- the single<->multi boundary that the consensus gate depends on is not an artifact of exact matching. Honest framing: multi-caller consensus is established field practice (LRGASP); combine operationalizes it correctly and the reference-bias rescue remains PanIsoGuard's true differentiator.",
+  "protocol": "merge_comparison",
+  "ruleset_version": null,
+  "scope": "gencode_v49_chr22_5caller",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

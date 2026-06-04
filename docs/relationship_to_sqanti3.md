@@ -53,6 +53,13 @@ orthogonal, largely SQANTI-independent evidence:
 It explicitly avoids re-deriving TSS/TTS, ORF/NMD, polyA motif, or splice motif, and
 makes no SQANTI3-style ML/rule QC filter — those would duplicate SQANTI3.
 
+> **"Rescue" means the opposite thing in the two tools.** SQANTI3 *rescue* recovers a
+> **reference** transcript a caller failed to report (it adds a known model back).
+> PanIsoGuard's reference-bias *rescue* (`PAN_REF_RESCUED_FALSE_NOVEL`) does the reverse —
+> it **exonerates a sample's novel call** that only *looks* novel because of reference
+> bias, gated by a circularity firewall. Same word, opposite direction; they do not
+> compete. (See also [relationship_to_merge_tools.md](relationship_to_merge_tools.md).)
+
 ## `bio_flags` (consume, not recompute)
 
 To make the "consume, don't recompute" stance concrete, each

@@ -160,6 +160,13 @@ panisoguard combine \
   --out caller_support_matrix.tsv
 ```
 
+> `combine` is a clean re-implementation of the established N-way intron-chain comparison
+> (it reproduces `gffcompare -i` exactly; multi-caller consensus is shared practice, not a
+> PanIsoGuard invention). Its value is feeding caller agreement into the adjudicator as one
+> auditable evidence axis. PanIsoGuard's differentiator is the **reference-bias rescue +
+> circularity firewall** — see
+> [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md).
+
 ### Outputs
 
 `adjudicate` writes three files at `<out-prefix>`:

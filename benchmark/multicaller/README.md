@@ -90,6 +90,15 @@ PIG.000233  callers=bambu,espresso,flair,isoquant,talon  novelty=novel
 
 (Complements the synthetic cross-caller unit test in `tests/unit/consensus_test.cpp`.)
 
+> **`combine` is not a novel merge — and the consensus claim is not a matcher artifact.**
+> Multi-caller consensus is established practice (gffcompare, TAMA, LRGASP). The
+> [merge_comparison](../merge_comparison) protocol shows `combine` reproduces
+> `gffcompare -i` **exactly**, and the ≥3 precision above is **matcher-robust** (0.975–0.980
+> across exact / gffcompare / TAMA / a 0–20 bp wobble sweep, with **0** genuine novels
+> crossing the single↔multi boundary under any fuzzy matcher). So this protocol measures
+> a real property of the *data*; PanIsoGuard's differentiator is the reference-bias rescue,
+> not the merge (see [relationship_to_merge_tools.md](../../docs/relationship_to_merge_tools.md)).
+
 ## Pipeline
 
 ```
