@@ -37,12 +37,14 @@ surveyed merge/QC tool provides, are:
    as reference bias on **independent** (variant / pangenome) evidence, never on circular
    RNA-derived data. No surveyed merge/QC tool does this. *Honestly scoped:* it is a
    **high-specificity, high-sensitivity guardrail with a low base rate**, not a high-yield
-   discovery engine — reference bias at splice junctions is rare (whole-genome HG002:
-   **33** genuine cases, all rescued, 0 false; population-deletion reference bias in typical
-   cell lines: ~0). Its value is *correctness* (it never over-promotes, and catches the
-   genuine cases when they occur), and it rises for non-reference / personalized-genome
-   samples. See [benchmark/hg002](../benchmark/hg002) and
-   [benchmark/pangenome](../benchmark/pangenome).
+   discovery engine — reference bias at splice junctions is rare but *recurrent per genome*:
+   across a **four-individual GIAB cohort** (HG001/2/3/4) it finds 31–37 genuine cases each
+   (**137 total → 137/137 rescued, 0 false, 137/137 firewall-held**); population-deletion
+   reference bias in typical cell lines is ~0. Its value is *correctness* (it never
+   over-promotes, and catches every genuine case), and it rises for non-reference /
+   personalized-genome samples. See
+   [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue),
+   [benchmark/hg002](../benchmark/hg002), and [benchmark/pangenome](../benchmark/pangenome).
 2. **One unified, auditable verdict** — consensus, short-read, long-read-mapping, variant,
    and pangenome evidence projected into a single confidence class with a machine-readable
    `rule_trace`, rather than leaving the user to reconcile a `.tracking` file, an NDR

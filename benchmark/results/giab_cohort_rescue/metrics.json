@@ -1,0 +1,46 @@
+{
+  "command": "benchmark/hg002/run_wholegenome.sh per individual VCF (HG001/2/3/4); totals in benchmark/giab_cohort_rescue (run_cohort.sh)",
+  "data_provenance": "FOUR real GIAB benchmark individuals (HG001/NA12878, HG002/NA24385, HG003/NA24149, HG004/NA24143), v4.2.1 biallelic SNVs, whole-genome chr1-22, GRCh38 + GENCODE v49. Per individual+chromosome: bcftools SNV-consensus haplotype, scan every annotation intron for reference bias (non-canonical on the linear reference, canonical on the individual's haplotype = CREATED), adjudicate the variant axis (wgs provenance for the rescue, unknown for the firewall). Annotation+variant scan; no RNA-seq/caller runs. No private data.",
+  "generated_utc": null,
+  "metrics": {
+    "false_rescues_total": 0,
+    "firewall_held_circular_total": 137,
+    "individuals": 4,
+    "per_individual": {
+      "HG001": {
+        "created": 37,
+        "false_rescues": 0,
+        "held_circular": 37,
+        "rescued": 37
+      },
+      "HG002": {
+        "created": 33,
+        "false_rescues": 0,
+        "held_circular": 33,
+        "rescued": 33
+      },
+      "HG003": {
+        "created": 31,
+        "false_rescues": 0,
+        "held_circular": 31,
+        "rescued": 31
+      },
+      "HG004": {
+        "created": 36,
+        "false_rescues": 0,
+        "held_circular": 36,
+        "rescued": 36
+      }
+    },
+    "reference_bias_created_total": 137,
+    "rescued_total": 137,
+    "sensitivity": 1.0
+  },
+  "notes": "COHORT-level yield of the reference-bias rescue across four personalized human genomes (extends the single-sample HG002 result). Each individual carries 31-37 genuine reference-bias splice junctions (137 total); the variant axis rescues ALL of them (137/137, 100% sensitivity), with 0 false rescues, and the circularity firewall holds every one (137/137) under circular-risk provenance. So the rescue is a consistent, perfectly-specific guardrail across individuals -- a few dozen false-novel calls exonerated per personalized genome -- not a one-off. Its practical value rises with sample divergence from the linear reference.",
+  "protocol": "giab_cohort_rescue",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "giab_hg001_hg002_hg003_hg004_wholegenome",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

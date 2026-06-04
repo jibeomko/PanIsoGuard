@@ -26,9 +26,11 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
 - **Validation benchmarks** (all git-tracked, schema-checked):
   `pangenome` (GATE-1 on the real HPRC v1.1 chr22 graph),
   `pangenome_public` (GM12878 + K562 whole-genome specificity),
-  `multicaller` (5 callers, truth-scored; PR curve over the consensus threshold),
+  `multicaller` (5 callers, truth-scored; PR curve over the consensus threshold) +
+  `sirv_multicaller` (the consensus generalized to a 2nd reference, SIRV-Set4),
   `wholegenome_multicaller` (real GM12878), `merge_comparison` (head-to-head vs
-  gffcompare / TAMA), and `hg002_wholegenome` (variant-rescue yield).
+  gffcompare / TAMA), `hg002_wholegenome` (variant-rescue yield), and
+  `giab_cohort_rescue` (rescue across a 4-individual GIAB cohort: 137/137, 0 false).
 
 ### Fixed
 - **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`

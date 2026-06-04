@@ -126,6 +126,23 @@ and the standard `talon_filter_transcripts` whitelist; Bambu uses a fixed NDR to
 online recommendation step; TALON 6.0 on py3.7 needs a `pyranges`/`importlib.metadata`
 shim.
 
+## Generalization to a second reference (SIRV-Set4)
+
+To check the consensus signal is **not specific to GENCODE chr22**, the same analysis was
+run on the **Lexogen SIRV-Set4** spike-in reference — a denser, multi-contig transcriptome
+(7 loci, ~70 dense overlapping isoforms) with its own hidden-chain truth (FLAIR + IsoQuant
++ Bambu + ESPRESSO; [score_sirv.py](score_sirv.py)). The same pattern holds:
+
+| supporting callers | precision (vs SIRV hidden truth) |
+|--------------------|:---:|
+| 1 (single-caller)  | **0.037** |
+| ≥ 2                | **1.000** |
+
+Single-caller novels are again overwhelmingly artifacts (precision 0.04, mirroring the 0.012
+on chr22), and ≥ 2-caller agreement is perfectly precise. So "agreement = confidence" is a
+property of multi-caller data, not of one reference or simulator. Recorded in
+[../results/sirv_multicaller](../results/sirv_multicaller).
+
 ## Scope / what remains
 
 Validated for **precision stratification** on one controlled truth set (chr22, five

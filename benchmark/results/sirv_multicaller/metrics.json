@@ -1,0 +1,90 @@
+{
+  "command": "panisoguard combine --gtf <caller:gtf>...; benchmark/multicaller/score_sirv.py --matrix matrix.tsv --truth truth_hidden_chains.tsv --gtf <caller:gtf>... --emit-metrics metrics.json",
+  "data_provenance": "Lexogen SIRV-Set4 spike-in reference (7 loci, ~70 dense overlapping isoforms, multi-contig), PBSIM3-simulated reads, one shared minimap2 alignment. Callers: bambu,espresso,flair,isoquant. Truth = SIRV transcripts deleted from the reduced annotation (hidden chains). A SECOND reference (beyond GENCODE chr22) for the multi-caller consensus. No private data.",
+  "generated_utc": null,
+  "metrics": {
+    "min_callers": 2,
+    "n_novel_chains": 195,
+    "per_caller": {
+      "bambu": {
+        "false": 0,
+        "genuine": 2,
+        "novel": 2,
+        "precision": 1.0,
+        "recall": 0.15384615384615385
+      },
+      "espresso": {
+        "false": 0,
+        "genuine": 2,
+        "novel": 2,
+        "precision": 1.0,
+        "recall": 0.15384615384615385
+      },
+      "flair": {
+        "false": 178,
+        "genuine": 12,
+        "novel": 190,
+        "precision": 0.06315789473684211,
+        "recall": 0.9230769230769231
+      },
+      "isoquant": {
+        "false": 4,
+        "genuine": 6,
+        "novel": 10,
+        "precision": 0.6,
+        "recall": 0.46153846153846156
+      }
+    },
+    "pr_curve": [
+      {
+        "f1": 0.125,
+        "false": 182,
+        "genuine": 13,
+        "min_callers": 1,
+        "precision": 0.06666666666666667,
+        "recall": 1.0
+      },
+      {
+        "f1": 0.631578947368421,
+        "false": 0,
+        "genuine": 6,
+        "min_callers": 2,
+        "precision": 1.0,
+        "recall": 0.46153846153846156
+      },
+      {
+        "f1": 0.2666666666666667,
+        "false": 0,
+        "genuine": 2,
+        "min_callers": 3,
+        "precision": 1.0,
+        "recall": 0.15384615384615385
+      }
+    ],
+    "stratification": {
+      "1": {
+        "false": 182,
+        "genuine": 7,
+        "precision": 0.037037037037037035
+      },
+      "2": {
+        "false": 0,
+        "genuine": 4,
+        "precision": 1.0
+      },
+      "3": {
+        "false": 0,
+        "genuine": 2,
+        "precision": 1.0
+      }
+    },
+    "total_hidden_genuine": 13
+  },
+  "notes": "Generalization of the chr22 multicaller result to a SECOND, denser, multi-contig reference (SIRV-Set4). Confirms the consensus signal (single-caller novels mostly artifacts; >= k-caller agreement raises precision) is not specific to one reference/simulator. Strand-agnostic exact-chain matching.",
+  "protocol": "sirv_multicaller",
+  "ruleset_version": null,
+  "scope": "sirv_set4_multicaller",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}
