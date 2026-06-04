@@ -85,6 +85,41 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
 }
 
+TEST_CASE("rules: indel-near and soft-clip are mapping-artifact triggers", "[rules]") {
+  const RuleEngine eng;  // defaults: indel_near / softclip thresholds both 0.5
+
+  // An indel adjacent to the junction on most spanning reads (an alignment-ambiguous
+  // indel mis-rendered as an intron) flags the mapping mechanism even when MAPQ and
+  // supplementary fractions are clean. Validated on chr22: catches 41/124 false novel
+  // junctions at 100% precision (benchmark/bam_axis).
+  EvidenceVector indel = novel_ev(1, 0);
+  indel.bam_evaluable = true;
+  indel.bam_n_spanning_total = 20;
+  indel.bam_max_frac_indel_near = 0.8;  // > default 0.5
+  Verdict vi = eng.evaluate(indel);
+  CHECK(vi.primary_mechanism == Mechanism::kMapping);
+  CHECK(vi.confidence == ConfidenceClass::kArtifact);
+
+  // Terminal soft-clipping on most spanning reads (reads that could not align through)
+  // is the same mapping mechanism.
+  EvidenceVector clip = novel_ev(1, 0);
+  clip.bam_evaluable = true;
+  clip.bam_n_spanning_total = 20;
+  clip.bam_max_frac_softclip = 0.7;  // > default 0.5
+  CHECK(eng.evaluate(clip).primary_mechanism == Mechanism::kMapping);
+
+  // Below threshold (the genuine-junction regime, chr22 genuine max ~0.19): no mapping
+  // flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
+  EvidenceVector ok = novel_ev(1, 1);
+  ok.bam_evaluable = true;
+  ok.bam_n_spanning_total = 20;
+  ok.bam_max_frac_indel_near = 0.19;
+  ok.bam_max_frac_softclip = 0.04;
+  Verdict vo = eng.evaluate(ok);
+  CHECK(vo.primary_mechanism == Mechanism::kNone);
+  CHECK(vo.confidence == ConfidenceClass::kHighConfNovel);
+}
+
 TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel chain", "[rules]") {
   const RuleEngine eng;  // defaults: consensus_min_callers = 2
 

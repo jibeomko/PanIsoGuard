@@ -1,0 +1,39 @@
+{
+  "command": "panisoguard adjudicate --classification flair_classification.txt --isoforms-gtf flair.isoforms.gtf --ref-gtf chr22_modified.gtf --sj-tab truth.SJ.tab --bam aln.bam [--config cfg_off.toml]; benchmark/bam_axis/score_bam_axis.py --off OFF --on ON",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (simulated PBSIM3 HiFi, one shared minimap2 splice:hq alignment); FLAIR collapse + SQANTI3. Public/simulated, no private data. OFF = current binary with mapping indel/softclip thresholds set > 1.0 (never fire); ON = shipped default config.",
+  "metrics": {
+    "discrimination_indel_near": {
+      "false": {
+        "frac_gt_threshold": 0.3306,
+        "mean": 0.3496,
+        "n": 124
+      },
+      "false_caught": 41,
+      "genuine": {
+        "max": 0.1905,
+        "mean": 0.0316,
+        "n": 430
+      },
+      "genuine_flagged": 0,
+      "precision_at_threshold": 1.0,
+      "threshold": 0.5
+    },
+    "impact": {
+      "false_specificity_off": 0.9459,
+      "false_specificity_on": 0.9662,
+      "false_transitions_off_to_on": {
+        "LOW_CONF_PARTIAL->ARTIFACT": 24,
+        "MEDIUM_CONF_NOVEL->LOW_CONF_PARTIAL": 3
+      },
+      "genuine_lost_from_confident_novel": 0,
+      "genuine_sensitivity_off": 0.589,
+      "genuine_sensitivity_on": 0.589
+    }
+  },
+  "notes": "BAM read-level mapping axis: the indel-near / soft-clip fractions were measured by the BAM reader but never fed the verdict before v0.0.4. indel_near cleanly separates genuine (max 0.190) from false (mean 0.350) novel junctions; wiring it as a 4th mapping-artifact trigger (default frac > 0.5) catches false novel junctions at 100% precision (genuine max 0.190 < 0.5, so 0 genuine are ever flagged) and lifts false-novel specificity with ZERO genuine loss. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the same mapping mechanism for noisy reads but its yield is not claimed on this set.",
+  "protocol": "bam_axis",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gencode_v49_chr22_flair",
+  "status": "tracked",
+  "tool_version": "0.0.4"
+}

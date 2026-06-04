@@ -10,6 +10,14 @@ container, and a large round of honest validation. Release is held until the fir
 bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
 
 ### Added
+- **BAM mapping axis — indel-near / soft-clip now feed the verdict.** The read-level
+  `bam_frac_indel_near` and `bam_frac_softclip` fractions were measured at every junction
+  but never acted on (only low-MAPQ / supplementary did). They are now two additional
+  `mapping_or_repeat` triggers (`max_indel_near_frac` / `max_softclip_frac`, default 0.5).
+  Validated on chr22 SQANTI-SIM: indel-near separates genuine novel junctions (max 0.190)
+  from false (mean 0.350) and, gated at 0.5, catches **41/124 false at 100 % precision**,
+  lifting false-novel specificity **0.946 → 0.966** with **0 genuine loss** (sensitivity
+  unchanged). New [benchmark/bam_axis](benchmark/bam_axis) + unit test.
 - **Multi-caller consensus axis.** `adjudicate --caller-support <combine matrix>` feeds
   cross-caller agreement into the verdict: when short-read support is `UNKNOWN`, a novel
   chain recovered by ≥ `consensus_min_callers` (default 2) callers is promoted
@@ -28,9 +36,11 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   `pangenome_public` (GM12878 + K562 whole-genome specificity),
   `multicaller` (5 callers, truth-scored; PR curve over the consensus threshold) +
   `sirv_multicaller` (the consensus generalized to a 2nd reference, SIRV-Set4),
-  `wholegenome_multicaller` (real GM12878), `merge_comparison` (head-to-head vs
-  gffcompare / TAMA), `hg002_wholegenome` (variant-rescue yield), and
-  `giab_cohort_rescue` (rescue across a 4-individual GIAB cohort: 137/137, 0 false).
+  `wholegenome_multicaller` (real GM12878 + the union-vs-consensus decision impact),
+  `merge_comparison` (head-to-head vs gffcompare / TAMA), `hg002_wholegenome`
+  (variant-rescue yield), `giab_cohort_rescue` (rescue across a 4-individual GIAB
+  cohort: 137/137, 0 false), and `bam_axis` (wiring the indel-near / soft-clip read
+  signals: false-novel specificity 0.946 → 0.966, 0 genuine loss).
 
 ### Fixed
 - **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`

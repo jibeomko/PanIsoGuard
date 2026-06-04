@@ -21,6 +21,10 @@ struct RuleConfig {
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
+  double bam_max_indel_near_frac = 0.5;     // > this fraction of spanning reads with an indel adjacent to the
+                                            // junction -> mapping artifact (an alignment-ambiguous indel, not a real intron)
+  double bam_max_softclip_frac = 0.5;       // > this fraction of spanning reads terminally soft-clipped -> mapping artifact
+                                            // (reads that could not align through the junction; data-dependent yield)
   // Pangenome (reference-bias) axis
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
   // Per-axis enable switches (used by `ablate` to mask one axis at a time).

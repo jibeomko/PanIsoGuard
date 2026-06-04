@@ -48,13 +48,17 @@ use_sqanti_all_canonical = true     # informational (engine always uses SQANTI a
 
 [axis_artifact.mapping]             # BAM read-level axis (engine-read; only when --bam supplied)
 min_mapq               = 20         # spanning reads below this MAPQ count as low-confidence
-softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction (reported-only*)
-junction_window_bp     = 10         # indel proximity window around each splice boundary (reported-only*)
+softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction
+junction_window_bp     = 10         # indel proximity window around each splice boundary
 max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
-# *The mapping_flag gate uses only low_mapq_frac / supplementary_frac. The soft-clip
-#  and indel-near fractions are computed and emitted to attribution.jsonl for
-#  inspection, but do not yet contribute to the mapping mechanism decision.
+max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to the junction -> mapping artifact
+                                    #   (an alignment-ambiguous indel mis-rendered as an intron; validated to
+                                    #    catch 41/124 false novel junctions at 100% precision on chr22 -- benchmark/bam_axis)
+max_softclip_frac      = 0.5        # > this fraction terminally soft-clipped -> mapping artifact (reads that could
+                                    #   not align through; ~0 on clean HiFi, data-dependent yield on noisy reads)
+# All four mapping signals (low_mapq / supplementary / indel_near / softclip) are OR'd
+# into the mapping mechanism. indel_near + softclip were measured-only before v0.0.4.
 
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
 # When ALL of an isoform's novel-vs-linear-reference junctions are realizable on a

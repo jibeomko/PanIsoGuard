@@ -35,6 +35,8 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
       c.bam_junction_window_bp = static_cast<int>((*map)["junction_window_bp"].value_or<int64_t>(c.bam_junction_window_bp));
       c.bam_max_low_mapq_frac = (*map)["max_low_mapq_frac"].value_or(c.bam_max_low_mapq_frac);
       c.bam_max_supplementary_frac = (*map)["max_supplementary_frac"].value_or(c.bam_max_supplementary_frac);
+      c.bam_max_indel_near_frac = (*map)["max_indel_near_frac"].value_or(c.bam_max_indel_near_frac);
+      c.bam_max_softclip_frac = (*map)["max_softclip_frac"].value_or(c.bam_max_softclip_frac);
     }
   }
   if (auto pg = tbl["axis_pangenome"].as_table()) {
@@ -147,14 +149,23 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   // do not map confidently (low MAPQ / supplementary / multimapping), the junction
   // may be a mapping artifact and downstream motif/QC signals are moot. Only the
   // first-matching mechanism is reported as primary (see rule_trace for all flags).
+  // Four mapping-artifact signals, all OR'd: low MAPQ, supplementary/secondary, an
+  // indel adjacent to the junction (an alignment-ambiguous indel mis-rendered as an
+  // intron -- the dominant artifact mechanism for false novel junctions on clean reads),
+  // and terminal soft-clipping (reads that could not align through). indel_near and
+  // softclip were previously measured but never acted on; see benchmark/bam_axis.
   const bool mapping_flag = cfg_.use_mapping && ev.bam_evaluable && ev.bam_n_spanning_total > 0 &&
                             (ev.bam_max_frac_low_mapq > cfg_.bam_max_low_mapq_frac ||
-                             ev.bam_max_frac_supplementary > cfg_.bam_max_supplementary_frac);
+                             ev.bam_max_frac_supplementary > cfg_.bam_max_supplementary_frac ||
+                             ev.bam_max_frac_indel_near > cfg_.bam_max_indel_near_frac ||
+                             ev.bam_max_frac_softclip > cfg_.bam_max_softclip_frac);
   Mechanism mech = Mechanism::kNone;
   if (mapping_flag) {
     mech = Mechanism::kMapping;
     trace("bam mapping artifact (low_mapq_frac=" + std::to_string(ev.bam_max_frac_low_mapq) +
           ", supplementary_frac=" + std::to_string(ev.bam_max_frac_supplementary) +
+          ", indel_near_frac=" + std::to_string(ev.bam_max_frac_indel_near) +
+          ", softclip_frac=" + std::to_string(ev.bam_max_frac_softclip) +
           ") -> mechanism=mapping_or_repeat");
   } else if (cfg_.use_noncanonical && ev.canon_evaluable && ev.noncanonical) {
     mech = Mechanism::kNoncanonical;
