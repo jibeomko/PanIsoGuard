@@ -35,10 +35,14 @@ set has an indel next to the junction on *every* spanning read). An 11× mean se
 a signal the engine was throwing away.
 
 **Soft-clip** is ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020) —
-it does not discriminate here. It is wired as the same mapping mechanism (a heavily
-soft-clipped junction = reads that could not align through) but its yield is **data-
-dependent** and only expected to matter on noisier (e.g. ONT) reads; no yield is claimed
-on this set.
+it does not discriminate here. It is wired into the same mapping mechanism but **disabled
+by default** (`max_softclip_frac = 1.01`, which can never fire). Two reasons: it has no
+demonstrated yield on this set, and — unlike `indel_near`, which is junction-proximal
+(`bam_junction_window_bp`) — the soft-clip feature is a **terminal** soft-clip *anywhere*
+on the read, so on real long reads it also fires on adapter / poly-A read ends of
+legitimate junction-spanning reads. A default-on gate would therefore risk demoting genuine
+novels (HIGH → MEDIUM). The knob is left for users who validate it on their own chemistry;
+making it junction-proximal is future work.
 
 ## The operating point (zero genuine cost)
 

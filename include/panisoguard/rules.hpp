@@ -22,9 +22,14 @@ struct RuleConfig {
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
   double bam_max_indel_near_frac = 0.5;     // > this fraction of spanning reads with an indel adjacent to the
-                                            // junction -> mapping artifact (an alignment-ambiguous indel, not a real intron)
-  double bam_max_softclip_frac = 0.5;       // > this fraction of spanning reads terminally soft-clipped -> mapping artifact
-                                            // (reads that could not align through the junction; data-dependent yield)
+                                            // junction -> mapping artifact (an alignment-ambiguous indel, not a real
+                                            // intron). Junction-proximal (bam_junction_window_bp); validated on chr22.
+  double bam_max_softclip_frac = 1.01;      // DISABLED by default (> 1.0 can never fire, since a fraction is <= 1.0).
+                                            // The soft-clip feature is a TERMINAL soft-clip anywhere on the read, NOT
+                                            // junction-proximal -- on real long reads it also fires on adapter / poly-A
+                                            // ends of legitimate junction-spanning reads, so a default-on gate would
+                                            // risk demoting genuine novels. Unvalidated on noisy data; enable (set <= 1.0)
+                                            // only with your own per-chemistry validation. See benchmark/bam_axis.
   // Pangenome (reference-bias) axis
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
   // Per-axis enable switches (used by `ablate` to mask one axis at a time).

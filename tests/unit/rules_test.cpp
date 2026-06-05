@@ -85,13 +85,13 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
 }
 
-TEST_CASE("rules: indel-near and soft-clip are mapping-artifact triggers", "[rules]") {
-  const RuleEngine eng;  // defaults: indel_near / softclip thresholds both 0.5
+TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by default", "[rules]") {
+  const RuleEngine eng;  // defaults: indel_near gate 0.5 (ON), softclip gate 1.01 (DISABLED)
 
   // An indel adjacent to the junction on most spanning reads (an alignment-ambiguous
   // indel mis-rendered as an intron) flags the mapping mechanism even when MAPQ and
   // supplementary fractions are clean. Validated on chr22: catches 41/124 false novel
-  // junctions at 100% precision (benchmark/bam_axis).
+  // junctions at 100% precision (benchmark/bam_axis). UNSUPPORTED -> ARTIFACT.
   EvidenceVector indel = novel_ev(1, 0);
   indel.bam_evaluable = true;
   indel.bam_n_spanning_total = 20;
@@ -100,21 +100,32 @@ TEST_CASE("rules: indel-near and soft-clip are mapping-artifact triggers", "[rul
   CHECK(vi.primary_mechanism == Mechanism::kMapping);
   CHECK(vi.confidence == ConfidenceClass::kArtifact);
 
-  // Terminal soft-clipping on most spanning reads (reads that could not align through)
-  // is the same mapping mechanism.
+  // SR-SUPPORTED + indel mapping artifact -> demoted HIGH -> MEDIUM (one step, not
+  // ARTIFACT): the conflicting-evidence case the projection grid must preserve.
+  EvidenceVector sup = novel_ev(1, 1);
+  sup.bam_evaluable = true;
+  sup.bam_n_spanning_total = 20;
+  sup.bam_max_frac_indel_near = 0.8;
+  Verdict vsup = eng.evaluate(sup);
+  CHECK(vsup.primary_mechanism == Mechanism::kMapping);
+  CHECK(vsup.confidence == ConfidenceClass::kMediumConfNovel);
+
+  // Soft-clip is DISABLED by default (gate 1.01): a terminal soft-clip is not
+  // junction-proximal and fires on adapter/poly-A read ends, so even an extreme
+  // softclip fraction must NOT flag the mapping mechanism under the shipped defaults.
   EvidenceVector clip = novel_ev(1, 0);
   clip.bam_evaluable = true;
   clip.bam_n_spanning_total = 20;
-  clip.bam_max_frac_softclip = 0.7;  // > default 0.5
-  CHECK(eng.evaluate(clip).primary_mechanism == Mechanism::kMapping);
+  clip.bam_max_frac_softclip = 0.99;  // would fire at 0.5, but default gate is 1.01 (off)
+  CHECK(eng.evaluate(clip).primary_mechanism == Mechanism::kNone);
 
-  // Below threshold (the genuine-junction regime, chr22 genuine max ~0.19): no mapping
-  // flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
+  // Below threshold (the genuine-junction regime, chr22 genuine indel_near max ~0.19):
+  // no mapping flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
   EvidenceVector ok = novel_ev(1, 1);
   ok.bam_evaluable = true;
   ok.bam_n_spanning_total = 20;
   ok.bam_max_frac_indel_near = 0.19;
-  ok.bam_max_frac_softclip = 0.04;
+  ok.bam_max_frac_softclip = 0.99;  // soft-clip off by default -> ignored
   Verdict vo = eng.evaluate(ok);
   CHECK(vo.primary_mechanism == Mechanism::kNone);
   CHECK(vo.confidence == ConfidenceClass::kHighConfNovel);

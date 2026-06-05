@@ -10,14 +10,17 @@ container, and a large round of honest validation. Release is held until the fir
 bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
 
 ### Added
-- **BAM mapping axis — indel-near / soft-clip now feed the verdict.** The read-level
+- **BAM mapping axis — indel-near now feeds the verdict.** The read-level
   `bam_frac_indel_near` and `bam_frac_softclip` fractions were measured at every junction
-  but never acted on (only low-MAPQ / supplementary did). They are now two additional
-  `mapping_or_repeat` triggers (`max_indel_near_frac` / `max_softclip_frac`, default 0.5).
-  Validated on chr22 SQANTI-SIM: indel-near separates genuine novel junctions (max 0.190)
-  from false (mean 0.350) and, gated at 0.5, catches **41/124 false at 100 % precision**,
-  lifting false-novel specificity **0.946 → 0.966** with **0 genuine loss** (sensitivity
-  unchanged). New [benchmark/bam_axis](benchmark/bam_axis) + unit test.
+  but never acted on (only low-MAPQ / supplementary did). **`indel_near`** is now a
+  `mapping_or_repeat` trigger (`max_indel_near_frac`, default 0.5). Validated on chr22
+  SQANTI-SIM: it separates genuine novel junctions (max 0.190) from false (mean 0.350)
+  and, gated at 0.5, catches **41/124 false at 100 % precision**, lifting false-novel
+  specificity **0.946 → 0.966** with **0 genuine loss** (sensitivity unchanged).
+  **`softclip`** is wired but **disabled by default** (`max_softclip_frac = 1.01`): the
+  feature is a *terminal* soft-clip (not junction-proximal), so a default-on gate would
+  risk demoting genuine novels on noisy reads — opt-in only. New
+  [benchmark/bam_axis](benchmark/bam_axis) + unit test.
 - **Multi-caller consensus axis.** `adjudicate --caller-support <combine matrix>` feeds
   cross-caller agreement into the verdict: when short-read support is `UNKNOWN`, a novel
   chain recovered by ≥ `consensus_min_callers` (default 2) callers is promoted
