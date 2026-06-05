@@ -168,7 +168,7 @@ def main():
             "protocol": "bam_axis",
             "scope": "gencode_v49_chr22_flair",
             "status": "tracked",
-            "tool_version": "0.0.4",
+            "tool_version": "0.0.3",
             "ruleset_version": "builtin-0.0.1",
             "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (simulated PBSIM3 HiFi, one shared "
                                "minimap2 splice:hq alignment); FLAIR collapse + SQANTI3. Public/simulated, "
