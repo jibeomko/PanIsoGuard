@@ -42,8 +42,11 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   `wholegenome_multicaller` (real GM12878 + the union-vs-consensus decision impact),
   `merge_comparison` (head-to-head vs gffcompare / TAMA), `hg002_wholegenome`
   (variant-rescue yield), `giab_cohort_rescue` (rescue across a 4-individual GIAB
-  cohort: 137/137, 0 false), and `bam_axis` (wiring the indel-near / soft-clip read
-  signals: false-novel specificity 0.946 → 0.966, 0 genuine loss).
+  cohort: 137/137, 0 false), `bam_axis` (wiring the indel-near / soft-clip read
+  signals: false-novel specificity 0.946 → 0.966, 0 genuine loss), and
+  `gm12878_realdata` (the BAM axis on a **real** ONT dataset: soft-clip default-off
+  empirically vindicated — 98 % fire rate on ONT — and the mapping thresholds shown to
+  be chemistry-dependent; reference-bias rescue 0/1364 on the reference-grade sample).
 
 ### Fixed
 - **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`
