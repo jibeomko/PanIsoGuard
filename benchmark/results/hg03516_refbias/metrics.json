@@ -1,0 +1,44 @@
+{
+  "command": "see run.sh: download flnc+assemblies; asm5+paftools->SNV-consensus haplotypes; minimap2 splice:hq + IsoQuant -> novel junctions; scan_variant_axis.py per chrom vs pat+mat haplotypes; adjudicate --reference --reference-haplotype --haplotype-provenance {wgs,unknown}; analyze.py",
+  "data_provenance": "REAL public HPRC Release 2 HG03516 (ESN/Nigeria, AFR LCL): PacBio Kinnex Iso-Seq (s3://human-pangenomics .../HG03516/raw_data/PacBio_Kinnex/*.flnc.bam) + HiFi de-novo phased assembly (pat/mat, GCA_018469415.2/GCA_018469425.2). Personal SNV-consensus haplotype = assembly minimap2 asm5 + paftools.js call vs GRCh38, SNVs only (length-matched). GENCODE v49. No private data.",
+  "metrics": {
+    "all_trace_to_assembly_snv": true,
+    "annotated_noncanonical": 5,
+    "contrast_gm12878_directional": {
+      "expected_at_hg03516_rate": 0.55,
+      "junctions_scanned": 1364,
+      "p_observe_zero": 0.575,
+      "reference_bias_junctions": 0
+    },
+    "firewall_circular_risk_provenance": {
+      "created_rows_held_ambiguous": 57
+    },
+    "heterozygous_one_haplotype": 23,
+    "homozygous_both_haplotypes": 17,
+    "individual": "HG03516 (ESN, Esan in Nigeria; AFR superpopulation; HPRC Release 2 LCL)",
+    "novel_transcript_models_isoquant": 37568,
+    "novel_vs_gencode_v49": 35,
+    "per_junction_rate": 0.000405,
+    "read_support_exact": {
+      "ge2_spanning_reads": 40,
+      "max": 95,
+      "median": 5,
+      "min": 2,
+      "of": 40
+    },
+    "reference_bias_junctions": 40,
+    "rescue_independent_dna_provenance": {
+      "created_rows_rescued": 57,
+      "false_rescues": 0,
+      "unique_junctions": 40
+    },
+    "rna": "PacBio Kinnex Iso-Seq (flnc), 11.34M full-length reads aligned (minimap2 splice:hq)",
+    "unique_novel_junctions_scanned": 98672
+  },
+  "notes": "POSITIVE real-data application: PanIsoGuard's reference-bias rescue FIRES on real long-read RNA from a divergent (African, ESN) individual -- 40 caller-reported novel splice junctions are reference bias (non-canonical on GRCh38, canonical on HG03516's own HiFi-assembly haplotype via a real personal SNV), 35/40 novel vs GENCODE (a reference-only pipeline would report them as discoveries). All 40 rescued (PAN_REF_RESCUED_FALSE_NOVEL) under independent-DNA provenance with 0 false rescues; the circularity firewall holds all under circular-risk provenance. Independently adversarially audited (5 angles); REQUIRED CAVEATS, all stated honestly: (1) one hit (chr17:3681978-3685514, P2RX5) was DROPPED -- a 4bp-displaced IsoQuant model coordinate with 0 exact spanning reads whose reads splice to an already-canonical GRCh38 site. (2) The HG03516-vs-GM12878(0) contrast is DIRECTIONAL, NOT a controlled rate: ~72x denominator asymmetry (98,672 vs 1,364 junctions), different chemistry (PacBio vs ONT), caller set (IsoQuant vs multi-caller), and variant source (HiFi assembly genome-wide vs GIAB v4.2.1 high-confidence SNPs excluding segdups); at HG03516's rate GM12878's 0 is expected (E=0.55, P(0)=0.58). The apples-to-apples 'scales with divergence' evidence is giab_cohort_rescue (137 across 4 genomes). (3) 'Independent-DNA provenance' = HiFi de-novo ASSEMBLY variant calls (paftools.js, GT 1/1 + QUAL 60 placeholders, SNV-only so indel-mediated reference bias is invisible), not short-read WGS genotyping; the firewall's independence is MOLECULE independence (DNA vs RNA), which holds, but both arms share the GRCh38 + minimap2 backbone. Mitigations: 40/40 independent exact read support (median 5); audit found 0/40 hits in segdup/paralog/low-complexity regions and the restoring SNVs collinear on one assembly contig.",
+  "protocol": "hg03516_refbias",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "hg03516_esn_afr_real_longread",
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

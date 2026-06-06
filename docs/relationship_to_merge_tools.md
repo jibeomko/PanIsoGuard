@@ -42,7 +42,13 @@ surveyed merge/QC tool provides, are:
    (**137 total → 137/137 rescued, 0 false, 137/137 firewall-held**); population-deletion
    reference bias in typical cell lines is ~0. Its value is *correctness* (it never
    over-promotes, and catches every genuine case), and it rises for non-reference /
-   personalized-genome samples. See
+   personalized-genome samples. **On real long-read RNA from a divergent African individual
+   (HG03516, ESN/Nigeria, HPRC R2 — same-individual Iso-Seq + HiFi assembly) the rescue
+   fires on real caller calls: 40 IsoQuant novel junctions are reference bias (35 novel vs
+   GENCODE — discoveries a reference-only pipeline would report), 40/40 rescued with 0 false
+   and the firewall holding all 40; the reference-grade control GM12878 yields 0** (a
+   directional contrast, not a controlled rate — see the protocol's caveats). See
+   [benchmark/hg03516_refbias](../benchmark/hg03516_refbias) (the positive real-data case),
    [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue),
    [benchmark/hg002](../benchmark/hg002), and [benchmark/pangenome](../benchmark/pangenome).
 2. **One unified, auditable verdict** — consensus, short-read, long-read-mapping, variant,
