@@ -1,0 +1,60 @@
+{
+  "command": "per individual: benchmark/hg03516_refbias/run.sh (download + haplotypes + IsoQuant + scan + adjudicate); benchmark/refbias_cohort/analyze.py <gencode> HG03516:<wd1> HG02717:<wd2>",
+  "data_provenance": "REAL public HPRC Release 2 long-read RNA (PacBio Kinnex Iso-Seq) + HiFi de-novo phased assemblies for the SAME individuals: HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, Gambian Mandinka) -- two independent West African individuals. Personal SNV-consensus haplotypes from assembly minimap2 asm5 + paftools.js call vs GRCh38 (SNVs only, length-matched). GENCODE v49. No private data. Reference-grade comparator GM12878=NA12878 (European) yields 0 -- see gm12878_realdata.",
+  "metrics": {
+    "cohort_total": {
+      "false_rescues": 0,
+      "firewall_held_all": true,
+      "individuals": 2,
+      "novel_vs_gencode_v49": 77,
+      "reference_bias_junctions": 86,
+      "rescued_unique": 86
+    },
+    "per_individual": {
+      "HG02717": {
+        "annotated_noncanonical": 4,
+        "dropped_zero_exact_read_support": 1,
+        "false_rescues": 0,
+        "firewall_held_rows": 61,
+        "heterozygous": 31,
+        "homozygous": 15,
+        "novel_vs_gencode_v49": 42,
+        "read_support_exact": {
+          "ge2": 46,
+          "max": 163,
+          "median": 9,
+          "min": 2,
+          "of": 46
+        },
+        "reference_bias_junctions": 46,
+        "rescued_rows": 61,
+        "unique_novel_junctions_scanned": 88622
+      },
+      "HG03516": {
+        "annotated_noncanonical": 5,
+        "dropped_zero_exact_read_support": 1,
+        "false_rescues": 0,
+        "firewall_held_rows": 57,
+        "heterozygous": 23,
+        "homozygous": 17,
+        "novel_vs_gencode_v49": 35,
+        "read_support_exact": {
+          "ge2": 40,
+          "max": 95,
+          "median": 5,
+          "min": 2,
+          "of": 40
+        },
+        "reference_bias_junctions": 40,
+        "rescued_rows": 57,
+        "unique_novel_junctions_scanned": 98672
+      }
+    }
+  },
+  "notes": "POSITIVE real-data application, REPLICATED across two independent divergent African individuals: the reference-bias rescue fires on real long-read RNA -- HG03516 40 + HG02717 46 = 86 reference-bias novel splice junctions (77 novel vs GENCODE -- discoveries a reference-only pipeline would report), each non-canonical on GRCh38 but canonical on that individual's own HiFi-assembly haplotype via a real personal SNV. 86/86 rescued (PAN_REF_RESCUED_FALSE_NOVEL) under independent-DNA provenance, 0 false rescues; the circularity firewall holds all 86 AMBIGUOUS under circular-risk provenance. Both individuals were processed identically; the principled read-support filter (drop junctions with 0 exact-coordinate spanning reads) removed 1 displaced-coordinate caller-model artifact each. Same caveats as hg03516_refbias (independently audited): the divergent-vs-reference-grade contrast with GM12878's 0 is DIRECTIONAL not a controlled rate (denominator/chemistry/variant-method differ); the personal genome is a HiFi de-novo ASSEMBLY SNV call (paftools placeholder QC, SNV-only -> indel reference bias invisible), molecule-independent (DNA vs RNA) but sharing the GRCh38+minimap2 backbone. The replication across two unrelated West African genomes is the cohort evidence that the rescue is a consistent, perfectly-specific safeguard whose yield scales with divergence (cf. giab_cohort_rescue).",
+  "protocol": "refbias_cohort",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "hprc_r2_west_african_cohort_real_longread",
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

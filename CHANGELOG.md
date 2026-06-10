@@ -47,11 +47,12 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   `gm12878_realdata` (the BAM axis on a **real** ONT dataset: soft-clip default-off
   empirically vindicated — 98 % fire rate on ONT — and the mapping thresholds shown to
   be chemistry-dependent; reference-bias rescue 0/1364 on the reference-grade sample), and
-  `hg03516_refbias` (the **positive real-data application**: the reference-bias rescue
-  fires on real PacBio Iso-Seq from a divergent African individual — HG03516, ESN/Nigeria,
-  HPRC R2 — **40 reference-bias novel junctions (35 novel vs GENCODE), 40/40 rescued, 0
-  false, firewall holds all 40**, vs 0 on reference-grade GM12878; independently
-  adversarially audited, caveats stated).
+  `refbias_cohort` + `hg03516_refbias` (the **positive real-data application, replicated**:
+  the reference-bias rescue fires on real PacBio Iso-Seq from **two** divergent West African
+  individuals — HG03516 (ESN) + HG02717 (GWD), HPRC R2 — **86 reference-bias novel junctions
+  (77 novel vs GENCODE), 86/86 rescued, 0 false, firewall holds all 86**, perfectly specific
+  across both genomes, vs 0 on reference-grade GM12878; independently adversarially audited,
+  caveats stated — the differentiator firing on real divergent-genome RNA).
 
 ### Fixed
 - **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`

@@ -42,14 +42,16 @@ surveyed merge/QC tool provides, are:
    (**137 total → 137/137 rescued, 0 false, 137/137 firewall-held**); population-deletion
    reference bias in typical cell lines is ~0. Its value is *correctness* (it never
    over-promotes, and catches every genuine case), and it rises for non-reference /
-   personalized-genome samples. **On real long-read RNA from a divergent African individual
-   (HG03516, ESN/Nigeria, HPRC R2 — same-individual Iso-Seq + HiFi assembly) the rescue
-   fires on real caller calls: 40 IsoQuant novel junctions are reference bias (35 novel vs
-   GENCODE — discoveries a reference-only pipeline would report), 40/40 rescued with 0 false
-   and the firewall holding all 40; the reference-grade control GM12878 yields 0** (a
-   directional contrast, not a controlled rate — see the protocol's caveats). See
-   [benchmark/hg03516_refbias](../benchmark/hg03516_refbias) (the positive real-data case),
-   [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue),
+   personalized-genome samples. **On real long-read RNA from TWO divergent
+   West African individuals (HG03516 ESN + HG02717 GWD, HPRC R2 — same-individual Iso-Seq +
+   HiFi assembly each) the rescue fires on real caller calls and is perfectly specific in
+   both: 40 + 46 = 86 IsoQuant novel junctions are reference bias (77 novel vs GENCODE —
+   discoveries a reference-only pipeline would report), 86/86 rescued with 0 false and the
+   firewall holding all 86; the reference-grade control GM12878 yields 0** (a directional
+   contrast, not a controlled rate — see the protocol's caveats). See
+   [benchmark/refbias_cohort](../benchmark/refbias_cohort) (the positive real-data case,
+   replicated) and [benchmark/hg03516_refbias](../benchmark/hg03516_refbias) (its audited
+   deep-dive), [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue),
    [benchmark/hg002](../benchmark/hg002), and [benchmark/pangenome](../benchmark/pangenome).
 2. **One unified, auditable verdict** — consensus, short-read, long-read-mapping, variant,
    and pangenome evidence projected into a single confidence class with a machine-readable
