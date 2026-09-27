@@ -27,30 +27,30 @@ independent of that review:
 ```bash
 V=0.0.4
 
-# 1) finalize the changelog: rename "[Unreleased] — targets 0.0.4" to "[0.0.4] - <date>"
-#    (edit CHANGELOG.md)
+# 1) finalize the changelog: rename "[Unreleased]" to "[X.Y.Z] - <date>" (edit CHANGELOG.md);
+#    step 3's workflow copies this section into the release notes
 
-# 2) bump the version in all THREE sources (sha256 is fixed in step 6)
+# 2) bump the version in all THREE sources (sha256 is fixed in step 4)
 sed -i -E "s/(project\(panisoguard VERSION )[0-9.]+/\1$V/" CMakeLists.txt
 sed -i -E "s/^version = \"[0-9.]+\"/version = \"$V\"/" python/pyproject.toml
 sed -i -E "s/(set version = \")[0-9.]+/\1$V/" recipes/bioconda/meta.yaml
 python3 scripts/check_version_sync.py        # must print OK (checks the version string, not the sha)
-
-# 3) commit + push the bump
 git add CMakeLists.txt python/pyproject.toml recipes/bioconda/meta.yaml CHANGELOG.md
 git commit -m "release: v$V"
 git push origin main
 
-# 4) tag + GitHub Release (this is what produces the source tarball the recipe points at)
+# 3) tag. Pushing it runs .github/workflows/release.yml, which creates the GitHub Release:
+#    notes = bioconda source block + this version's CHANGELOG section, plus the
+#    bioconda-source.yaml asset. Do NOT `gh release create` by hand (it will already exist).
 git tag -a "v$V" -m "PanIsoGuard v$V"
 git push origin "v$V"
-gh release create "v$V" --title "v$V" --notes-from-tag   # or paste the CHANGELOG section
+sleep 10   # let the Release run register before watching it
+gh run watch "$(gh run list --workflow release.yml --limit 1 --json databaseId --jq '.[0].databaseId')"
 
-# 5) get the release tarball's sha256
-curl -sL "https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v$V.tar.gz" | sha256sum
-
-# 6) put that sha256 into recipes/bioconda/meta.yaml (replace the sha256: line), commit, push
-#    git commit -am "recipe: pin v$V source sha256" && git push origin main
+# 4) pin the sha256 the workflow computed into the recipe
+SHA=$(gh release download "v$V" -p bioconda-source.yaml -O - | awk '/sha256/{print $2}')
+sed -i -E "s/^(  sha256: )[0-9a-f]{64}/\1$SHA/" recipes/bioconda/meta.yaml
+git commit -am "recipe: pin v$V source sha256" && git push origin main
 ```
 
 ## Getting a release onto bioconda
@@ -60,7 +60,7 @@ curl -sL "https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v$V.tar.gz" 
   watches GitHub releases and opens a version-bump PR on `bioconda-recipes` for you. Review
   it, comment `@BiocondaBot please add label` once CI is green, and wait for a maintainer.
 - **Manual PR.** In your `bioconda-recipes` fork, edit `recipes/panisoguard/meta.yaml`
-  (version + sha256 to match step 5–6), open a PR, and add the `please review & merge`
+  (version + sha256 to match step 4), open a PR, and add the `please review & merge`
   label via the bot.
 
 ## Optional: publish `panisoguard-report` to PyPI

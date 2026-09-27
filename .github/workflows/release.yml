@@ -58,6 +58,9 @@ jobs:
             sha256: ${{ steps.sha.outputs.sha256 }}
           \`\`\`
           EOF
+          # Append this version's CHANGELOG.md section ("## [X.Y.Z] ..." up to the next "## [").
+          TAG="${{ steps.sha.outputs.tag }}"
+          { echo; awk -v v="${TAG#v}" '$0 ~ "^## \\[" v "\\]" {p=1; next} /^## \[/ {p=0} p' CHANGELOG.md; } >> notes.md
           cat bioconda-source.yaml
 
       - name: Create / update GitHub Release

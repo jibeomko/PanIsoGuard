@@ -3,6 +3,8 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
+## [Unreleased]
+
 ## [0.0.4] - 2026-09-27
 
 The flagship change is the **multi-caller consensus axis**, plus a PDF report tool, a
