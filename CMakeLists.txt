@@ -53,7 +53,10 @@ endif()
 message(STATUS "PanIsoGuard: using htslib ${HTSLIB_VERSION} (${HTSLIB_LIBRARY})")
 
 # --- Core library (M1) -------------------------------------------------------
-add_library(panisoguard_core STATIC
+# OBJECT, not STATIC: the core is internal (only the executable is installed), and an object
+# library needs no archiver. conda-forge compilers >= 2.0 ship an unprefixed c++ but only a
+# prefixed ar, so without system binutils CMake finds no `ar` and a STATIC build fails.
+add_library(panisoguard_core OBJECT
   src/core/fingerprint.cpp
   src/core/interval_index.cpp
   src/core/consensus.cpp
@@ -122,10 +125,12 @@ if(PANISOGUARD_BUILD_TESTS)
   target_compile_definitions(panisoguard_tests PRIVATE
     PANISOGUARD_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/tests/data/tiny")
   add_test(NAME unit COMMAND panisoguard_tests)
-  # The README quick example must keep matching its checked-in expected outputs.
-  add_test(NAME example_tiny
-    COMMAND bash "${CMAKE_SOURCE_DIR}/examples/tiny/run.sh" "${CMAKE_BINARY_DIR}/example_tiny_out")
-  set_tests_properties(example_tiny PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
+  # The README Quick start examples must keep matching their checked-in expected outputs.
+  foreach(ex tiny multi_caller)
+    add_test(NAME example_${ex}
+      COMMAND bash "${CMAKE_SOURCE_DIR}/examples/${ex}/run.sh" "${CMAKE_BINARY_DIR}/example_${ex}_out")
+    set_tests_properties(example_${ex} PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
+  endforeach()
 
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,

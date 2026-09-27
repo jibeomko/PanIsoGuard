@@ -113,6 +113,23 @@ jobs:
           git -c user.email=ci@example.com -c user.name=ci commit -qm init
           bioconda-utils lint recipes config.yml --packages panisoguard
 
+  container:
+    name: docker build + Quick start examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build the image (as in the README)
+        run: docker build -t panisoguard .
+
+      - name: Run the Quick start examples in the container (as in the README)
+        run: |
+          set -euo pipefail
+          for ex in tiny multi_caller; do
+            docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard examples/$ex/run.sh
+          done
+
   report-tool:
     name: report tool (matplotlib smoke)
     runs-on: ubuntu-latest

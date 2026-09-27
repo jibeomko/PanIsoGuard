@@ -1,9 +1,10 @@
 # PanIsoGuard container: the C++ adjudicator (built from source) + panisoguard-report.
 # Build:  docker build -t panisoguard .
-# Use:    docker run --rm -v "$PWD":/data -w /data panisoguard \
-#             adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
+# Use:    docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
+#             panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
 #         docker run --rm panisoguard panisoguard --version
-#         docker run --rm -v "$PWD":/data -w /data panisoguard panisoguard-report --prefix run
+#         docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard panisoguard-report --prefix run
+# (-u runs as you so outputs can be written to the mounted folder; the image user cannot.)
 # (Pass the command through the default entrypoint — do NOT use --entrypoint, which would
 #  bypass the conda-env activation that puts htslib/matplotlib on the path.)
 #

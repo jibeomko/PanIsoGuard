@@ -13,6 +13,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   SQANTI3 6.0.1 and STAR runs (`notes/data/build_toy.sh`). `notes/check_notes.py`
   recomputes all 81 toy verdicts with the Python standard library and compares them with
   the binary; it runs as the CTest `integration_study_notes`.
+- **Copy-paste Quick start.** One block clones, creates a conda env, builds and runs both
+  bundled examples; a Docker alternative follows. Both blocks were run verbatim from the README
+  in a stock Debian 13 Miniconda container with no system compiler or `ar`. CI now runs the
+  Docker route (`container` job) and both examples (CTest `example_tiny`,
+  `example_multi_caller`).
 - **Non-circular check of the reference-bias rescue**
   ([benchmark/refbias_phasing](benchmark/refbias_phasing)). For heterozygous reference-bias
   junctions in HG03516 and HG02717, the long reads that use the junction are phased with the
@@ -34,6 +39,15 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   The name is to be bumped with any change to a default threshold or to the projection.
 
 ### Fixed
+- **Build failed without system binutils.** conda-forge compilers >= 2.0 install an
+  unprefixed `c++` but only a prefixed `ar`, so where no system `/usr/bin/ar` exists (a clean
+  container, and this project's own Docker image) CMake found no archiver and linking
+  `libpanisoguard_core.a` failed; the Docker build on `main` was broken by it. CI never saw it
+  because its runners have system binutils. The core is now an OBJECT library, which needs no
+  archiver.
+- README / Dockerfile container commands: the command must start with `panisoguard` (a bare
+  `adjudicate` is "not found"), and `-u "$(id -u):$(id -g)"` is needed to write outputs into
+  the mounted folder.
 - `examples/tiny/expected/sample.provenance.log` still said `tool_version 0.0.3`, so the
   README quick example failed its own diff; nothing ran it. The diff now ignores the
   version line, and the example runs as the CTest `example_tiny`.

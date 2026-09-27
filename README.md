@@ -27,7 +27,7 @@ haplotype FASTA), and re-classifies each novel call into a confidence class with
 
 ## Contents
 
-- [Install](#install) · [Quick start](#quick-start) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence tiers](#evidence-tiers)
+- [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence tiers](#evidence-tiers)
 - [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Scope and design](#scope-and-design) · [Validation](#validation)
 - [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout) · [Architecture map](#architecture-map)
 
@@ -41,6 +41,49 @@ verdict groups cover the six novel-isoform classes; the full set, including
 `HIGH_CONF_KNOWN`, is listed [below](#confidence-classes). Vector source:
 [`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
+## Quick start
+
+Paste this into a Linux (or macOS) terminal. It needs only `git` and `conda` (Miniconda,
+Miniforge or Mamba; `mamba` works the same) and builds PanIsoGuard in its own conda
+environment, so no system compiler or htslib is involved. The first run downloads the
+compilers and htslib (a few minutes); the examples then run offline in under a second.
+
+```bash
+git clone https://github.com/jibeomko/PanIsoGuard.git
+cd PanIsoGuard
+conda create -y -n panisoguard --override-channels -c conda-forge -c bioconda \
+    cxx-compiler c-compiler cmake make zlib "htslib>=1.18"
+conda activate panisoguard
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+
+examples/tiny/run.sh            # one caller: a known, a short-read-supported novel, and an artifact isoform
+examples/multi_caller/run.sh    # three callers: combine -> consensus verdict
+```
+
+Each example prints its verdicts and ends with `example output matches expected files` /
+`output matches expected` (checked against the committed `expected/` files).
+`--override-channels` takes the packages only from conda-forge and bioconda, whatever channels
+your conda is set up with. The tool is now `build/panisoguard` (it runs without the environment
+active); `export PATH="$PWD/build:$PATH"` lets you call it as `panisoguard`, as in
+[Usage](#usage).
+
+**No conda? Docker** (in the same `PanIsoGuard` folder):
+
+```bash
+docker build -t panisoguard .
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard examples/tiny/run.sh
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard examples/multi_caller/run.sh
+```
+
+`-u` runs the container as you, so it can write into your folder. The image also contains the
+optional PDF report tool; outside it, `pip install ./python` and then
+`panisoguard-report --prefix <out-prefix>` (see [python/](python/)).
+
+For a step-by-step walk-through of how one toy gene's inputs become verdicts, see the
+study notes (in Korean): [notes/](notes/README.md).
+
 ## Install
 
 ### Bioconda
@@ -50,52 +93,34 @@ submitted ([bioconda-recipes #65953](https://github.com/bioconda/bioconda-recipe
 awaiting review). Once it is merged:
 
 ```bash
-conda install -c bioconda -c conda-forge panisoguard
+conda install -c conda-forge -c bioconda panisoguard
 ```
 
 ### Container
 
-Build a self-contained image (the C++ binary + the optional PDF report tool) — works today
-without waiting on the conda release:
+`docker build -t panisoguard .` (see [Quick start](#quick-start)), then put `panisoguard` in
+front of any command and mount your data:
 
 ```bash
-docker build -t panisoguard .
-docker run --rm panisoguard panisoguard --version
-docker run --rm -v "$PWD":/data -w /data panisoguard \
-    adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
+    panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
+    panisoguard-report --prefix run
 ```
 
 ### From source
 
-Requires a C++17 compiler, CMake ≥ 3.20, and **htslib ≥ 1.18**.
+The [Quick start](#quick-start) builds from source in a conda environment. With your own
+toolchain you need a C++17 compiler, CMake ≥ 3.20 and **htslib ≥ 1.18** (older distribution
+packages are too old; the conda route avoids this). htslib is found in `$CONDA_PREFIX`, or pass
+`-DCMAKE_PREFIX_PATH=/prefix`.
 
 ```bash
-git clone https://github.com/jibeomko/PanIsoGuard.git && cd PanIsoGuard
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-ctest --test-dir build            # unit suite
+ctest --test-dir build            # unit, integration and example tests
 ./build/panisoguard --version
 ```
-
-htslib is discovered from `$CONDA_PREFIX`; override with `-DCMAKE_PREFIX_PATH=/prefix`.
-
-## Quick start
-
-Two bundled examples run in under a second and need no downloads:
-
-```bash
-examples/tiny/run.sh            # one caller: a known, a short-read-supported novel, and an artifact isoform
-examples/multi_caller/run.sh    # three callers: combine -> consensus verdict
-```
-
-Each script finds `panisoguard` on your `PATH`, in `build/`, or via
-`PANISOGUARD=/path/to/panisoguard`, writes `output/` next to itself, and checks the result
-against the checked-in `expected/` files. The optional PDF report (SQANTI3-style) is a Python
-companion: `pip install ./python`, then `panisoguard-report --prefix <out-prefix>` (see
-[python/](python/)).
-
-For a step-by-step walk-through of how one toy gene's inputs become verdicts, see the
-study notes (in Korean): [notes/](notes/README.md).
 
 ## Usage
 
