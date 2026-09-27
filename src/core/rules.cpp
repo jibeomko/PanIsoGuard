@@ -207,8 +207,10 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
     cls = (mech == Mechanism::kNone) ? ConfidenceClass::kHighConfNovel
                                      : ConfidenceClass::kMediumConfNovel;
   } else if (sup == NoveltySupport::kPartial) {
-    cls = (mech == Mechanism::kNone) ? ConfidenceClass::kMediumConfNovel
-                                     : ConfidenceClass::kLowConfPartial;
+    // An uncorroborated novel junction leaves the chain unconfirmed, so PARTIAL never
+    // promotes to a confident novel call (it did, to MEDIUM, and those were the extra
+    // false positives in benchmark/sqanti3_filter_h2h).
+    cls = ConfidenceClass::kLowConfPartial;
   } else {  // UNSUPPORTED
     cls = (mech == Mechanism::kNone) ? ConfidenceClass::kLowConfPartial
                                      : ConfidenceClass::kArtifact;

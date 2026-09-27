@@ -182,8 +182,10 @@ def main():
                      "BAM reader but never fed the verdict before v0.0.4. indel_near cleanly separates genuine "
                      "(max 0.190) from false (mean 0.350) novel junctions; wiring it as a 4th mapping-artifact "
                      "trigger (default frac > 0.5) catches false novel junctions at 100% precision (genuine max "
-                     "0.190 < 0.5, so 0 genuine are ever flagged) and lifts false-novel specificity with ZERO "
-                     "genuine loss. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the "
+                     "0.190 < 0.5, so 0 genuine are ever flagged). Since the PARTIAL-never-promotes fix the "
+                     "3 false novels it used to demote are already non-confident, so it no longer changes "
+                     "operating-point specificity here (ON == OFF); it relabels 24 false LOW_CONF_PARTIAL -> "
+                     "ARTIFACT. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the "
                      "same mapping mechanism for noisy reads but its yield is not claimed on this set.",
         }
         json.dump(out, open(a.emit_metrics, "w"), indent=2, sort_keys=True)

@@ -80,8 +80,10 @@ fired conditions are listed in `rule_trace`.
 2. Otherwise project (Axis A × Axis B):
    - `SUPPORTED × none → HIGH_CONF_NOVEL`
    - `SUPPORTED × mechanism → MEDIUM_CONF_NOVEL`
-   - `PARTIAL × none → MEDIUM_CONF_NOVEL`
-   - `PARTIAL × mechanism → LOW_CONF_PARTIAL`
+   - `PARTIAL × any → LOW_CONF_PARTIAL` (an uncorroborated novel junction leaves the
+     chain unconfirmed; before 0.0.4 `PARTIAL × none` promoted to `MEDIUM_CONF_NOVEL`,
+     which produced false positives — see
+     [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h))
    - `UNSUPPORTED × none → LOW_CONF_PARTIAL`
    - `UNSUPPORTED × mechanism → ARTIFACT`
    - `UNKNOWN` support → `AMBIGUOUS`, except:

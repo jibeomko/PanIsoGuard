@@ -33,7 +33,7 @@ TEST_CASE("rule projection over the 2-axis grid", "[rules]") {
 
   CHECK(eng.evaluate(novel_ev(2, 2)).confidence == ConfidenceClass::kHighConfNovel);
   CHECK(eng.evaluate(novel_ev(2, 2, /*noncanonical=*/true)).confidence == ConfidenceClass::kMediumConfNovel);
-  CHECK(eng.evaluate(novel_ev(2, 1)).confidence == ConfidenceClass::kMediumConfNovel);
+  CHECK(eng.evaluate(novel_ev(2, 1)).confidence == ConfidenceClass::kLowConfPartial);  // PARTIAL never promotes
   CHECK(eng.evaluate(novel_ev(2, 1, /*noncanonical=*/true)).confidence == ConfidenceClass::kLowConfPartial);
   CHECK(eng.evaluate(novel_ev(2, 0)).confidence == ConfidenceClass::kLowConfPartial);
   CHECK(eng.evaluate(novel_ev(2, 0, /*noncanonical=*/true)).confidence == ConfidenceClass::kArtifact);

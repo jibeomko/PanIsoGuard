@@ -4,11 +4,11 @@
   "generated_utc": null,
   "metrics": {
     "auprc_baseline": 0.8314,
-    "auprc_genuine": 0.9698,
+    "auprc_genuine": 0.9712,
     "nnc_recall": 1.0,
-    "precision_genuine": 0.982,
+    "precision_genuine": 0.989,
     "recall_genuine": 0.589,
-    "specificity_false": 0.946
+    "specificity_false": 0.966
   },
   "notes": "Operating point = config/rules.default.toml (default-0.0.1). Full grid in sweep.tsv.",
   "protocol": "sqanti_sim",
@@ -16,5 +16,5 @@
   "scope": "gencode_v49_chr22",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.2"
+  "tool_version": "0.0.3"
 }

@@ -29,7 +29,7 @@ against it. They validate the **adjudication logic** — given caller + SQANTI3 
 |----------|-------|--------|
 | [controlled_truth](../benchmark/controlled_truth) | GENCODE chr22, incomplete-reference (hidden = genuine, shifted-exon = false); short-read axis | on decisive calls **precision(genuine)=1.000, specificity(false)=1.000**; genuine NIC-like isoforms honestly **abstained** (no novel junction to corroborate) |
 | [synthetic_axes](../benchmark/synthetic_axes) | synthetic contig, 4 labelled categories × 40, run through `adjudicate` in 4 configs | full config classifies **all per truth (0 errors)**; per-config deltas isolate each axis (BAM → mapping artifact, haplotype → reference-bias rescue) |
-| [bam_axis](../benchmark/bam_axis) | chr22 SQANTI-SIM with `--bam`; wire the previously-measured-but-unused **indel-near / soft-clip** read fractions into the mapping mechanism | the **indel-near** signal cleanly separates novel junctions (genuine max **0.190** vs false mean **0.350**); gated at 0.5 it catches **41/124 false at 100 % precision** (0 genuine flagged). Wired ON vs OFF: false-novel specificity **0.946 → 0.966**, genuine sensitivity **unchanged (0.589)**, **0 genuine lost** — a strictly-conservative gain (catches false novels the low-MAPQ/supplementary rule misses; 29 of 41 had *no* mechanism flagged before). Soft-clip is **default-OFF** (terminal, not junction-proximal → risks demoting genuine novels on noisy reads; opt-in only) |
+| [bam_axis](../benchmark/bam_axis) | chr22 SQANTI-SIM with `--bam`; wire the previously-measured-but-unused **indel-near / soft-clip** read fractions into the mapping mechanism | the **indel-near** signal cleanly separates novel junctions (genuine max **0.190** vs false mean **0.350**); gated at 0.5 it catches **41/124 false at 100 % precision** (0 genuine flagged). Wired ON vs OFF: **0 genuine lost**; 24 false calls relabelled `LOW_CONF_PARTIAL → ARTIFACT` with an explicit mapping mechanism (29 of the 41 had *no* mechanism flagged before). Its earlier specificity lift (0.946 → 0.966) is now delivered by the `PARTIAL` fix without the BAM, so ON == OFF at the operating point. Soft-clip is **default-OFF** (terminal, not junction-proximal → risks demoting genuine novels on noisy reads; opt-in only) |
 | [gm12878_realdata](../benchmark/gm12878_realdata) | the BAM axis + reference-bias rescue on a **real published GM12878 ONT direct-RNA** dataset (ENCFF440ZML) | **real-data robustness.** Soft-clip default-OFF **empirically vindicated** — on real ONT it would fire on **187/191 (98 %)** of junctions (adapter/poly-A). The HiFi-calibrated `indel_near` 0.5 gate **over-flags on ONT** (175/191 = 92 %; barely separates single 0.925 vs ≥2 0.732) while low-MAPQ/supplementary barely fire (6 %/2 %) → the BAM thresholds are **chemistry-dependent** (opt-in, re-calibrate per platform). The **consensus** axis separates the same data chemistry-independently (254 vs 31). Reference-bias rescue **0/1364** (GM12878 = NA12878 is reference-grade; value reserved for divergent genomes) |
 | [end2end](../benchmark/end2end) | PBSIM3 → minimap2 → FLAIR3 → SQANTI3 → `adjudicate`, GENCODE chr22 | on the SQANTI-novel set: **specificity(false)=0.996**, genuine-recall(decisive)=1.000 — correct on *real* caller + SQANTI3 output |
 | [hg002](../benchmark/hg002) | real GIAB HG002 v4.2.1 SNVs → personalized haplotype, `--haplotype-provenance wgs` | headline `PAN_REF_RESCUED_FALSE_NOVEL` validated on **real, independent (WGS-derived) variants** — non-circular; **0 false rescues** |
@@ -43,8 +43,23 @@ against it. They validate the **adjudication logic** — given caller + SQANTI3 
 | [multicaller](../benchmark/multicaller) | **five** callers (FLAIR + IsoQuant + Bambu + ESPRESSO + TALON) on one shared alignment, integrated by `combine`, scored vs SQANTI-SIM truth | single-caller novel precision **0.012** (per-caller precision 0.40–0.98); PR curve over "≥ k callers" peaks at **≥3 (P 0.980, R 0.910, F1 0.944)** — the optimal consensus threshold scales with caller count. Engine reproduces it: `adjudicate --caller-support` (long-read only) takes FLAIR from **0 confident novels (all AMBIGUOUS) → 0.975 precision** by promoting cross-caller-agreed novels |
 | [wholegenome_multicaller](../benchmark/wholegenome_multicaller) | **real** public GM12878 whole-genome (IsoQuant + Bambu + ESPRESSO), no truth → orthogonal **canonical-motif** validation + **decision-impact** framing | *Honest, small-N.* Disagreement holds at genome scale (**254 single-caller vs 31 consensus** of 285 novel chains). Consensus novels **100 %** canonical vs single-caller **97.6 %** — direction correct but small lift (+0.024, ceiling effect: stringent production callers are already clean). **Decision impact:** the reported novel count swings **31 → 285 (9.2×)** purely on integration policy — **89 % (254/285)** of the naive-union novels are caller-*private* (no second caller corroborates). On real data the value is the reproducible high-confidence core + making the 9× policy choice explicit/auditable, not bulk artifact removal |
 | [merge_comparison](../benchmark/merge_comparison) | head-to-head vs the incumbent merge tools on the **same** 5-caller chr22 set: `combine` vs **gffcompare -i**, **TAMA**, and a 0–20 bp wobble sweep | **`combine` ≡ gffcompare -i exactly** (same n_callers distribution + PR curve) — a clean re-implementation, not a novel merge. The consensus ≥3 precision is **matcher-robust** (0.975–0.980 across exact / gffcompare / TAMA / wobble), and **0** genuine novels cross the single↔multi boundary under any fuzzy matcher → the consensus gate is a property of the **data**, not of exact matching. Honest: consensus is established practice; the **reference-bias rescue** is the differentiator |
-| [sqanti_sim](../benchmark/sqanti_sim) | canonical SQANTI-SIM (GENCODE chr22): delete 769 transcripts → PBSIM3 HiFi → FLAIR → SQANTI3 → `adjudicate` | genuine-novel detection **precision 0.982, specificity 0.946, AUPRC 0.970** (baseline 0.831); NNC recall 1.000; known→HIGH_CONF_KNOWN 1.000; **0 genuine→ARTIFACT**. Moderate overall recall = honest abstention on NIC-combinatorial / ISM-partial, not misclassification |
+| [sqanti_sim](../benchmark/sqanti_sim) | canonical SQANTI-SIM (GENCODE chr22): delete 769 transcripts → PBSIM3 HiFi → FLAIR → SQANTI3 → `adjudicate` | genuine-novel detection **precision 0.989, specificity 0.966, AUPRC 0.971** (0.831 = positive rate, i.e. a random ranking — not a competing method; see [sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) for the real baselines); NNC recall 1.000; known→HIGH_CONF_KNOWN 1.000; **0 genuine→ARTIFACT**. Moderate overall recall = honest abstention on NIC-combinatorial / ISM-partial, not misclassification |
 | [pangenome](../benchmark/pangenome) (GATE-1) | real **HPRC v1.1** MC GRCh38 chr22 graph → `vg deconstruct` → population-deletion junctions; sample **out-of-graph** (non-circular) | **0 false rescues** on real FLAIR novel junctions; rescue **fires** when a novel intron is a real population deletion (population provenance); circularity firewall **holds** all rescues `AMBIGUOUS` under circular-risk provenance |
+
+**Scope of the reference-bias numbers (read before citing them).** In `hg002`,
+`hg002_wholegenome`, `giab_cohort_rescue`, `hg03516_refbias` and `refbias_cohort`, a
+junction is labelled `CREATED` (reference bias) when it is non-canonical on GRCh38 and
+canonical on the individual's haplotype — the same criterion the variant rescue applies.
+So "N/N rescued, 0 false, N/N firewall-held" shows the rule is implemented as specified
+and that the provenance gate works; it is **not** independent evidence that these
+junctions are reference-bias artifacts. An independent check (e.g. at heterozygous sites,
+do the reads using the junction carry the alt allele?) has not been done. Yield is low:
+~30–45 junctions per divergent genome.
+
+**Accuracy against real baselines.** On the SQANTI-SIM truth set,
+[sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) compares PanIsoGuard with the
+SQANTI3 rules / ML filter and a one-line short-read rule, with oracle and simulated
+Illumina junctions. PanIsoGuard is not more accurate than those baselines; see there.
 
 Together these cover the validated short-read, BAM mapping, and variant axes,
 the full pipeline (real FLAIR/SQANTI3), the headline reference-bias rescue on
@@ -87,11 +102,13 @@ under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
 
 **Calibration caveat.** `config/rules.default.toml` thresholds are conservative
 defaults. They are well-calibrated on the run truth sets above (low ECE/Brier) and
-the SQANTI-SIM AUPRC (0.970) confirms strong genuine-vs-false ranking. A threshold
+the SQANTI-SIM AUPRC (0.971) confirms strong genuine-vs-false ranking — on an oracle
+short-read set, and no better than a one-line short-read rule (see
+[sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h)). A threshold
 **sweep** on the SQANTI-SIM v49 chr22 truth set
 ([`benchmark/results/sqanti_sim/sweep.tsv`](../benchmark/results/sqanti_sim/sweep.tsv),
 produced by [`benchmark/sqanti_sim/sweep.py`](../benchmark/sqanti_sim/sweep.py)) shows
-AUPRC is **robust (0.969–0.970)** across the `sj_min_uniq_reads × require_canonical_motif
+AUPRC is **robust (0.970–0.971)** across the `sj_min_uniq_reads × require_canonical_motif
 × perc_A_degradation` grid and the shipped `default-0.0.1` config is within 1e-4 of the
 grid-best — the only degradation is the expected support cliff once `sj_min_uniq_reads`
 exceeds the data's coverage (AUPRC → 0.919). So the conservative defaults are

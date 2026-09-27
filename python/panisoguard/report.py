@@ -320,7 +320,7 @@ def projected_class(support, mech):
     if support == "SUPPORTED":
         return "HIGH_CONF_NOVEL" if not has_mech else "MEDIUM_CONF_NOVEL"
     if support == "PARTIAL":
-        return "MEDIUM_CONF_NOVEL" if not has_mech else "LOW_CONF_PARTIAL"
+        return "LOW_CONF_PARTIAL"
     if support == "UNSUPPORTED":
         return "LOW_CONF_PARTIAL" if not has_mech else "ARTIFACT"
     if support == "UNKNOWN":

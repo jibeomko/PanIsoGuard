@@ -38,7 +38,7 @@ distance). See [docs/method_graph.md](docs/method_graph.md).
 
 ## Contents
 
-- [When to use PanIsoGuard](#when-to-use-panisoguard) · [At a glance](#at-a-glance)
+- [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [At a glance](#at-a-glance)
 - [Subcommands](#subcommands) · [Usage](#usage) · [Quick example](#quick-example)
 - [Confidence classes](#confidence-classes) · [Evidence tiers](#evidence-tiers)
 - [Build](#build) · [Install (conda)](#install-conda) · [Validation](#validation) · [Documentation](#documentation)
@@ -58,15 +58,17 @@ output classes shown are a simplified grouping — the full set is listed
 > reference-bias tier are implemented and tested, along with the
 > `adjudicate` / `benchmark` / `ablate` / `combine` subcommands.
 >
-> **Validation.** The adjudication logic is validated against ground truth
-> (SQANTI-SIM **AUPRC 0.970** vs a 0.831 baseline, and well-calibrated —
-> ECE/Brier ≤ 0.013 on the run truth sets; see
-> [docs/validation.md](docs/validation.md)).
+> **What it is — and is not.** PanIsoGuard is a tool for **traceable verdicts**: every
+> novel call gets a class, the mechanism behind it, and the exact rules that fired. It is
+> **not a more accurate filter.** In a head-to-head on SQANTI-SIM truth it ties a
+> one-line short-read rule ("keep an isoform if every junction has ≥ 3 short reads") on
+> ranking. At its default operating point it gives up recall for precision. With no short
+> reads it is worse than the SQANTI3 rules filter. See
+> [How it compares](#how-it-compares).
 >
 > **Thresholds.** A SQANTI-SIM (v49 chr22) threshold **sweep** finds AUPRC
-> **robust (0.969–0.970)** across the grid with the shipped default within 1e-4 of
-> grid-best — the conservative defaults are near-optimal there
-> ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)),
+> **robust (0.970–0.971)** across the grid with the shipped default within 1e-4 of
+> grid-best ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)),
 > though not yet swept on additional datasets.
 >
 > **Pangenome.** The file-based pangenome reference-bias rescue is **validated on the
@@ -78,7 +80,10 @@ output classes shown are a simplified grouping — the full set is listed
 
 ## When to use PanIsoGuard
 
-Use it when you have **novel** long-read isoform calls and need to decide which to trust:
+Use it when you have **novel** long-read isoform calls and need to see **why** each one is
+trusted or not. If you only need a filtered GTF, the SQANTI3 rules filter (or requiring
+short-read support on every junction) is as accurate and simpler — see
+[How it compares](#how-it-compares).
 
 - **You ran more than one isoform caller** (FLAIR / IsoQuant / Bambu / ESPRESSO / TALON, …)
   and have several *disagreeing* novel-isoform sets. PanIsoGuard integrates them
@@ -89,17 +94,43 @@ Use it when you have **novel** long-read isoform calls and need to decide which 
   is one of 7 classes with a machine-readable `rule_trace` (and an optional
   [PDF report](python/README.md)), so you can filter `HIGH`/`MEDIUM_CONF_NOVEL` and audit the
   rest instead of eyeballing reads.
-- **You have a personalized haplotype or a pangenome** and want to catch *reference-bias*
-  false novelty — a junction that looks novel only because the sample differs from the linear
-  reference. The rescue is a **high-specificity guardrail** (it never over-promotes; a
-  circularity firewall blocks rescues that would rest on the sample's own RNA), most useful
-  for non-reference / personalized-genome samples ([benchmark/hg002](benchmark/hg002)).
+- **You have a personalized haplotype or a pangenome** and want to flag *reference-bias*
+  candidates — a junction that is non-canonical on the linear reference but canonical on
+  the sample's haplotype. A circularity firewall blocks rescues that would rest on the
+  sample's own RNA. Expect few hits (~30–45 per divergent genome). The benchmarks show the
+  rule is implemented as specified; they do not independently confirm that flagged
+  junctions are artifacts ([docs/validation.md](docs/validation.md)).
 
 **It is *not* a caller or a QC re-implementation.** It sits *above* the callers and consumes
 SQANTI3 QC as priors — it does not re-derive TSS/TTS, ORF/NMD, polyA, or splice motifs
 ([docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)), and its `combine` step
 is a clean re-implementation of `gffcompare -i`, not a new merge
 ([docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md)).
+
+## How it compares
+
+SQANTI-SIM truth (GENCODE v49 chr22, FLAIR + SQANTI3), 870 non-FSM isoforms (730 genuine /
+140 false). All methods got the same inputs. "1M short reads" = 1M simulated Illumina pairs
+→ STAR. Full tables, bootstrap CIs, and caveats are in
+[benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h).
+
+| short reads | method | precision | recall | F1 | AUPRC |
+|---|---|---:|---:|---:|---:|
+| none | SQANTI3 rules filter | 0.918 | 0.886 | **0.902** | **0.909** |
+| none | PanIsoGuard (+ BAM) | — (0 calls) | 0.000 | — | 0.824 (0.875) |
+| 1M | SQANTI3 rules filter | 0.918 | 0.890 | 0.904 | 0.909 |
+| 1M | every junction ≥ 3 short reads | 0.976 | **0.945** | **0.960** | 0.968 |
+| 1M | PanIsoGuard | **0.990** | 0.545 | 0.703 | 0.968 |
+| 1M | PanIsoGuard + BAM | **0.990** | 0.545 | 0.703 | **0.977** |
+
+- PanIsoGuard is the most precise. Its recall is low because it abstains on NIC isoforms
+  (no individually-novel junction to corroborate) and ISM isoforms.
+- On ranking (AUPRC) it ties the one-line short-read rule. The BAM mapping axis adds about
+  +0.01; that gain is significant only at the lowest short-read depth.
+- Without short reads it makes no positive calls unless you give it multi-caller support
+  (`--caller-support`).
+
+So use it for the per-call trace, not for a higher score.
 
 ## Subcommands
 

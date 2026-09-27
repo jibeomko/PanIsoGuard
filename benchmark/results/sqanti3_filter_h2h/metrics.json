@@ -1,0 +1,328 @@
+{
+  "command": "bash benchmark/sqanti3_filter_h2h/run.sh (after benchmark/sqanti_sim/run.sh); bootstrap CIs: 2000 resamples of the non-FSM isoforms, seed 1",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 truth set of benchmark/sqanti_sim (FLAIR + SQANTI3 6.0.1); non-FSM multi-exon isoforms, 730 genuine / 140 false. Short reads: none, the oracle truth SJ.tab, or wgsim 2x100 pairs (250k/1M/4M) from the simulated transcripts weighted by long-read counts -> STAR 2.7.4a 2-pass. Public/simulated.",
+  "generated_utc": "2026-09-27T06:28:54Z",
+  "metrics": {
+    "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
+      "PIG": [
+        -0.106,
+        -0.066
+      ],
+      "PIG+bam": [
+        -0.06,
+        -0.008
+      ]
+    },
+    "bootstrap_auprc_diff_vs_allSJ3_95ci": {
+      "oracle": {
+        "PIG": [
+          -0.015,
+          0.005
+        ],
+        "PIG+bam": [
+          -0.007,
+          0.012
+        ]
+      },
+      "sr_1000000": {
+        "PIG": [
+          -0.011,
+          0.01
+        ],
+        "PIG+bam": [
+          -0.001,
+          0.018
+        ]
+      },
+      "sr_250000": {
+        "PIG": [
+          -0.008,
+          0.013
+        ],
+        "PIG+bam": [
+          0.002,
+          0.021
+        ]
+      },
+      "sr_4000000": {
+        "PIG": [
+          -0.011,
+          0.01
+        ],
+        "PIG+bam": [
+          -0.002,
+          0.018
+        ]
+      }
+    },
+    "none": {
+      "PIG": {
+        "FP": 0,
+        "TP": 0,
+        "auprc": 0.824,
+        "f1": null,
+        "prec": null,
+        "rec": 0.0,
+        "spec": 1.0
+      },
+      "PIG+bam": {
+        "FP": 0,
+        "TP": 0,
+        "auprc": 0.875,
+        "f1": null,
+        "prec": null,
+        "rec": 0.0,
+        "spec": 1.0
+      },
+      "SQ3ml": {
+        "FP": 33,
+        "TP": 202,
+        "auprc": 0.829,
+        "f1": 0.419,
+        "prec": 0.86,
+        "rec": 0.277,
+        "spec": 0.764
+      },
+      "SQ3rules": {
+        "FP": 58,
+        "TP": 647,
+        "auprc": 0.909,
+        "f1": 0.902,
+        "prec": 0.918,
+        "rec": 0.886,
+        "spec": 0.586
+      }
+    },
+    "oracle": {
+      "PIG": {
+        "FP": 5,
+        "TP": 430,
+        "auprc": 0.971,
+        "f1": 0.738,
+        "prec": 0.989,
+        "rec": 0.589,
+        "spec": 0.964
+      },
+      "PIG+bam": {
+        "FP": 5,
+        "TP": 430,
+        "auprc": 0.979,
+        "f1": 0.738,
+        "prec": 0.989,
+        "rec": 0.589,
+        "spec": 0.964
+      },
+      "SQ3ml": {
+        "FP": 15,
+        "TP": 235,
+        "auprc": 0.924,
+        "f1": 0.48,
+        "prec": 0.94,
+        "rec": 0.322,
+        "spec": 0.893
+      },
+      "SQ3rules": {
+        "FP": 58,
+        "TP": 652,
+        "auprc": 0.91,
+        "f1": 0.906,
+        "prec": 0.918,
+        "rec": 0.893,
+        "spec": 0.586
+      },
+      "SQ3strict": {
+        "FP": 15,
+        "TP": 652,
+        "auprc": 0.963,
+        "f1": 0.933,
+        "prec": 0.978,
+        "rec": 0.893,
+        "spec": 0.893
+      },
+      "allSJ3": {
+        "FP": 18,
+        "TP": 730,
+        "auprc": 0.976,
+        "f1": 0.988,
+        "prec": 0.976,
+        "rec": 1.0,
+        "spec": 0.871
+      }
+    },
+    "sr_1000000": {
+      "PIG": {
+        "FP": 4,
+        "TP": 398,
+        "auprc": 0.968,
+        "f1": 0.703,
+        "prec": 0.99,
+        "rec": 0.545,
+        "spec": 0.971
+      },
+      "PIG+bam": {
+        "FP": 4,
+        "TP": 398,
+        "auprc": 0.977,
+        "f1": 0.703,
+        "prec": 0.99,
+        "rec": 0.545,
+        "spec": 0.971
+      },
+      "SQ3ml": {
+        "FP": 13,
+        "TP": 214,
+        "auprc": 0.926,
+        "f1": 0.447,
+        "prec": 0.943,
+        "rec": 0.293,
+        "spec": 0.907
+      },
+      "SQ3rules": {
+        "FP": 58,
+        "TP": 650,
+        "auprc": 0.909,
+        "f1": 0.904,
+        "prec": 0.918,
+        "rec": 0.89,
+        "spec": 0.586
+      },
+      "SQ3strict": {
+        "FP": 14,
+        "TP": 613,
+        "auprc": 0.955,
+        "f1": 0.903,
+        "prec": 0.978,
+        "rec": 0.84,
+        "spec": 0.9
+      },
+      "allSJ3": {
+        "FP": 17,
+        "TP": 690,
+        "auprc": 0.968,
+        "f1": 0.96,
+        "prec": 0.976,
+        "rec": 0.945,
+        "spec": 0.879
+      }
+    },
+    "sr_250000": {
+      "PIG": {
+        "FP": 4,
+        "TP": 387,
+        "auprc": 0.967,
+        "f1": 0.69,
+        "prec": 0.99,
+        "rec": 0.53,
+        "spec": 0.971
+      },
+      "PIG+bam": {
+        "FP": 4,
+        "TP": 387,
+        "auprc": 0.976,
+        "f1": 0.69,
+        "prec": 0.99,
+        "rec": 0.53,
+        "spec": 0.971
+      },
+      "SQ3ml": {
+        "FP": 13,
+        "TP": 213,
+        "auprc": 0.912,
+        "f1": 0.446,
+        "prec": 0.942,
+        "rec": 0.292,
+        "spec": 0.907
+      },
+      "SQ3rules": {
+        "FP": 58,
+        "TP": 649,
+        "auprc": 0.909,
+        "f1": 0.903,
+        "prec": 0.918,
+        "rec": 0.889,
+        "spec": 0.586
+      },
+      "SQ3strict": {
+        "FP": 14,
+        "TP": 595,
+        "auprc": 0.952,
+        "f1": 0.889,
+        "prec": 0.977,
+        "rec": 0.815,
+        "spec": 0.9
+      },
+      "allSJ3": {
+        "FP": 17,
+        "TP": 671,
+        "auprc": 0.964,
+        "f1": 0.946,
+        "prec": 0.975,
+        "rec": 0.919,
+        "spec": 0.879
+      }
+    },
+    "sr_4000000": {
+      "PIG": {
+        "FP": 4,
+        "TP": 397,
+        "auprc": 0.968,
+        "f1": 0.702,
+        "prec": 0.99,
+        "rec": 0.544,
+        "spec": 0.971
+      },
+      "PIG+bam": {
+        "FP": 4,
+        "TP": 397,
+        "auprc": 0.976,
+        "f1": 0.702,
+        "prec": 0.99,
+        "rec": 0.544,
+        "spec": 0.971
+      },
+      "SQ3ml": {
+        "FP": 12,
+        "TP": 215,
+        "auprc": 0.92,
+        "f1": 0.449,
+        "prec": 0.947,
+        "rec": 0.295,
+        "spec": 0.914
+      },
+      "SQ3rules": {
+        "FP": 58,
+        "TP": 650,
+        "auprc": 0.909,
+        "f1": 0.904,
+        "prec": 0.918,
+        "rec": 0.89,
+        "spec": 0.586
+      },
+      "SQ3strict": {
+        "FP": 14,
+        "TP": 613,
+        "auprc": 0.955,
+        "f1": 0.903,
+        "prec": 0.978,
+        "rec": 0.84,
+        "spec": 0.9
+      },
+      "allSJ3": {
+        "FP": 17,
+        "TP": 689,
+        "auprc": 0.968,
+        "f1": 0.96,
+        "prec": 0.976,
+        "rec": 0.944,
+        "spec": 0.879
+      }
+    }
+  },
+  "notes": "Per setting: non-FSM genuine-vs-false metrics per method. allSJ3 = keep an isoform iff every junction has >= 3 unique short reads (SQANTI3 min_cov). SQ3strict = SQANTI3 rules filter with min_cov >= 3 required. SQ3ml uses SQANTI3's default TP/TN (FSM vs NNC) which is mismatched to this simulation (most NNC are genuine), so it is reported but not used for conclusions. Conclusion: PanIsoGuard is not more accurate than a one-line short-read rule; only PIG+bam shows a small AUPRC gain (significant at 250k only); with no short reads it is worse than the SQANTI3 rules filter.",
+  "protocol": "sqanti3_filter_h2h",
+  "ruleset_version": "builtin-0.0.1",
+  "scope": "gencode_v49_chr22_sqanti_sim",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.3"
+}

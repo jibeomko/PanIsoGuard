@@ -61,19 +61,20 @@ gates above 1.0 (OFF, never fires):
 
 | | OFF (low-MAPQ/supp only) | ON (+ indel-near) |
 |---|:---:|:---:|
-| false-novel **specificity** | 0.946 | **0.966** (+0.020) |
-| genuine **sensitivity** | 0.589 | **0.589** (unchanged) |
+| false-novel **specificity** | 0.966 | 0.966 (unchanged) |
+| genuine **sensitivity** | 0.589 | 0.589 (unchanged) |
 | genuine isoforms lost from confident-novel | — | **0** |
 
-False-novel transitions OFF→ON: **24** `LOW_CONF_PARTIAL → ARTIFACT` and **3**
-`MEDIUM_CONF_NOVEL → LOW_CONF_PARTIAL` (three false novels that previously escaped as
-*confident* novel). Of the 41 caught, **29 had no artifact mechanism flagged at all** under
-the old rule — the indel-near signal is the only axis that explains them. **Zero** genuine
+False-novel transitions OFF→ON: **24** `LOW_CONF_PARTIAL → ARTIFACT`. **Zero** genuine
 isoforms changed class.
 
-So the wiring is a strictly-conservative correctness gain: it removes false novels the
-existing mapping signals miss entirely, at no cost to genuine recall — the same
-high-specificity ethos as the reference-bias rescue.
+> **Superseded headline.** Before 0.0.4 this table read specificity 0.946 → 0.966: the gain
+> was 3 false novels demoted `MEDIUM_CONF_NOVEL → LOW_CONF_PARTIAL`. All 3 had *partial*
+> short-read support, and the PARTIAL-never-promotes fix (see
+> [sqanti3_filter_h2h](../sqanti3_filter_h2h)) now keeps them non-confident without the BAM,
+> so indel-near no longer moves the operating point on this set. What remains is sharper
+> attribution: 24 false calls get an explicit `mapping_or_repeat` mechanism (`ARTIFACT`)
+> instead of an unexplained `LOW_CONF_PARTIAL`.
 
 ## Reproduce
 

@@ -15,8 +15,10 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   but never acted on (only low-MAPQ / supplementary did). **`indel_near`** is now a
   `mapping_or_repeat` trigger (`max_indel_near_frac`, default 0.5). Validated on chr22
   SQANTI-SIM: it separates genuine novel junctions (max 0.190) from false (mean 0.350)
-  and, gated at 0.5, catches **41/124 false at 100 % precision**, lifting false-novel
-  specificity **0.946 → 0.966** with **0 genuine loss** (sensitivity unchanged).
+  and, gated at 0.5, catches **41/124 false at 100 % precision** with **0 genuine loss**.
+  (Its earlier specificity lift 0.946 → 0.966 came from 3 partially-supported false novels
+  that the PARTIAL fix below now handles without the BAM; on this set it now only sharpens
+  attribution, 24 `LOW_CONF_PARTIAL → ARTIFACT`.)
   **`softclip`** is wired but **disabled by default** (`max_softclip_frac = 1.01`): the
   feature is a *terminal* soft-clip (not junction-proximal), so a default-on gate would
   risk demoting genuine novels on noisy reads — opt-in only. New
@@ -43,7 +45,7 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   `merge_comparison` (head-to-head vs gffcompare / TAMA), `hg002_wholegenome`
   (variant-rescue yield), `giab_cohort_rescue` (rescue across a 4-individual GIAB
   cohort: 137/137, 0 false), `bam_axis` (wiring the indel-near / soft-clip read
-  signals: false-novel specificity 0.946 → 0.966, 0 genuine loss), and
+  signals: 41/124 false caught, 0 genuine loss), and
   `gm12878_realdata` (the BAM axis on a **real** ONT dataset: soft-clip default-off
   empirically vindicated — 98 % fire rate on ONT — and the mapping thresholds shown to
   be chemistry-dependent; reference-bias rescue 0/1364 on the reference-grade sample), and
@@ -55,6 +57,12 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
   caveats stated — the differentiator firing on real divergent-genome RNA).
 
 ### Fixed
+- **`PARTIAL` short-read support no longer promotes to `MEDIUM_CONF_NOVEL`.** An isoform
+  with some but not all novel junctions corroborated was called a confident novel. The
+  head-to-head against the SQANTI3 filter showed these were exactly PanIsoGuard's extra
+  false positives. `PARTIAL` now always projects to `LOW_CONF_PARTIAL`. SQANTI-SIM:
+  precision 0.982 → 0.989, specificity 0.946 → 0.966, AUPRC 0.970 → 0.971, recall
+  unchanged.
 - **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`
   was left as a `999` "reserved" sentinel after the axis was wired, so passing
   `--config config/rules.default.toml` turned consensus off. Set to the built-in default (2)
@@ -65,6 +73,15 @@ bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
 - Hardened junction aggregation and provenance.
 
 ### Changed
+- **Repositioned as a traceable-verdict tool, not a better filter.** New
+  [benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h) compares PanIsoGuard with
+  the SQANTI3 rules / ML filter and a one-line short-read rule on SQANTI-SIM truth,
+  using oracle and simulated Illumina junctions. PanIsoGuard ties the one-line rule on
+  AUPRC; only the BAM axis adds a small gain. Recall is much lower because of
+  abstention. With no short reads it is worse than the SQANTI3 rules filter. The README
+  now says this up front. The "AUPRC 0.970 vs 0.831 baseline" claim is dropped: 0.831 was
+  the positive rate, not a method. `docs/validation.md` now states that the
+  reference-bias benchmarks use the rescue rule's own criterion as truth.
 - **Honest positioning** (after head-to-head benchmarking): `combine` is a clean
   re-implementation of `gffcompare -i` (not a novel merge), the consensus precision is
   matcher-robust, and the reference-bias rescue is a **high-specificity, high-sensitivity
