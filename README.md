@@ -35,13 +35,6 @@ haplotype FASTA), and re-classifies each novel call into a confidence class with
 
 ![How PanIsoGuard judges a novel isoform, in five steps, followed for one example isoform, iso_B. 1, read inputs: the SQANTI3 classification, the caller's isoforms and the reference annotation are needed; short-read junctions (SJ.tab), a long-read BAM, genome haplotypes and a caller-support matrix are optional. 2, find novel junctions: iso_B has one junction that is not in the reference. 3, gather evidence: short reads support it; long reads and SQANTI3 QC find no artifact signal; callers and genome were not given, so they are not evaluated. 4, apply fixed rules: reference bias is checked first (not evaluated here); then short-read support times artifact signal gives the class, and iso_B lands on supported with no artifact signal. 5, report the verdict: confirmed novel (the other outcomes are reference bias, unconfirmed and artifact), written to a verdict table, the reasons and a run log.](docs/figures/overview.png)
 
-<sub>iso_B is one isoform of the toy gene in the [study notes](notes/README.md); its marks are real
-output of the notes' main run (short reads and a long-read BAM, no genome or caller input). In
-step 4, rows are short-read support and columns the artifact signal: none, long-read mapping,
-SQANTI3 QC. The four verdict groups cover the six novel-isoform classes
-([full list](#confidence-classes)). Vector source:
-[`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
-
 ## Quick start
 
 Paste this into a Linux (or macOS) terminal. It needs only `git` and `conda` (Miniconda,
