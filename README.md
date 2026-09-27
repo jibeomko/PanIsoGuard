@@ -33,12 +33,13 @@ haplotype FASTA), and re-classifies each novel call into a confidence class with
 
 ## At a glance
 
-![PanIsoGuard overview: novel isoform calls from a long-read caller (a toy gene with four novel isoforms whose new junctions are highlighted) go into PanIsoGuard adjudicate, which gathers five kinds of evidence for each one — short-read junctions, long-read alignment, SQANTI3 QC, caller agreement, and haplotype or pangenome — and assigns one of four verdict groups: confirmed novel, reference bias, unconfirmed and held, or artifact. A bottom panel shows the real rule_trace of two of the toy isoforms.](docs/figures/overview.png)
+![How PanIsoGuard judges a novel isoform, in five steps, followed for one example isoform, iso_B. 1, read inputs: the SQANTI3 classification, the caller's isoforms and the reference annotation are needed; short-read junctions (SJ.tab), a long-read BAM, genome haplotypes and a caller-support matrix are optional. 2, find novel junctions: iso_B has one junction that is not in the reference. 3, gather evidence: short reads support it; long reads and SQANTI3 QC find no artifact signal; callers and genome were not given, so they are not evaluated. 4, apply fixed rules: reference bias is checked first (not evaluated here); then short-read support times artifact signal gives the class, and iso_B lands on supported with no artifact signal. 5, report the verdict: confirmed novel (the other outcomes are reference bias, unconfirmed and artifact), written to a verdict table, the reasons and a run log.](docs/figures/overview.png)
 
-<sub>The gene on the left is the toy locus of the [study notes](notes/README.md), and the
-two `rule_trace` excerpts are its real output with short-read junctions supplied. The four
-verdict groups cover the six novel-isoform classes; the full set, including
-`HIGH_CONF_KNOWN`, is listed [below](#confidence-classes). Vector source:
+<sub>iso_B is one isoform of the toy gene in the [study notes](notes/README.md); its marks are real
+output of the notes' main run (short reads and a long-read BAM, no genome or caller input). In
+step 4, rows are short-read support and columns the artifact signal: none, long-read mapping,
+SQANTI3 QC. The four verdict groups cover the six novel-isoform classes
+([full list](#confidence-classes)). Vector source:
 [`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
 ## Quick start
@@ -219,6 +220,12 @@ panisoguard combine \
 | `<prefix>.adjudicated.tsv`   | one row per isoform — confidence class, primary mechanism, novel-junction support counts |
 | `<prefix>.attribution.jsonl` | per-isoform `rule_trace` (the rules that fired, in order) + `graph_trace` (splice-graph view — see [docs/method_graph.md](docs/method_graph.md)) + `bio_flags` (SQANTI3 QC descriptors passed through, verdict-neutral — see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
 | `<prefix>.provenance.log`    | tool and ruleset version, the effective thresholds, which axes were active, circularity status, class counts |
+
+What the verdicts look like: four isoforms of the same toy gene, the evidence found for each,
+and the verdict with its reason (real output of one run; the ringed evidence decided each
+verdict).
+
+![Verdict examples: a table of four novel isoforms of a toy gene. For each, the evidence PanIsoGuard checks (short reads, long-read alignment, SQANTI3 QC, the person's own genome) is marked as supports, partly, against or nothing found, followed by the verdict and its reason: iso_B confirmed novel (junction in 12 short reads), iso_C unconfirmed (1 of 2 junctions confirmed), iso_G artifact (no short reads and an indel beside the junction), iso_A reference bias (non-canonical only on the reference genome, canonical on the person's haplotype).](docs/figures/verdict_examples.png)
 
 ### Confidence classes
 
@@ -420,7 +427,7 @@ PanIsoGuard/
 |   |-- unit/                        # Catch2 tests, module by module
 |   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA fixtures
 |-- docs/                            # architecture, algorithm, input contracts, validation plan
-|-- docs/figures/                    # overview figure source and rendered README image
+|-- docs/figures/                    # README figures (SVG sources + rendered PNGs)
 |-- notes/                           # study notes (Korean): a toy gene followed through every step
 |-- workflow/                        # optional Snakemake orchestration around PanIsoGuard
 |-- benchmark/                       # synthetic axes, truth sets, SIRV, HG002, calibration notes

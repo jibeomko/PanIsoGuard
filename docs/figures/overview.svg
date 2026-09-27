@@ -1,157 +1,196 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="906" viewBox="0 0 1600 906">
-<!-- README hero figure. overview.png is this file rendered by headless Chrome at device scale 2, window 1600 x 906 (a screenshot of the SVG). -->
-<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0b0b0b" flood-opacity="0.08"/></filter></defs>
-<rect width="1600" height="906" fill="#ffffff"/>
-<text x="800.0" y="66.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="38" font-weight="bold" fill="#0b0b0b" text-anchor="middle">A verdict for every novel isoform, with the reasons attached</text>
-<text x="800.0" y="104.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="20" font-weight="normal" fill="#52514e" text-anchor="middle">PanIsoGuard weighs independent evidence for each novel isoform from a long-read caller and records which rule decided.</text>
-<rect x="40" y="148" width="420" height="544" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
-<text x="68.0" y="192.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="25" font-weight="bold" fill="#0b0b0b" text-anchor="start">Novel isoform calls</text>
-<text x="68.0" y="220.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">from any long-read caller, plus SQANTI3 QC</text>
-<text x="70.0" y="268.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">reference</text>
-<polyline points="97.4,290 125.3,281 153.1,290" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180.6,290 208.4,281 236.3,290" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="263.7,290 291.6,281 319.4,290" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="346.9,290 374.7,281 402.6,290" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="70.0" y="282" width="27.4" height="16" rx="3" fill="#b4b2aa"/>
-<rect x="153.1" y="282" width="27.4" height="16" rx="3" fill="#b4b2aa"/>
-<rect x="236.3" y="282" width="27.4" height="16" rx="3" fill="#b4b2aa"/>
-<rect x="319.4" y="282" width="27.4" height="16" rx="3" fill="#b4b2aa"/>
-<rect x="402.6" y="282" width="27.4" height="16" rx="3" fill="#b4b2aa"/>
-<text x="70.0" y="348.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_A</text>
-<text x="430.0" y="348.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">shifted acceptor</text>
-<polyline points="97.4,370 125.3,361 153.1,370" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180.6,370 212.6,355 244.6,370" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="263.7,370 291.6,361 319.4,370" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="346.9,370 374.7,361 402.6,370" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="70.0" y="362" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="153.1" y="362" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="244.6" y="362" width="19.1" height="16" rx="3" fill="#3d3c39"/>
-<rect x="319.4" y="362" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="402.6" y="362" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<text x="70.0" y="426.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_B</text>
-<text x="430.0" y="426.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">shifted acceptor</text>
-<polyline points="97.4,448 125.3,439 153.1,448" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180.6,448 208.4,439 236.3,448" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="263.7,448 294.3,433 325.0,448" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="346.9,448 374.7,439 402.6,448" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="70.0" y="440" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="153.1" y="440" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="236.3" y="440" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="325.0" y="440" width="21.9" height="16" rx="3" fill="#3d3c39"/>
-<rect x="402.6" y="440" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<text x="70.0" y="504.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_C</text>
-<text x="430.0" y="504.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">extra exon</text>
-<polyline points="97.4,526 125.3,517 153.1,526" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180.6,526 208.4,517 236.3,526" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="263.7,526 272.2,511 280.6,526" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="302.5,526 311.0,511 319.4,526" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="346.9,526 374.7,517 402.6,526" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="70.0" y="518" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="153.1" y="518" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="236.3" y="518" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="280.6" y="518" width="21.9" height="16" rx="3" fill="#3d3c39"/>
-<rect x="319.4" y="518" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="402.6" y="518" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<text x="70.0" y="582.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_E</text>
-<text x="430.0" y="582.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">exon skipped</text>
-<polyline points="97.4,604 125.3,595 153.1,604" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180.6,604 250.0,589 319.4,604" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="346.9,604 374.7,595 402.6,604" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="70.0" y="596" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="153.1" y="596" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="319.4" y="596" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<rect x="402.6" y="596" width="27.4" height="16" rx="3" fill="#3d3c39"/>
-<polyline points="70,658 85,648 100,658" fill="none" stroke="#eb6834" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="112.0" y="659.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="normal" fill="#52514e" text-anchor="start">novel junction: what needs evidence</text>
-<line x1="470" y1="420.0" x2="488" y2="420.0" stroke="#c3c2b7" stroke-width="3.5" stroke-linecap="round"/>
-<path d="M486,410.0 L502,420.0 L486,430.0 Z" fill="#c3c2b7"/>
-<rect x="512" y="148" width="596" height="544" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
-<path d="M512,164 a16,16 0 0 1 16,-16 h564 a16,16 0 0 1 16,16 v64 h-596 Z" fill="#1f1f1e"/>
-<text x="540.0" y="198.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="30" font-weight="bold" fill="#ffffff" text-anchor="start">PanIsoGuard</text>
-<text x="742.0" y="198.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="19" font-weight="normal" fill="#c3c2b7" text-anchor="start">adjudicate</text>
-<text x="540.0" y="260.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#52514e" text-anchor="start">Evidence gathered for each novel isoform</text>
-<rect x="532" y="280" width="556" height="72" rx="10" fill="#f9f9f7" stroke="#ecebe6"/>
-<rect x="546" y="295" width="42" height="42" rx="9" fill="#ffffff" stroke="#e1e0d9"/>
-<rect x="552" y="321" width="10" height="6" rx="1.5" fill="#3d3c39"/><rect x="572" y="321" width="10" height="6" rx="1.5" fill="#3d3c39"/><path d="M562,324 L567,319 L572,324" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M554,313 h7 M573,313 h7 M558,306 h5 M571,306 h6" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="606.0" y="311.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="19" font-weight="bold" fill="#0b0b0b" text-anchor="start">Short-read junctions</text>
-<text x="1072.0" y="311.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">--sj-tab</text>
-<text x="606.0" y="336.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">is each novel junction in short reads?</text>
-<rect x="532" y="360" width="556" height="72" rx="10" fill="#f9f9f7" stroke="#ecebe6"/>
-<rect x="546" y="375" width="42" height="42" rx="9" fill="#ffffff" stroke="#e1e0d9"/>
-<path d="M551,400 h9 M574,400 h9" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M560,400 L567,392 L574,400" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="578" cy="389" r="3" fill="#eb6834"/>
-<text x="606.0" y="391.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="19" font-weight="bold" fill="#0b0b0b" text-anchor="start">Long-read alignment</text>
-<text x="1072.0" y="391.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">--bam</text>
-<text x="606.0" y="416.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">low MAPQ, chimeric, indel at the junction?</text>
-<rect x="532" y="440" width="556" height="72" rx="10" fill="#f9f9f7" stroke="#ecebe6"/>
-<rect x="546" y="455" width="42" height="42" rx="9" fill="#ffffff" stroke="#e1e0d9"/>
-<rect x="556" y="463" width="22" height="26" rx="4" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M562,471 h10 M562,477 h10 M562,483 h6" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="606.0" y="471.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="19" font-weight="bold" fill="#0b0b0b" text-anchor="start">SQANTI3 QC</text>
-<text x="1072.0" y="471.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">--classification</text>
-<text x="606.0" y="496.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">non-canonical motif, RT switching, intra-priming?</text>
-<rect x="532" y="520" width="556" height="72" rx="10" fill="#f9f9f7" stroke="#ecebe6"/>
-<rect x="546" y="535" width="42" height="42" rx="9" fill="#ffffff" stroke="#e1e0d9"/>
-<path d="M552,550 h9 l4,-4 l4,4 h13" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M552,558 h9 l4,-4 l4,4 h13" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M552,566 h9 l4,-4 l4,4 h13" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="606.0" y="551.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="19" font-weight="bold" fill="#0b0b0b" text-anchor="start">Caller agreement</text>
-<text x="1072.0" y="551.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">--caller-support</text>
-<text x="606.0" y="576.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">same intron chain from two or more callers?</text>
-<rect x="532" y="600" width="556" height="72" rx="10" fill="#f9f9f7" stroke="#ecebe6"/>
-<rect x="546" y="615" width="42" height="42" rx="9" fill="#ffffff" stroke="#e1e0d9"/>
-<path d="M552,630 h30 M552,642 h30" stroke="#3d3c39" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M558,630 v12 M564,630 v12 M577,630 v12" stroke="#3d3c39" stroke-width="1.6"/><rect x="568.5" y="627" width="5" height="18" rx="1.5" fill="#eb6834"/>
-<text x="606.0" y="631.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="19" font-weight="bold" fill="#0b0b0b" text-anchor="start">Haplotype / pangenome</text>
-<text x="1072.0" y="631.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="end">--reference-haplotype</text>
-<text x="606.0" y="656.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">novel only against the reference genome?</text>
-<line x1="1118" y1="420.0" x2="1136" y2="420.0" stroke="#c3c2b7" stroke-width="3.5" stroke-linecap="round"/>
-<path d="M1134,410.0 L1150,420.0 L1134,430.0 Z" fill="#c3c2b7"/>
-<rect x="1160" y="148.0" width="400" height="125.5" rx="14" fill="#eff8ef" stroke="none" stroke-width="1.2" filter="url(#sh)"/>
-<rect x="1160" y="148.0" width="6" height="125.5" rx="3" fill="#0ca30c"/>
-<circle cx="1210" cy="190.0" r="21" fill="#0ca30c"/>
-<path d="M1201.0,191.0 l6.0,6.0 l12.0,-13.0" stroke="#ffffff" stroke-width="3.60" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1248.0" y="190.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="23" font-weight="bold" fill="#0b0b0b" text-anchor="start">Confirmed novel</text>
-<text x="1248.0" y="215.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">each novel junction has support</text>
-<text x="1248.0" y="241.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">HIGH_CONF_NOVEL</text>
-<text x="1248.0" y="260.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">MEDIUM_CONF_NOVEL</text>
-<rect x="1160" y="287.5" width="400" height="125.5" rx="14" fill="#eef4fc" stroke="none" stroke-width="1.2" filter="url(#sh)"/>
-<rect x="1160" y="287.5" width="6" height="125.5" rx="3" fill="#2a78d6"/>
-<circle cx="1210" cy="329.5" r="21" fill="#2a78d6"/>
-<path d="M1218.0,325.5 a9.0,9.0 0 1 0 -1.0,8.0" stroke="#ffffff" stroke-width="3.60" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1219.0,317.5 v8.0 h-8.0" stroke="#ffffff" stroke-width="3.60" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1248.0" y="329.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="23" font-weight="bold" fill="#0b0b0b" text-anchor="start">Reference bias</text>
-<text x="1248.0" y="354.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">novel only against the reference</text>
-<text x="1248.0" y="380.5" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">PAN_REF_RESCUED_FALSE_NOVEL</text>
-<rect x="1160" y="427.0" width="400" height="125.5" rx="14" fill="#f4f3f0" stroke="none" stroke-width="1.2" filter="url(#sh)"/>
-<rect x="1160" y="427.0" width="6" height="125.5" rx="3" fill="#6b6a66"/>
-<circle cx="1210" cy="469.0" r="21" fill="#6b6a66"/>
-<path d="M1202.0,469.0 h16.0" stroke="#ffffff" stroke-width="3.60" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1248.0" y="469.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="23" font-weight="bold" fill="#0b0b0b" text-anchor="start">Unconfirmed, held</text>
-<text x="1248.0" y="494.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">evidence missing or incomplete</text>
-<text x="1248.0" y="520.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">AMBIGUOUS</text>
-<text x="1248.0" y="539.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">LOW_CONF_PARTIAL</text>
-<rect x="1160" y="566.5" width="400" height="125.5" rx="14" fill="#fcf0f0" stroke="none" stroke-width="1.2" filter="url(#sh)"/>
-<rect x="1160" y="566.5" width="6" height="125.5" rx="3" fill="#d03b3b"/>
-<circle cx="1210" cy="608.5" r="21" fill="#d03b3b"/>
-<path d="M1203.0,601.5 l14.0,14.0 M1217.0,601.5 l-14.0,14.0" stroke="#ffffff" stroke-width="3.60" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1248.0" y="608.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="23" font-weight="bold" fill="#0b0b0b" text-anchor="start">Artifact</text>
-<text x="1248.0" y="633.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">no support, plus an artifact signature</text>
-<text x="1248.0" y="659.5" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">ARTIFACT</text>
-<rect x="40" y="722" width="1520" height="156" rx="16" fill="#fbfbfa" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
-<text x="68.0" y="766.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="21" font-weight="bold" fill="#0b0b0b" text-anchor="start">Every call keeps its rule_trace</text>
-<text x="68.0" y="794.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#52514e" text-anchor="start">real output for two isoforms above</text>
-<text x="68.0" y="818.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="14" font-weight="normal" fill="#52514e" text-anchor="start">(attribution.jsonl; walk-through in notes/)</text>
-<text x="430.0" y="766.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="16" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_B</text>
-<circle cx="500.0" cy="760" r="10" fill="#0ca30c"/>
-<path d="M495.7142857142857,760.4761904761905 l2.8571428571428568,2.8571428571428568 l5.7142857142857135,-6.19047619047619" stroke="#ffffff" stroke-width="1.71" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="518.0" y="766.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="16" font-weight="bold" fill="#0b0b0b" text-anchor="start">HIGH_CONF_NOVEL</text>
-<text x="430.0" y="798.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">sj_support=1/1 -&gt; SUPPORTED</text>
-<text x="430.0" y="823.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">no artifact mechanism flagged -&gt; mechanism=none</text>
-<text x="430.0" y="848.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">project(SUPPORTED,none) -&gt; HIGH_CONF_NOVEL</text>
-<text x="996.0" y="766.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="16" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_A</text>
-<circle cx="1066.0" cy="760" r="10" fill="#d03b3b"/>
-<path d="M1062.6666666666667,756.6666666666666 l6.666666666666666,6.666666666666666 M1069.3333333333333,756.6666666666666 l-6.666666666666666,6.666666666666666" stroke="#ffffff" stroke-width="1.71" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="1084.0" y="766.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="16" font-weight="bold" fill="#0b0b0b" text-anchor="start">ARTIFACT</text>
-<text x="996.0" y="798.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">sj_support=0/1 -&gt; UNSUPPORTED</text>
-<text x="996.0" y="823.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">all_canonical=non_canonical -&gt; mechanism=noncanonical</text>
-<text x="996.0" y="848.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="normal" fill="#3d3c39" text-anchor="start">project(UNSUPPORTED,noncanonical) -&gt; ARTIFACT</text>
-<line x1="400" y1="744" x2="400" y2="856" stroke="#e1e0d9" stroke-width="1.2"/>
-<line x1="972" y1="744" x2="972" y2="856" stroke="#e1e0d9" stroke-width="1.2"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1364" height="458" viewBox="0 0 1364 458">
+<!-- README hero figure. overview.png is this file rendered by headless Chrome at device scale 2, window 1364 x 458. -->
+<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0b0b0b" flood-opacity="0.07"/></filter></defs>
+<rect width="1364" height="458" fill="#ffffff"/>
+<text x="682.0" y="50.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="32" font-weight="bold" fill="#0b0b0b" text-anchor="middle">How PanIsoGuard judges a novel isoform</text>
+<text x="682.0" y="82.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="normal" fill="#52514e" text-anchor="middle">Five steps for every novel isoform, followed here for one example: iso_B</text>
+<rect x="20" y="108" width="244" height="300" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
+<circle cx="52" cy="140" r="15" fill="#1f1f1e"/>
+<text x="52.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+<text x="76.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Read inputs</text>
+<line x1="38" y1="164" x2="246" y2="164" stroke="#e1e0d9" stroke-width="1.2"/>
+<path d="M272.0,268.0 L282.0,278.0 L272.0,288.0" fill="none" stroke="#c3c2b7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="290" y="108" width="244" height="300" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
+<circle cx="322" cy="140" r="15" fill="#1f1f1e"/>
+<text x="322.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+<text x="346.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Find novel junctions</text>
+<line x1="308" y1="164" x2="516" y2="164" stroke="#e1e0d9" stroke-width="1.2"/>
+<path d="M542.0,268.0 L552.0,278.0 L542.0,288.0" fill="none" stroke="#c3c2b7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="560" y="108" width="244" height="300" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
+<circle cx="592" cy="140" r="15" fill="#1f1f1e"/>
+<text x="592.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">3</text>
+<text x="616.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Gather evidence</text>
+<line x1="578" y1="164" x2="786" y2="164" stroke="#e1e0d9" stroke-width="1.2"/>
+<path d="M812.0,268.0 L822.0,278.0 L812.0,288.0" fill="none" stroke="#c3c2b7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="830" y="108" width="244" height="300" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
+<circle cx="862" cy="140" r="15" fill="#1f1f1e"/>
+<text x="862.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
+<text x="886.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Apply fixed rules</text>
+<line x1="848" y1="164" x2="1056" y2="164" stroke="#e1e0d9" stroke-width="1.2"/>
+<path d="M1082.0,268.0 L1092.0,278.0 L1082.0,288.0" fill="none" stroke="#c3c2b7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1100" y="108" width="244" height="300" rx="16" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.2" filter="url(#sh)"/>
+<circle cx="1132" cy="140" r="15" fill="#1f1f1e"/>
+<text x="1132.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">5</text>
+<text x="1156.0" y="146.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Report the verdict</text>
+<line x1="1118" y1="164" x2="1326" y2="164" stroke="#e1e0d9" stroke-width="1.2"/>
+<path d="M54.0,184 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#ffffff" stroke="#52514e" stroke-width="1.6"/>
+<path d="M77.0,180 v9 h9" fill="none" stroke="#52514e" stroke-width="1.6"/>
+<path d="M62.0,197.0 h16 M62.0,203.0 h16 M62.0,209.0 h16 M68.0,195.0 v16" stroke="#3d3c39" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="70.0" y="238.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#0b0b0b" text-anchor="middle">SQANTI3</text>
+<path d="M126.0,184 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#ffffff" stroke="#52514e" stroke-width="1.6"/>
+<path d="M149.0,180 v9 h9" fill="none" stroke="#52514e" stroke-width="1.6"/>
+<rect x="131.0" y="203.0" width="6" height="6" rx="1" fill="#3d3c39"/><rect x="147.0" y="203.0" width="6" height="6" rx="1" fill="#3d3c39"/><path d="M137.0,206.0 L142.0,199.0 L147.0,206.0" stroke="#eb6834" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+<text x="142.0" y="238.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#0b0b0b" text-anchor="middle">isoforms</text>
+<path d="M198.0,184 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#ffffff" stroke="#52514e" stroke-width="1.6"/>
+<path d="M221.0,180 v9 h9" fill="none" stroke="#52514e" stroke-width="1.6"/>
+<rect x="203.0" y="203.0" width="6" height="6" rx="1" fill="#8e8c85"/><rect x="219.0" y="203.0" width="6" height="6" rx="1" fill="#8e8c85"/><path d="M209.0,206.0 L214.0,200.0 L219.0,206.0" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+<text x="214.0" y="238.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#0b0b0b" text-anchor="middle">reference</text>
+<path d="M42.0,276 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#fbfbfa" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M65.0,272 v9 h9" fill="none" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<rect x="45.0" y="299.0" width="9" height="5" rx="1.5" fill="#8e8c85"/><rect x="62.0" y="299.0" width="9" height="5" rx="1.5" fill="#8e8c85"/><path d="M54.0,301.5 L58.0,297.0 L62.0,301.5" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M47.0,292.0 h6 M63.0,292.0 h6 M50.0,286.0 h5 M61.0,286.0 h5" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="58.0" y="330.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">SJ.tab</text>
+<path d="M98.0,276 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#fbfbfa" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M121.0,272 v9 h9" fill="none" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M100.0,299.0 h8 M120.0,299.0 h8" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M108.0,299.0 L114.0,292.0 L120.0,299.0" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124.0" cy="289.0" r="2.6" fill="#eb6834"/>
+<text x="114.0" y="330.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">BAM</text>
+<path d="M154.0,276 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#fbfbfa" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M177.0,272 v9 h9" fill="none" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M157.0,290.0 h26 M157.0,300.0 h26" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M162.0,290.0 v10 M167.0,290.0 v10 M179.0,290.0 v10" stroke="#8e8c85" stroke-width="1.5"/><rect x="171.5" y="287.0" width="4.5" height="16" rx="1.5" fill="#eb6834"/>
+<text x="170.0" y="330.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">genome</text>
+<path d="M210.0,276 a4,4 0 0 1 4,-4 h19 l9,9 v27 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 Z" fill="#fbfbfa" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M233.0,272 v9 h9" fill="none" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M213.0,290.0 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M213.0,297.0 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M213.0,304.0 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#8e8c85" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="226.0" y="330.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">callers</text>
+<rect x="64" y="358" width="14" height="12" rx="3" fill="#ffffff" stroke="#52514e" stroke-width="1.6"/>
+<text x="84.0" y="368.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">needed</text>
+<rect x="150.0" y="358" width="14" height="12" rx="3" fill="#fbfbfa" stroke="#c3c2b7" stroke-width="1.6" stroke-dasharray="3 2"/>
+<text x="170.0" y="368.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">optional</text>
+<text x="310.0" y="216.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#898781" text-anchor="start">reference</text>
+<polyline points="325.5,244 341.3,236 357.1,244" fill="none" stroke="#c3c2b7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="372.7,244 388.4,236 404.2,244" fill="none" stroke="#c3c2b7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="419.8,244 435.6,236 451.3,244" fill="none" stroke="#c3c2b7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="466.9,244 482.7,236 498.5,244" fill="none" stroke="#c3c2b7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="310.0" y="236.0" width="15.5" height="16" rx="2.5" fill="#bdbbb3"/>
+<rect x="357.1" y="236.0" width="15.5" height="16" rx="2.5" fill="#bdbbb3"/>
+<rect x="404.2" y="236.0" width="15.5" height="16" rx="2.5" fill="#bdbbb3"/>
+<rect x="451.3" y="236.0" width="15.5" height="16" rx="2.5" fill="#bdbbb3"/>
+<rect x="498.5" y="236.0" width="15.5" height="16" rx="2.5" fill="#bdbbb3"/>
+<text x="310.0" y="296.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="13" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_B</text>
+<polyline points="325.5,326 341.3,317 357.1,326" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="372.7,326 388.4,317 404.2,326" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="419.8,326 437.1,308 454.5,326" fill="none" stroke="#eb6834" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="466.9,326 482.7,317 498.5,326" fill="none" stroke="#c3c2b7" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="310.0" y="318.0" width="15.5" height="16" rx="2.5" fill="#3d3c39"/>
+<rect x="357.1" y="318.0" width="15.5" height="16" rx="2.5" fill="#3d3c39"/>
+<rect x="404.2" y="318.0" width="15.5" height="16" rx="2.5" fill="#3d3c39"/>
+<rect x="454.5" y="318.0" width="12.4" height="16" rx="2.5" fill="#3d3c39"/>
+<rect x="498.5" y="318.0" width="15.5" height="16" rx="2.5" fill="#3d3c39"/>
+<circle cx="437.1" cy="317" r="21" fill="none" stroke="#eb6834" stroke-width="1.6" stroke-dasharray="4 3"/>
+<path d="M437.1,338 V348" stroke="#eb6834" stroke-width="1.6"/>
+<text x="437.1" y="364.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="bold" fill="#eb6834" text-anchor="middle">novel junction</text>
+<rect x="576" y="176" width="212" height="36" rx="9" fill="#f9f9f7" stroke="#ecebe6"/>
+<rect x="585" y="198" width="9" height="5" rx="1.5" fill="#3d3c39"/><rect x="602" y="198" width="9" height="5" rx="1.5" fill="#3d3c39"/><path d="M594,200.5 L598,196 L602,200.5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M587,191 h6 M603,191 h6 M590,185 h5 M601,185 h5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="622.0" y="199.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Short reads</text>
+<circle cx="768" cy="194" r="11" fill="#0ca30c"/>
+<path d="M763.23,194.37 l3.30,3.30 l6.23,-6.97" stroke="#ffffff" stroke-width="2.05" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="576" y="218" width="212" height="36" rx="9" fill="#f9f9f7" stroke="#ecebe6"/>
+<path d="M584,240 h8 M604,240 h8" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M592,240 L598,233 L604,240" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="608" cy="230" r="2.6" fill="#eb6834"/>
+<text x="622.0" y="241.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Long reads</text>
+<circle cx="768" cy="236" r="11" fill="#b3b1a9"/>
+<path d="M763.97,236 h8.07" stroke="#ffffff" stroke-width="2.05" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="576" y="260" width="212" height="36" rx="9" fill="#f9f9f7" stroke="#ecebe6"/>
+<rect x="588" y="266" width="20" height="24" rx="3.5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M593,273 h10 M593,279 h10 M593,285 h6" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="622.0" y="283.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">SQANTI3 QC</text>
+<circle cx="768" cy="278" r="11" fill="#b3b1a9"/>
+<path d="M763.97,278 h8.07" stroke="#ffffff" stroke-width="2.05" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="576" y="302" width="212" height="36" rx="9" fill="#f9f9f7" stroke="#ecebe6"/>
+<path d="M585,315 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M585,322 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M585,329 h8 l3.5,-3.5 l3.5,3.5 h11" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="622.0" y="325.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Callers</text>
+<circle cx="768" cy="320" r="10.19" fill="#ffffff" stroke="#8e8c85" stroke-width="1.47" stroke-dasharray="2.2 1.8"/>
+<rect x="576" y="344" width="212" height="36" rx="9" fill="#f9f9f7" stroke="#ecebe6"/>
+<path d="M585,357 h26 M585,367 h26" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M590,357 v10 M595,357 v10 M607,357 v10" stroke="#3d3c39" stroke-width="1.5"/><rect x="599.5" y="354" width="4.5" height="16" rx="1.5" fill="#eb6834"/>
+<text x="622.0" y="367.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Genome</text>
+<circle cx="768" cy="362" r="10.19" fill="#ffffff" stroke="#8e8c85" stroke-width="1.47" stroke-dasharray="2.2 1.8"/>
+<rect x="846" y="174" width="212" height="36" rx="9" fill="#edf4fd"/>
+<path d="M855,187 h26 M855,197 h26" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M860,187 v10 M865,187 v10 M877,187 v10" stroke="#3d3c39" stroke-width="1.5"/><rect x="869.5" y="184" width="4.5" height="16" rx="1.5" fill="#eb6834"/>
+<text x="890.0" y="197.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Reference bias?</text>
+<circle cx="1038" cy="192" r="10.19" fill="#ffffff" stroke="#8e8c85" stroke-width="1.47" stroke-dasharray="2.2 1.8"/>
+<path d="M952.0,216 v13" stroke="#c3c2b7" stroke-width="2.2" stroke-linecap="round"/><path d="M947.0,224 l5,6 l5,-6" fill="none" stroke="#c3c2b7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="922.0" cy="253" r="8" fill="#b3b1a9"/>
+<path d="M919.07,253 h5.87" stroke="#ffffff" stroke-width="1.49" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M952.0,257 h8 M972.0,257 h8" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M960.0,257 L966.0,250 L972.0,257" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="976.0" cy="247" r="2.6" fill="#eb6834"/>
+<rect x="1000.0" y="241" width="20" height="24" rx="3.5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1005.0,248 h10 M1005.0,254 h10 M1005.0,260 h6" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="869.0" y="257" width="9" height="5" rx="1.5" fill="#3d3c39"/><rect x="886.0" y="257" width="9" height="5" rx="1.5" fill="#3d3c39"/><path d="M878.0,259.5 L882.0,255 L886.0,259.5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M871.0,250 h6 M887.0,250 h6 M874.0,244 h5 M885.0,244 h5" stroke="#3d3c39" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M866.0,265 H1032.0 M897.0,240 V384" stroke="#e1e0d9" stroke-width="1.2"/>
+<circle cx="882.0" cy="282.5" r="8.5" fill="#0ca30c"/>
+<path d="M878.32,282.78 l2.55,2.55 l4.82,-5.38" stroke="#ffffff" stroke-width="1.59" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="882.0" cy="311.5" r="7.88" fill="#ffffff" stroke="#0ca30c" stroke-width="1.30"/><path d="M882.0,303.62 A7.88,7.88 0 0 0 882.0,319.38 Z" fill="#0ca30c"/>
+<circle cx="882.0" cy="340.5" r="8.5" fill="#d03b3b"/>
+<path d="M879.17,337.67 l5.67,5.67 M884.83,337.67 l-5.67,5.67" stroke="#ffffff" stroke-width="1.59" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="882.0" cy="369.5" r="7.88" fill="#ffffff" stroke="#8e8c85" stroke-width="1.13" stroke-dasharray="1.7 1.4"/>
+<rect x="902.0" y="270" width="40" height="25" rx="4" fill="#0ca30c"/>
+<rect x="946.0" y="270" width="40" height="25" rx="4" fill="#8fd18f"/>
+<rect x="990.0" y="270" width="40" height="25" rx="4" fill="#8fd18f"/>
+<rect x="902.0" y="299" width="40" height="25" rx="4" fill="#8e8c85"/>
+<rect x="946.0" y="299" width="40" height="25" rx="4" fill="#8e8c85"/>
+<rect x="990.0" y="299" width="40" height="25" rx="4" fill="#8e8c85"/>
+<rect x="902.0" y="328" width="40" height="25" rx="4" fill="#8e8c85"/>
+<rect x="946.0" y="328" width="40" height="25" rx="4" fill="#d03b3b"/>
+<rect x="990.0" y="328" width="40" height="25" rx="4" fill="#d03b3b"/>
+<rect x="902.0" y="357" width="40" height="25" rx="4" fill="#d9d7d0"/>
+<rect x="946.0" y="357" width="40" height="25" rx="4" fill="#d03b3b"/>
+<rect x="990.0" y="357" width="40" height="25" rx="4" fill="#d9d7d0"/>
+<rect x="900.5" y="268.5" width="43" height="28" rx="6" fill="none" stroke="#0b0b0b" stroke-width="2.4"/>
+<g>
+<rect x="1116" y="176" width="212" height="32" rx="9" fill="#eef8ee" stroke="#0ca30c" stroke-width="2.2"/>
+<circle cx="1136" cy="192" r="10" fill="#0ca30c"/>
+<path d="M1131.67,192.33 l3.00,3.00 l5.67,-6.33" stroke="#ffffff" stroke-width="1.87" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1154.0" y="197.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Confirmed novel</text>
+</g>
+<g opacity="0.38">
+<rect x="1116" y="214" width="212" height="32" rx="9" fill="#edf4fd"/>
+<circle cx="1136" cy="230" r="10" fill="#2a78d6"/>
+<path d="M1140.00,228.00 a4.33,4.33 0 1 0 -0.53,4.00" stroke="#ffffff" stroke-width="1.87" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1140.53,224.00 v4.00 h-4.00" stroke="#ffffff" stroke-width="1.87" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1154.0" y="235.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Reference bias</text>
+</g>
+<g opacity="0.38">
+<rect x="1116" y="252" width="212" height="32" rx="9" fill="#f4f3f0"/>
+<circle cx="1136" cy="268" r="10" fill="#8e8c85"/>
+<text x="1136" y="272.67" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.3" font-weight="bold" fill="#ffffff" text-anchor="middle">?</text>
+<text x="1154.0" y="273.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Unconfirmed</text>
+</g>
+<g opacity="0.38">
+<rect x="1116" y="290" width="212" height="32" rx="9" fill="#fcf0f0"/>
+<circle cx="1136" cy="306" r="10" fill="#d03b3b"/>
+<path d="M1132.67,302.67 l6.67,6.67 M1139.33,302.67 l-6.67,6.67" stroke="#ffffff" stroke-width="1.87" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1154.0" y="311.5" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">Artifact</text>
+</g>
+<rect x="1145.0" y="338" width="26" height="30" rx="4" fill="#ffffff" stroke="#52514e" stroke-width="1.5"/>
+<path d="M1150.0,347 h16 M1150.0,353 h16 M1150.0,359 h16 M1156.0,345 v16" stroke="#3d3c39" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1158.0" y="386.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">verdict</text>
+<rect x="1209.0" y="338" width="26" height="30" rx="4" fill="#ffffff" stroke="#52514e" stroke-width="1.5"/>
+<path d="M1215.0,347 h13 m-3.5,-3 l3.5,3 l-3.5,3" stroke="#3d3c39" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1215.0,353 h13 m-3.5,-3 l3.5,3 l-3.5,3" stroke="#3d3c39" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1215.0,359 h13 m-3.5,-3 l3.5,3 l-3.5,3" stroke="#3d3c39" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1222.0" y="386.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">reasons</text>
+<rect x="1273.0" y="338" width="26" height="30" rx="4" fill="#ffffff" stroke="#52514e" stroke-width="1.5"/>
+<path d="M1279.0,347 h14 M1279.0,353 h9 M1279.0,359 h12" stroke="#3d3c39" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1286.0" y="386.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="middle">run log</text>
+<circle cx="436.5" cy="435" r="8" fill="#0ca30c"/>
+<path d="M433.03,435.27 l2.40,2.40 l4.53,-5.07" stroke="#ffffff" stroke-width="1.49" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="450.5" y="440.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">supports</text>
+<circle cx="535.5" cy="435" r="7.41" fill="#ffffff" stroke="#0ca30c" stroke-width="1.23"/><path d="M535.5,427.59 A7.41,7.41 0 0 0 535.5,442.41 Z" fill="#0ca30c"/>
+<text x="549.5" y="440.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">partly</text>
+<circle cx="614.5" cy="435" r="8" fill="#d03b3b"/>
+<path d="M611.83,432.33 l5.33,5.33 M617.17,432.33 l-5.33,5.33" stroke="#ffffff" stroke-width="1.49" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="628.5" y="440.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">against</text>
+<circle cx="704.5" cy="435" r="8" fill="#b3b1a9"/>
+<path d="M701.57,435 h5.87" stroke="#ffffff" stroke-width="1.49" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="718.5" y="440.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">nothing found</text>
+<circle cx="835.5" cy="435" r="7.41" fill="#ffffff" stroke="#8e8c85" stroke-width="1.07" stroke-dasharray="1.6 1.3"/>
+<text x="849.5" y="440.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">not evaluated</text>
 </svg>
