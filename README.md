@@ -33,12 +33,12 @@ haplotype FASTA), and re-classifies each novel call into a confidence class with
 
 ## At a glance
 
-![PanIsoGuard overview: long-read novel isoform calls (real or artifact?) are checked against four kinds of evidence — SQANTI QC priors, short-read junctions, long-read mapping, and variants/reference bias — and sorted into plain-language verdicts: real novel, reference-bias rescued, uncertain (held), or artifact.](docs/figures/overview.png)
+![PanIsoGuard overview: novel isoform calls from a long-read caller (a toy gene with four novel isoforms whose new junctions are highlighted) go into PanIsoGuard adjudicate, which gathers five kinds of evidence for each one — short-read junctions, long-read alignment, SQANTI3 QC, caller agreement, and haplotype or pangenome — and assigns one of four verdict groups: confirmed novel, reference bias, unconfirmed and held, or artifact. A bottom panel shows the real rule_trace of two of the toy isoforms.](docs/figures/overview.png)
 
-<sub>Consumes caller + SQANTI3 output (does not replace them); adds an orthogonal,
-auditable verdict layer, each call carrying a machine-readable `rule_trace`. The four
-output classes shown are a simplified grouping — the full set is listed
-[below](#confidence-classes). Vector source:
+<sub>The gene on the left is the toy locus of the [study notes](notes/README.md), and the
+two `rule_trace` excerpts are its real output with short-read junctions supplied. The four
+verdict groups cover the six novel-isoform classes; the full set, including
+`HIGH_CONF_KNOWN`, is listed [below](#confidence-classes). Vector source:
 [`docs/figures/overview.svg`](docs/figures/overview.svg).</sub>
 
 ## Install
