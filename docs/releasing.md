@@ -12,13 +12,15 @@ truth in **three** files, kept in lockstep by CI (`scripts/check_version_sync.py
 ## GitHub releases do not wait for bioconda
 
 The **first** bioconda submission is [bioconda-recipes PR #65953](https://github.com/bioconda/bioconda-recipes/pull/65953)
-(`Add panisoguard 0.0.3`), open and waiting for a maintainer since 2026-06 (CI green,
+(`Add panisoguard 0.0.4`, submitted as 0.0.3), open and waiting for a maintainer since 2026-06 (CI green,
 `please review & merge` label applied). A GitHub release is cut whenever a change is ready,
 independent of that review:
 
-- Leave the open PR at the version it was submitted with. Its source tarball stays valid,
-  and re-pushing restarts its CI for no gain. Ping only after long inactivity, with a short
-  friendly note.
+- Bump the open PR (version + sha256 in the fork's `recipes/panisoguard/meta.yaml`, PR title)
+  when the new release fixes a bug, so the first package on the channel is not the broken
+  one; otherwise leave it, since a push restarts its CI. PR #65953 was bumped 0.0.3 → 0.0.4
+  for the `PARTIAL` fix (labels survive the push). Ping only after long inactivity, with a
+  short friendly note.
 - Once it merges, the autobump bot sees the newer GitHub release and opens the version-bump
   PR (see below).
 
