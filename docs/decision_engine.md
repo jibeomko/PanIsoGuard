@@ -41,7 +41,7 @@ on two axes; the binned pair is projected to one confidence class.
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary** fractions gate this mechanism; soft-clip / indel-near fractions are also computed and reported but do not currently drive the verdict | `--bam` |
+| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each); the soft-clip fraction is computed and reported but its gate is disabled by default (`max_softclip_frac = 1.01`) | `--bam` |
 | noncanonical / rt_switch / degradation | SQANTI3 priors `all_canonical` / `RTS_stage` / `perc_A_downstream_TTS≥60` | always (from classification) |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
@@ -54,8 +54,9 @@ preempts all of them). Rationale: **alignment reliability is the most upstream
 concern** — if the spanning reads do not map confidently, the junction may be a
 mapping artifact and downstream motif/QC signals are moot; non-canonical motif is the
 next strongest structural signal; RT-switching and intra-priming degradation are
-softer biochemical signals. Only the first-matching mechanism is the `primary`; all
-fired conditions are listed in `rule_trace`.
+softer biochemical signals. Only the first-matching mechanism is reported, both as
+`primary_mechanism` and in `rule_trace` (the check stops at the first match); the other
+flags stay visible in the `evidence` block of `attribution.jsonl`.
 
 ## Projection to confidence classes (7 reachable)
 
@@ -93,7 +94,7 @@ fired conditions are listed in `rule_trace`.
        MEDIUM_CONF_NOVEL` (mechanism `none`) or `LOW_CONF_PARTIAL` (any other
        mechanism). Multi-caller agreement corroborates the chain methodologically
        when the short-read axis is silent; a strong mapping artifact still preempts
-       it. Disable with `ablate --without consensus`.
+       it. Disable with `ablate --axes consensus`.
 - Pass-through: `full-splice_match → HIGH_CONF_KNOWN`; `incomplete-splice_match →
   LOW_CONF_PARTIAL`; non-targeted categories → `AMBIGUOUS`.
 
@@ -109,13 +110,13 @@ counted as a novel junction and DOES receive short-read / BAM / variant evaluati
 (it is not auto-`AMBIGUOUS`). The residual `AMBIGUOUS` set is non-targeted categories
 plus isoforms whose every junction is an already-known intron (no novel junction to
 evaluate). `rule_trace` records which `UNKNOWN` reason applies
-(`caller_chain_absent` / `axis_absent` / `no_novel_junctions`).
+(`caller_chain_absent` / `short_read/catalog_axis_absent` / `no_novel_junctions`).
 
 ## Provenance and circularity
 
 Every reclassification records its driving axis and (for the variant axis) a
 provenance/circularity flag. A verdict resting solely on variants derived from the
-same RNA reads being adjudicated is flagged `circularity_risk` and is **not**
+same RNA reads being adjudicated is flagged (`circularity_flag = true`) and is **not**
 promoted to a hard class. `provenance.log` reports which axes were evaluable.
 
 ## Evidence gates

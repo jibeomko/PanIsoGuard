@@ -1,0 +1,16 @@
+chrT	toyref	transcript	101	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	exon	101	200	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	exon	401	500	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	exon	701	800	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	exon	1001	1100	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	exon	1301	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX1";
+chrT	toyref	transcript	101	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX2";
+chrT	toyref	exon	101	200	.	+	.	gene_id "GENE_T"; transcript_id "TX2";
+chrT	toyref	exon	701	800	.	+	.	gene_id "GENE_T"; transcript_id "TX2";
+chrT	toyref	exon	1001	1100	.	+	.	gene_id "GENE_T"; transcript_id "TX2";
+chrT	toyref	exon	1301	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX2";
+chrT	toyref	transcript	101	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX3";
+chrT	toyref	exon	101	200	.	+	.	gene_id "GENE_T"; transcript_id "TX3";
+chrT	toyref	exon	401	500	.	+	.	gene_id "GENE_T"; transcript_id "TX3";
+chrT	toyref	exon	701	800	.	+	.	gene_id "GENE_T"; transcript_id "TX3";
+chrT	toyref	exon	1301	1400	.	+	.	gene_id "GENE_T"; transcript_id "TX3";

@@ -5,6 +5,24 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Added
+- **Study notes** ([notes/](notes/README.md), in Korean): nine notes that follow one toy
+  gene from the input files to the verdict (coordinates and novel junctions, short-read
+  support, artifact mechanisms, the projection, reference-bias rescue, caller consensus,
+  evaluation, and an end-to-end recomputation). The toy inputs are built with real
+  SQANTI3 6.0.1 and STAR runs (`notes/data/build_toy.sh`). `notes/check_notes.py`
+  recomputes all 81 toy verdicts with the Python standard library and compares them with
+  the binary; it runs as the CTest `integration_study_notes`.
+
+### Fixed
+- `docs/decision_engine.md`: the indel-near fraction does drive the mapping mechanism
+  (since 0.0.4); `rule_trace` records only the first-matching mechanism, not every flag;
+  `ablate --axes consensus` (not `--without`); the `UNKNOWN` reason is
+  `short_read/catalog_axis_absent`. Matching stale comment in `src/core/adjudicator.cpp`.
+- `docs/validation.md`: the proposed independent check of the reference-bias rescue
+  ("do junction reads carry the alt allele?") cannot work, because the motif-creating base
+  is intronic and never in those reads; replaced with phasing / carrier comparison.
+
 ## [0.0.4] - 2026-09-27
 
 The flagship change is the **multi-caller consensus axis**, plus a PDF report tool, a

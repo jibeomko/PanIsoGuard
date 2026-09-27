@@ -298,6 +298,7 @@ is explained by reference bias — either a personalized haplotype (variant axis
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What is verified and the truth-based validation plan. |
 | [CHANGELOG.md](CHANGELOG.md) · [docs/releasing.md](docs/releasing.md) | Changelog, and the release / bioconda runbook. |
+| [notes/](notes/README.md) | Study notes (in Korean): one toy gene followed from input files to verdict, one step per note. Every code block was run and its output is shown; `notes/check_notes.py` (CTest `integration_study_notes`) keeps them in sync with the binary. |
 
 ## Repository layout
 
@@ -324,6 +325,7 @@ PanIsoGuard/
 |   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA fixtures
 |-- docs/                            # architecture, algorithm, input contracts, validation plan
 |-- docs/figures/                    # overview figure source and rendered README image
+|-- notes/                           # study notes (Korean): a toy gene followed through every step
 |-- workflow/                        # optional Snakemake orchestration around PanIsoGuard
 |-- benchmark/                       # synthetic axes, truth sets, SIRV, HG002, calibration notes
 |-- examples/tiny/                   # 5-minute dataset with expected adjudicate outputs

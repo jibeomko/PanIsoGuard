@@ -59,7 +59,7 @@ class RuleEngine {
 
   // A copy of this engine with one evidence axis disabled, for ablation. Axis is
   // one of: short_read, mapping, noncanonical, rt_switch, degradation, variant,
-  // pangenome.
+  // pangenome, consensus.
   RuleEngine with_axis_disabled(const std::string& axis) const;
 
  private:

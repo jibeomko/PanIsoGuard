@@ -101,9 +101,8 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           if (f.n_spanning > 0) {
             if (f.frac_low_mapq() > ev.bam_max_frac_low_mapq) ev.bam_max_frac_low_mapq = f.frac_low_mapq();
             if (f.frac_supplementary() > ev.bam_max_frac_supplementary) ev.bam_max_frac_supplementary = f.frac_supplementary();
-            // softclip / indel-near fractions are aggregated and emitted to
-            // attribution.jsonl for inspection, but currently do NOT gate a mechanism:
-            // RuleEngine::evaluate's mapping_flag uses only low_mapq/supplementary.
+            // All four fractions feed RuleEngine::evaluate's mapping_flag (the softclip gate
+            // is disabled by default via its threshold) and are emitted to attribution.jsonl.
             if (f.frac_softclip() > ev.bam_max_frac_softclip) ev.bam_max_frac_softclip = f.frac_softclip();
             if (f.frac_indel_near() > ev.bam_max_frac_indel_near) ev.bam_max_frac_indel_near = f.frac_indel_near();
           }

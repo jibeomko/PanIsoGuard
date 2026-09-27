@@ -151,6 +151,12 @@ if(PANISOGUARD_BUILD_TESTS)
       COMMAND ${Python3_EXECUTABLE}
               "${CMAKE_SOURCE_DIR}/benchmark/config_equivalence/ci_check.py"
               $<TARGET_FILE:panisoguard>)
+    # The study notes (notes/, Korean) quote verdicts on a toy locus; recompute them with the
+    # Python stdlib and compare, so a rule change cannot silently outdate the notes.
+    add_test(NAME integration_study_notes
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/notes/check_notes.py"
+              $<TARGET_FILE:panisoguard>)
   else()
     message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")
   endif()

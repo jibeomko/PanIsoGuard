@@ -52,9 +52,13 @@ junction is labelled `CREATED` (reference bias) when it is non-canonical on GRCh
 canonical on the individual's haplotype — the same criterion the variant rescue applies.
 So "N/N rescued, 0 false, N/N firewall-held" shows the rule is implemented as specified
 and that the provenance gate works; it is **not** independent evidence that these
-junctions are reference-bias artifacts. An independent check (e.g. at heterozygous sites,
-do the reads using the junction carry the alt allele?) has not been done. Yield is low:
-~30–45 junctions per divergent genome.
+junctions are reference-bias artifacts. The motif-creating base is always intronic, so
+reads that use the junction never contain it; an independent check has to come from
+elsewhere, e.g. phasing (do long reads using the junction carry, at other heterozygous
+sites of the gene, the alleles of the haplotype that creates the motif?) or comparing
+carriers with non-carriers. Neither has been done (see
+[notes/05](../notes/05_reference_bias.md)). Yield is low: ~30–45 junctions per divergent
+genome.
 
 **Accuracy against real baselines.** On the SQANTI-SIM truth set,
 [sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) compares PanIsoGuard with the
