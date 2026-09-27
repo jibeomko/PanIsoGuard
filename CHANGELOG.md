@@ -3,11 +3,12 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
-## [Unreleased] — targets 0.0.4
+## [0.0.4] - 2026-09-27
 
 The flagship change is the **multi-caller consensus axis**, plus a PDF report tool, a
-container, and a large round of honest validation. Release is held until the first
-bioconda submission (v0.0.3) merges; see [docs/releasing.md](docs/releasing.md).
+container, a large round of validation, a head-to-head against the SQANTI3 filter, and the
+`PARTIAL` projection fix it exposed. PanIsoGuard is now positioned as a traceable-verdict
+tool, not a more accurate filter (see README, "How it compares").
 
 ### Added
 - **BAM mapping axis — indel-near now feeds the verdict.** The read-level

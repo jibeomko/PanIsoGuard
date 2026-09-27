@@ -9,27 +9,23 @@ truth in **three** files, kept in lockstep by CI (`scripts/check_version_sync.py
 | `python/pyproject.toml` | `version = "X.Y.Z"` |
 | `recipes/bioconda/meta.yaml` | `{% set version = "X.Y.Z" %}` + `sha256:` |
 
-## First-time status (v0.0.3)
+## GitHub releases do not wait for bioconda
 
 The **first** bioconda submission is [bioconda-recipes PR #65953](https://github.com/bioconda/bioconda-recipes/pull/65953)
-(`Add panisoguard 0.0.3`). It is OPEN / `REVIEW_REQUIRED` / `BLOCKED` — CI is green and the
-`please review & merge` label is applied; it is waiting for a bioconda maintainer to
-approve+merge (first submissions are queue-gated; days–weeks is normal). **Nothing is
-required from us** until it merges. Etiquette: only ping after ~a week of no activity, with
-a short friendly note — do not bump the recipe version or open a competing PR while it is
-in review.
+(`Add panisoguard 0.0.3`), open and waiting for a maintainer since 2026-06 (CI green,
+`please review & merge` label applied). A GitHub release is cut whenever a change is ready,
+independent of that review:
 
-## Cutting the next release (e.g. v0.0.4) — do this AFTER v0.0.3 merges
+- Leave the open PR at the version it was submitted with. Its source tarball stays valid,
+  and re-pushing restarts its CI for no gain. Ping only after long inactivity, with a short
+  friendly note.
+- Once it merges, the autobump bot sees the newer GitHub release and opens the version-bump
+  PR (see below).
 
-> The next release will carry the **consensus axis** and everything else committed since
-> the `v0.0.3` git tag (see [CHANGELOG.md](../CHANGELOG.md)). Hold it until v0.0.3 is on the
-> bioconda channel so the first review isn't thrashed.
+## Cutting a release
 
 ```bash
 V=0.0.4
-
-# 0) confirm v0.0.3 is actually published on the channel
-conda search -c bioconda panisoguard
 
 # 1) finalize the changelog: rename "[Unreleased] — targets 0.0.4" to "[0.0.4] - <date>"
 #    (edit CHANGELOG.md)
@@ -57,11 +53,10 @@ curl -sL "https://github.com/jibeomko/PanIsoGuard/archive/refs/tags/v$V.tar.gz" 
 #    git commit -am "recipe: pin v$V source sha256" && git push origin main
 ```
 
-## Getting v0.0.4 onto bioconda
+## Getting a release onto bioconda
 
-Once the GitHub Release exists, **either**:
-
-- **Autobump (preferred, automatic after the first merge).** The bioconda autobump bot
+- **Package not yet on the channel** (first PR still open): nothing to do; see above.
+- **Autobump (preferred, once the package is on the channel).** The bioconda autobump bot
   watches GitHub releases and opens a version-bump PR on `bioconda-recipes` for you. Review
   it, comment `@BiocondaBot please add label` once CI is green, and wait for a maintainer.
 - **Manual PR.** In your `bioconda-recipes` fork, edit `recipes/panisoguard/meta.yaml`
@@ -82,11 +77,10 @@ it is on PyPI; keep its version in lockstep with the C++ package.
 
 ## Checklist
 
-- [ ] v0.0.3 merged & visible via `conda search -c bioconda panisoguard`
 - [ ] CHANGELOG section finalized with a date
 - [ ] version bumped in all three files; `check_version_sync.py` OK
 - [ ] `ctest --test-dir build` green (incl. `integration_config_equivalence`)
 - [ ] tag pushed + GitHub Release created
 - [ ] recipe `sha256` updated to the release tarball
-- [ ] bioconda PR (autobump or manual) opened & labelled
+- [ ] bioconda: if the package is on the channel, autobump/manual PR opened & labelled
 - [ ] (optional) report tool published to PyPI

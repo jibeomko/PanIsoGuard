@@ -34,5 +34,5 @@
   "ruleset_version": "builtin-0.0.1",
   "scope": "gencode_v49_chr22_flair",
   "status": "tracked",
-  "tool_version": "0.0.3"
+  "tool_version": "0.0.4"
 }
