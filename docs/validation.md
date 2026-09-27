@@ -36,6 +36,7 @@ against it. They validate the **adjudication logic** — given caller + SQANTI3 
 | [hg002_wholegenome](../benchmark/hg002) (yield) | the *same* scan extended to **whole-genome** HG002 (chr1–22, 597,781 GENCODE introns) | **rescue YIELD quantified**: reference bias at splice junctions is rare but real — **33** genuine reference-bias junctions genome-wide, **33/33 rescued** (100 % sensitivity), **0 false**, **33/33 held** by the firewall under circular-risk provenance. The rescue is a **high-specificity/sensitivity guardrail with a low base rate** (~1 in 18k introns), not a high-yield discovery engine |
 | [giab_cohort_rescue](../benchmark/giab_cohort_rescue) | the rescue across a **four-individual GIAB cohort** (HG001/HG002/HG003/HG004) | **cohort impact**: 31–37 reference-bias junctions per personalized genome, **137 total → 137/137 rescued** (100 % sensitivity), **0 false**, **137/137 held** by the firewall. A consistent, perfectly-specific safeguard across individuals — the impact case for PanIsoGuard's differentiator |
 | [refbias_cohort](../benchmark/refbias_cohort) | the rescue on **real PacBio Iso-Seq across TWO divergent West African individuals** (HG03516 ESN + HG02717 GWD; HPRC R2 — same-individual RNA + HiFi assembly each) | **POSITIVE real-data application, REPLICATED** (the differentiator firing on real RNA calls, perfectly specific across both genomes). **86 reference-bias junctions** (40 + 46; **77 novel vs GENCODE** — discoveries a reference-only pipeline would report), each non-canonical on GRCh38 but canonical on that individual's own assembly haplotype via a real SNV; all read-supported, **86/86 rescued (0 false)**, **86/86 firewall-held**. vs reference-grade GM12878 **0**. *Directional contrast, not a controlled rate.* See [hg03516_refbias](../benchmark/hg03516_refbias) for the single-individual deep-dive + 5-angle adversarial audit (read-support filter; assembly-SNV / no-indel / placeholder-QC caveats) |
+| [refbias_phasing](../benchmark/refbias_phasing) | **non-circular** check of the rescue on the same two individuals: for heterozygous reference-bias junctions, are the long reads that use the junction from the haplotype on which it is canonical (phase from the trio-phased assembly)? | **27 of 28 testable junctions consistent** (572/575 phased junction reads from the motif haplotype; both haplotypes expressed at the loci). 1 contradicted (HG03516 chr3:184709997, junction reads from the non-canonical haplotype, all with a 2-bp insertion next to the donor — an alignment artifact the rescue does not screen for). 54 heterozygous, 34 homozygous (untestable) |
 | [hg03516_refbias](../benchmark/hg03516_refbias) | the single-individual **deep-dive + adversarial audit** for HG03516 (one arm of the cohort above) | the audited HG03516 result (**40** reference-bias junctions, 35 novel, 40/40 rescued, 0 false, 40/40 held) with the full 5-angle audit that set the cohort's caveats: dropped 1 displaced-coordinate hit, exact-coordinate read support, and the directional (not controlled-rate) framing of the GM12878 contrast |
 | [sirv_multicaller](../benchmark/multicaller) | the multi-caller consensus on a **second reference** — Lexogen SIRV-Set4 (dense, multi-contig) | **generalization**: single-caller novel precision **0.037** → ≥ 2-caller **1.000** vs the SIRV hidden-chain truth, mirroring the chr22 result (0.012 → ≥3 0.980). The consensus signal is a property of multi-caller data, not of one reference/simulator |
 | [sirv](../benchmark/sirv) | Lexogen SIRV-Set4 spike-in control, dense overlapping isoforms | specificity(false)=0.944, recall=1.000; the 3 FPs are FLAIR mis-collapses of *individually real* junctions — a documented short-read-axis limitation |
@@ -53,12 +54,14 @@ canonical on the individual's haplotype — the same criterion the variant rescu
 So "N/N rescued, 0 false, N/N firewall-held" shows the rule is implemented as specified
 and that the provenance gate works; it is **not** independent evidence that these
 junctions are reference-bias artifacts. The motif-creating base is always intronic, so
-reads that use the junction never contain it; an independent check has to come from
-elsewhere, e.g. phasing (do long reads using the junction carry, at other heterozygous
-sites of the gene, the alleles of the haplotype that creates the motif?) or comparing
-carriers with non-carriers. Neither has been done (see
-[notes/05](../notes/05_reference_bias.md)). Yield is low: ~30–45 junctions per divergent
-genome.
+reads that use the junction never contain it. The independent check is
+[refbias_phasing](../benchmark/refbias_phasing): for heterozygous junctions, do the long
+reads that use the junction carry, at the gene's other heterozygous SNVs, the alleles of
+the haplotype that makes it canonical? In HG03516 + HG02717, 27 of 28 testable junctions
+pass (572 of 575 phased junction reads from that haplotype, while both haplotypes are
+expressed at the loci); the one failure looks like an alignment artifact. The 34
+homozygous junctions cannot be phased and remain unchecked. Yield is low: ~30–45
+junctions per divergent genome.
 
 **Accuracy against real baselines.** On the SQANTI-SIM truth set,
 [sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) compares PanIsoGuard with the

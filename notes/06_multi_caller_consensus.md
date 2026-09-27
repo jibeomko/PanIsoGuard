@@ -189,10 +189,11 @@ PIG.000002	2	caller1=c1_known;caller2=c2_1
 PIG.000003	2	caller1=c1_G;caller2=c2_3
 PIG.000004	2	caller1=c1_B;caller2=c2_2
 read caller-support for 13 native isoform id(s) (consensus axis)
+WARNING: 7 of 7 novel SQANTI3 isoform id(s) (e.g. "iso_A") are not in the --caller-support matrix; check that the ids match exactly.
 AMBIGUOUS consensus_evaluable False n_callers None
 ```
 
-`combine`의 묶음은 그대로다. 하지만 PanIsoGuard는 분류표의 이름 `iso_B`로 `native_ids`를 찾는데, 표에는 `c1_B`만 있다. 그래서 `iso_B`는 합의 정보가 없는 것(`consensus_evaluable = false`)으로 처리되어 `AMBIGUOUS`로 남는다. 이번에도 경고는 없다. stderr의 "13 native isoform id(s)"는 표에서 읽은 이름 수일 뿐, 분류표와 몇 개가 짝지어졌는지는 알려 주지 않는다. `combine`에는 SQANTI3에 넣은 것과 같은 caller GTF를 줘야 한다.
+`combine`의 묶음은 그대로다. 하지만 PanIsoGuard는 분류표의 이름 `iso_B`로 `native_ids`를 찾는데, 표에는 `c1_B`만 있다. 그래서 `iso_B`는 합의 정보가 없는 것(`consensus_evaluable = false`)으로 처리되어 `AMBIGUOUS`로 남는다. "13 native isoform id(s)"는 표에서 읽은 이름 수일 뿐이라, 이 노트를 처음 쓸 때는 짝이 맞지 않는다는 것을 알 수 없었다. 지금은 novel isoform 7개 모두 표에 없다고 경고한다. `combine`에는 SQANTI3에 넣은 것과 같은 caller GTF를 줘야 한다.
 
 </details>
 

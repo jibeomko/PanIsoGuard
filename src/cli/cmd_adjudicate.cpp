@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <map>
+#include <sstream>
 #include <string>
 
 #include "panisoguard/result_writer.hpp"
@@ -84,6 +85,21 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.pangenome_circular = pangenome_provenance_is_circular(common.pangenome_provenance);
     prov.consensus_axis_on = !common.caller_support.empty();
     prov.config_path = common.config;
+    const RuleConfig& c = run.engine.config();
+    auto num = [](double x) { std::ostringstream o; o << x; return o.str(); };  // 0.5, not 0.500000
+    prov.thresholds =
+        "sj_min_uniq_reads=" + std::to_string(c.sj_min_uniq_reads) +
+        " sj_require_canonical_motif=" + (c.sj_require_canonical_motif ? "true" : "false") +
+        " consensus_min_callers=" + std::to_string(c.consensus_min_callers) +
+        " max_perc_A_downstream_TTS=" + num(c.perc_A_degradation_threshold) +
+        " min_mapq=" + std::to_string(c.bam_min_mapq) +
+        " softclip_min_bp=" + std::to_string(c.bam_softclip_min_bp) +
+        " junction_window_bp=" + std::to_string(c.bam_junction_window_bp) +
+        " max_low_mapq_frac=" + num(c.bam_max_low_mapq_frac) +
+        " max_supplementary_frac=" + num(c.bam_max_supplementary_frac) +
+        " max_indel_near_frac=" + num(c.bam_max_indel_near_frac) +
+        " max_softclip_frac=" + num(c.bam_max_softclip_frac) +
+        " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
     write_adjudication_outputs(out_prefix, run.results, prov);
 
     std::map<std::string, std::size_t> counts;

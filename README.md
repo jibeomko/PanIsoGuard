@@ -97,9 +97,11 @@ short-read support on every junction) is as accurate and simpler — see
 - **You have a personalized haplotype or a pangenome** and want to flag *reference-bias*
   candidates — a junction that is non-canonical on the linear reference but canonical on
   the sample's haplotype. A circularity firewall blocks rescues that would rest on the
-  sample's own RNA. Expect few hits (~30–45 per divergent genome). The benchmarks show the
-  rule is implemented as specified; they do not independently confirm that flagged
-  junctions are artifacts ([docs/validation.md](docs/validation.md)).
+  sample's own RNA. Expect few hits (~30–45 per divergent genome). A phasing check on two
+  divergent genomes supports the explanation for 27 of 28 testable heterozygous junctions:
+  the reads that use the junction come from the haplotype on which it is canonical
+  ([benchmark/refbias_phasing](benchmark/refbias_phasing)). Homozygous ones cannot be
+  checked this way.
 
 **It is *not* a caller or a QC re-implementation.** It sits *above* the callers and consumes
 SQANTI3 QC as priors — it does not re-derive TSS/TTS, ORF/NMD, polyA, or splice motifs

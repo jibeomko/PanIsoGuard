@@ -31,9 +31,9 @@
   },
   "notes": "Self-contained correctness check; regenerated and drift-checked by collect.py.",
   "protocol": "synthetic_axes",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.2",
   "scope": "ci_fixture",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.2"
+  "tool_version": "0.0.4"
 }

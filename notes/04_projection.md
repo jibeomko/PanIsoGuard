@@ -269,6 +269,6 @@ short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서
 <details>
 <summary>조합표를 TOML로 옮길 수 있을까</summary>
 
-기준값(read 3개, 비율 0.5 등)은 TOML에서 바꿀 수 있지만, 이 노트의 조합표 자체는 C++ 코드(`RuleEngine::evaluate()`)에 들어 있다. [docs/decision_engine.md](../docs/decision_engine.md)의 "Future work"에 조합표를 TOML로 옮기는 계획이 적혀 있다. 지금은 조합표를 바꾸면 [02](02_short_read_support.md) 6절에서 본 것처럼 `ruleset_version`에 드러나지 않으니, `tool_version`까지 같이 기록해야 판정을 재현할 수 있다.
+기준값(read 3개, 비율 0.5 등)은 TOML에서 바꿀 수 있지만, 이 노트의 조합표 자체는 C++ 코드(`RuleEngine::evaluate()`)에 들어 있다. [docs/decision_engine.md](../docs/decision_engine.md)의 "Future work"에 조합표를 TOML로 옮기는 계획이 적혀 있다. 조합표가 코드에 있으니 조합표를 바꿀 때는 기본 규칙 이름(`ruleset_version`)을 손으로 올려야 한다. 0.0.4의 `PARTIAL` 변경 때는 이것을 빠뜨려서, 0.0.3과 0.0.4가 같은 이름을 썼다([02](02_short_read_support.md) 6절).
 
 </details>

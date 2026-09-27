@@ -122,6 +122,10 @@ if(PANISOGUARD_BUILD_TESTS)
   target_compile_definitions(panisoguard_tests PRIVATE
     PANISOGUARD_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/tests/data/tiny")
   add_test(NAME unit COMMAND panisoguard_tests)
+  # The README quick example must keep matching its checked-in expected outputs.
+  add_test(NAME example_tiny
+    COMMAND bash "${CMAKE_SOURCE_DIR}/examples/tiny/run.sh" "${CMAKE_BINARY_DIR}/example_tiny_out")
+  set_tests_properties(example_tiny PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
 
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,

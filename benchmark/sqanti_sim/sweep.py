@@ -171,7 +171,7 @@ def main() -> int:
                 "recall_genuine": op["recall_genuine"], "nnc_recall": op["nnc_recall"],
             },
             "notes": "Operating point = config/rules.default.toml (default-0.0.1). Full grid in sweep.tsv.",
-            "protocol": "sqanti_sim", "ruleset_version": "builtin-0.0.1", "scope": a.scope,
+            "protocol": "sqanti_sim", "ruleset_version": "builtin-0.0.2", "scope": a.scope,
             "source": None, "status": "tracked",
             "tool_version": ver[0].split()[-1] if ver else None,
         }

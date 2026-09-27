@@ -53,6 +53,25 @@ bool common_args_ok(const CommonArgs& c, std::string& err) {
   return true;
 }
 
+// Ids are joined by exact string match; a mismatch silently degrades verdicts
+// (caller_chain_absent / no consensus), so say how many failed to join.
+template <typename Map>
+void warn_unjoined(const SqantiTable& sqanti, const Map& by_id, bool novel_only, const char* what) {
+  std::size_t n = 0, missing = 0;
+  std::string example;
+  for (const auto& r : sqanti.records) {
+    if (novel_only && !r.is_novel()) continue;
+    ++n;
+    if (by_id.count(r.isoform) == 0 && missing++ == 0) example = r.isoform;
+  }
+  if (missing > 0) {
+    std::fprintf(stderr,
+        "WARNING: %zu of %zu %sSQANTI3 isoform id(s) (e.g. \"%s\") are not in %s; "
+        "check that the ids match exactly.\n",
+        missing, n, novel_only ? "novel " : "", example.c_str(), what);
+  }
+}
+
 LoadedRun load_and_adjudicate(const CommonArgs& c) {
   LoadedRun run;
   run.sqanti = read_sqanti_classification(c.classification);
@@ -66,6 +85,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     for (auto& t : read_gtf_transcripts(c.isoforms_gtf)) chains.emplace(t.id, std::move(t.chain));
   }
   std::fprintf(stderr, "read %zu caller isoform chains\n", chains.size());
+  warn_unjoined(run.sqanti, chains, /*novel_only=*/false, "the caller isoform file");
 
   Catalog catalog;
   const Catalog* catalog_ptr = nullptr;
@@ -131,6 +151,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     caller_support_ptr = &caller_support;
     std::fprintf(stderr, "read caller-support for %zu native isoform id(s) (consensus axis)\n",
                  caller_support.size());
+    warn_unjoined(run.sqanti, caller_support, /*novel_only=*/true, "the --caller-support matrix");
   }
 
   run.engine = c.config.empty() ? RuleEngine() : RuleEngine::from_toml(c.config);

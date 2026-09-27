@@ -249,9 +249,10 @@ cat out/toy.provenance.log
 ```text
 # PanIsoGuard adjudicate provenance
 tool_version	0.0.4
-ruleset_version	builtin-0.0.1
+ruleset_version	builtin-0.0.2
 sqanti3_version_target	6.0
 config	<built-in defaults>
+thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 min_mapq=20 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 classification	data/caller1_classification.txt
 isoforms	data/caller1.gtf
 ref_gtf	data/reference.gtf
@@ -273,7 +274,7 @@ class.LOW_CONF_PARTIAL	2
 total	9
 ```
 
-`axis.*` 줄이 이번 실행에서 켜진 증거 축이다. `not_evaluable`인 축은 증거가 "없다"가 아니라 "보지 않았다"는 뜻이다. PanIsoGuard는 입력이 없는 축을 찬성으로도 반대로도 세지 않는다.
+`thresholds` 줄은 이번 판정에 실제로 쓴 기준값 전부다. 설정 파일이 나중에 바뀌어도 이 줄로 판정을 재현할 수 있다([02](02_short_read_support.md) 6절). `axis.*` 줄이 이번 실행에서 켜진 증거 축이다. `not_evaluable`인 축은 증거가 "없다"가 아니라 "보지 않았다"는 뜻이다. PanIsoGuard는 입력이 없는 축을 찬성으로도 반대로도 세지 않는다.
 
 ## 4. 입력에서 판정까지 어떤 단계를 지날까?
 

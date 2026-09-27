@@ -28,7 +28,8 @@ mkdir -p "$OUT_DIR"
 if [[ -f expected/sample.adjudicated.tsv && -f expected/sample.attribution.jsonl && -f expected/sample.provenance.log ]]; then
   diff -u expected/sample.adjudicated.tsv "$OUT_DIR/sample.adjudicated.tsv"
   diff -u expected/sample.attribution.jsonl "$OUT_DIR/sample.attribution.jsonl"
-  diff -u expected/sample.provenance.log "$OUT_DIR/sample.provenance.log"
+  # tool_version changes every release; everything else in the log must match.
+  diff -u -I "^tool_version" expected/sample.provenance.log "$OUT_DIR/sample.provenance.log"
   echo "example output matches expected files"
 else
   echo "expected files not found; generated output under $OUT_DIR/"

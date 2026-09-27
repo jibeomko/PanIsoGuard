@@ -121,6 +121,7 @@ ok   iso_C is PARTIAL -> LOW_CONF_PARTIAL (02)
 ok   iso_G is a mapping artifact (03)
 ok   iso_A novel junction absent from SJ.out.tab (02)
 ok   fingerprint of iso_known (06)
+ok   unjoined isoform id is warned about (01)
 ok   consensus lifts iso_G, BAM drops it (06)
 ok   AUPRC 0.9712 from the SQANTI-SIM confusion table (07)
 All checks passed.

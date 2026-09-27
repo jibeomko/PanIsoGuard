@@ -218,10 +218,37 @@ population  population_known PAN_REF_RESCUED_FALSE_NOVEL false
 
 참조에서 canonical이 아니고(`not cr`) haplotype에서 canonical이면(`ch`) `CREATED`다. 2절의 `classify()`, 곧 PanIsoGuard의 rescue 규칙과 **같은 조건**이다. 그러니 "`CREATED` 86개를 모두 구제했다"는 것은 코드가 명세대로 동작한다는 확인이다. 이 junction들이 정말 reference bias로 생긴 가짜 novelty인지, 이 사람에게서 실제로 쓰이는 splice site인지는 보여 주지 못한다. "firewall이 86개를 모두 보류했다"도 같다. provenance 값 하나로 갈리는 분기가 그대로 동작했다는 뜻이다.
 
-독립적으로 확인하려면 정답 라벨이 규칙과 다른 곳에서 와야 한다. 4절에서 봤듯이 motif를 만든 변이 자체는 read로 볼 수 없으니, 방법은 두 가지 정도다(둘 다 아직 해 보지 않았다).
+독립적으로 확인하려면 정답 라벨이 규칙과 다른 곳에서 와야 한다. 4절에서 봤듯이 motif를 만든 변이 자체는 read로 볼 수 없으니, 방법은 두 가지 정도다.
 
 - **phasing**: long read는 exon 여러 개를 한 번에 읽는다. 같은 유전자의 다른 exon에 이형접합 SNP가 있으면, novel junction을 쓰는 long read가 모두 motif를 만든 haplotype(여기서는 hap1) 쪽 allele을 갖고 있는지, 참조 junction을 쓰는 read는 반대쪽(hap2) allele을 갖고 있는지 볼 수 있다. 그렇다면 이 junction은 정말 그 haplotype에서만 쓰인다는 독립적인 증거가 된다.
 - **여러 사람 비교**: 같은 변이를 가진 사람에게서만 이 junction이 나타나고, 없는 사람에게서는 나타나지 않는지 본다.
+
+이 노트를 쓰고 나서 첫 번째 방법을 실제 데이터에 해 봤다([benchmark/refbias_phasing](../benchmark/refbias_phasing)). HPRC의 서아프리카계 두 사람(HG03516, HG02717)에서 rescue 대상 junction 가운데 이형접합인 것만 골라, 그 junction을 쓰는 long read가 어느 haplotype에서 왔는지 유전자의 다른 이형접합 SNP로 가렸다. phase는 RNA가 아니라 부모 정보로 나눈 HiFi 조립에서 가져왔다. 결과는 저장소에 들어 있어서 데이터 없이 읽을 수 있다.
+
+```python
+import json
+m = json.load(open("../benchmark/results/refbias_phasing/metrics.json"))["metrics"]
+for who, r in m.items():
+    print(f"{who}: {r['junctions']} junctions, {r['heterozygous']} heterozygous | {r['verdicts']}")
+    print(f"   junction reads from the motif haplotype / the other: "
+          f"{r['tested_junction_reads_motif_haplotype']} / {r['tested_junction_reads_other_haplotype']}"
+          f" | other reads at the same loci: {r['tested_locus_reads_motif_haplotype']} / {r['tested_locus_reads_other_haplotype']}")
+    for row in r["rows"]:
+        if row["verdict"].startswith("CONTRADICTED"):
+            print("   contradicted:", {k: row[k] for k in ("junction", "haplotypes", "J_H", "J_O", "J_indel_near")})
+```
+
+```text
+HG02717: 47 junctions, 31 heterozygous | {'consistent': 16, 'uninformative': 15, 'untestable': 16}
+   junction reads from the motif haplotype / the other: 400 / 0 | other reads at the same loci: 1839 / 1078
+HG03516: 41 junctions, 23 heterozygous | {'CONTRADICTED': 1, 'consistent': 11, 'uninformative': 11, 'untestable': 18}
+   junction reads from the motif haplotype / the other: 172 / 3 | other reads at the same loci: 669 / 654
+   contradicted: {'junction': 'chr3:184709997-184735943:+', 'haplotypes': 'mat', 'J_H': 0, 'J_O': 3, 'J_indel_near': 1.0}
+```
+
+판정할 수 있었던 이형접합 junction 28개 가운데 27개에서, junction을 쓰는 read는 모두 motif가 canonical인 haplotype에서 왔다. 같은 자리의 다른 read를 보면 두 haplotype이 모두 발현되고 있으니, 우연히 한쪽만 보인 것이 아니다. rescue의 설명("이 사람의 이 haplotype에서는 평범한 splice site다")이 규칙과 독립된 증거로 처음 확인된 셈이다.
+
+예외 하나(HG03516 chr3:184709997)는 junction read 3개가 모두 반대쪽 haplotype, 곧 motif가 non-canonical인 쪽에서 왔다. 세 read 모두 donor 바로 앞에 2 bp 삽입이 있어서(`J_indel_near` 1.0) 정렬이 만든 가짜 junction으로 보인다. [03](03_artifact_mechanisms.md)의 BAM 축이라면 잡았을 흔적이지만, rescue가 조합표보다 먼저 판정을 끝내기 때문에 보지 않는다([08](08_one_isoform_end_to_end.md) 연습문제). 그렇다고 mapping 흔적이 rescue를 막게 바꾸면 되는 것도 아니다. HG02717의 한 junction은 read 81개 모두 같은 흔적이 있는데 phasing 검사를 통과했다. 동형접합 junction 34개는 두 haplotype이 같으니 이 방법으로 검사할 수 없다.
 
 얼마나 자주 일어나는지도 적어 둘 만하다. 벤치마크에서 이런 junction은 서아프리카계 개인 한 명당 40개 남짓이었다. caller가 부른 novel junction은 한 사람당 9만 개쯤이었으니 0.05% 정도다. 드물지만 이 사람에게 고유한 junction이라는 점에서 중요할 수 있는 경우를 가려 주는 안전장치로 보는 것이 맞다.
 
@@ -231,7 +258,7 @@ population  population_known PAN_REF_RESCUED_FALSE_NOVEL false
 - rescue는 haplotype의 출처가 정확히 `wgs`나 `external`일 때만 `PAN_REF_RESCUED_FALSE_NOVEL`이 되고, 나머지는 `AMBIGUOUS` + `circularity_flag`로 보류됨(대문자 `WGS`도 보류). 판정하려는 RNA에서 만든 haplotype으로 그 RNA를 구제하는 순환을 막으려는 것임.
 - pangenome 목록도 같은 규칙(모든 junction, 출처 `population`/`external`)으로 구제하고, haplotype 축보다 먼저 확인함.
 - motif를 만드는 변이는 늘 intron 안에 있어서 그 junction을 쓰는 read에는 나타나지 않음. short read가 이 junction을 확인하지 못하는 이유이기도 함.
-- 벤치마크의 "N/N 구제, 거짓 0개"는 정답 라벨이 rescue 규칙과 같은 조건이라 구현 확인일 뿐임. 독립 검증(phasing, 여러 사람 비교)은 아직 하지 않았음.
+- 벤치마크의 "N/N 구제, 거짓 0개"는 정답 라벨이 rescue 규칙과 같은 조건이라 구현 확인일 뿐임. 규칙과 독립된 phasing 검사에서는 판정 가능한 이형접합 junction 28개 중 27개가 설명과 맞았고, 1개는 정렬 artifact로 보임. 동형접합 34개는 검사하지 못함.
 
 다음 노트 [06](06_multi_caller_consensus.md)에서는 caller 여러 개의 결과를 합쳐서 short read 대신 쓰는 방법을 본다.
 

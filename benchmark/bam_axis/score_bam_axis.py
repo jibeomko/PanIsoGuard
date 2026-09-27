@@ -169,7 +169,7 @@ def main():
             "scope": "gencode_v49_chr22_flair",
             "status": "tracked",
             "tool_version": "0.0.4",
-            "ruleset_version": "builtin-0.0.1",
+            "ruleset_version": "builtin-0.0.2",
             "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (simulated PBSIM3 HiFi, one shared "
                                "minimap2 splice:hq alignment); FLAIR collapse + SQANTI3. Public/simulated, "
                                "no private data. OFF = current binary with mapping indel/softclip thresholds "

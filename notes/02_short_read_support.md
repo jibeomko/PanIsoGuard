@@ -221,20 +221,23 @@ sed 's/^sj_min_uniq_reads *= *3/sj_min_uniq_reads = 1/' ../config/rules.default.
 grep '^sj_min_uniq_reads' out/min1.toml
 $PIG adjudicate $A --config out/min1.toml --out-prefix out/min1 2>/dev/null
 paste <(cut -f1,5,7 out/v004.adjudicated.tsv) <(cut -f5,7 out/min1.adjudicated.tsv) | grep -E 'isoform|iso_C' | column -t
-grep -E '^(config|ruleset)' out/min1.provenance.log
+grep -E '^(ruleset|config|thresholds)' out/min1.provenance.log
 ```
 
 ```text
 sj_min_uniq_reads = 1      # STAR SJ.tab n_uniq to corroborate a novel junction
 isoform_id  novelty_support  confidence_class  novelty_support  confidence_class
 iso_C       PARTIAL          LOW_CONF_PARTIAL  SUPPORTED        HIGH_CONF_NOVEL
-ruleset_version	default-0.0.1
+ruleset_version	default-0.0.2
 config	out/min1.toml
+thresholds	sj_min_uniq_reads=1 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 min_mapq=20 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 ```
 
 `iso_C`의 두 번째 junction(read 1개)이 기준을 넘으면서 `iso_C`가 `HIGH_CONF_NOVEL`로 올라간다. 기준 하나로 등급이 두 단계 뛴다.
 
-`provenance.log`의 마지막 두 줄을 같이 보면 조심할 점이 하나 있다. `ruleset_version`은 TOML의 `[meta]`에 적힌 이름을 그대로 옮긴 것이라, 기준값을 바꿔도 `default-0.0.1` 그대로다. 그러니 어떤 기준으로 판정했는지는 `ruleset_version`이 아니라 `config` 줄의 파일을 봐야 한다. 같은 이유로 0.0.4의 `PARTIAL` 규칙 변경(4절)도 `ruleset_version`에는 드러나지 않는다. 조합 규칙은 TOML이 아니라 코드에 있기 때문이다. 판정을 재현하려면 `tool_version`과 `config`를 함께 적어 둬야 한다.
+`provenance.log`의 마지막 세 줄을 같이 보면 조심할 점이 하나 있다. `ruleset_version`은 TOML의 `[meta]`에 적힌 이름을 그대로 옮긴 것이라, 파일을 복사해서 기준값만 바꾸면 이름은 `default-0.0.2` 그대로다. 그래서 실제로 쓴 기준값은 `thresholds` 줄에 따로 적힌다. 여기서는 `sj_min_uniq_reads=1`이 보인다. 설정 파일이 나중에 바뀌거나 사라져도 이 줄로 판정을 재현할 수 있다.
+
+이 노트를 처음 쓸 때는 `thresholds` 줄이 없었고, 0.0.4의 `PARTIAL` 규칙 변경(4절)도 `ruleset_version`에 드러나지 않았다(0.0.3과 0.0.4가 모두 `builtin-0.0.1`). 조합 규칙은 TOML이 아니라 코드에 있기 때문이다. 이 노트를 쓰고 나서 기본 규칙 이름을 `0.0.2`로 올리고, 앞으로 기본 기준값이나 조합 규칙이 바뀌면 함께 올리도록 코드에 적어 두었다([rules.hpp](../include/panisoguard/rules.hpp)).
 
 기준을 어디에 둘지는 short read의 깊이에 달렸다. SQANTI-SIM에서 기준을 1, 3, 5, 10, 60으로 바꿔 가며 돌린 결과는 [benchmark/results/sqanti_sim/sweep.tsv](../benchmark/results/sqanti_sim/sweep.tsv)에 있다. 그 데이터는 정답에서 만든 `SJ.tab`에 모든 junction의 read 수를 50으로 적어 두었기 때문에, 기준이 50 이하일 때는 결과가 거의 변하지 않고 50을 넘는 순간 한꺼번에 무너진다. 실제 short read의 깊이로 다시 따져 본 결과는 [07](07_evaluation.md)에 있다.
 
@@ -244,7 +247,7 @@ config	out/min1.toml
 - isoform의 지지 수준은 novel junction `n`개 중 확인된 `k`개로 정함. 모두면 `SUPPORTED`, 일부면 `PARTIAL`, 없으면 `UNSUPPORTED`, 볼 수 없으면 `UNKNOWN`(이유 세 가지)임.
 - 0.0.4부터 `PARTIAL`은 `LOW_CONF_PARTIAL`에 머묾. 확인 안 된 junction이 남은 isoform을 confident novel로 부르던 것이 SQANTI-SIM에서 가짜 3개를 통과시켰기 때문임.
 - `iso_A`의 junction은 short read 9개가 정렬됐지만 STAR의 non-canonical 필터, strand 0, motif 조건이라는 세 관문에 모두 걸림. 셋 다 "참조 게놈에서 non-canonical"이라는 한 사실에서 나옴. canonical로 만드는 염기는 intron 안에 있어서 read로는 볼 수 없음.
-- 기준은 TOML로 바꿀 수 있지만 `ruleset_version`은 따라 바뀌지 않음. 판정을 재현하려면 `tool_version`과 `config`를 함께 기록해야 함.
+- 기준은 TOML로 바꿀 수 있음. 실제로 쓴 기준값은 `provenance.log`의 `thresholds` 줄에 남음. `ruleset_version`은 설정 파일에 적힌 이름일 뿐이라 기준값을 바꿔도 따라 바뀌지 않음.
 
 다음 노트 [03](03_artifact_mechanisms.md)에서는 두 번째 축인 artifact 흔적을 본다. SQANTI3가 적어 준 QC 값과 long-read BAM에서 무엇을 읽는지다.
 

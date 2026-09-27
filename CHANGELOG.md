@@ -13,8 +13,32 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   SQANTI3 6.0.1 and STAR runs (`notes/data/build_toy.sh`). `notes/check_notes.py`
   recomputes all 81 toy verdicts with the Python standard library and compares them with
   the binary; it runs as the CTest `integration_study_notes`.
+- **Non-circular check of the reference-bias rescue**
+  ([benchmark/refbias_phasing](benchmark/refbias_phasing)). For heterozygous reference-bias
+  junctions in HG03516 and HG02717, the long reads that use the junction are phased with the
+  trio-phased HiFi assembly SNVs. 27 of 28 testable junctions pass: 572 of 575 phased junction
+  reads come from the haplotype on which the junction is canonical, while both haplotypes are
+  expressed at those loci. The one failure (HG03516 chr3:184709997) has junction reads from the
+  non-canonical haplotype, all with a 2-bp insertion next to the donor; the rescue is checked
+  before the mapping mechanism, so it is rescued anyway. The 34 homozygous junctions cannot be
+  phased.
+- `adjudicate` warns when SQANTI3 isoform ids do not join: how many are missing from the
+  caller isoform file (they fall to `caller_chain_absent`) and how many novel ones are
+  missing from the `--caller-support` matrix (no consensus). Both used to be silent.
+- `provenance.log` gains a `thresholds` line with every effective rule threshold, so a run
+  can be reproduced even if its config file later changes.
+
+### Changed
+- `ruleset_version` is now `builtin-0.0.2` / `default-0.0.2`. The 0.0.4 `PARTIAL` change
+  had kept `0.0.1`, so 0.0.3 and 0.0.4 reported the same name for different projections.
+  The name is to be bumped with any change to a default threshold or to the projection.
 
 ### Fixed
+- `examples/tiny/expected/sample.provenance.log` still said `tool_version 0.0.3`, so the
+  README quick example failed its own diff; nothing ran it. The diff now ignores the
+  version line, and the example runs as the CTest `example_tiny`.
+- `config/rules.default.toml` header still quoted "AUPRC 0.970 vs 0.831 baseline" and an
+  unmet GATE-1.
 - `docs/decision_engine.md`: the indel-near fraction does drive the mapping mechanism
   (since 0.0.4); `rule_trace` records only the first-matching mechanism, not every flag;
   `ablate --axes consensus` (not `--without`); the `UNKNOWN` reason is

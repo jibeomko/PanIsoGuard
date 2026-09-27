@@ -59,7 +59,13 @@ PanIsoGuard 0.0.4(이 저장소에서 빌드)로 돌렸다. Python 쪽은 SQANTI
 - [docs/decision_engine.md](../docs/decision_engine.md)는 BAM의 indel-near 비율이 판정에 쓰이지 않는다고 적고 있었음. 0.0.4부터 쓰임([03](03_artifact_mechanisms.md) 3절). `src/core/adjudicator.cpp`의 주석도 같은 내용이 낡아 있었음.
 - 같은 문서가 "걸린 기전 조건은 모두 `rule_trace`에 나열된다"고 적고 있었음. 실제로는 첫 번째 기전만 남고, 나머지는 JSON의 `evidence`에만 있음([03](03_artifact_mechanisms.md) 4절).
 - 같은 문서의 `ablate --without consensus`는 없는 옵션임. `ablate --axes consensus`가 맞음. `rule_trace`의 `UNKNOWN` 이유 이름(`axis_absent` → `short_read/catalog_axis_absent`)과 circularity 표시 이름(`circularity_risk` → `circularity_flag`)도 코드와 달랐음.
-- [docs/validation.md](../docs/validation.md)에는 "junction을 쓰는 read가 alt allele을 갖고 있는지"로 reference-bias rescue를 독립 검증하자는 제안이 있었음. motif를 만드는 염기는 늘 intron 안에 있어서 그 read에는 나타나지 않으니 불가능함. phasing이나 여러 사람 비교로 고침([05](05_reference_bias.md) 4, 6절).
+- [docs/validation.md](../docs/validation.md)에는 "junction을 쓰는 read가 alt allele을 갖고 있는지"로 reference-bias rescue를 독립 검증하자는 제안이 있었음. motif를 만드는 염기는 늘 intron 안에 있어서 그 read에는 나타나지 않으니 불가능함. phasing으로 바꿔서 실제로 해 봤고, 판정 가능한 28개 중 27개가 맞았음([05](05_reference_bias.md) 4, 6절).
+
+**노트를 쓴 뒤 코드에서 고친 것**
+
+- 0.0.4의 `PARTIAL` 규칙 변경에도 `ruleset_version`이 `builtin-0.0.1` 그대로였음. `0.0.2`로 올리고, 실제로 쓴 기준값 전부를 `provenance.log`의 `thresholds` 줄에 남기게 함([02](02_short_read_support.md) 6절).
+- isoform 이름이 분류표와 caller 파일에서 어긋나거나([01](01_intron_chain_and_novelty.md) 연습문제 2), `--caller-support` 표의 이름이 어긋나도([06](06_multi_caller_consensus.md) 연습문제 1) 경고가 없었음. 이제 짝을 찾지 못한 수를 경고함.
+- `examples/tiny`의 기대 출력이 0.0.4 버전 표기 때문에 어긋나 있었는데 아무 테스트도 돌리지 않아 몰랐음. 버전 줄은 비교에서 빼고 CTest(`example_tiny`)에 넣음.
 
 **0.0.4에서 이미 고친 것**(이 노트의 [07](07_evaluation.md)과 같은 분석에서 나옴)
 
@@ -69,8 +75,7 @@ PanIsoGuard 0.0.4(이 저장소에서 빌드)로 돌렸다. Python 쪽은 SQANTI
 
 **아직 남아 있는 것**(고치지 않고 기록만 함)
 
-- `ruleset_version`은 TOML에 적힌 이름이라, 기준값을 바꾸거나 0.0.4처럼 코드의 조합 규칙이 바뀌어도 그대로임([02](02_short_read_support.md) 6절).
-- isoform 이름이 분류표와 caller 파일에서 어긋나거나([01](01_intron_chain_and_novelty.md) 연습문제 2), `--caller-support` 표의 이름이 어긋나거나([06](06_multi_caller_consensus.md) 연습문제 1), `SJ.tab` 좌표가 1 bp 밀려도([01](01_intron_chain_and_novelty.md) 연습문제 1) 경고 없이 판정만 바뀜.
+- `SJ.tab` 좌표가 1 bp 밀려도 경고 없이 판정만 바뀜([01](01_intron_chain_and_novelty.md) 연습문제 1).
 - BAM 비율 기준에 spanning read 수의 최솟값이 없어서, read가 적은 junction에서는 read 하나로 판정이 갈림([03](03_artifact_mechanisms.md) 연습문제 2).
-- reference-bias rescue는 조합표보다 먼저 판정을 끝내서 mapping 흔적을 보지 않음([08](08_one_isoform_end_to_end.md) 연습문제 1).
+- reference-bias rescue는 조합표보다 먼저 판정을 끝내서 mapping 흔적을 보지 않음([08](08_one_isoform_end_to_end.md) 연습문제 1). 실제 데이터에서도 이 때문에 정렬 artifact 하나가 구제됨([05](05_reference_bias.md) 6절). 다만 mapping 흔적으로 rescue를 막으면 맞는 rescue 하나가 막혀서, 규칙은 바꾸지 않음.
 - SQANTI3는 junction을 연결한 유전자 안에서만 찾고 PanIsoGuard의 catalog은 유전자를 구분하지 않아서, SQANTI-SIM에서 한 건의 NIC 분류가 어긋났음([01](01_intron_chain_and_novelty.md) 4절).

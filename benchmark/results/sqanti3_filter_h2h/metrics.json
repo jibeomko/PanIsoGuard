@@ -320,7 +320,7 @@
   },
   "notes": "Per setting: non-FSM genuine-vs-false metrics per method. allSJ3 = keep an isoform iff every junction has >= 3 unique short reads (SQANTI3 min_cov). SQ3strict = SQANTI3 rules filter with min_cov >= 3 required. SQ3ml uses SQANTI3's default TP/TN (FSM vs NNC) which is mismatched to this simulation (most NNC are genuine), so it is reported but not used for conclusions. Conclusion: PanIsoGuard is not more accurate than a one-line short-read rule; only PIG+bam shows a small AUPRC gain (significant at 250k only); with no short reads it is worse than the SQANTI3 rules filter.",
   "protocol": "sqanti3_filter_h2h",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.2",
   "scope": "gencode_v49_chr22_sqanti_sim",
   "source": null,
   "status": "tracked",

@@ -12,7 +12,7 @@
   },
   "notes": "Operating point = config/rules.default.toml (default-0.0.1). Full grid in sweep.tsv.",
   "protocol": "sqanti_sim",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.2",
   "scope": "gencode_v49_chr22",
   "source": null,
   "status": "tracked",

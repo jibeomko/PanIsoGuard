@@ -142,7 +142,7 @@ def main() -> int:
             "scope": meta["scope"],
             "status": "tracked",
             "tool_version": ver,
-            "ruleset_version": "builtin-0.0.1",
+            "ruleset_version": "builtin-0.0.2",
             "generated_utc": stamp,
             "data_provenance": meta["data_provenance"],
             "command": meta["command"],

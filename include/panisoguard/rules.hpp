@@ -42,7 +42,9 @@ struct RuleConfig {
   bool use_pangenome = true;
   bool use_consensus = true;
   std::string sqanti3_version_target = "6.0";
-  std::string ruleset_version = "builtin-0.0.1";
+  // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
+  // the projection in RuleEngine::evaluate() changes. 0.0.2: PARTIAL no longer promotes (0.0.4).
+  std::string ruleset_version = "builtin-0.0.2";
 };
 
 class RuleEngine {

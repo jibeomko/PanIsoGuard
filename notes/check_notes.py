@@ -239,6 +239,12 @@ def main():
         subprocess.run([PIG, "combine", "--gtf", "caller1:" + D("caller1.gtf"), "--gtf", "caller2:" + D("caller2.gtf"),
                         "--ref-gtf", D("reference.gtf"), "--out", matrix], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # An isoform id that does not join must be reported, not silently held AMBIGUOUS (01, 06).
+        renamed = os.path.join(tmp, "renamed.gtf")
+        open(renamed, "w").write(open(D("caller1.gtf")).read().replace('"iso_A"', '"FLAIR_iso_A"'))
+        err = subprocess.run([PIG, "adjudicate", *base[:2], "--isoforms-gtf", renamed,
+                              "--out-prefix", os.path.join(tmp, "renamed")], capture_output=True, text=True).stderr
+        warned = 'WARNING: 1 of 9 SQANTI3 isoform id(s) (e.g. "iso_A")' in err
         results = {}
         for name, args, inp in configs:
             args = [pan if a is None and name == "pangenome" else matrix if a is None else a for a in args]
@@ -260,6 +266,7 @@ def main():
         ("iso_G is a mapping artifact (03)", results["step3"]["iso_G"][1:3] == ("mapping_or_repeat", "ARTIFACT")),
         ("iso_A novel junction absent from SJ.out.tab (02)", ("chrT", "+", (500, 730)) not in sj),
         ("fingerprint of iso_known (06)", fingerprint("chrT", "+", chains["iso_known"][2]) == 4486241254994410266),
+        ("unjoined isoform id is warned about (01)", warned),
         ("consensus lifts iso_G, BAM drops it (06)",
          results["consensus"]["iso_G"][2] == "MEDIUM_CONF_NOVEL" and results["consensus_bam"]["iso_G"][2] == "ARTIFACT"),
     ]

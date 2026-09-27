@@ -344,15 +344,16 @@ PanIsoGuard는 SQANTI3 분류표의 `isoform` 열 값과 caller 파일의 이름
 ```bash
 sed 's/\tiso_A\t/\tFLAIR_iso_A\t/' out/caller1.bed > out/renamed.bed
 $PIG adjudicate --classification data/caller1_classification.txt --isoforms-bed out/renamed.bed \
-  --ref-gtf data/reference.gtf --sj-tab data/short_reads.SJ.out.tab --out-prefix out/renamed 2>/dev/null
+  --ref-gtf data/reference.gtf --sj-tab data/short_reads.SJ.out.tab --out-prefix out/renamed 2>&1 | grep WARNING
 grep '"iso_A"' out/renamed.attribution.jsonl | python3 -c 'import json,sys; r=json.loads(sys.stdin.read()); print(r["confidence_class"], r["evidence"]["chain_available"], r["rule_trace"])'
 ```
 
 ```text
+WARNING: 1 of 9 SQANTI3 isoform id(s) (e.g. "iso_A") are not in the caller isoform file; check that the ids match exactly.
 AMBIGUOUS False ['novelty-support UNKNOWN reason=caller_chain_absent', 'all_canonical=non_canonical -> mechanism=noncanonical', 'project(UNKNOWN,noncanonical) -> AMBIGUOUS']
 ```
 
-`iso_A`는 `ARTIFACT`(step2) 대신 `AMBIGUOUS`가 되고, 이유는 `caller_chain_absent`로 남는다. 이번에도 경고는 없다. stderr에는 "read 9 caller isoform chains"만 찍혀서, 이름이 하나 어긋났다는 것을 거기서는 알 수 없다. 결과에 `caller_chain_absent`가 보이면 이름 짝짓기부터 확인해야 한다.
+`iso_A`는 `ARTIFACT`(step2) 대신 `AMBIGUOUS`가 되고, 이유는 `caller_chain_absent`로 남는다. 이 노트를 처음 쓸 때는 이 경우에 경고가 없었다. stderr에 "read 9 caller isoform chains"만 찍혀서, 이름이 하나 어긋났다는 것을 알 수 없었다. 지금은 짝을 찾지 못한 isoform 수와 예시 하나를 경고로 알려 준다. 결과에 `caller_chain_absent`가 보이면 이름 짝짓기부터 확인해야 한다.
 
 </details>
 

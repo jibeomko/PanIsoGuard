@@ -1,0 +1,969 @@
+{
+ "command": "benchmark/refbias_phasing/phase_check.py HG03516:<workdir> HG02717:<workdir> --emit-metrics benchmark/results/refbias_phasing/metrics.json",
+ "data_provenance": "the benchmark/hg03516_refbias work dirs: public HPRC Release 2 PacBio Kinnex Iso-Seq (minimap2 splice:hq to GRCh38) and trio-phased HiFi assembly SNVs (pat/mat, paftools call). No PanIsoGuard run: tests the rescue's claim directly.",
+ "generated_utc": null,
+ "metrics": {
+  "HG02717": {
+   "heterozygous": 31,
+   "junctions": 47,
+   "rows": [
+    {
+     "J_H": 10,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 10,
+     "fisher_p": 0.30830039525691694,
+     "haplotypes": "mat",
+     "het_sites": 19,
+     "junction": "chr1:148379554-148388733:-",
+     "nonJ_H": 11,
+     "nonJ_O": 2,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat,pat",
+     "junction": "chr1:159201621-159204893:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "fisher_p": 0.09783333631108333,
+     "haplotypes": "pat",
+     "het_sites": 12,
+     "junction": "chr1:198919944-198937225:-",
+     "nonJ_H": 233,
+     "nonJ_O": 275,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 21,
+     "J_O": 0,
+     "J_indel_near": 0.13,
+     "J_reads": 84,
+     "fisher_p": 3.2819674507598376e-14,
+     "haplotypes": "pat",
+     "het_sites": 23,
+     "junction": "chr10:38366011-38369952:+",
+     "nonJ_H": 4,
+     "nonJ_O": 45,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 1,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "fisher_p": 0.25,
+     "haplotypes": "mat",
+     "het_sites": 8,
+     "junction": "chr10:117270443-117277114:-",
+     "nonJ_H": 0,
+     "nonJ_O": 3,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.05,
+     "J_reads": 66,
+     "haplotypes": "mat",
+     "het_sites": 4,
+     "junction": "chr11:827711-828229:+",
+     "nonJ_H": 11,
+     "nonJ_O": 12,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 32,
+     "fisher_p": 0.05000000000000001,
+     "haplotypes": "mat",
+     "het_sites": 19,
+     "junction": "chr12:92337507-92357530:-",
+     "nonJ_H": 0,
+     "nonJ_O": 3,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 23,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 23,
+     "fisher_p": 0.03694581280788178,
+     "haplotypes": "mat",
+     "het_sites": 33,
+     "junction": "chr14:24445572-24474186:+",
+     "nonJ_H": 4,
+     "nonJ_O": 2,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "fisher_p": 0.1212121212121212,
+     "haplotypes": "mat",
+     "het_sites": 14,
+     "junction": "chr14:39470553-39510812:+",
+     "nonJ_H": 3,
+     "nonJ_O": 5,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "mat",
+     "het_sites": 10,
+     "junction": "chr14:61596235-61597085:-",
+     "nonJ_H": 0,
+     "nonJ_O": 2,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 2,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "fisher_p": 0.12333965844402275,
+     "haplotypes": "mat",
+     "het_sites": 76,
+     "junction": "chr14:106638568-106639104:-",
+     "nonJ_H": 64,
+     "nonJ_O": 121,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 6,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 7,
+     "fisher_p": 0.0991400120518107,
+     "haplotypes": "pat",
+     "het_sites": 8,
+     "junction": "chr15:38481459-38482310:+",
+     "nonJ_H": 54,
+     "nonJ_O": 27,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat,pat",
+     "junction": "chr15:85325915-85330077:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": null,
+     "J_reads": 0,
+     "haplotypes": "mat,pat",
+     "junction": "chr17:3681978-3685514:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 1,
+     "J_O": 0,
+     "J_indel_near": 0.01,
+     "J_reads": 163,
+     "fisher_p": 0.5266524520255864,
+     "haplotypes": "pat",
+     "het_sites": 15,
+     "junction": "chr17:36211890-36212481:+",
+     "nonJ_H": 246,
+     "nonJ_O": 222,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.01,
+     "J_reads": 79,
+     "haplotypes": "mat,pat",
+     "junction": "chr17:64815245-64821766:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 11,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 11,
+     "fisher_p": 2.726340814412528e-07,
+     "haplotypes": "pat",
+     "het_sites": 14,
+     "junction": "chr17:69179008-69179274:-",
+     "nonJ_H": 2,
+     "nonJ_O": 21,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 11,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:12022106-12034827:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 31,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:12022106-12035536:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 5,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:34772473-34772823:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 18,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:35658858-35661506:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 38,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:48061668-48061997:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 54,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 54,
+     "fisher_p": 4.100901604094355e-08,
+     "haplotypes": "pat",
+     "het_sites": 48,
+     "junction": "chr2:64903675-64904091:-",
+     "nonJ_H": 451,
+     "nonJ_O": 177,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 155,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 156,
+     "fisher_p": 1.1887562966328382e-23,
+     "haplotypes": "pat",
+     "het_sites": 48,
+     "junction": "chr2:64903675-64904990:-",
+     "nonJ_H": 328,
+     "nonJ_O": 163,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 11,
+     "J_O": 0,
+     "J_indel_near": 1.0,
+     "J_reads": 81,
+     "fisher_p": 1.0481044781399082e-06,
+     "haplotypes": "mat",
+     "het_sites": 40,
+     "junction": "chr2:88861556-88947305:-",
+     "nonJ_H": 49,
+     "nonJ_O": 137,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "fisher_p": 0.8359684832267478,
+     "haplotypes": "pat",
+     "het_sites": 59,
+     "junction": "chr2:113703932-113704009:+",
+     "nonJ_H": 128,
+     "nonJ_O": 8,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.03,
+     "J_reads": 40,
+     "haplotypes": "mat,pat",
+     "junction": "chr20:38415224-38419573:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 2,
+     "J_O": 0,
+     "J_indel_near": 0.5,
+     "J_reads": 2,
+     "fisher_p": 0.6043956043956044,
+     "haplotypes": "pat",
+     "het_sites": 3,
+     "junction": "chr21:29109534-29149188:+",
+     "nonJ_H": 9,
+     "nonJ_O": 3,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 35,
+     "J_O": 0,
+     "J_indel_near": 0.03,
+     "J_reads": 35,
+     "fisher_p": 1.2630734133114363e-08,
+     "haplotypes": "pat",
+     "het_sites": 92,
+     "junction": "chr3:75432870-75435014:-",
+     "nonJ_H": 122,
+     "nonJ_O": 95,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 21,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 21,
+     "fisher_p": 0.0658753766574031,
+     "haplotypes": "pat",
+     "het_sites": 41,
+     "junction": "chr3:197651337-197654687:-",
+     "nonJ_H": 105,
+     "nonJ_O": 16,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 0,
+     "J_O": 2,
+     "J_indel_near": 0.0,
+     "J_reads": 5,
+     "haplotypes": "pat",
+     "het_sites": 4,
+     "junction": "chr4:56466745-56467091:-",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat",
+     "het_sites": 6,
+     "junction": "chr4:142033827-142039703:+",
+     "nonJ_H": 38,
+     "nonJ_O": 80,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 6,
+     "haplotypes": "mat,pat",
+     "junction": "chr5:159100035-159105024:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 13,
+     "haplotypes": "mat,pat",
+     "junction": "chr5:159100838-159105024:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "fisher_p": 0.6245220499982853,
+     "haplotypes": "mat",
+     "het_sites": 102,
+     "junction": "chr6:31272090-31272616:-",
+     "nonJ_H": 204,
+     "nonJ_O": 35,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 2,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "pat",
+     "het_sites": 10,
+     "junction": "chr6:82059679-82066884:-",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 11,
+     "haplotypes": "pat",
+     "het_sites": 0,
+     "junction": "chr6:130018664-130022220:+",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "pat",
+     "het_sites": 0,
+     "junction": "chr6:130019237-130022220:+",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "pat",
+     "het_sites": 0,
+     "junction": "chr6:130019713-130022220:+",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "mat,pat",
+     "junction": "chr6:132402976-132410919:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "mat,pat",
+     "junction": "chr7:12496343-12503751:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 6,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 11,
+     "fisher_p": 0.8536585365853658,
+     "haplotypes": "mat",
+     "het_sites": 51,
+     "junction": "chr7:144278475-144282280:-",
+     "nonJ_H": 34,
+     "nonJ_O": 1,
+     "verdict": "uninformative (other haplotype not seen at the locus)"
+    },
+    {
+     "J_indel_near": 0.12,
+     "J_reads": 8,
+     "haplotypes": "mat,pat",
+     "junction": "chr8:30631328-30638488:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 5,
+     "haplotypes": "mat",
+     "het_sites": 2,
+     "junction": "chr8:92917010-92922556:-",
+     "nonJ_H": 1,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 1,
+     "J_O": 0,
+     "J_indel_near": 0.02,
+     "J_reads": 47,
+     "fisher_p": 1.0,
+     "haplotypes": "mat",
+     "het_sites": 4,
+     "junction": "chr8:92921660-92922556:-",
+     "nonJ_H": 1,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "mat,pat",
+     "junction": "chr8:122417022-122417269:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 38,
+     "J_O": 0,
+     "J_indel_near": 0.03,
+     "J_reads": 39,
+     "fisher_p": 1.6722008768265026e-06,
+     "haplotypes": "pat",
+     "het_sites": 8,
+     "junction": "chr9:100353245-100353996:+",
+     "nonJ_H": 141,
+     "nonJ_O": 67,
+     "verdict": "consistent"
+    }
+   ],
+   "tested_junction_reads_motif_haplotype": 400,
+   "tested_junction_reads_other_haplotype": 0,
+   "tested_locus_reads_motif_haplotype": 1839,
+   "tested_locus_reads_other_haplotype": 1078,
+   "verdicts": {
+    "consistent": 16,
+    "uninformative": 15,
+    "untestable": 16
+   }
+  },
+  "HG03516": {
+   "heterozygous": 23,
+   "junctions": 41,
+   "rows": [
+    {
+     "J_H": 2,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "fisher_p": 0.2479338842975207,
+     "haplotypes": "mat",
+     "het_sites": 52,
+     "junction": "chr1:88763331-88765206:+",
+     "nonJ_H": 59,
+     "nonJ_O": 61,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "mat,pat",
+     "junction": "chr1:161592242-161599629:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "mat,pat",
+     "junction": "chr1:161596531-161599629:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 66,
+     "J_O": 0,
+     "J_indel_near": 0.01,
+     "J_reads": 70,
+     "fisher_p": 1.8595933566638085e-20,
+     "haplotypes": "pat",
+     "het_sites": 19,
+     "junction": "chr1:162806950-162812297:+",
+     "nonJ_H": 81,
+     "nonJ_O": 111,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.12,
+     "J_reads": 8,
+     "haplotypes": "mat,pat",
+     "junction": "chr10:121790289-121834248:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 31,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 31,
+     "fisher_p": 0.009430312416121493,
+     "haplotypes": "pat",
+     "het_sites": 10,
+     "junction": "chr11:827711-828229:+",
+     "nonJ_H": 65,
+     "nonJ_O": 13,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "mat,pat",
+     "junction": "chr11:94059814-94129327:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 16,
+     "haplotypes": "mat,pat",
+     "junction": "chr12:92337507-92357530:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat,pat",
+     "junction": "chr15:85325915-85330077:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 18,
+     "haplotypes": "mat,pat",
+     "junction": "chr16:72249242-72284571:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": null,
+     "J_reads": 0,
+     "haplotypes": "mat,pat",
+     "junction": "chr17:3681978-3685514:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 6,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 6,
+     "fisher_p": 0.2696078431372549,
+     "haplotypes": "mat",
+     "het_sites": 8,
+     "junction": "chr17:38765089-38765943:+",
+     "nonJ_H": 9,
+     "nonJ_O": 3,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 7,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 8,
+     "fisher_p": 0.2022058823529412,
+     "haplotypes": "mat",
+     "het_sites": 10,
+     "junction": "chr17:55407297-55407745:-",
+     "nonJ_H": 8,
+     "nonJ_O": 3,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 18,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 18,
+     "fisher_p": 0.002306389456028623,
+     "haplotypes": "mat",
+     "het_sites": 31,
+     "junction": "chr18:5240709-5241698:+",
+     "nonJ_H": 78,
+     "nonJ_O": 35,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "mat",
+     "het_sites": 24,
+     "junction": "chr18:55266182-55269830:-",
+     "nonJ_H": 9,
+     "nonJ_O": 15,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 6,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:23786391-23786773:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "mat,pat",
+     "junction": "chr19:48061668-48061997:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 25,
+     "haplotypes": "mat,pat",
+     "junction": "chr2:64903675-64904091:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 95,
+     "haplotypes": "mat,pat",
+     "junction": "chr2:64903675-64904990:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 3,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 10,
+     "fisher_p": 0.03496503496503496,
+     "haplotypes": "mat",
+     "het_sites": 2,
+     "junction": "chr2:230945850-230951951:+",
+     "nonJ_H": 2,
+     "nonJ_O": 8,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 13,
+     "haplotypes": "mat,pat",
+     "junction": "chr20:18412853-18412967:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 21,
+     "haplotypes": "mat,pat",
+     "junction": "chr20:18412853-18414347:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 18,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 18,
+     "fisher_p": 5.060923635550121e-06,
+     "haplotypes": "mat",
+     "het_sites": 24,
+     "junction": "chr20:44199455-44202960:-",
+     "nonJ_H": 196,
+     "nonJ_O": 199,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "haplotypes": "mat,pat",
+     "junction": "chr21:43659794-43669997:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 2,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat",
+     "het_sites": 2,
+     "junction": "chr22:18145946-18149099:-",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat,pat",
+     "junction": "chr3:27291762-27295040:-",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 3,
+     "J_indel_near": 1.0,
+     "J_reads": 3,
+     "fisher_p": 1.0,
+     "haplotypes": "mat",
+     "het_sites": 4,
+     "junction": "chr3:184709997-184735943:+",
+     "nonJ_H": 2,
+     "nonJ_O": 0,
+     "verdict": "CONTRADICTED (junction reads from the non-canonical haplotype)"
+    },
+    {
+     "J_H": 6,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 11,
+     "fisher_p": 0.005219065679389952,
+     "haplotypes": "pat",
+     "het_sites": 18,
+     "junction": "chr4:129110342-129111685:+",
+     "nonJ_H": 115,
+     "nonJ_O": 166,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "pat",
+     "het_sites": 2,
+     "junction": "chr4:158171480-158172251:+",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "pat",
+     "het_sites": 1,
+     "junction": "chr4:158171480-158179660:+",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 3,
+     "haplotypes": "pat",
+     "het_sites": 3,
+     "junction": "chr5:62601848-62604230:+",
+     "nonJ_H": 0,
+     "nonJ_O": 1,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 15,
+     "J_O": 0,
+     "J_indel_near": 0.07,
+     "J_reads": 15,
+     "fisher_p": 1.0,
+     "haplotypes": "mat",
+     "het_sites": 6,
+     "junction": "chr5:157667852-157670963:-",
+     "nonJ_H": 2,
+     "nonJ_O": 0,
+     "verdict": "uninformative (other haplotype not seen at the locus)"
+    },
+    {
+     "J_indel_near": 0.2,
+     "J_reads": 5,
+     "haplotypes": "mat,pat",
+     "junction": "chr5:159100838-159105024:+",
+     "verdict": "untestable (homozygous)"
+    },
+    {
+     "J_H": 4,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 4,
+     "fisher_p": 0.04545454545454545,
+     "haplotypes": "mat",
+     "het_sites": 2,
+     "junction": "chr6:46161753-46163729:-",
+     "nonJ_H": 2,
+     "nonJ_O": 5,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 1,
+     "J_O": 1,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "fisher_p": 0.7142857142857143,
+     "haplotypes": "pat",
+     "het_sites": 13,
+     "junction": "chr6:136665560-136668208:-",
+     "nonJ_H": 9,
+     "nonJ_O": 11,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 2,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "fisher_p": 1.0,
+     "haplotypes": "pat",
+     "het_sites": 9,
+     "junction": "chr7:45791846-45798532:+",
+     "nonJ_H": 1,
+     "nonJ_O": 4,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 0,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "pat",
+     "het_sites": 21,
+     "junction": "chr7:75467884-75468776:-",
+     "nonJ_H": 11,
+     "nonJ_O": 10,
+     "verdict": "uninformative (too few phased junction reads)"
+    },
+    {
+     "J_H": 4,
+     "J_O": 0,
+     "J_indel_near": 0.33,
+     "J_reads": 6,
+     "haplotypes": "pat",
+     "het_sites": 11,
+     "junction": "chr7:144278475-144282280:-",
+     "nonJ_H": 0,
+     "nonJ_O": 0,
+     "verdict": "uninformative (other haplotype not seen at the locus)"
+    },
+    {
+     "J_H": 7,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 8,
+     "fisher_p": 0.004729595934880412,
+     "haplotypes": "mat",
+     "het_sites": 32,
+     "junction": "chr7:150444566-150446699:+",
+     "nonJ_H": 77,
+     "nonJ_O": 93,
+     "verdict": "consistent"
+    },
+    {
+     "J_H": 6,
+     "J_O": 0,
+     "J_indel_near": 0.0,
+     "J_reads": 6,
+     "fisher_p": 0.09483251513179944,
+     "haplotypes": "pat",
+     "het_sites": 12,
+     "junction": "chr9:100353245-100353996:+",
+     "nonJ_H": 34,
+     "nonJ_O": 18,
+     "verdict": "consistent"
+    },
+    {
+     "J_indel_near": 0.0,
+     "J_reads": 2,
+     "haplotypes": "mat,pat",
+     "junction": "chr9:129809611-129810226:+",
+     "verdict": "untestable (homozygous)"
+    }
+   ],
+   "tested_junction_reads_motif_haplotype": 172,
+   "tested_junction_reads_other_haplotype": 3,
+   "tested_locus_reads_motif_haplotype": 669,
+   "tested_locus_reads_other_haplotype": 654,
+   "verdicts": {
+    "CONTRADICTED": 1,
+    "consistent": 11,
+    "uninformative": 11,
+    "untestable": 18
+   }
+  }
+ },
+ "notes": "MARGIN=2, MIN_PHASED_J=3, MIN_O_NONJ=2. 'motif haplotype' = the haplotype on which the junction is canonical. Homozygous junctions cannot be phased.",
+ "protocol": "refbias_phasing",
+ "ruleset_version": null,
+ "scope": "hprc_r2_hg03516_hg02717",
+ "source": null,
+ "status": "tracked",
+ "tool_version": null
+}

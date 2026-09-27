@@ -5,19 +5,15 @@
 # projection is documented in docs/decision_engine.md and echoed per-isoform in
 # the `rule_trace` field of <prefix>.attribution.jsonl.
 #
-# Status: the adjudication logic is validated against ground truth (SQANTI-SIM
-# AUPRC 0.970 vs 0.831 baseline; well-calibrated, ECE/Brier <= 0.013 -- see
-# docs/validation.md). The thresholds below are conservative defaults; a SQANTI-SIM
-# v49 chr22 sweep (benchmark/results/sqanti_sim/sweep.tsv) finds AUPRC robust
-# (0.969-0.970) across the grid and the default within 1e-4 of grid-best -- near-optimal
-# there, though not yet swept on additional datasets. Treat the confidence classes as
-# calibrated ordinal evidence, not a tuned probability. The pangenome (reference-bias)
-# tier remains experimental pending GATE-1. Framing constraint: PanIsoGuard reports
-# orthogonal attribution + confidence + provenance, never "beats" the SQANTI3 RF
-# filter or FLAIR2.
+# Status: the thresholds below are conservative defaults. A SQANTI-SIM v49 chr22 sweep
+# (benchmark/results/sqanti_sim/sweep.tsv) finds AUPRC flat (0.970-0.971) across the grid,
+# but on the same truth set PanIsoGuard is not more accurate than a one-line short-read
+# rule (benchmark/sqanti3_filter_h2h); see docs/validation.md. Treat the confidence
+# classes as ordinal, not a tuned probability. Every run writes the effective thresholds
+# to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.1"
+ruleset_version        = "default-0.0.2"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 random_seed            = 1
 

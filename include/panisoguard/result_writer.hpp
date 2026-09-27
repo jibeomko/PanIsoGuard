@@ -24,6 +24,8 @@ struct RunProvenance {
   bool pangenome_circular = false;  // pangenome junction-set provenance is circular-risk
   bool consensus_axis_on = false;   // a caller-support matrix was supplied
   std::string config_path;    // "" if built-in defaults
+  std::string thresholds;     // effective rule thresholds, "key=value ..." (so a run is
+                              // reproducible even if the config file changes later)
 };
 
 // Write <prefix>.adjudicated.tsv, <prefix>.attribution.jsonl, and
