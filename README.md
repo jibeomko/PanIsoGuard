@@ -215,10 +215,10 @@ panisoguard combine \
 | `<prefix>.provenance.log`    | tool and ruleset version, the effective thresholds, which axes were active, circularity status, class counts |
 
 What the verdicts look like: four isoforms of the same toy gene, the evidence found for each,
-and the verdict with its reason (real output of one run; the ringed evidence decided each
-verdict).
+and the verdict (real output of one run with short reads, a long-read BAM and
+two haplotypes; the outlined evidence decided each verdict).
 
-![Verdict examples: a table of four novel isoforms of a toy gene. For each, the evidence PanIsoGuard checks (short reads, long-read alignment, SQANTI3 QC, the person's own genome) is marked as supports, partly, against or nothing found, followed by the verdict and its reason: iso_B confirmed novel (junction in 12 short reads), iso_C unconfirmed (1 of 2 junctions confirmed), iso_G artifact (no short reads and an indel beside the junction), iso_A reference bias (non-canonical only on the reference genome, canonical on the person's haplotype).](docs/figures/verdict_examples.png)
+![Verdict examples: a table of four novel isoforms of a toy gene. For each, the evidence PanIsoGuard checks (short reads, long reads, SQANTI3 QC, genome) is marked as supports, partly, against or nothing found, followed by the verdict and its class, with the evidence that decided it outlined: iso_B confirmed novel (junction in 12 short reads), iso_C unconfirmed (1 of 2 junctions confirmed), iso_G artifact (no short reads and an indel beside the junction), iso_A reference bias (non-canonical only on the reference genome, canonical on the person's haplotype).](docs/figures/verdict_examples.png)
 
 ### Confidence classes
 
