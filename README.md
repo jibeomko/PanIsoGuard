@@ -26,12 +26,15 @@ like an artifact, the rules that decided it, and a log of the inputs that were u
 ## Contents
 
 - [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
-- [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
+- [Study notes](#study-notes) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
 - [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout) · [Architecture map](#architecture-map)
 
 ## At a glance
 
 ![How PanIsoGuard judges a novel isoform, in five steps, followed for one example isoform, iso_B. 1, read inputs: the SQANTI3 classification, the caller's isoforms and the reference annotation are needed; short-read junctions (SJ.tab), a long-read BAM, genome haplotypes and a caller-support matrix are optional. 2, find novel junctions: iso_B has one junction that is not in the reference. 3, gather evidence: short reads support it; long reads and SQANTI3 QC find no artifact signal; callers and genome were not given, so they are not evaluated. 4, apply fixed rules: reference bias is checked first (not evaluated here); then short-read support times artifact signal gives the class, and iso_B lands on supported with no artifact signal. 5, report the verdict: confirmed novel (the other outcomes are reference bias, unconfirmed and artifact), written to a verdict table, the reasons and a run log.](docs/figures/overview.png)
+
+To see these steps worked through on a small example gene, one note per step, read the
+[study notes](notes/README.md) (in Korean).
 
 ## Quick start
 
@@ -73,8 +76,8 @@ docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard exam
 includes the optional PDF report tool. Without Docker, install that with `pip install ./python`
 and run `panisoguard-report --prefix <out-prefix>` (see [python/](python/)).
 
-For a step-by-step walk-through of one toy gene, from input files to verdicts, see the study
-notes (in Korean): [notes/](notes/README.md).
+For a step-by-step walk-through of one toy gene, from input files to verdicts, see the
+[study notes](#study-notes) (in Korean).
 
 ## Install
 
@@ -227,7 +230,7 @@ panisoguard combine \
 | `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used, the `rule_trace` (the rules that decided the verdict, in order), a `graph_trace` (the same result seen as a splice graph; see [docs/method_graph.md](docs/method_graph.md)), and `bio_flags` (SQANTI3 QC values copied through for reference; they do not change the verdict; see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
-Here is what the verdicts look like for four isoforms of the same toy gene (real output of one
+Here is what the verdicts look like for four isoforms of the notes' toy gene (real output of one
 run with short reads, a long-read BAM and two haplotypes). The outlined evidence is what
 decided each verdict.
 
@@ -287,6 +290,27 @@ panisoguard benchmark [adjudicate options] --out bench/
 # which calls change when one kind of evidence is turned off
 panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
 ```
+
+## Study notes
+
+The [study notes](notes/README.md) (in Korean) explain how PanIsoGuard reaches its verdicts by
+following one small example through every step: a gene on a 1,700 bp toy chromosome, with three
+reference transcripts and nine isoforms from a caller. Each note starts from one question and
+shows the example before the rule. Every code block was run and shows its real output, and the
+CTest `integration_study_notes` checks that the notes still match the program. Read them in
+order if you are new:
+
+| # | Question | What it covers |
+|---|---|---|
+| 00 | [What does PanIsoGuard ask about a novel isoform?](notes/00_overview.md) | what is judged, and the steps from input files to verdict |
+| 01 | [What exactly is new in a novel isoform?](notes/01_intron_chain_and_novelty.md) | intron chains, each file's coordinate convention, counting novel junctions |
+| 02 | [How do we know short reads saw a novel junction?](notes/02_short_read_support.md) | `SJ.out.tab`, the four support levels, the `PARTIAL` rule change |
+| 03 | [What traces do artifacts leave?](notes/03_artifact_mechanisms.md) | SQANTI3's QC values, the four long-read BAM signs, which sign wins |
+| 04 | [How do support and artifact signs become one class?](notes/04_projection.md) | the support × artifact grid, the checks before it, `ablate`, all rules re-implemented in Python |
+| 05 | [What changes when the reference differs from the person's genome?](notes/05_reference_bias.md) | reference bias from haplotypes and a pangenome, the circularity firewall, the limits of its validation |
+| 06 | [If several callers find the same isoform, can we trust it?](notes/06_multi_caller_consensus.md) | intron-chain fingerprints, `combine`, strengths and weaknesses of caller agreement |
+| 07 | [How do we measure whether the verdicts are right?](notes/07_evaluation.md) | simulated truth, precision, recall and AUPRC, the comparison with a one-line rule |
+| 08 | [How does one isoform become one class?](notes/08_one_isoform_end_to_end.md) | working out one isoform by hand, from input files to class, and checking it against PanIsoGuard |
 
 ## When to use PanIsoGuard
 
