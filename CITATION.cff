@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use PanIsoGuard, please cite it as below."
+title: "PanIsoGuard: caller-agnostic adjudication of long-read RNA-seq novel isoforms"
+type: software
+authors:
+  - family-names: Ko
+    given-names: Jibeom
+    orcid: "https://orcid.org/0009-0002-8630-1973"
+    affiliation: "Korea Institute of Science and Technology (KIST)"
+repository-code: "https://github.com/jibeomko/PanIsoGuard"
+license: MIT
+version: 0.0.4
+date-released: 2026-09-27
+keywords:
+  - long-read RNA-seq
+  - isoform
+  - splice junction
+  - SQANTI3
+  - PacBio
+  - Oxford Nanopore
