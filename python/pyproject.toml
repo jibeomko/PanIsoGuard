@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "panisoguard-report"
-version = "0.0.4"
+version = "0.0.5"
 description = "PDF report generator for PanIsoGuard adjudication output (SQANTI3-style summary)"
 readme = "README.md"
 requires-python = ">=3.8"

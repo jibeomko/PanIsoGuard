@@ -3,7 +3,7 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
-## [Unreleased]
+## [0.0.5] - 2026-10-04
 
 ### Added
 - **Study notes** ([notes/](notes/README.md), in Korean): nine notes that follow one toy
@@ -32,11 +32,14 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   missing from the `--caller-support` matrix (no consensus). Both used to be silent.
 - `provenance.log` gains a `thresholds` line with every effective rule threshold, so a run
   can be reproduced even if its config file later changes.
+- `CITATION.cff` (author, ORCID, license, version): GitHub shows a "Cite this repository"
+  button, and Zenodo archives each release with a DOI.
 
 ### Changed
 - `ruleset_version` is now `builtin-0.0.2` / `default-0.0.2`. The 0.0.4 `PARTIAL` change
   had kept `0.0.1`, so 0.0.3 and 0.0.4 reported the same name for different projections.
   The name is to be bumped with any change to a default threshold or to the projection.
+  Verdicts are identical to 0.0.4: no threshold or projection changed in this release.
 
 ### Fixed
 - **Build failed without system binutils.** conda-forge compilers >= 2.0 install an
@@ -60,6 +63,10 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - `docs/validation.md`: the proposed independent check of the reference-bias rescue
   ("do junction reads carry the alt allele?") cannot work, because the motif-creating base
   is intronic and never in those reads; replaced with phasing / carrier comparison.
+- README: the bioconda package is on the channel (it said the recipe was still in review).
+
+### CI / tooling
+- Bioconda recipe passes `${CMAKE_ARGS}` to CMake (bioconda review suggestion).
 
 ## [0.0.4] - 2026-09-27
 

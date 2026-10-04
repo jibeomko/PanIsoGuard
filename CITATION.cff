@@ -9,8 +9,8 @@ authors:
     affiliation: "Korea Institute of Science and Technology (KIST)"
 repository-code: "https://github.com/jibeomko/PanIsoGuard"
 license: MIT
-version: 0.0.4
-date-released: 2026-09-27
+version: 0.0.5
+date-released: 2026-10-04
 keywords:
   - long-read RNA-seq
   - isoform
