@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml)
 [![License: MIT AND BSL-1.0](https://img.shields.io/badge/license-MIT%20AND%20BSL--1.0-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23131084.svg)](https://doi.org/10.5281/zenodo.23131084)
 
 Long-read isoform callers (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON, …) report many *novel*
 isoforms, and not all of them are real. Some come from alignment errors or library artifacts;
@@ -527,6 +528,13 @@ flowchart LR
   class Outputs output;
   linkStyle default stroke:#334155,stroke-width:3.5px;
 ```
+
+## Citation
+
+Each release is archived on Zenodo. To cite PanIsoGuard, use the DOI for all versions,
+[10.5281/zenodo.23131084](https://doi.org/10.5281/zenodo.23131084), which always resolves to
+the latest release; each release also has its own DOI on that page. GitHub's "Cite this
+repository" button gives the same record from [`CITATION.cff`](CITATION.cff).
 
 ## License
 

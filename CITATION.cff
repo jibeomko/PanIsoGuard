@@ -8,6 +8,7 @@ authors:
     orcid: "https://orcid.org/0009-0002-8630-1973"
     affiliation: "Korea Institute of Science and Technology (KIST)"
 repository-code: "https://github.com/jibeomko/PanIsoGuard"
+doi: 10.5281/zenodo.23131084
 license: MIT
 version: 0.0.5
 date-released: 2026-10-04
