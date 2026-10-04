@@ -83,13 +83,14 @@ For a step-by-step walk-through of one toy gene, from input files to verdicts, s
 
 ### Bioconda
 
-The Bioconda recipe is in [`recipes/bioconda/`](recipes/bioconda/). It has been submitted
-([bioconda-recipes #65953](https://github.com/bioconda/bioconda-recipes/pull/65953)) and is
-waiting for review. Once it is merged, you can install PanIsoGuard with:
-
 ```bash
 conda install -c conda-forge -c bioconda panisoguard
 ```
+
+PanIsoGuard is on the [bioconda channel](https://anaconda.org/bioconda/panisoguard); the
+[files page](https://anaconda.org/bioconda/panisoguard/files) lists the platforms each version
+is built for. The recipe is in [`recipes/bioconda/`](recipes/bioconda/). The optional PDF report tool is not part of this
+package; see [python/](python/).
 
 ### Container
 

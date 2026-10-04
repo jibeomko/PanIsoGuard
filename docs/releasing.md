@@ -11,18 +11,25 @@ truth in **three** files, kept in lockstep by CI (`scripts/check_version_sync.py
 
 ## GitHub releases do not wait for bioconda
 
-The **first** bioconda submission is [bioconda-recipes PR #65953](https://github.com/bioconda/bioconda-recipes/pull/65953)
-(`Add panisoguard 0.0.4`, submitted as 0.0.3), open and waiting for a maintainer since 2026-06 (CI green,
-`please review & merge` label applied). A GitHub release is cut whenever a change is ready,
-independent of that review:
+PanIsoGuard has been on bioconda since 0.0.4: the first submission,
+[bioconda-recipes PR #65953](https://github.com/bioconda/bioconda-recipes/pull/65953), was
+merged on 2026-09-30 after four months in review. A GitHub release is cut whenever a change is
+ready; the bioconda package follows through a version-bump PR (see below).
 
-- Bump the open PR (version + sha256 in the fork's `recipes/panisoguard/meta.yaml`, PR title)
-  when the new release fixes a bug, so the first package on the channel is not the broken
-  one; otherwise leave it, since a push restarts its CI. PR #65953 was bumped 0.0.3 → 0.0.4
-  for the `PARTIAL` fix (labels survive the push). Ping only after long inactivity, with a
-  short friendly note.
-- Once it merges, the autobump bot sees the newer GitHub release and opens the version-bump
-  PR (see below).
+Two things went wrong with the first submission. Watch for them with any bioconda PR, and with
+the first submission of any new package (for example `panisoguard-report`):
+
+- **A push after approval takes the PR out of the merge queue.** Mergify drops a queued PR
+  when its branch is "manually updated", and only a maintainer can requeue it. #65953 was
+  queued two minutes before a push of an optional review suggestion and lost a day. Before
+  pushing to an approved PR, check whether it is already queued.
+- **The first upload of a new package can miss a platform.** After the merge, each platform
+  uploads on its own, and they race to create the package on anaconda.org; a loser fails with
+  `Conflict: ('Owner bioconda already have a package named ...', 409)`. For 0.0.4 the
+  linux-64 upload failed this way while both macOS builds landed. The fix is a PR that only
+  bumps `build: number` ([#69756](https://github.com/bioconda/bioconda-recipes/pull/69756)).
+  After a first merge, check the upload checks on the merge commit and
+  <https://anaconda.org/bioconda/panisoguard/files>.
 
 ## Cutting a release
 
@@ -57,13 +64,12 @@ git commit -am "recipe: pin v$V source sha256" && git push origin main
 
 ## Getting a release onto bioconda
 
-- **Package not yet on the channel** (first PR still open): nothing to do; see above.
-- **Autobump (preferred, once the package is on the channel).** The bioconda autobump bot
+- **Autobump (preferred).** The bioconda autobump bot
   watches GitHub releases and opens a version-bump PR on `bioconda-recipes` for you. Review
   it, comment `@BiocondaBot please add label` once CI is green, and wait for a maintainer.
 - **Manual PR.** In your `bioconda-recipes` fork, edit `recipes/panisoguard/meta.yaml`
-  (version + sha256 to match step 4), open a PR, and add the `please review & merge`
-  label via the bot.
+  (version + sha256 to match step 4, and `build: number` back to 0), open a PR, and add the
+  `please review & merge` label via the bot.
 
 ## Optional: publish `panisoguard-report` to PyPI
 
@@ -84,5 +90,6 @@ it is on PyPI; keep its version in lockstep with the C++ package.
 - [ ] `ctest --test-dir build` green (incl. `integration_config_equivalence`)
 - [ ] tag pushed + GitHub Release created
 - [ ] recipe `sha256` updated to the release tarball
-- [ ] bioconda: if the package is on the channel, autobump/manual PR opened & labelled
+- [ ] bioconda: autobump/manual PR opened & labelled; after the merge, the new version is on
+      <https://anaconda.org/bioconda/panisoguard/files> for every platform
 - [ ] (optional) report tool published to PyPI
