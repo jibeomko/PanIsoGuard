@@ -111,7 +111,10 @@ jobs:
           git init -q
           git -c user.email=ci@example.com -c user.name=ci add -A
           git -c user.email=ci@example.com -c user.name=ci commit -qm init
-          bioconda-utils lint recipes config.yml --packages panisoguard
+          # build_number_needs_bump compares against the live channel, so it fails here as
+          # soon as the recipe's version is published; it only applies to bioconda-recipes PRs.
+          bioconda-utils lint recipes config.yml --packages panisoguard \
+            --exclude build_number_needs_bump
 
   container:
     name: docker build + Quick start examples
