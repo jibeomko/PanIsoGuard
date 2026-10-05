@@ -26,10 +26,13 @@ the first submission of any new package (for example `panisoguard-report`):
 - **The first upload of a new package can miss a platform.** After the merge, each platform
   uploads on its own, and they race to create the package on anaconda.org; a loser fails with
   `Conflict: ('Owner bioconda already have a package named ...', 409)`. For 0.0.4 the
-  linux-64 upload failed this way while both macOS builds landed. The fix is a PR that only
-  bumps `build: number` ([#69756](https://github.com/bioconda/bioconda-recipes/pull/69756)).
-  After a first merge, check the upload checks on the merge commit and
-  <https://anaconda.org/bioconda/panisoguard/files>.
+  linux-64 upload failed this way while both macOS builds landed. The usual fix is a PR that
+  only bumps `build: number`; we opened one
+  ([#69756](https://github.com/bioconda/bioconda-recipes/pull/69756)), but the 0.0.5 autobump
+  ([#69871](https://github.com/bioconda/bioconda-recipes/pull/69871)) rebuilt every platform
+  before it was reviewed, so it was closed. A new version fixes it the same way, and once the
+  package exists the race cannot recur. After a first merge, check the upload checks on the
+  merge commit and <https://anaconda.org/bioconda/panisoguard/files>.
 
 ## Cutting a release
 
