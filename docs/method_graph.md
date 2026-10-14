@@ -74,7 +74,7 @@ The *kind* of novelty is a property of the novel edges' endpoint nodes:
 
 This distinction matters because the short-read axis can corroborate an *edge* but the
 combinatorial *path* of a NIC isoform may carry no individually-novel edge to
-corroborate — which is exactly why the engine honestly **abstains** (`AMBIGUOUS`) on
+corroborate — which is exactly why the engine honestly **abstains** (`UNRESOLVED`) on
 NIC-combinatorial novelty rather than guessing
 (see [decision_engine.md](decision_engine.md), "NIC behaviour").
 
@@ -106,7 +106,7 @@ The `ARTIFACT` / held outcomes have clean graph readings:
 - **low-confidence path** — the reads traversing the edge map poorly (mapping
   mechanism); the path may be an alignment artifact, so upstream concerns dominate.
 - **circular evidence edge** — the only support for a rescue edge derives from the
-  *same sample's* RNA/graph; the circularity firewall holds it `AMBIGUOUS` rather than
+  *same sample's* RNA/graph; the circularity firewall holds it `UNRESOLVED` rather than
   promoting it (variant and pangenome axes both gated — see
   [decision_engine.md](decision_engine.md)).
 

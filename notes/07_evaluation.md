@@ -26,13 +26,13 @@ python3 ../benchmark/sqanti_sim/score.py $W/flair.isoforms.gtf $W/truth.truth.ts
 
 ```text
 === confusion (truth rows x PanIsoGuard class) ===
-truth          HIGH_CONF HIGH_CONF MEDIUM_CO LOW_CONF_ AMBIGUOUS  ARTIFACT   total
+truth              KNOWN NOVEL_CON NOVEL_PRO UNCONFIRM UNRESOLVE  ARTIFACT   total
 genuine_novel          0       385        45       154       146         0     730
 known                652         0         0         0         0         0     652
 false_novel            8         4         1        61         6        68     148
 monoexonic            33         0         0         9         7         0      49
 
-=== genuine-novel detection (predicted genuine = HIGH/MEDIUM_CONF_NOVEL) ===
+=== genuine-novel detection (predicted genuine = HIGH/NOVEL_PROBABLE) ===
 genuine_novel=730  false_novel=148
 precision=0.989  recall=0.589  specificity(false rejected)=0.966
 
@@ -45,32 +45,32 @@ precision=0.989  recall=0.589  specificity(false rejected)=0.966
 AUPRC = 0.9712   (baseline = 0.8314)
 ```
 
-표의 열 이름이 9글자에서 잘려서 첫 두 열이 모두 `HIGH_CONF`로 보이는데, 첫 열은 `HIGH_CONF_KNOWN`, 둘째 열은 `HIGH_CONF_NOVEL`이다.
+표의 열 이름이 9글자에서 잘려서 첫 두 열이 모두 `HIGH_CONF`로 보이는데, 첫 열은 `KNOWN`, 둘째 열은 `NOVEL_CONFIRMED`이다.
 
 ## 2. precision, recall, specificity는 무엇을 셀까?
 
-`HIGH_CONF_NOVEL`이나 `MEDIUM_CONF_NOVEL`이면 "진짜라고 불렀다"로 보고 센다.
+`NOVEL_CONFIRMED`이나 `NOVEL_PROBABLE`이면 "진짜라고 불렀다"로 보고 센다.
 
 - **precision** = 진짜라고 부른 것 중 실제로 진짜인 비율 = (385 + 45) / (385 + 45 + 4 + 1) = 430 / 435 = **0.989**
 - **recall** = 실제 진짜 중 진짜라고 부른 비율 = 430 / 730 = **0.589**
 - **specificity** = 실제 가짜 중 진짜라고 부르지 않은 비율 = (148 − 5) / 148 = **0.966**
 
-precision은 아주 높고 recall은 60%가 안 된다. 진짜를 놓친 300개는 어디 있을까? 표의 첫 줄을 보면 `LOW_CONF_PARTIAL` 154개와 `AMBIGUOUS` 146개다. 범주별 recall을 보면 그 정체가 나온다. NNC는 297개를 모두 찾았다. NIC는 절반을 못 찾았는데, [01](01_intron_chain_and_novelty.md) 4절에서 본 대로 대부분 알려진 junction의 조합이라 확인할 novel junction이 없어서 `AMBIGUOUS`로 보류된 것이다. ISM 154개는 전부 놓쳤다. SQANTI-SIM이 지운 전사체 중에는 남은 전사체의 일부처럼 보이는 것이 있어서, SQANTI3가 ISM으로 분류하고 PanIsoGuard는 ISM을 늘 `LOW_CONF_PARTIAL`로 둔다([04](04_projection.md) 2절). 이 154개도 chain이 지운 전사체와 정확히 같으니 진짜다. 판정을 내리지 않은 것이지 틀리게 내린 것은 아니지만, 놓친 것은 놓친 것이다.
+precision은 아주 높고 recall은 60%가 안 된다. 진짜를 놓친 300개는 어디 있을까? 표의 첫 줄을 보면 `UNCONFIRMED` 154개와 `UNRESOLVED` 146개다. 범주별 recall을 보면 그 정체가 나온다. NNC는 297개를 모두 찾았다. NIC는 절반을 못 찾았는데, [01](01_intron_chain_and_novelty.md) 4절에서 본 대로 대부분 알려진 junction의 조합이라 확인할 novel junction이 없어서 `UNRESOLVED`로 보류된 것이다. ISM 154개는 전부 놓쳤다. SQANTI-SIM이 지운 전사체 중에는 남은 전사체의 일부처럼 보이는 것이 있어서, SQANTI3가 ISM으로 분류하고 PanIsoGuard는 ISM을 늘 `UNCONFIRMED`로 둔다([04](04_projection.md) 2절). 이 154개도 chain이 지운 전사체와 정확히 같으니 진짜다. 판정을 내리지 않은 것이지 틀리게 내린 것은 아니지만, 놓친 것은 놓친 것이다.
 
 ## 3. AUPRC와 "baseline"은 무엇일까?
 
 precision과 recall은 "어디서부터 진짜라고 부를지"라는 선 하나에 달렸다. AUPRC는 그 선을 가장 믿을 만한 쪽부터 한 칸씩 내리면서 precision과 recall을 모두 계산하고, 그 곡선 아래 넓이를 잰 값이다. 순위를 얼마나 잘 매겼는지를 숫자 하나로 요약한다.
 
-PanIsoGuard의 등급은 순서가 있는 이름이라 숫자로 바꿔야 한다. `score.py`는 `HIGH_CONF_NOVEL` 1.0, `MEDIUM_CONF_NOVEL` 0.75, `AMBIGUOUS` 0.5, `LOW_CONF_PARTIAL` 0.25, `HIGH_CONF_KNOWN` 0.1, `ARTIFACT` 0으로 바꾼다. 위 혼동표의 숫자만 있으면 AUPRC를 다시 계산할 수 있다. 데이터 없이 돌아간다.
+PanIsoGuard의 등급은 순서가 있는 이름이라 숫자로 바꿔야 한다. `score.py`는 `NOVEL_CONFIRMED` 1.0, `NOVEL_PROBABLE` 0.75, `UNRESOLVED` 0.5, `UNCONFIRMED` 0.25, `KNOWN` 0.1, `ARTIFACT` 0으로 바꾼다. 위 혼동표의 숫자만 있으면 AUPRC를 다시 계산할 수 있다. 데이터 없이 돌아간다.
 
 ```python
 from sklearn.metrics import average_precision_score
 
 # class -> (genuine_novel, false_novel), read off the confusion table above
-counts = {"HIGH_CONF_NOVEL": (385, 4), "MEDIUM_CONF_NOVEL": (45, 1), "AMBIGUOUS": (146, 6),
-          "LOW_CONF_PARTIAL": (154, 61), "HIGH_CONF_KNOWN": (0, 8), "ARTIFACT": (0, 68)}
-SCORE = {"HIGH_CONF_NOVEL": 1.0, "MEDIUM_CONF_NOVEL": 0.75, "AMBIGUOUS": 0.5,      # score.py's ranking
-         "LOW_CONF_PARTIAL": 0.25, "HIGH_CONF_KNOWN": 0.1, "ARTIFACT": 0.0}
+counts = {"NOVEL_CONFIRMED": (385, 4), "NOVEL_PROBABLE": (45, 1), "UNRESOLVED": (146, 6),
+          "UNCONFIRMED": (154, 61), "KNOWN": (0, 8), "ARTIFACT": (0, 68)}
+SCORE = {"NOVEL_CONFIRMED": 1.0, "NOVEL_PROBABLE": 0.75, "UNRESOLVED": 0.5,      # score.py's ranking
+         "UNCONFIRMED": 0.25, "KNOWN": 0.1, "ARTIFACT": 0.0}
 
 def auprc(score):
     y, s = [], []
@@ -82,7 +82,7 @@ def auprc(score):
 pos, n = sum(g for g, _ in counts.values()), sum(g + f for g, f in counts.values())
 print(f"AUPRC {auprc(SCORE):.4f} | positive rate {pos}/{n} = {pos / n:.4f}")
 print(f"every isoform gets the same score: AUPRC {auprc({c: 0 for c in SCORE}):.4f}")
-print(f"AMBIGUOUS ranked below LOW_CONF_PARTIAL: AUPRC {auprc(dict(SCORE, AMBIGUOUS=0.25, LOW_CONF_PARTIAL=0.5)):.4f}")
+print(f"UNRESOLVED ranked below UNCONFIRMED: AUPRC {auprc(dict(SCORE, UNRESOLVED=0.25, UNCONFIRMED=0.5)):.4f}")
 
 print("\ncall 'genuine' from the top class down to ... :")
 tp = fp = 0
@@ -95,14 +95,14 @@ for cls in sorted(SCORE, key=SCORE.get, reverse=True):
 ```text
 AUPRC 0.9712 | positive rate 730/878 = 0.8314
 every isoform gets the same score: AUPRC 0.8314
-AMBIGUOUS ranked below LOW_CONF_PARTIAL: AUPRC 0.9545
+UNRESOLVED ranked below UNCONFIRMED: AUPRC 0.9545
 
 call 'genuine' from the top class down to ... :
-  HIGH_CONF_NOVEL    precision 0.990  recall 0.527
-  MEDIUM_CONF_NOVEL  precision 0.989  recall 0.589
-  AMBIGUOUS          precision 0.981  recall 0.789
-  LOW_CONF_PARTIAL   precision 0.910  recall 1.000
-  HIGH_CONF_KNOWN    precision 0.901  recall 1.000
+  NOVEL_CONFIRMED    precision 0.990  recall 0.527
+  NOVEL_PROBABLE     precision 0.989  recall 0.589
+  UNRESOLVED         precision 0.981  recall 0.789
+  UNCONFIRMED        precision 0.910  recall 1.000
+  KNOWN              precision 0.901  recall 1.000
   ARTIFACT           precision 0.831  recall 1.000
 ```
 
@@ -110,9 +110,9 @@ call 'genuine' from the top class down to ... :
 
 README에는 한동안 "AUPRC 0.970 vs a 0.831 baseline"이라고 적혀 있었다. 이렇게 쓰면 기존 방법보다 크게 나은 것처럼 읽히지만, 실제로는 "무작위보다 낫다"는 뜻이다. 이 데이터는 novel isoform의 83%가 진짜라서, 무작위 순위도 0.83을 받는다. 무작위와 완벽(1.0) 사이 거리의 몇 %를 줄였는지로 보는 편이 덜 헷갈린다(연습문제 1). 비교는 다른 방법과 해야 한다. 4절에서 한다.
 
-셋째 줄은 AUPRC가 등급을 숫자로 바꾸는 방식에 달렸다는 것을 보여 준다. `AMBIGUOUS`와 `LOW_CONF_PARTIAL`의 순서만 바꿔도 0.9712가 0.9545가 된다. 등급은 순서만 있는 이름이라 이 숫자 변환은 평가하는 쪽이 정하는 것이고, 그에 따라 결과가 달라진다(연습문제 2).
+셋째 줄은 AUPRC가 등급을 숫자로 바꾸는 방식에 달렸다는 것을 보여 준다. `UNRESOLVED`와 `UNCONFIRMED`의 순서만 바꿔도 0.9712가 0.9545가 된다. 등급은 순서만 있는 이름이라 이 숫자 변환은 평가하는 쪽이 정하는 것이고, 그에 따라 결과가 달라진다(연습문제 2).
 
-아래쪽 목록은 선을 한 칸씩 내린 결과다. `MEDIUM_CONF_NOVEL`까지 진짜로 부르면 precision 0.989, recall 0.589(2절의 숫자)이고, `AMBIGUOUS`까지 부르면 precision 0.981, recall 0.789가 된다. 보류한 isoform 대부분이 사실 진짜라서 생기는 일이다. 결과표를 필터로 쓸 때 어느 등급까지 남길지는 이렇게 precision과 recall을 맞바꾸는 선택이다.
+아래쪽 목록은 선을 한 칸씩 내린 결과다. `NOVEL_PROBABLE`까지 진짜로 부르면 precision 0.989, recall 0.589(2절의 숫자)이고, `UNRESOLVED`까지 부르면 precision 0.981, recall 0.789가 된다. 보류한 isoform 대부분이 사실 진짜라서 생기는 일이다. 결과표를 필터로 쓸 때 어느 등급까지 남길지는 이렇게 precision과 recall을 맞바꾸는 선택이다.
 
 ## 4. 다른 방법과 비교하면 어떨까?
 
@@ -162,7 +162,7 @@ no short reads, vs SQ3rules: {'PIG': [-0.106, -0.066], 'PIG+bam': [-0.06, -0.008
 
 1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard와 한 줄 규칙은 둘 다 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더하면 +0.01 정도 오르는데, 신뢰구간이 0을 넘는 것은 25만 쌍일 때뿐이다.
 2. **기본 선(precision, recall)**: PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다.
-3. **short read가 없을 때**: PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `AMBIGUOUS`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다.
+3. **short read가 없을 때**: PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다.
 
 ![operating points](figures/07_operating_points.png)
 
@@ -226,7 +226,7 @@ print({k: (m[k]["prec"], m[k]["rec"]) for k in label})
 ## 정리
 
 - 정답은 SQANTI-SIM이 주석에서 지운 전사체임. caller isoform의 intron chain이 지운 전사체와 같으면 진짜, 어느 시뮬레이션 전사체와도 다르면 가짜임.
-- PanIsoGuard 0.0.4는 SQANTI-SIM chr22에서 precision 0.989, recall 0.589, specificity 0.966, AUPRC 0.971임. 놓친 진짜 300개는 NIC와 ISM의 보류와 `LOW_CONF_PARTIAL`에 있음.
+- PanIsoGuard 0.0.4는 SQANTI-SIM chr22에서 precision 0.989, recall 0.589, specificity 0.966, AUPRC 0.971임. 놓친 진짜 300개는 NIC와 ISM의 보류와 `UNCONFIRMED`에 있음.
 - "baseline 0.831"은 양성 비율, 곧 무작위 순위의 AUPRC임. 다른 방법의 점수가 아님. AUPRC는 등급을 숫자로 바꾸는 방식에 따라서도 달라짐(0.971 ↔ 0.955).
 - 한 줄 규칙("모든 junction에 short read 3개 이상")과 비교하면 순위(AUPRC)는 통계적으로 구분되지 않고, 기본 선에서는 precision이 0.014 높은 대신 recall이 0.4 낮음. short read가 없으면 SQANTI3 rules filter보다 나쁨.
 - 그래서 PanIsoGuard의 쓸모는 정확도보다 판정마다 남는 이유와 기전에 있음.
@@ -246,13 +246,13 @@ AUPRC는 무작위 순위일 때 양성 비율(0.831), 완벽한 순위일 때 1
 
 ```python
 prev = 730 / 878
-for name, ap in (("PanIsoGuard", 0.9712), ("AMBIGUOUS below LOW", 0.9545)):
+for name, ap in (("PanIsoGuard", 0.9712), ("UNRESOLVED below LOW", 0.9545)):
     print(f"{name:20s} AUPRC {ap:.4f} -> share of the gap from random ({prev:.4f}) to perfect (1) closed: {(ap - prev) / (1 - prev):.2f}")
 ```
 
 ```text
 PanIsoGuard          AUPRC 0.9712 -> share of the gap from random (0.8314) to perfect (1) closed: 0.83
-AMBIGUOUS below LOW  AUPRC 0.9545 -> share of the gap from random (0.8314) to perfect (1) closed: 0.73
+UNRESOLVED below LOW AUPRC 0.9545 -> share of the gap from random (0.8314) to perfect (1) closed: 0.73
 ```
 
 무작위와 완벽 사이의 83%를 줄였다. 나쁘지 않은 순위다. 하지만 이것만으로는 다른 방법보다 나은지 알 수 없다. 4절의 한 줄 규칙도 같은 데이터에서 0.976이었다. 양성 비율이 높은 데이터에서는 AUPRC가 모두 1 근처에 몰리니, 숫자 하나보다 같은 데이터에서 다른 방법과 나란히 비교한 값을 봐야 한다.
@@ -261,7 +261,7 @@ AMBIGUOUS below LOW  AUPRC 0.9545 -> share of the gap from random (0.8314) to pe
 
 ### 문제 2
 
-> `score.py`는 `AMBIGUOUS`(0.5)를 `LOW_CONF_PARTIAL`(0.25)보다 위에 둔다. 판정을 보류한 것을 "일부만 확인됐다"보다 위에 두는 것이 이상해 보인다. 어느 쪽이 맞을까?
+> `score.py`는 `UNRESOLVED`(0.5)를 `UNCONFIRMED`(0.25)보다 위에 둔다. 판정을 보류한 것을 "일부만 확인됐다"보다 위에 두는 것이 이상해 보인다. 어느 쪽이 맞을까?
 
 <details>
 <summary>풀이</summary>
@@ -269,17 +269,17 @@ AMBIGUOUS below LOW  AUPRC 0.9545 -> share of the gap from random (0.8314) to pe
 정해진 답은 없다. 등급은 순서만 있는 이름이고, 이 두 등급은 서로 다른 이유로 만들어져서 어느 쪽이 더 믿을 만한지는 데이터에 달렸다. SQANTI-SIM에서는 이렇다.
 
 ```python
-counts = {"AMBIGUOUS": (146, 6), "LOW_CONF_PARTIAL": (154, 61)}
+counts = {"UNRESOLVED": (146, 6), "UNCONFIRMED": (154, 61)}
 for c, (g, f) in counts.items():
     print(f"{c:16s} genuine {g}/{g + f} = {g / (g + f):.2f}")
 ```
 
 ```text
-AMBIGUOUS        genuine 146/152 = 0.96
-LOW_CONF_PARTIAL genuine 154/215 = 0.72
+UNRESOLVED       genuine 146/152 = 0.96
+UNCONFIRMED      genuine 154/215 = 0.72
 ```
 
-이 데이터에서는 `AMBIGUOUS`가 훨씬 더 진짜가 많다. `AMBIGUOUS`의 대부분이 알려진 junction만 조합한 NIC라서, 새 junction을 만들어 내는 가짜가 끼어들 틈이 적기 때문이다. 반면 `LOW_CONF_PARTIAL`에는 ISM(진짜 154개)과 확인 안 된 NNC 가짜(61개)가 섞여 있다. 그러니 `score.py`의 순서가 이 데이터에는 맞는 셈이다. 하지만 이 순서는 판정 규칙이 정한 것이 아니라 평가하는 쪽이 정한 것이고, 순서를 바꾸면 AUPRC가 0.017 떨어진다. 다른 도구와 AUPRC를 비교할 때는 이런 변환이 어떻게 정해졌는지까지 같이 적어야 한다.
+이 데이터에서는 `UNRESOLVED`가 훨씬 더 진짜가 많다. `UNRESOLVED`의 대부분이 알려진 junction만 조합한 NIC라서, 새 junction을 만들어 내는 가짜가 끼어들 틈이 적기 때문이다. 반면 `UNCONFIRMED`에는 ISM(진짜 154개)과 확인 안 된 NNC 가짜(61개)가 섞여 있다. 그러니 `score.py`의 순서가 이 데이터에는 맞는 셈이다. 하지만 이 순서는 판정 규칙이 정한 것이 아니라 평가하는 쪽이 정한 것이고, 순서를 바꾸면 AUPRC가 0.017 떨어진다. 다른 도구와 AUPRC를 비교할 때는 이런 변환이 어떻게 정해졌는지까지 같이 적어야 한다.
 
 </details>
 
@@ -288,6 +288,6 @@ LOW_CONF_PARTIAL genuine 154/215 = 0.72
 <details>
 <summary>score.py의 AUPRC와 h2h의 AUPRC는 왜 조금 다른가</summary>
 
-1절의 `score.py`는 정답이 `genuine_novel`이나 `false_novel`인 isoform **878개**를 모두 쓴다. 여기에는 SQANTI3가 FSM으로 분류했는데 정답은 가짜인 8개가 들어 있다(혼동표의 `false_novel` × `HIGH_CONF_KNOWN`). 4절의 h2h 비교는 FSM을 빼고 novel 후보 **870개**만 쓴다. FSM은 PanIsoGuard가 판정하지 않고 통과시키는 범주라, 비교에서 빼는 편이 공정하기 때문이다. 그래서 같은 oracle 입력인데도 `score.py`는 0.9712, h2h는 0.971(반올림)로 거의 같지만 계산 대상은 다르다. precision도 두 스크립트 모두 0.989지만, 가짜 5개(`HIGH` 4 + `MEDIUM` 1)가 어느 범주에서 나왔는지까지 따지면 h2h 쪽 집합이 8개 작다.
+1절의 `score.py`는 정답이 `genuine_novel`이나 `false_novel`인 isoform **878개**를 모두 쓴다. 여기에는 SQANTI3가 FSM으로 분류했는데 정답은 가짜인 8개가 들어 있다(혼동표의 `false_novel` × `KNOWN`). 4절의 h2h 비교는 FSM을 빼고 novel 후보 **870개**만 쓴다. FSM은 PanIsoGuard가 판정하지 않고 통과시키는 범주라, 비교에서 빼는 편이 공정하기 때문이다. 그래서 같은 oracle 입력인데도 `score.py`는 0.9712, h2h는 0.971(반올림)로 거의 같지만 계산 대상은 다르다. precision도 두 스크립트 모두 0.989지만, 가짜 5개(`HIGH` 4 + `MEDIUM` 1)가 어느 범주에서 나왔는지까지 따지면 h2h 쪽 집합이 8개 작다.
 
 </details>

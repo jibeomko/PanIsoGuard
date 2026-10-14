@@ -92,7 +92,7 @@ same intron read as '-' strand: ('GT-AG', True) vs ('CT-AC', False)
 
 haplotype FASTA가 어디서 왔는지가 중요하다. 이 사람의 DNA(WGS나 HiFi 조립)에서 만든 서열이라면 RNA와 독립된 증거다. 그런데 **판정하려는 바로 그 RNA read**에서 변이를 불러 만든 서열이라면 이야기가 다르다. RNA read가 non-canonical junction을 억지로 설명하려고 정렬되면서 생긴 mismatch가 "변이"로 불리고, 그 변이가 다시 그 junction을 "canonical"로 만들어 줄 수 있다. 자기 자신을 근거로 자기를 구제하는 순환 논리다.
 
-PanIsoGuard는 haplotype이 어디서 왔는지 확인할 방법이 없으니, 사용자가 `--haplotype-provenance`로 알려 줘야 한다. 이 값이 정확히 `wgs`나 `external`일 때만 구제하고, 나머지는 모두 `AMBIGUOUS`로 보류하면서 `circularity_flag`를 켠다. 이것을 circularity firewall이라고 부른다. 값을 바꿔 가며 돌려 봤다.
+PanIsoGuard는 haplotype이 어디서 왔는지 확인할 방법이 없으니, 사용자가 `--haplotype-provenance`로 알려 줘야 한다. 이 값이 정확히 `wgs`나 `external`일 때만 구제하고, 나머지는 모두 `UNRESOLVED`로 보류하면서 `circularity_flag`를 켠다. 이것을 circularity firewall이라고 부른다. 값을 바꿔 가며 돌려 봤다.
 
 ```bash
 PIG=../build/panisoguard; mkdir -p out
@@ -100,17 +100,17 @@ A="--classification data/caller1_classification.txt --isoforms-gtf data/caller1.
 for p in "" rna_derived unknown WGS wgs external; do
   $PIG adjudicate $A ${p:+--haplotype-provenance $p} --out-prefix out/prov 2>/dev/null
   printf '%-14s %-50s %s\n' "${p:-(not given)}" "$(grep '^axis.variant' out/prov.provenance.log | cut -f2)" \
-    "$(grep -P '^iso_A\t' out/prov.adjudicated.tsv | cut -f6,7,10 | tr '\t' ' ')"
+    "$(grep -P '^iso_A\t' out/prov.adjudicated.tsv | cut -f6,7,12 | tr '\t' ' ')"
 done
 ```
 
 ```text
-(not given)    on (circular-risk: held, not promoted)             variant_created AMBIGUOUS true
-rna_derived    on (circular-risk: held, not promoted)             variant_created AMBIGUOUS true
-unknown        on (circular-risk: held, not promoted)             variant_created AMBIGUOUS true
-WGS            on (circular-risk: held, not promoted)             variant_created AMBIGUOUS true
-wgs            on                                                 variant_created PAN_REF_RESCUED_FALSE_NOVEL false
-external       on                                                 variant_created PAN_REF_RESCUED_FALSE_NOVEL false
+(not given)    on (circular-risk: held, not promoted)             variant_created UNRESOLVED true
+rna_derived    on (circular-risk: held, not promoted)             variant_created UNRESOLVED true
+unknown        on (circular-risk: held, not promoted)             variant_created UNRESOLVED true
+WGS            on (circular-risk: held, not promoted)             variant_created UNRESOLVED true
+wgs            on                                                 variant_created REFERENCE_BIAS false
+external       on                                                 variant_created REFERENCE_BIAS false
 ```
 
 값을 주지 않으면 `unknown`으로 보고 보류한다. 대문자 `WGS`도 보류된다. 문자열이 정확히 같아야 하고 오류도 내지 않는다. 오타가 나면 구제 쪽이 아니라 보류 쪽으로 빠지게 만든 것이다. 결과를 읽을 때는 `provenance.log`의 `axis.variant` 줄에서 `circular-risk`가 붙었는지 보면 된다.
@@ -145,11 +145,11 @@ grep '"iso_AB"' out/ab.attribution.jsonl | python3 -c 'import json,sys; r=json.l
 ```
 
 ```text
-LOW_CONF_PARTIAL | n_novel 2 sr 1 variant_rescue False
-['sj_support=1/2 -> PARTIAL', 'all_canonical=non_canonical -> mechanism=noncanonical', 'project(PARTIAL,noncanonical) -> LOW_CONF_PARTIAL']
+UNCONFIRMED | n_novel 2 sr 1 variant_rescue False
+['sj_support=1/2 -> PARTIAL', 'all_canonical=non_canonical -> mechanism=noncanonical', 'project(PARTIAL,noncanonical) -> UNCONFIRMED']
 ```
 
-두 junction 중 하나(730)만 `CREATED`라서 rescue가 되지 않고, 조합표로 넘어갔다. 1020 쪽 junction은 short read 12개가 확인했으니 지지 수준은 `PARTIAL`이고, 결과는 `LOW_CONF_PARTIAL`이다. `wgs`를 줬는데도 이렇다.
+두 junction 중 하나(730)만 `CREATED`라서 rescue가 되지 않고, 조합표로 넘어갔다. 1020 쪽 junction은 short read 12개가 확인했으니 지지 수준은 `PARTIAL`이고, 결과는 `UNCONFIRMED`이다. `wgs`를 줬는데도 이렇다.
 
 ## 4. short read로는 왜 이 변이를 볼 수 없을까?
 
@@ -190,7 +190,7 @@ for p in unknown population; do
   $PIG adjudicate --classification data/caller1_classification.txt --isoforms-gtf data/caller1.gtf \
     --ref-gtf data/reference.gtf --sj-tab data/short_reads.SJ.out.tab \
     --pangenome-junctions out/pangenome.tsv --pangenome-provenance $p --out-prefix out/pan 2>/dev/null
-  printf '%-11s %s\n' $p "$(grep -P '^iso_A\t' out/pan.adjudicated.tsv | cut -f6,7,10 | tr '\t' ' ')"
+  printf '%-11s %s\n' $p "$(grep -P '^iso_A\t' out/pan.adjudicated.tsv | cut -f6,7,12 | tr '\t' ' ')"
 done
 grep '"iso_A"' out/pan.attribution.jsonl | python3 -c 'import json,sys; print(json.loads(sys.stdin.read())["rule_trace"])'
 ```
@@ -198,9 +198,9 @@ grep '"iso_A"' out/pan.attribution.jsonl | python3 -c 'import json,sys; print(js
 ```text
 # chrom	start(1-based)	end	strand	n_haplotypes
 chrT	501	730	+	12
-unknown     population_known AMBIGUOUS true
-population  population_known PAN_REF_RESCUED_FALSE_NOVEL false
-['all 1/1 novel junctions realizable on a pangenome haplotype path (independent population data) -> PAN_REF_RESCUED_FALSE_NOVEL (reference bias, population_known)']
+unknown     population_known UNRESOLVED true
+population  population_known REFERENCE_BIAS false
+['all 1/1 novel junctions realizable on a pangenome haplotype path (independent population data) -> REFERENCE_BIAS (population_known)']
 ```
 
 규칙은 haplotype 축과 같다. isoform의 모든 novel junction이 목록에 있어야 하고, 목록의 출처가 `population`이나 `external`일 때만 구제한다. 목록이 이 시료 자신의 read로 만든 graph에서 나왔다면 다시 순환 논리가 되기 때문이다. 기전 이름만 `population_known`으로 다르다. pangenome 축은 haplotype 축보다 먼저 확인한다. 그래서 개인 haplotype의 출처가 불확실해도, 독립적인 pangenome 목록이 있으면 구제된다.
@@ -255,7 +255,7 @@ HG03516: 41 junctions, 23 heterozygous | {'CONTRADICTED': 1, 'consistent': 11, '
 ## 정리
 
 - haplotype 축은 novel junction의 motif를 참조와 haplotype에서 따로 읽어 `CREATED`(참조 non-canonical, haplotype canonical), `DISRUPTED`, `NONE`으로 나눔. isoform의 모든 novel junction이 `CREATED`일 때만 rescue 후보가 됨.
-- rescue는 haplotype의 출처가 정확히 `wgs`나 `external`일 때만 `PAN_REF_RESCUED_FALSE_NOVEL`이 되고, 나머지는 `AMBIGUOUS` + `circularity_flag`로 보류됨(대문자 `WGS`도 보류). 판정하려는 RNA에서 만든 haplotype으로 그 RNA를 구제하는 순환을 막으려는 것임.
+- rescue는 haplotype의 출처가 정확히 `wgs`나 `external`일 때만 `REFERENCE_BIAS`이 되고, 나머지는 `UNRESOLVED` + `circularity_flag`로 보류됨(대문자 `WGS`도 보류). 판정하려는 RNA에서 만든 haplotype으로 그 RNA를 구제하는 순환을 막으려는 것임.
 - pangenome 목록도 같은 규칙(모든 junction, 출처 `population`/`external`)으로 구제하고, haplotype 축보다 먼저 확인함.
 - motif를 만드는 변이는 늘 intron 안에 있어서 그 junction을 쓰는 read에는 나타나지 않음. short read가 이 junction을 확인하지 못하는 이유이기도 함.
 - 벤치마크의 "N/N 구제, 거짓 0개"는 정답 라벨이 rescue 규칙과 같은 조건이라 구현 확인일 뿐임. 규칙과 독립된 phasing 검사에서는 판정 가능한 이형접합 junction 28개 중 27개가 설명과 맞았고, 1개는 정렬 artifact로 보임. 동형접합 34개는 검사하지 못함.
@@ -292,7 +292,7 @@ for haps in (["hap2"], ["hap1"]):
 
 ### 문제 2
 
-> `iso_A`는 step2(`SJ.out.tab`까지)에서 `ARTIFACT`였고 step5(haplotype + `wgs`)에서 `PAN_REF_RESCUED_FALSE_NOVEL`이 되었다. 이 등급 이름의 "FALSE_NOVEL"은 `iso_A`가 가짜라는 뜻일까?
+> `iso_A`는 step2(`SJ.out.tab`까지)에서 `ARTIFACT`였고 step5(haplotype + `wgs`)에서 `REFERENCE_BIAS`이 되었다. 이 등급 이름의 "FALSE_NOVEL"은 `iso_A`가 가짜라는 뜻일까?
 
 <details>
 <summary>풀이</summary>

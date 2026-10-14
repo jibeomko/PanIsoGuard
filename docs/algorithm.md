@@ -52,18 +52,18 @@ Applied in priority order; the full grid and rationale are in
 
 ```text
 1. Pass-through categories:
-     full-splice_match        -> HIGH_CONF_KNOWN
-     incomplete-splice_match  -> LOW_CONF_PARTIAL
-     non-targeted (not novel) -> AMBIGUOUS
+     full-splice_match        -> KNOWN
+     incomplete-splice_match  -> UNCONFIRMED
+     non-targeted (not novel) -> UNRESOLVED
 2. Reference-bias rescue (highest priority for novel isoforms):
-     if ALL novel junctions are graph-supported (pangenome axis) -> PAN_REF_RESCUED_FALSE_NOVEL
-         (held AMBIGUOUS if the junction-set provenance is circular-risk)
-     else if ALL novel junctions are variant-explained (haplotype axis) -> PAN_REF_RESCUED_FALSE_NOVEL
-         (held AMBIGUOUS if the haplotype provenance is circular-risk)
+     if ALL novel junctions are graph-supported (pangenome axis) -> REFERENCE_BIAS
+         (held UNRESOLVED if the junction-set provenance is circular-risk)
+     else if ALL novel junctions are variant-explained (haplotype axis) -> REFERENCE_BIAS
+         (held UNRESOLVED if the haplotype provenance is circular-risk)
 3. Otherwise project the 2-axis grid:
      Axis A novelty-support  = short-read corroboration of novel junctions
      Axis B artifact mechanism = mapping > noncanonical > rt_switch > degradation
-     (support x mechanism) -> {HIGH/MEDIUM/LOW_CONF_NOVEL, AMBIGUOUS, ARTIFACT}
+     (support x mechanism) -> {NOVEL_CONFIRMED, NOVEL_PROBABLE, UNCONFIRMED, UNRESOLVED, ARTIFACT}
 ```
 
 The rescue branches return early and are **all-or-nothing**: a single explained

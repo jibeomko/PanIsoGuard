@@ -180,23 +180,23 @@ catalog의 열쇠에는 strand가 들어 있다. 같은 좌표라도 반대 stra
 awk 'BEGIN{FS=OFS="\t"} {$7="-"; print}' data/reference.gtf > out/reference_minus.gtf
 $PIG adjudicate --classification data/caller1_classification.txt --isoforms-gtf data/caller1.gtf \
   --ref-gtf out/reference_minus.gtf --out-prefix out/minus 2>/dev/null
-paste <(cut -f1,4,8 out/step1.adjudicated.tsv) <(cut -f8,7 out/minus.adjudicated.tsv) | column -t
+paste <(cut -f1,4,10 out/step1.adjudicated.tsv) <(cut -f10,7 out/minus.adjudicated.tsv) | column -t
 ```
 
 ```text
 isoform_id  structural_category      n_novel_junctions  confidence_class  n_novel_junctions
-iso_A       novel_not_in_catalog     1                  AMBIGUOUS         4
-iso_B       novel_not_in_catalog     1                  AMBIGUOUS         4
-iso_C       novel_not_in_catalog     2                  AMBIGUOUS         5
-iso_D       novel_in_catalog         0                  AMBIGUOUS         2
-iso_E       novel_in_catalog         1                  AMBIGUOUS         3
-iso_F       novel_not_in_catalog     1                  AMBIGUOUS         4
-iso_G       novel_not_in_catalog     1                  AMBIGUOUS         4
-iso_ism     incomplete-splice_match  0                  LOW_CONF_PARTIAL  3
-iso_known   full-splice_match        0                  HIGH_CONF_KNOWN   4
+iso_A       novel_not_in_catalog     1                  UNRESOLVED        4
+iso_B       novel_not_in_catalog     1                  UNRESOLVED        4
+iso_C       novel_not_in_catalog     2                  UNRESOLVED        5
+iso_D       novel_in_catalog         0                  UNRESOLVED        2
+iso_E       novel_in_catalog         1                  UNRESOLVED        3
+iso_F       novel_not_in_catalog     1                  UNRESOLVED        4
+iso_G       novel_not_in_catalog     1                  UNRESOLVED        4
+iso_ism     incomplete-splice_match  0                  UNCONFIRMED       3
+iso_known   full-splice_match        0                  KNOWN             4
 ```
 
-셋째 열이 원래 참조로 센 값, 마지막 열이 strand를 뒤집은 참조로 센 값이다. 모든 intron이 novel이 되었다. 그런데 `iso_known`은 intron 네 개가 전부 novel로 세어졌는데도 여전히 `HIGH_CONF_KNOWN`이다. `structural_category`는 SQANTI3가 원래 참조로 미리 계산해 둔 값이고, PanIsoGuard는 FSM이면 novel junction 수를 보지 않고 바로 `HIGH_CONF_KNOWN`을 주기 때문이다.
+셋째 열이 원래 참조로 센 값, 마지막 열이 strand를 뒤집은 참조로 센 값이다. 모든 intron이 novel이 되었다. 그런데 `iso_known`은 intron 네 개가 전부 novel로 세어졌는데도 여전히 `KNOWN`이다. `structural_category`는 SQANTI3가 원래 참조로 미리 계산해 둔 값이고, PanIsoGuard는 FSM이면 novel junction 수를 보지 않고 바로 `KNOWN`을 주기 때문이다.
 
 이 실험은 실제로 조심해야 할 점을 하나 보여 준다. PanIsoGuard는 **범주는 SQANTI3에게서 받고, novel junction은 직접 센다.** 그러니 `--ref-gtf`에는 SQANTI3를 돌릴 때 쓴 것과 같은 주석을 줘야 한다. 두 주석이 다르면 "SQANTI3는 NNC라는데 PanIsoGuard는 novel junction이 0개"처럼 앞뒤가 맞지 않는 증거가 조용히 만들어진다. 경고는 나오지 않는다.
 
@@ -212,7 +212,7 @@ iso_known   full-splice_match        0                  HIGH_CONF_KNOWN   4
 | `iso_D` | NIC / combination_of_known_junctions | 0 | intron은 모두 알려져 있고 조합만 새로움 |
 | `iso_ism` | ISM / 3prime_fragment | 0 | TX1의 앞부분이 잘린 조각 |
 
-NIC라고 해서 novel junction이 없는 것은 아니다. `iso_E`처럼 알려진 splice site 두 개를 새로 이으면 intron 자체는 catalog에 없으니 novel junction이 된다. 이런 isoform은 short read로 확인할 대상이 있다. 반면 `iso_D`처럼 알려진 intron만 새로 조합한 isoform은 확인할 novel junction이 없어서 `AMBIGUOUS`로 보류된다([00](00_overview.md) 연습문제 2).
+NIC라고 해서 novel junction이 없는 것은 아니다. `iso_E`처럼 알려진 splice site 두 개를 새로 이으면 intron 자체는 catalog에 없으니 novel junction이 된다. 이런 isoform은 short read로 확인할 대상이 있다. 반면 `iso_D`처럼 알려진 intron만 새로 조합한 isoform은 확인할 novel junction이 없어서 `UNRESOLVED`로 보류된다([00](00_overview.md) 연습문제 2).
 
 실제 데이터에서는 이런 isoform이 얼마나 될까? SQANTI-SIM으로 만든 chr22 시뮬레이션(정답을 아는 데이터, [07](07_evaluation.md))을 PanIsoGuard 0.0.4로 다시 돌려서 NIC만 subcategory별로 세어 봤다. 이 블록은 [benchmark/sqanti_sim/run.sh](../benchmark/sqanti_sim/run.sh)가 만든 작업 폴더가 있어야 돌아간다. 폴더가 약 260 MB라 저장소에는 넣지 않았다.
 
@@ -239,18 +239,18 @@ print("NIC total:", sum(tab.values()))
 ```
 
 ```text
-combination_of_known_junctions     novel jx = 0   AMBIGUOUS           124
-combination_of_known_splicesites   novel jx = 0   AMBIGUOUS             1
-combination_of_known_splicesites   novel jx >= 1  HIGH_CONF_NOVEL     119
-combination_of_known_splicesites   novel jx >= 1  LOW_CONF_PARTIAL      3
-combination_of_known_splicesites   novel jx >= 1  MEDIUM_CONF_NOVEL    12
-intron_retention                   novel jx = 0   AMBIGUOUS            24
-intron_retention                   novel jx >= 1  HIGH_CONF_NOVEL       3
-intron_retention                   novel jx >= 1  MEDIUM_CONF_NOVEL     1
+combination_of_known_junctions     novel jx = 0   UNRESOLVED          124
+combination_of_known_splicesites   novel jx = 0   UNRESOLVED            1
+combination_of_known_splicesites   novel jx >= 1  NOVEL_CONFIRMED     119
+combination_of_known_splicesites   novel jx >= 1  NOVEL_PROBABLE       12
+combination_of_known_splicesites   novel jx >= 1  UNCONFIRMED           3
+intron_retention                   novel jx = 0   UNRESOLVED           24
+intron_retention                   novel jx >= 1  NOVEL_CONFIRMED       3
+intron_retention                   novel jx >= 1  NOVEL_PROBABLE        1
 NIC total: 287
 ```
 
-NIC 287개 가운데 149개(124 + 1 + 24)가 novel junction이 없어서 `AMBIGUOUS`로 보류된다. 124개는 `iso_D`처럼 알려진 junction의 조합이고, 24개는 intron retention(intron 하나가 exon 안에 그대로 남은 것, 곧 intron이 하나 사라진 것)이다. intron retention은 새 intron을 만들지 않으니 novel junction이 없는 것이 당연하다. 반대로 novel junction이 있는 NIC 138개는 대부분(119개) `HIGH_CONF_NOVEL`이 된다.
+NIC 287개 가운데 149개(124 + 1 + 24)가 novel junction이 없어서 `UNRESOLVED`로 보류된다. 124개는 `iso_D`처럼 알려진 junction의 조합이고, 24개는 intron retention(intron 하나가 exon 안에 그대로 남은 것, 곧 intron이 하나 사라진 것)이다. intron retention은 새 intron을 만들지 않으니 novel junction이 없는 것이 당연하다. 반대로 novel junction이 있는 NIC 138개는 대부분(119개) `NOVEL_CONFIRMED`이 된다.
 
 여기서 [07](07_evaluation.md)에 나올 숫자 하나가 설명된다. SQANTI-SIM에서 진짜 NIC의 recall이 0.477(279개 중 133개)밖에 안 되는 이유가 대부분 이 149개다. PanIsoGuard의 한계라기보다 설계상 선택이다. short read 하나로는 멀리 떨어진 두 junction이 같은 분자에 함께 있는지 확인할 수 없으니, 확인할 수 없는 것은 판정하지 않고 보류한다. 다만 이 선택 때문에 recall을 잃는다는 사실은 그대로 적어 둬야 한다.
 
@@ -323,12 +323,12 @@ paste <(cut -f1,5,7 out/step2.adjudicated.tsv) <(cut -f5,7 out/shifted.adjudicat
 chrT	200	400	1	1	1	30	0	50
 chrT	200	700	1	1	1	10	0	48
 isoform_id  novelty_support  confidence_class  novelty_support  confidence_class
-iso_B       SUPPORTED        HIGH_CONF_NOVEL   UNSUPPORTED      LOW_CONF_PARTIAL
-iso_C       PARTIAL          LOW_CONF_PARTIAL  UNSUPPORTED      LOW_CONF_PARTIAL
-iso_E       SUPPORTED        HIGH_CONF_NOVEL   UNSUPPORTED      LOW_CONF_PARTIAL
+iso_B       SUPPORTED        NOVEL_CONFIRMED   UNKNOWN          UNRESOLVED
+iso_C       PARTIAL          UNCONFIRMED       UNKNOWN          UNRESOLVED
+iso_E       SUPPORTED        NOVEL_CONFIRMED   UNKNOWN          UNRESOLVED
 ```
 
-1 bp 어긋난 junction은 catalog에서도, short read 표에서도 다른 junction이다. 그래서 short read 지지가 전부 사라지고 `HIGH_CONF_NOVEL` 두 개가 `LOW_CONF_PARTIAL`로 떨어진다. `SJ.out.tab`은 여러 도구가 직접 만들거나 고쳐 쓰는 경우가 많으니, 결과에서 `SUPPORTED`가 이상하게 적으면 좌표 규칙부터 의심해 볼 만하다. 이런 실수를 알아채는 가장 쉬운 방법은 참조 주석에 있는 intron이 `SJ.out.tab`에서 얼마나 발견되는지 세어 보는 것이다. 정상이라면 발현되는 유전자의 알려진 intron은 대부분 있어야 한다.
+1 bp 어긋난 junction은 catalog에서도, short read 표에서도 다른 junction이다. 그래서 short read 지지가 전부 사라지고 `NOVEL_CONFIRMED` 두 개가 `UNCONFIRMED`로 떨어진다. `SJ.out.tab`은 여러 도구가 직접 만들거나 고쳐 쓰는 경우가 많으니, 결과에서 `SUPPORTED`가 이상하게 적으면 좌표 규칙부터 의심해 볼 만하다. 이런 실수를 알아채는 가장 쉬운 방법은 참조 주석에 있는 intron이 `SJ.out.tab`에서 얼마나 발견되는지 세어 보는 것이다. 정상이라면 발현되는 유전자의 알려진 intron은 대부분 있어야 한다.
 
 </details>
 
@@ -350,10 +350,10 @@ grep '"iso_A"' out/renamed.attribution.jsonl | python3 -c 'import json,sys; r=js
 
 ```text
 WARNING: 1 of 9 SQANTI3 isoform id(s) (e.g. "iso_A") are not in the caller isoform file; check that the ids match exactly.
-AMBIGUOUS False ['novelty-support UNKNOWN reason=caller_chain_absent', 'all_canonical=non_canonical -> mechanism=noncanonical', 'project(UNKNOWN,noncanonical) -> AMBIGUOUS']
+UNRESOLVED False ['novelty-support UNKNOWN reason=caller_chain_absent', 'all_canonical=non_canonical -> mechanism=noncanonical', 'project(UNKNOWN,noncanonical) -> UNRESOLVED']
 ```
 
-`iso_A`는 `ARTIFACT`(step2) 대신 `AMBIGUOUS`가 되고, 이유는 `caller_chain_absent`로 남는다. 이 노트를 처음 쓸 때는 이 경우에 경고가 없었다. stderr에 "read 9 caller isoform chains"만 찍혀서, 이름이 하나 어긋났다는 것을 알 수 없었다. 지금은 짝을 찾지 못한 isoform 수와 예시 하나를 경고로 알려 준다. 결과에 `caller_chain_absent`가 보이면 이름 짝짓기부터 확인해야 한다.
+`iso_A`는 `ARTIFACT`(step2) 대신 `UNRESOLVED`가 되고, 이유는 `caller_chain_absent`로 남는다. 이 노트를 처음 쓸 때는 이 경우에 경고가 없었다. stderr에 "read 9 caller isoform chains"만 찍혀서, 이름이 하나 어긋났다는 것을 알 수 없었다. 지금은 짝을 찾지 못한 isoform 수와 예시 하나를 경고로 알려 준다. 결과에 `caller_chain_absent`가 보이면 이름 짝짓기부터 확인해야 한다.
 
 </details>
 

@@ -103,6 +103,6 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
 - **Orthogonal axes** — each evidence axis is optional and can be masked individually
   (`ablate`), so a run with only SQANTI priors still produces honest verdicts.
 - **Circularity firewall** — a rescue that would rest on the sample's own RNA-derived
-  data is held `AMBIGUOUS`, not promoted (variant and pangenome axes both gated).
+  data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
 - **htslib-only** — the sole non-vendored dependency; cgranges / toml++ / Catch2 are
   vendored single-header components.

@@ -118,32 +118,32 @@ H="--reference data/toy.fa --reference-haplotype data/hap1.fa --reference-haplot
 i=0
 for extra in "" "$R" "$R $S" "$R $S $M" "$R $S $M $H" "$R $S $M $H --haplotype-provenance wgs"; do
   $PIG adjudicate $B $extra --out-prefix out/step$i 2>/dev/null
-  printf 'step%d  %s\n' $i "$(grep -P '^iso_A\t' out/step$i.adjudicated.tsv | cut -f5-8,10 | tr '\t' ' ')"
+  printf 'step%d  %s\n' $i "$(grep -P '^iso_A\t' out/step$i.adjudicated.tsv | cut -f5-7,10,12 | tr '\t' ' ')"
   i=$((i+1))
 done
 ```
 
 ```text
-step0  UNKNOWN noncanonical AMBIGUOUS 0 false
-step1  UNKNOWN noncanonical AMBIGUOUS 1 false
+step0  UNKNOWN noncanonical UNRESOLVED 0 false
+step1  UNKNOWN noncanonical UNRESOLVED 1 false
 step2  UNSUPPORTED noncanonical ARTIFACT 1 false
 step3  UNSUPPORTED noncanonical ARTIFACT 1 false
-step4  UNKNOWN variant_created AMBIGUOUS 1 true
-step5  UNKNOWN variant_created PAN_REF_RESCUED_FALSE_NOVEL 1 false
+step4  UNKNOWN variant_created UNRESOLVED 1 true
+step5  UNKNOWN variant_created REFERENCE_BIAS 1 false
 ```
 
 출력 열은 차례로 novelty support, primary mechanism, confidence class, novel junction 수, circularity flag이다.
 
 | 단계 | 더한 입력 | `iso_A`의 판정 | 자세히 다루는 노트 |
 |---|---|---|---|
-| step0 | SQANTI3 분류표 + caller GTF | `AMBIGUOUS` (무엇이 새로운지 알 수 없음) | [01](01_intron_chain_and_novelty.md) |
-| step1 | + 참조 GTF | `AMBIGUOUS` (novel junction 1개를 찾았지만 확인할 증거가 없음) | [01](01_intron_chain_and_novelty.md) |
+| step0 | SQANTI3 분류표 + caller GTF | `UNRESOLVED` (무엇이 새로운지 알 수 없음) | [01](01_intron_chain_and_novelty.md) |
+| step1 | + 참조 GTF | `UNRESOLVED` (novel junction 1개를 찾았지만 확인할 증거가 없음) | [01](01_intron_chain_and_novelty.md) |
 | step2 | + short-read `SJ.out.tab` | `ARTIFACT` (short read 지지 없음 + non-canonical motif) | [02](02_short_read_support.md), [04](04_projection.md) |
 | step3 | + long-read BAM | `ARTIFACT` (mapping 문제는 없음) | [03](03_artifact_mechanisms.md) |
-| step4 | + 개인 haplotype FASTA 두 개 (출처 unknown) | `AMBIGUOUS` (reference bias로 설명되지만 출처가 불확실해 보류) | [05](05_reference_bias.md) |
-| step5 | + 출처를 `wgs`로 명시 | `PAN_REF_RESCUED_FALSE_NOVEL` | [05](05_reference_bias.md) |
+| step4 | + 개인 haplotype FASTA 두 개 (출처 unknown) | `UNRESOLVED` (reference bias로 설명되지만 출처가 불확실해 보류) | [05](05_reference_bias.md) |
+| step5 | + 출처를 `wgs`로 명시 | `REFERENCE_BIAS` | [05](05_reference_bias.md) |
 
-같은 isoform 하나가 입력에 따라 `AMBIGUOUS`에서 `ARTIFACT`로, 다시 "reference bias로 설명되는 가짜 novelty"로 바뀐다. 이 시리즈가 풀려는 것이 바로 이 표다. 각 단계에서 PanIsoGuard가 무엇을 보고, 왜 판정을 바꾸는지다. [08](08_one_isoform_end_to_end.md)에서는 이 표를 PanIsoGuard 없이 Python으로 처음부터 다시 계산해서 맞춰 본다.
+같은 isoform 하나가 입력에 따라 `UNRESOLVED`에서 `ARTIFACT`로, 다시 "reference bias로 설명되는 가짜 novelty"로 바뀐다. 이 시리즈가 풀려는 것이 바로 이 표다. 각 단계에서 PanIsoGuard가 무엇을 보고, 왜 판정을 바꾸는지다. [08](08_one_isoform_end_to_end.md)에서는 이 표를 PanIsoGuard 없이 Python으로 처음부터 다시 계산해서 맞춰 본다.
 
 ## 2. PanIsoGuard는 무엇을 판정할까?
 
@@ -157,12 +157,12 @@ PanIsoGuard는 isoform을 새로 부르는 caller가 아니다. 이미 caller가
 
 | confidence class | 뜻 |
 |---|---|
-| `HIGH_CONF_KNOWN` | 이미 알려진 isoform(FSM)이라 판정할 것이 없음 |
-| `HIGH_CONF_NOVEL` | novel junction이 모두 독립 증거로 확인되고 artifact 흔적도 없음 |
-| `MEDIUM_CONF_NOVEL` | 확인은 되었지만 artifact 흔적이 하나 있거나, short read 대신 caller 여러 개의 합의로만 확인됨 |
-| `LOW_CONF_PARTIAL` | novel junction 일부만 확인됨, 확인이 안 됐지만 artifact 흔적도 없음, 또는 ISM |
-| `PAN_REF_RESCUED_FALSE_NOVEL` | 새로워 보이는 이유가 참조 게놈과 개인 게놈의 차이(reference bias)로 설명됨 |
-| `AMBIGUOUS` | 판정할 증거가 없음. reference bias로 설명되지만 그 근거의 출처가 불확실할 때도 여기로 보류함 |
+| `KNOWN` | 이미 알려진 isoform(FSM)이라 판정할 것이 없음 |
+| `NOVEL_CONFIRMED` | novel junction이 모두 독립 증거로 확인되고 artifact 흔적도 없음 |
+| `NOVEL_PROBABLE` | 확인은 되었지만 artifact 흔적이 하나 있거나, short read 대신 caller 여러 개의 합의로만 확인됨 |
+| `UNCONFIRMED` | novel junction 일부만 확인됨, 확인이 안 됐지만 artifact 흔적도 없음, 또는 ISM |
+| `REFERENCE_BIAS` | 새로워 보이는 이유가 참조 게놈과 개인 게놈의 차이(reference bias)로 설명됨 |
+| `UNRESOLVED` | 판정할 증거가 없음. reference bias로 설명되지만 그 근거의 출처가 불확실할 때도 여기로 보류함 |
 | `ARTIFACT` | 확인이 안 되고 artifact 흔적까지 있음 |
 
 반대로 PanIsoGuard가 하지 않는 일도 있다. SQANTI3의 QC 값(splice motif, RT switching, poly-A 등)을 다시 계산하지 않고 SQANTI3가 적어 준 값을 그대로 쓴다. 그리고 이 등급은 확률이 아니다. `HIGH`가 `MEDIUM`보다 믿을 만하다는 순서만 있는 서열 척도다([07](07_evaluation.md)).
@@ -179,7 +179,7 @@ $PIG adjudicate \
   --sj-tab         data/short_reads.SJ.out.tab \
   --bam            data/long_reads.bam \
   --out-prefix     out/toy
-cut -f1,4-9 out/toy.adjudicated.tsv | column -t
+cut -f1,4-7,10,11 out/toy.adjudicated.tsv | column -t
 ```
 
 ```text
@@ -189,22 +189,22 @@ building reference catalog...
 read 10 short-read junctions
 opened BAM for mapping axis: data/long_reads.bam
 adjudicated 9 isoforms:
-  AMBIGUOUS                    1
   ARTIFACT                     3
-  HIGH_CONF_KNOWN              1
-  HIGH_CONF_NOVEL              2
-  LOW_CONF_PARTIAL             2
+  KNOWN                        1
+  NOVEL_CONFIRMED              2
+  UNCONFIRMED                  2
+  UNRESOLVED                   1
 wrote out/toy.{adjudicated.tsv,attribution.jsonl,provenance.log}
 isoform_id  structural_category      novelty_support  primary_mechanism  confidence_class  n_novel_junctions  n_novel_jx_sr_supported
 iso_A       novel_not_in_catalog     UNSUPPORTED      noncanonical       ARTIFACT          1                  0
-iso_B       novel_not_in_catalog     SUPPORTED        none               HIGH_CONF_NOVEL   1                  1
-iso_C       novel_not_in_catalog     PARTIAL          none               LOW_CONF_PARTIAL  2                  1
-iso_D       novel_in_catalog         UNKNOWN          none               AMBIGUOUS         0                  0
-iso_E       novel_in_catalog         SUPPORTED        none               HIGH_CONF_NOVEL   1                  1
+iso_B       novel_not_in_catalog     SUPPORTED        none               NOVEL_CONFIRMED   1                  1
+iso_C       novel_not_in_catalog     PARTIAL          none               UNCONFIRMED       2                  1
+iso_D       novel_in_catalog         UNKNOWN          none               UNRESOLVED        0                  0
+iso_E       novel_in_catalog         SUPPORTED        none               NOVEL_CONFIRMED   1                  1
 iso_F       novel_not_in_catalog     UNSUPPORTED      noncanonical       ARTIFACT          1                  0
 iso_G       novel_not_in_catalog     UNSUPPORTED      mapping_or_repeat  ARTIFACT          1                  0
-iso_ism     incomplete-splice_match  UNKNOWN          none               LOW_CONF_PARTIAL  0                  0
-iso_known   full-splice_match        SUPPORTED        none               HIGH_CONF_KNOWN   0                  0
+iso_ism     incomplete-splice_match  UNKNOWN          none               UNCONFIRMED       0                  0
+iso_known   full-splice_match        SUPPORTED        none               KNOWN             0                  0
 ```
 
 위의 여덟 줄은 진행 로그(stderr)이고, 판정은 세 파일에 나뉘어 저장된다.
@@ -215,7 +215,7 @@ iso_known   full-splice_match        SUPPORTED        none               HIGH_CO
 | `out/toy.attribution.jsonl` | isoform마다 JSON 한 줄. 판정에 쓴 증거 전체와 `rule_trace` |
 | `out/toy.provenance.log` | 어떤 입력이 들어왔고 어떤 증거 축이 켜졌는지, 등급별 개수 |
 
-표만 봐서는 `iso_C`가 왜 `LOW_CONF_PARTIAL`인지 알 수 없다. 이유는 JSON 쪽에 있다.
+표만 봐서는 `iso_C`가 왜 `UNCONFIRMED`인지 알 수 없다. 이유는 JSON 쪽에 있다.
 
 ```python
 import json
@@ -230,15 +230,15 @@ for line in open("out/toy.attribution.jsonl"):
 ```
 
 ```text
-confidence_class: LOW_CONF_PARTIAL
+confidence_class: UNCONFIRMED
 evidence: {'n_novel_junctions': 2, 'n_novel_jx_sr_supported': 1, 'noncanonical': False, 'bam_n_spanning': 10, 'bam_frac_indel_near': 0}
 rule_trace:
    sj_support=1/2 -> PARTIAL
    no artifact mechanism flagged -> mechanism=none
-   project(PARTIAL,none) -> LOW_CONF_PARTIAL
+   project(PARTIAL,none) -> UNCONFIRMED
 ```
 
-`rule_trace` 세 줄이 판정 과정 전체다. novel junction 두 개 중 short read가 확인한 것이 하나뿐이라 지지 수준이 `PARTIAL`이 되었다. artifact 흔적은 없어서 기전은 `none`이다. 이 둘을 조합하니 `LOW_CONF_PARTIAL`이 나왔다. 이 세 단계, 곧 **지지 수준을 정하고, 기전을 정하고, 둘을 조합한다**가 PanIsoGuard 판정의 뼈대다.
+`rule_trace` 세 줄이 판정 과정 전체다. novel junction 두 개 중 short read가 확인한 것이 하나뿐이라 지지 수준이 `PARTIAL`이 되었다. artifact 흔적은 없어서 기전은 `none`이다. 이 둘을 조합하니 `UNCONFIRMED`이 나왔다. 이 세 단계, 곧 **지지 수준을 정하고, 기전을 정하고, 둘을 조합한다**가 PanIsoGuard 판정의 뼈대다.
 
 `provenance.log`는 이 판정이 어떤 입력 위에서 나왔는지 적어 둔다. 같은 isoform도 입력에 따라 판정이 달라지니까(1절 표), 결과를 읽을 때 꼭 같이 봐야 하는 파일이다.
 
@@ -248,17 +248,25 @@ cat out/toy.provenance.log
 
 ```text
 # PanIsoGuard adjudicate provenance
-tool_version	0.0.4
-ruleset_version	builtin-0.0.2
+tool_version	0.0.5
+ruleset_version	builtin-0.0.3
 sqanti3_version_target	6.0
 config	<built-in defaults>
-thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 min_mapq=20 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
+thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 classification	data/caller1_classification.txt
 isoforms	data/caller1.gtf
 ref_gtf	data/reference.gtf
 sj_tab	data/short_reads.SJ.out.tab
 bam	data/long_reads.bam
 caller_support	<none>
+reference	<none>
+pangenome_junctions	<none>
+# inputs
+input.classification	data/caller1_classification.txt	size=2982	mtime=2026-09-27T08:36:11Z
+input.isoforms	data/caller1.gtf	size=3854	mtime=2026-09-27T08:36:11Z
+input.ref_gtf	data/reference.gtf	size=1151	mtime=2026-09-27T08:36:11Z
+input.sj_tab	data/short_reads.SJ.out.tab	size=274	mtime=2026-09-27T08:36:11Z
+input.bam	data/long_reads.bam	size=451	mtime=2026-09-27T08:36:11Z
 axis.short_read	on
 axis.catalog	on
 axis.bam	on
@@ -266,11 +274,16 @@ axis.variant	not_evaluable
 axis.pangenome	not_evaluable
 axis.consensus	not_evaluable
 # confidence-class counts
-class.AMBIGUOUS	1
 class.ARTIFACT	3
-class.HIGH_CONF_KNOWN	1
-class.HIGH_CONF_NOVEL	2
-class.LOW_CONF_PARTIAL	2
+class.KNOWN	1
+class.NOVEL_CONFIRMED	2
+class.UNCONFIRMED	2
+class.UNRESOLVED	1
+# verdict counts
+verdict.artifact	3
+verdict.confirmed	2
+verdict.known	1
+verdict.unconfirmed	3
 total	9
 ```
 
@@ -305,7 +318,7 @@ total	9
 
 - PanIsoGuard는 caller가 부른 novel isoform(NIC, NNC)마다 confidence class, primary mechanism, rule_trace를 붙인다. isoform을 새로 부르지도, SQANTI3 QC를 다시 계산하지도 않음.
 - 판정의 뼈대는 세 단계임. novel junction이 독립 증거로 얼마나 확인되는지(지지 수준), 어떤 artifact 흔적이 있는지(기전), 둘의 조합(등급).
-- 같은 isoform도 입력에 따라 판정이 바뀜. `iso_A`는 `AMBIGUOUS` → `ARTIFACT` → `AMBIGUOUS`(보류) → `PAN_REF_RESCUED_FALSE_NOVEL`로 바뀜. 결과는 늘 `provenance.log`와 같이 읽어야 함.
+- 같은 isoform도 입력에 따라 판정이 바뀜. `iso_A`는 `UNRESOLVED` → `ARTIFACT` → `UNRESOLVED`(보류) → `REFERENCE_BIAS`로 바뀜. 결과는 늘 `provenance.log`와 같이 읽어야 함.
 - 입력이 없는 축은 `not_evaluable`이고, 찬성으로도 반대로도 세지 않음.
 
 다음 노트 [01](01_intron_chain_and_novelty.md)에서는 "novel"이 정확히 무엇을 뜻하는지, 곧 intron chain과 좌표, 그리고 PanIsoGuard가 novel junction을 세는 방법을 본다.
@@ -329,7 +342,7 @@ $PIG adjudicate --classification data/caller1_classification.txt --isoforms-gtf 
 ```text
 read 9 SQANTI records (54 cols)
 read 9 caller isoform chains
-WARNING: --ref-gtf not supplied: novel-junction classification is disabled; every novel isoform is held AMBIGUOUS and the supplied SJ/BAM/haplotype/pangenome evidence will NOT be used.
+WARNING: --ref-gtf not supplied: novel-junction classification is disabled; every novel isoform is held UNRESOLVED and the supplied SJ/BAM/haplotype/pangenome evidence will NOT be used.
 read 10 short-read junctions
 ```
 
@@ -348,7 +361,7 @@ for f in ("out/noref.attribution.jsonl", "out/toy.attribution.jsonl"):
 ```text
 noref iso_A sj_evaluable False n_novel 0 | novelty-support UNKNOWN reason=short_read/catalog_axis_absent
 noref iso_D sj_evaluable False n_novel 0 | novelty-support UNKNOWN reason=short_read/catalog_axis_absent
-toy iso_A sj_evaluable True n_novel 1 | sj_support=0/1 -> UNSUPPORTED
+toy iso_A sj_evaluable True n_novel 1 | sj_support=0/1 -> UNSUPPORTED (3/3 known junctions covered)
 toy iso_D sj_evaluable True n_novel 0 | novelty-support UNKNOWN reason=no_novel_junctions (e.g. NIC combinatorial novelty)
 ```
 
@@ -358,12 +371,12 @@ toy iso_D sj_evaluable True n_novel 0 | novelty-support UNKNOWN reason=no_novel_
 
 ### 문제 2
 
-> `iso_D`는 SQANTI3가 NIC로 분류한 novel isoform이고, 그 junction 두 개는 short read로 각각 10번씩 확인되었다. 그런데도 `AMBIGUOUS`다. 왜 `HIGH_CONF_NOVEL`이 아닐까?
+> `iso_D`는 SQANTI3가 NIC로 분류한 novel isoform이고, 그 junction 두 개는 short read로 각각 10번씩 확인되었다. 그런데도 `UNRESOLVED`다. 왜 `NOVEL_CONFIRMED`이 아닐까?
 
 <details>
 <summary>풀이</summary>
 
-`iso_D`의 두 intron(201–700, 801–1300)은 각각 TX2와 TX3에 이미 있다. 새로운 것은 "두 intron을 한 전사체에서 같이 쓴다"는 조합뿐이다. PanIsoGuard의 지지 수준은 **novel junction마다** short read를 확인해서 정하는데, `iso_D`에는 확인할 novel junction이 없다. 그래서 이유 `no_novel_junctions`로 지지 수준이 `UNKNOWN`이 되고 `AMBIGUOUS`로 보류된다(문제 1의 마지막 줄).
+`iso_D`의 두 intron(201–700, 801–1300)은 각각 TX2와 TX3에 이미 있다. 새로운 것은 "두 intron을 한 전사체에서 같이 쓴다"는 조합뿐이다. PanIsoGuard의 지지 수준은 **novel junction마다** short read를 확인해서 정하는데, `iso_D`에는 확인할 novel junction이 없다. 그래서 이유 `no_novel_junctions`로 지지 수준이 `UNKNOWN`이 되고 `UNRESOLVED`로 보류된다(문제 1의 마지막 줄).
 
 short read 하나는 길이가 100 bp라 junction 하나밖에 걸치지 못한다. 그러니 short read로는 "이 두 junction이 같은 분자에 함께 있다"를 확인할 수 없다. 이 점은 [01](01_intron_chain_and_novelty.md)에서 실제 SQANTI-SIM 데이터로 다시 보는데, NIC 287개 중 149개가 novel junction이 없어서 판정 대상에서 빠지고, 그중 124개가 `iso_D`처럼 알려진 junction의 조합이다. PanIsoGuard의 recall이 낮은 가장 큰 이유 중 하나다.
 

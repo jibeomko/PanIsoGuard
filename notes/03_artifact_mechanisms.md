@@ -178,11 +178,11 @@ print(r["confidence_class"], r["rule_trace"])'
 ```
 
 ```text
-{'bam_evaluable': True, 'bam_n_spanning': 5, 'bam_frac_low_mapq': 0.2, 'bam_frac_supplementary': 0.2, 'bam_frac_softclip': 0.2, 'bam_frac_indel_near': 0.2}
-AMBIGUOUS ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'project(UNKNOWN,none) -> AMBIGUOUS']
+{'bam_evaluable': True, 'bam_n_spanning': 5, 'bam_n_junctions_gated': 1, 'bam_frac_low_mapq': 0.2, 'bam_frac_supplementary': 0.2, 'bam_frac_softclip': 0.2, 'bam_frac_indel_near': 0.2}
+UNRESOLVED ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'project(UNKNOWN,none) -> UNRESOLVED']
 ```
 
-걸친 read는 5개이고, 네 특징이 각각 5개 중 1개(0.2)씩이다. 분모가 걸친 read 수라는 점이 중요하다. 네 비율 모두 기준을 넘지 않아서 기전은 `none`이다. (`SJ.out.tab`을 주지 않았으니 지지 수준은 `UNKNOWN`이고, 그래서 `AMBIGUOUS`다.)
+걸친 read는 5개이고, 네 특징이 각각 5개 중 1개(0.2)씩이다. 분모가 걸친 read 수라는 점이 중요하다. 네 비율 모두 기준을 넘지 않아서 기전은 `none`이다. (`SJ.out.tab`을 주지 않았으니 지지 수준은 `UNKNOWN`이고, 그래서 `UNRESOLVED`다.)
 
 ## 3. 흔적이 얼마나 많아야 기전으로 인정할까?
 
@@ -213,8 +213,8 @@ iso_G.r1	0	chrT	101	60	100M200N100M200N100M204N5M3D88M200N100M
 iso_G.r2	0	chrT	101	60	100M200N100M200N100M204N5M3D88M200N100M
 iso_G.r3	0	chrT	101	60	100M200N100M200N100M204N5M3D88M200N100M
 iso_G.r4	0	chrT	101	60	100M200N100M200N100M204N96M200N100M
-{'bam_evaluable': True, 'bam_n_spanning': 4, 'bam_frac_low_mapq': 0, 'bam_frac_supplementary': 0, 'bam_frac_softclip': 0, 'bam_frac_indel_near': 0.75}
-['sj_support=0/1 -> UNSUPPORTED', 'bam mapping artifact (low_mapq_frac=0.000000, supplementary_frac=0.000000, indel_near_frac=0.750000, softclip_frac=0.000000) -> mechanism=mapping_or_repeat', 'project(UNSUPPORTED,mapping_or_repeat) -> ARTIFACT']
+{'bam_evaluable': True, 'bam_n_spanning': 4, 'bam_n_junctions_gated': 1, 'bam_frac_low_mapq': 0, 'bam_frac_supplementary': 0, 'bam_frac_softclip': 0, 'bam_frac_indel_near': 0.75}
+['sj_support=0/1 -> UNSUPPORTED (3/3 known junctions covered)', 'bam mapping artifact (low_mapq_frac=0.000000, supplementary_frac=0.000000, indel_near_frac=0.750000, softclip_frac=0.000000, over 1 junction(s) with >= 3 reads) -> mechanism=mapping_or_repeat', 'project(UNSUPPORTED,mapping_or_repeat) -> ARTIFACT']
 ```
 
 `out/toy`는 [00](00_overview.md) 3절의 실행 결과다. indel near 비율 0.75가 기준 0.5를 넘어서 `mapping_or_repeat`이 되었다.
@@ -280,18 +280,18 @@ for line in open("out/edited.attribution.jsonl"):
 ```
 
 ```text
-iso_B: SUPPORTED x degradation -> MEDIUM_CONF_NOVEL
-     perc_A_downstream_TTS=70.000000 >= 60.000000 -> mechanism=degradation
-     project(SUPPORTED,degradation) -> MEDIUM_CONF_NOVEL
-iso_E: SUPPORTED x rt_switch -> MEDIUM_CONF_NOVEL
+iso_B: SUPPORTED x degradation -> NOVEL_PROBABLE
+     perc_A_downstream_TTS=70.000000 >= 60.000000 (polyA motif column absent: perc_A alone) -> mechanism=degradation
+     project(SUPPORTED,degradation) -> NOVEL_PROBABLE
+iso_E: SUPPORTED x rt_switch -> NOVEL_PROBABLE
      RTS_stage=TRUE -> mechanism=rt_switch
-     project(SUPPORTED,rt_switch) -> MEDIUM_CONF_NOVEL
+     project(SUPPORTED,rt_switch) -> NOVEL_PROBABLE
 iso_G: UNSUPPORTED x mapping_or_repeat -> ARTIFACT
-     bam mapping artifact (low_mapq_frac=0.000000, supplementary_frac=0.000000, indel_near_frac=0.750000, softclip_frac=0.000000) -> mechanism=mapping_or_repeat
+     bam mapping artifact (low_mapq_frac=0.000000, supplementary_frac=0.000000, indel_near_frac=0.750000, softclip_frac=0.000000, over 1 junction(s) with >= 3 reads) -> mechanism=mapping_or_repeat
      project(UNSUPPORTED,mapping_or_repeat) -> ARTIFACT
 ```
 
-`iso_B`와 `iso_E`는 short read로 확인된 isoform이라 흔적이 하나 생겨도 `MEDIUM_CONF_NOVEL`에 머문다. `iso_G`는 흔적이 넷인데 `mapping_or_repeat`만 보고된다.
+`iso_B`와 `iso_E`는 short read로 확인된 isoform이라 흔적이 하나 생겨도 `NOVEL_PROBABLE`에 머문다. `iso_G`는 흔적이 넷인데 `mapping_or_repeat`만 보고된다.
 
 여기서 문서와 다른 점을 하나 발견했다. [docs/decision_engine.md](../docs/decision_engine.md)는 "기전이 여러 개면 첫 번째만 primary이고, 걸린 조건은 모두 `rule_trace`에 나열된다"고 적고 있었다. 그런데 위 출력의 `iso_G` `rule_trace`에는 mapping 한 줄뿐이다. 코드(`RuleEngine::evaluate()`)가 기전을 `if … else if …`로 고르기 때문에, 처음 걸린 조건만 기록하고 나머지는 보지도 않는다. 나머지 흔적은 `rule_trace`가 아니라 JSON의 `evidence` 쪽(`noncanonical: true`, `rts_stage: true`)에 남는다. 문서는 이 노트를 쓰면서 코드에 맞게 고쳤다.
 
@@ -363,10 +363,10 @@ iso_G.r1	100M200N100M200N100M204N5M3D88M200N100M
 iso_G.r2	100M200N100M200N100M204N5M3D88M200N100M
 iso_G.r3	100M200N100M200N100M204N96M200N100M
 iso_G.r4	100M200N100M200N100M204N96M200N100M
-indel_near 0.5 -> none LOW_CONF_PARTIAL
+indel_near 0.5 -> none UNCONFIRMED
 ```
 
-비율이 정확히 0.5라서 기준(0.5 **초과**)을 넘지 못한다. 기전은 `none`이 되고, short read 지지도 없으니 `UNSUPPORTED × none → LOW_CONF_PARTIAL`이다. read가 4개뿐일 때는 read 하나 차이로 `ARTIFACT`와 `LOW_CONF_PARTIAL`이 갈린다. 비율 기준은 spanning read가 적은 junction에서 이렇게 불안정하다. 지금 코드에는 spanning read 수의 최솟값 조건이 없어서, read 1개짜리 junction도 그 read 하나에 indel이 있으면 비율 1.0으로 바로 걸린다.
+비율이 정확히 0.5라서 기준(0.5 **초과**)을 넘지 못한다. 기전은 `none`이 되고, short read 지지도 없으니 `UNSUPPORTED × none → UNCONFIRMED`이다. read가 4개뿐일 때는 read 하나 차이로 `ARTIFACT`와 `UNCONFIRMED`이 갈린다. 비율 기준은 spanning read가 적은 junction에서 이렇게 불안정하다. 지금 코드에는 spanning read 수의 최솟값 조건이 없어서, read 1개짜리 junction도 그 read 하나에 indel이 있으면 비율 1.0으로 바로 걸린다.
 
 </details>
 

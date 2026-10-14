@@ -21,20 +21,20 @@ import matplotlib.pyplot as plt
 rows = ["SUPPORTED", "PARTIAL", "UNSUPPORTED", "UNKNOWN"]
 cols = ["none", "noncanonical /\nrt_switch / degradation", "mapping_or_repeat"]
 grid = {  # (row, col): (class, toy examples)
-    (0, 0): ("HIGH_CONF_NOVEL", "iso_B, iso_E"),
-    (0, 1): ("MEDIUM_CONF_NOVEL", "iso_B with perc_A 70 (03)"),
-    (0, 2): ("MEDIUM_CONF_NOVEL", ""),
-    (1, 0): ("LOW_CONF_PARTIAL", "iso_C"), (1, 1): ("LOW_CONF_PARTIAL", ""), (1, 2): ("LOW_CONF_PARTIAL", ""),
-    (2, 0): ("LOW_CONF_PARTIAL", "iso_G without BAM"),
+    (0, 0): ("NOVEL_CONFIRMED", "iso_B, iso_E"),
+    (0, 1): ("NOVEL_PROBABLE", "iso_B with perc_A 70 (03)"),
+    (0, 2): ("NOVEL_PROBABLE", ""),
+    (1, 0): ("UNCONFIRMED", "iso_C"), (1, 1): ("UNCONFIRMED", ""), (1, 2): ("UNCONFIRMED", ""),
+    (2, 0): ("UNCONFIRMED", "iso_G without BAM"),
     (2, 1): ("ARTIFACT", "iso_A, iso_F"),
     (2, 2): ("ARTIFACT", "iso_G"),
-    (3, 0): ("AMBIGUOUS", "iso_D\n(>=2 callers: MEDIUM)"),
-    (3, 1): ("AMBIGUOUS", "iso_A without SJ\n(>=2 callers: LOW)"),
+    (3, 0): ("UNRESOLVED", "iso_D\n(>=2 callers: MEDIUM)"),
+    (3, 1): ("UNRESOLVED", "iso_A without SJ\n(>=2 callers: LOW)"),
     (3, 2): ("ARTIFACT", "iso_G without SJ"),
 }
 # Ordinal diverging: confident novel (blue) <-> artifact (red), neutral gray for "no call".
-FILL = {"HIGH_CONF_NOVEL": ("#256abf", "#ffffff"), "MEDIUM_CONF_NOVEL": ("#9ec5f4", "#0b0b0b"),
-        "AMBIGUOUS": ("#f0efec", "#0b0b0b"), "LOW_CONF_PARTIAL": ("#f6c7c6", "#0b0b0b"),
+FILL = {"NOVEL_CONFIRMED": ("#256abf", "#ffffff"), "NOVEL_PROBABLE": ("#9ec5f4", "#0b0b0b"),
+        "UNRESOLVED": ("#f0efec", "#0b0b0b"), "UNCONFIRMED": ("#f6c7c6", "#0b0b0b"),
         "ARTIFACT": ("#e34948", "#0b0b0b")}
 fig, ax = plt.subplots(figsize=(8.4, 4.6), dpi=150)
 for (r, c), (cls, ex) in grid.items():
@@ -59,26 +59,26 @@ print("cells:", len(grid))
 cells: 12
 ```
 
-색은 믿을 만한 novel(파랑)에서 artifact(빨강)로 가는 순서를 나타내고, 판정을 보류한 `AMBIGUOUS`는 회색이다. 칸마다 등급 이름을 글자로 적어 두었으니 색을 구별하지 못해도 읽을 수 있다.
+색은 믿을 만한 novel(파랑)에서 artifact(빨강)로 가는 순서를 나타내고, 판정을 보류한 `UNRESOLVED`는 회색이다. 칸마다 등급 이름을 글자로 적어 두었으니 색을 구별하지 못해도 읽을 수 있다.
 
 </details>
 
 줄마다 읽으면 규칙이 단순하다.
 
-- **`SUPPORTED`** 줄: 흔적이 없으면 `HIGH_CONF_NOVEL`, 흔적이 무엇이든 하나라도 있으면 `MEDIUM_CONF_NOVEL`이다. short read로 확인된 junction은 흔적이 있어도 `ARTIFACT`로 떨어뜨리지 않는다.
-- **`PARTIAL`** 줄: 흔적과 상관없이 `LOW_CONF_PARTIAL`이다(0.0.4부터, [02](02_short_read_support.md) 4절).
-- **`UNSUPPORTED`** 줄: 흔적이 없으면 `LOW_CONF_PARTIAL`, 흔적이 있으면 `ARTIFACT`다. short read를 봤는데 없었고, 가짜의 흔적까지 있을 때만 `ARTIFACT`가 된다.
-- **`UNKNOWN`** 줄: short read로 볼 수 없었으니 원칙적으로 `AMBIGUOUS`다. 예외가 두 가지 있다(3절).
+- **`SUPPORTED`** 줄: 흔적이 없으면 `NOVEL_CONFIRMED`, 흔적이 무엇이든 하나라도 있으면 `NOVEL_PROBABLE`이다. short read로 확인된 junction은 흔적이 있어도 `ARTIFACT`로 떨어뜨리지 않는다.
+- **`PARTIAL`** 줄: 흔적과 상관없이 `UNCONFIRMED`이다(0.0.4부터, [02](02_short_read_support.md) 4절).
+- **`UNSUPPORTED`** 줄: 흔적이 없으면 `UNCONFIRMED`, 흔적이 있으면 `ARTIFACT`다. short read를 봤는데 없었고, 가짜의 흔적까지 있을 때만 `ARTIFACT`가 된다.
+- **`UNKNOWN`** 줄: short read로 볼 수 없었으니 원칙적으로 `UNRESOLVED`다. 예외가 두 가지 있다(3절).
 
-`HIGH_CONF_NOVEL`로 가는 길이 딱 한 칸뿐이라는 점을 눈여겨볼 만하다. short read가 novel junction을 전부 확인하고 흔적도 없어야 한다.
+`NOVEL_CONFIRMED`로 가는 길이 딱 한 칸뿐이라는 점을 눈여겨볼 만하다. short read가 novel junction을 전부 확인하고 흔적도 없어야 한다.
 
 ## 2. 조합표를 보기 전에 먼저 확인하는 것은?
 
 `RuleEngine::evaluate()`는 조합표에 오기 전에 세 가지를 차례로 확인하고, 하나라도 해당되면 거기서 판정을 끝낸다.
 
-1. **범주가 FSM이면** `HIGH_CONF_KNOWN`, **ISM이면** `LOW_CONF_PARTIAL`이다. 증거를 보지 않는다.
-2. **NIC나 NNC가 아니면**(`genic`, `antisense`, `intergenic`, `fusion` 등) `AMBIGUOUS`다. PanIsoGuard가 판정하려고 만든 대상이 아니다.
-3. **reference bias로 설명되면**(pangenome 축을 먼저, 그다음 variant 축) `PAN_REF_RESCUED_FALSE_NOVEL`이다. 출처가 불확실하면 `AMBIGUOUS`로 보류한다([05](05_reference_bias.md)).
+1. **범주가 FSM이면** `KNOWN`, **ISM이면** `UNCONFIRMED`이다. 증거를 보지 않는다.
+2. **NIC나 NNC가 아니면**(`genic`, `antisense`, `intergenic`, `fusion` 등) `UNRESOLVED`다. PanIsoGuard가 판정하려고 만든 대상이 아니다.
+3. **reference bias로 설명되면**(pangenome 축을 먼저, 그다음 variant 축) `REFERENCE_BIAS`이다. 출처가 불확실하면 `UNRESOLVED`로 보류한다([05](05_reference_bias.md)).
 
 3번이 조합표보다 앞에 있기 때문에 [00](00_overview.md)의 step4와 step5에서 `iso_A`의 `novelty_support`가 `UNKNOWN`으로 나왔다. rescue가 판정을 끝내 버려서 지지 수준을 정하는 단계까지 가지 않았고, 지지 수준 칸은 처음 값(`UNKNOWN`)으로 남았다. `SJ.out.tab`을 넣었는데도 그렇다.
 
@@ -95,20 +95,20 @@ cut -f1,5,6,7 out/nosj.adjudicated.tsv | column -t
 
 ```text
 isoform_id  novelty_support  primary_mechanism  confidence_class
-iso_A       UNKNOWN          noncanonical       AMBIGUOUS
-iso_B       UNKNOWN          none               AMBIGUOUS
-iso_C       UNKNOWN          none               AMBIGUOUS
-iso_D       UNKNOWN          none               AMBIGUOUS
-iso_E       UNKNOWN          none               AMBIGUOUS
-iso_F       UNKNOWN          noncanonical       AMBIGUOUS
+iso_A       UNKNOWN          noncanonical       UNRESOLVED
+iso_B       UNKNOWN          none               UNRESOLVED
+iso_C       UNKNOWN          none               UNRESOLVED
+iso_D       UNKNOWN          none               UNRESOLVED
+iso_E       UNKNOWN          none               UNRESOLVED
+iso_F       UNKNOWN          noncanonical       UNRESOLVED
 iso_G       UNKNOWN          mapping_or_repeat  ARTIFACT
-iso_ism     UNKNOWN          none               LOW_CONF_PARTIAL
-iso_known   SUPPORTED        none               HIGH_CONF_KNOWN
+iso_ism     UNKNOWN          none               UNCONFIRMED
+iso_known   SUPPORTED        none               KNOWN
 ```
 
-novel isoform이 모두 `UNKNOWN`인데 `iso_G`만 `ARTIFACT`다. 같은 `UNKNOWN`이라도 `iso_A`와 `iso_F`의 `noncanonical`은 `AMBIGUOUS`에 그친다. 두 흔적을 다르게 대하는 이유는 흔적이 어디서 왔는지에 있다. mapping 흔적은 이 isoform을 만든 long read의 정렬 자체를 직접 본 결과다. non-canonical motif는 참조 게놈의 서열일 뿐이라, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈이 틀린 경우도 있다.
+novel isoform이 모두 `UNKNOWN`인데 `iso_G`만 `ARTIFACT`다. 같은 `UNKNOWN`이라도 `iso_A`와 `iso_F`의 `noncanonical`은 `UNRESOLVED`에 그친다. 두 흔적을 다르게 대하는 이유는 흔적이 어디서 왔는지에 있다. mapping 흔적은 이 isoform을 만든 long read의 정렬 자체를 직접 본 결과다. non-canonical motif는 참조 게놈의 서열일 뿐이라, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈이 틀린 경우도 있다.
 
-둘째, **caller 여러 개의 합의가 short read를 대신할 수 있다.** `--caller-support`로 caller별 결과를 합친 표를 주면, short read가 없을 때 caller 2개 이상이 같은 intron chain을 찾은 isoform은 흔적이 없으면 `MEDIUM_CONF_NOVEL`, 흔적이 있으면 `LOW_CONF_PARTIAL`이 된다. 합의로는 `HIGH`까지 올라가지 않는다. 같은 read로 돌린 caller들의 합의는 독립된 실험 증거가 아니기 때문이다. mapping 흔적이 있으면 합의가 있어도 `ARTIFACT`다. [06](06_multi_caller_consensus.md)에서 직접 돌려 본다.
+둘째, **caller 여러 개의 합의가 short read를 대신할 수 있다.** `--caller-support`로 caller별 결과를 합친 표를 주면, short read가 없을 때 caller 2개 이상이 같은 intron chain을 찾은 isoform은 흔적이 없으면 `NOVEL_PROBABLE`, 흔적이 있으면 `UNCONFIRMED`이 된다. 합의로는 `HIGH`까지 올라가지 않는다. 같은 read로 돌린 caller들의 합의는 독립된 실험 증거가 아니기 때문이다. mapping 흔적이 있으면 합의가 있어도 `ARTIFACT`다. [06](06_multi_caller_consensus.md)에서 직접 돌려 본다.
 
 ## 4. 축 하나를 끄면 판정이 얼마나 바뀔까?
 
@@ -128,14 +128,14 @@ ablation over 9 isoforms:
   noncanonical          2 / 9 changed (22.222%)
 wrote out/abl.{ablation,ablation_transitions}.tsv
 axis	transition	count
-short_read	ARTIFACT->AMBIGUOUS	2
-short_read	HIGH_CONF_NOVEL->AMBIGUOUS	2
-short_read	LOW_CONF_PARTIAL->AMBIGUOUS	1
-mapping	ARTIFACT->LOW_CONF_PARTIAL	1
-noncanonical	ARTIFACT->LOW_CONF_PARTIAL	2
+short_read	ARTIFACT->UNRESOLVED	2
+short_read	NOVEL_CONFIRMED->UNRESOLVED	2
+short_read	UNCONFIRMED->UNRESOLVED	1
+mapping	ARTIFACT->UNCONFIRMED	1
+noncanonical	ARTIFACT->UNCONFIRMED	2
 ```
 
-short read 축을 끄면 다섯 개가 바뀐다. `iso_A`와 `iso_F`의 `ARTIFACT`, `iso_B`와 `iso_E`의 `HIGH_CONF_NOVEL`, `iso_C`의 `LOW_CONF_PARTIAL`이 모두 `AMBIGUOUS`가 된다. `iso_G`는 3절의 첫째 예외 때문에 `ARTIFACT`로 남는다(연습문제 2). mapping 축을 끄면 `iso_G` 하나가, noncanonical 축을 끄면 `iso_A`와 `iso_F`가 `ARTIFACT`에서 `LOW_CONF_PARTIAL`로 올라간다. 이 예제에서는 short read 축이 판정을 가장 많이 좌우한다. `ablate`는 어느 축이 결과를 얼마나 움직이는지 보여 줄 뿐, 그 판정이 맞는지는 알려 주지 않는다. 맞는지는 정답이 있는 데이터로만 알 수 있다([07](07_evaluation.md)).
+short read 축을 끄면 다섯 개가 바뀐다. `iso_A`와 `iso_F`의 `ARTIFACT`, `iso_B`와 `iso_E`의 `NOVEL_CONFIRMED`, `iso_C`의 `UNCONFIRMED`이 모두 `UNRESOLVED`가 된다. `iso_G`는 3절의 첫째 예외 때문에 `ARTIFACT`로 남는다(연습문제 2). mapping 축을 끄면 `iso_G` 하나가, noncanonical 축을 끄면 `iso_A`와 `iso_F`가 `ARTIFACT`에서 `UNCONFIRMED`로 올라간다. 이 예제에서는 short read 축이 판정을 가장 많이 좌우한다. `ablate`는 어느 축이 결과를 얼마나 움직이는지 보여 줄 뿐, 그 판정이 맞는지는 알려 주지 않는다. 맞는지는 정답이 있는 데이터로만 알 수 있다([07](07_evaluation.md)).
 
 ## 5. 규칙 전체를 Python으로 옮기면 판정이 똑같이 나올까?
 
@@ -151,14 +151,14 @@ MAP_GATES = {"bam_frac_low_mapq": 0.5, "bam_frac_supplementary": 0.5,
 def evaluate(cat, e, perc_a, min_callers=2):
     """RuleEngine::evaluate() with the built-in defaults, on one attribution.jsonl record."""
     if cat == "full-splice_match":
-        return "HIGH_CONF_KNOWN"
+        return "KNOWN"
     if cat == "incomplete-splice_match":
-        return "LOW_CONF_PARTIAL"
+        return "UNCONFIRMED"
     if cat not in NOVEL:
-        return "AMBIGUOUS"
+        return "UNRESOLVED"
     for axis in ("pangenome", "variant"):                      # reference-bias rescue first
         if e[f"{axis}_evaluable"] and e[f"{axis}_rescue"]:
-            return "AMBIGUOUS" if e[f"{axis}_circular"] else "PAN_REF_RESCUED_FALSE_NOVEL"
+            return "UNRESOLVED" if e[f"{axis}_circular"] else "REFERENCE_BIAS"
     n, k = e["n_novel_junctions"], e["n_novel_jx_sr_supported"]
     if not (e["sj_evaluable"] and e["chain_available"]) or n == 0:
         sup = "UNKNOWN"
@@ -178,13 +178,13 @@ def evaluate(cat, e, perc_a, min_callers=2):
         if mech == "mapping_or_repeat":
             return "ARTIFACT"
         if e["consensus_evaluable"] and e["n_callers"] >= min_callers:
-            return "MEDIUM_CONF_NOVEL" if mech == "none" else "LOW_CONF_PARTIAL"
-        return "AMBIGUOUS"
+            return "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
+        return "UNRESOLVED"
     if sup == "SUPPORTED":
-        return "HIGH_CONF_NOVEL" if mech == "none" else "MEDIUM_CONF_NOVEL"
+        return "NOVEL_CONFIRMED" if mech == "none" else "NOVEL_PROBABLE"
     if sup == "PARTIAL":
-        return "LOW_CONF_PARTIAL"
-    return "LOW_CONF_PARTIAL" if mech == "none" else "ARTIFACT"
+        return "UNCONFIRMED"
+    return "UNCONFIRMED" if mech == "none" else "ARTIFACT"
 
 def check(runs):
     n_iso = n_same = 0
@@ -223,37 +223,37 @@ isoform 1,579개도 모두 같다. 판정 규칙 전체가 이 40줄 안에 있�
 
 ## 정리
 
-- `SUPPORTED`는 흔적이 없으면 `HIGH`, 있으면 `MEDIUM`임. `PARTIAL`은 늘 `LOW_CONF_PARTIAL`임. `UNSUPPORTED`는 흔적이 없으면 `LOW_CONF_PARTIAL`, 있으면 `ARTIFACT`임. `UNKNOWN`은 원칙적으로 `AMBIGUOUS`임.
-- 조합표보다 먼저 FSM/ISM의 통과, NIC/NNC가 아닌 범주의 `AMBIGUOUS`, reference-bias rescue를 확인함. rescue된 isoform은 지지 수준이 `UNKNOWN`으로 남음.
+- `SUPPORTED`는 흔적이 없으면 `HIGH`, 있으면 `MEDIUM`임. `PARTIAL`은 늘 `UNCONFIRMED`임. `UNSUPPORTED`는 흔적이 없으면 `UNCONFIRMED`, 있으면 `ARTIFACT`임. `UNKNOWN`은 원칙적으로 `UNRESOLVED`임.
+- 조합표보다 먼저 FSM/ISM의 통과, NIC/NNC가 아닌 범주의 `UNRESOLVED`, reference-bias rescue를 확인함. rescue된 isoform은 지지 수준이 `UNKNOWN`으로 남음.
 - `UNKNOWN` 줄의 예외는 둘임. mapping 흔적은 short read 없이도 `ARTIFACT`를 만들고, caller 2개 이상의 합의는 `MEDIUM`(흔적 있으면 `LOW`)까지 올림.
 - `ablate`는 축 하나를 끄고 판정을 다시 내려서 각 축이 결과를 얼마나 움직이는지 보여 줌. 맞는지는 알려 주지 않음.
 - 판정 규칙 전체를 Python 40줄로 옮겨 예제 82개와 SQANTI-SIM 1,579개의 판정을 모두 똑같이 재현함.
 
-다음 노트 [05](05_reference_bias.md)에서는 조합표보다 먼저 보는 reference-bias rescue를 본다. `iso_A`가 `ARTIFACT`에서 `PAN_REF_RESCUED_FALSE_NOVEL`로 바뀌는 단계다.
+다음 노트 [05](05_reference_bias.md)에서는 조합표보다 먼저 보는 reference-bias rescue를 본다. `iso_A`가 `ARTIFACT`에서 `REFERENCE_BIAS`로 바뀌는 단계다.
 
 ## 연습문제
 
 ### 문제 1
 
-> `UNSUPPORTED × none`은 `LOW_CONF_PARTIAL`인데, `UNKNOWN × noncanonical`은 `AMBIGUOUS`다. 둘 다 "확인이 안 됐다"는 점에서 비슷해 보이는데, 왜 다르게 대할까?
+> `UNSUPPORTED × none`은 `UNCONFIRMED`인데, `UNKNOWN × noncanonical`은 `UNRESOLVED`다. 둘 다 "확인이 안 됐다"는 점에서 비슷해 보이는데, 왜 다르게 대할까?
 
 <details>
 <summary>풀이</summary>
 
-`UNSUPPORTED`는 short read를 봤는데 이 junction이 없었다는 **관찰**이다. 흔적은 없지만 확인도 안 됐으니 "믿기 어려운 쪽"인 `LOW_CONF_PARTIAL`에 둔다. `UNKNOWN`은 short read를 볼 수 없었다는 뜻이라 관찰 자체가 없다. 여기에 non-canonical motif 하나만으로 판정을 내리면, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈 쪽이 틀린 경우에도 가짜로 몰게 된다. 그래서 보류(`AMBIGUOUS`)한다. 단, `UNKNOWN`이라도 mapping 흔적은 long read 정렬을 직접 본 것이라 예외로 `ARTIFACT`를 만든다(3절).
+`UNSUPPORTED`는 short read를 봤는데 이 junction이 없었다는 **관찰**이다. 흔적은 없지만 확인도 안 됐으니 "믿기 어려운 쪽"인 `UNCONFIRMED`에 둔다. `UNKNOWN`은 short read를 볼 수 없었다는 뜻이라 관찰 자체가 없다. 여기에 non-canonical motif 하나만으로 판정을 내리면, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈 쪽이 틀린 경우에도 가짜로 몰게 된다. 그래서 보류(`UNRESOLVED`)한다. 단, `UNKNOWN`이라도 mapping 흔적은 long read 정렬을 직접 본 것이라 예외로 `ARTIFACT`를 만든다(3절).
 
-결과표를 필터로 쓸 때 이 차이가 중요하다. `AMBIGUOUS`는 "나쁘다"가 아니라 "모른다"이고, `LOW_CONF_PARTIAL`은 "확인하려 했지만 안 됐다"이다.
+결과표를 필터로 쓸 때 이 차이가 중요하다. `UNRESOLVED`는 "나쁘다"가 아니라 "모른다"이고, `UNCONFIRMED`은 "확인하려 했지만 안 됐다"이다.
 
 </details>
 
 ### 문제 2
 
-> 4절의 `ablate`에서 short read 축을 끄자 `iso_A`와 `iso_F`의 `ARTIFACT`는 `AMBIGUOUS`로 바뀌었는데 `iso_G`의 `ARTIFACT`는 그대로였다. 왜일까?
+> 4절의 `ablate`에서 short read 축을 끄자 `iso_A`와 `iso_F`의 `ARTIFACT`는 `UNRESOLVED`로 바뀌었는데 `iso_G`의 `ARTIFACT`는 그대로였다. 왜일까?
 
 <details>
 <summary>풀이</summary>
 
-short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서 `UNKNOWN`으로 바뀐다. 그다음은 기전에 달렸다. `iso_A`와 `iso_F`의 기전은 `noncanonical`이라 `UNKNOWN × noncanonical → AMBIGUOUS`다. `iso_G`의 기전은 `mapping_or_repeat`이고, 3절의 첫째 예외 때문에 `UNKNOWN × mapping_or_repeat → ARTIFACT`다. 3절의 실행(`out/nosj`, 처음부터 short read 표를 주지 않은 경우)과 같은 결과다. `ablate`가 파일을 다시 읽지 않고 증거에서 축 하나만 끈 뒤 판정을 다시 내리기 때문에 두 결과가 일치한다.
+short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서 `UNKNOWN`으로 바뀐다. 그다음은 기전에 달렸다. `iso_A`와 `iso_F`의 기전은 `noncanonical`이라 `UNKNOWN × noncanonical → UNRESOLVED`다. `iso_G`의 기전은 `mapping_or_repeat`이고, 3절의 첫째 예외 때문에 `UNKNOWN × mapping_or_repeat → ARTIFACT`다. 3절의 실행(`out/nosj`, 처음부터 short read 표를 주지 않은 경우)과 같은 결과다. `ablate`가 파일을 다시 읽지 않고 증거에서 축 하나만 끈 뒤 판정을 다시 내리기 때문에 두 결과가 일치한다.
 
 </details>
 

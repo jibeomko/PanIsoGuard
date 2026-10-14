@@ -77,24 +77,24 @@ for i, inp in enumerate(steps):
 ```
 
 ```text
-step0: by hand UNKNOWN     noncanonical    AMBIGUOUS                    | PanIsoGuard same
-step1: by hand UNKNOWN     noncanonical    AMBIGUOUS                    | PanIsoGuard same
+step0: by hand UNKNOWN     noncanonical    UNRESOLVED                   | PanIsoGuard same
+step1: by hand UNKNOWN     noncanonical    UNRESOLVED                   | PanIsoGuard same
 step2: by hand UNSUPPORTED noncanonical    ARTIFACT                     | PanIsoGuard same
 step3: by hand UNSUPPORTED noncanonical    ARTIFACT                     | PanIsoGuard same
-step4: by hand UNKNOWN     variant_created AMBIGUOUS                    | PanIsoGuard same
-step5: by hand UNKNOWN     variant_created PAN_REF_RESCUED_FALSE_NOVEL  | PanIsoGuard same
+step4: by hand UNKNOWN     variant_created UNRESOLVED                   | PanIsoGuard same
+step5: by hand UNKNOWN     variant_created REFERENCE_BIAS               | PanIsoGuard same
 ```
 
 여섯 단계 모두 같다. 단계마다 무엇이 판정을 바꿨는지 정리하면 이렇다.
 
 | 단계 | 더한 입력 | 바뀐 증거 | 적용된 규칙 | 등급 |
 |---|---|---|---|---|
-| step0 | 분류표 + caller GTF | 기전 `noncanonical`(SQANTI3) | `UNKNOWN` × 흔적 → 보류 | `AMBIGUOUS` |
-| step1 | + 참조 GTF | novel junction 1개 | 확인할 입력 없음, 여전히 `UNKNOWN` | `AMBIGUOUS` |
+| step0 | 분류표 + caller GTF | 기전 `noncanonical`(SQANTI3) | `UNKNOWN` × 흔적 → 보류 | `UNRESOLVED` |
+| step1 | + 참조 GTF | novel junction 1개 | 확인할 입력 없음, 여전히 `UNKNOWN` | `UNRESOLVED` |
 | step2 | + `SJ.out.tab` | short read 지지 0/1 | `UNSUPPORTED` × `noncanonical` | `ARTIFACT` |
 | step3 | + BAM | spanning 5개, 흔적 0 | 기전 그대로 | `ARTIFACT` |
-| step4 | + haplotype (출처 unknown) | `CREATED` 1/1 | rescue 후보지만 firewall이 보류 | `AMBIGUOUS` + `circularity_flag` |
-| step5 | + 출처 `wgs` | 같음 | rescue | `PAN_REF_RESCUED_FALSE_NOVEL` |
+| step4 | + haplotype (출처 unknown) | `CREATED` 1/1 | rescue 후보지만 firewall이 보류 | `UNRESOLVED` + `circularity_flag` |
+| step5 | + 출처 `wgs` | 같음 | rescue | `REFERENCE_BIAS` |
 
 step0에서 step1로 갈 때는 novel junction을 찾았지만 등급은 그대로다. step3에서 BAM을 더해도 흔적이 없어 등급은 그대로다. 판정을 실제로 움직인 입력은 short read 표와 haplotype 두 가지였다. step4와 step5의 지지 수준이 `UNKNOWN`으로 돌아가는 것은 rescue가 조합표보다 먼저 판정을 끝내기 때문이다([04](04_projection.md) 2절).
 
@@ -107,17 +107,17 @@ python3 check_notes.py
 ```
 
 ```text
-step0          9 isoforms, iso_A -> AMBIGUOUS
-step1          9 isoforms, iso_A -> AMBIGUOUS
+step0          9 isoforms, iso_A -> UNRESOLVED
+step1          9 isoforms, iso_A -> UNRESOLVED
 step2          9 isoforms, iso_A -> ARTIFACT
 step3          9 isoforms, iso_A -> ARTIFACT
-step4          9 isoforms, iso_A -> AMBIGUOUS
-step5          9 isoforms, iso_A -> PAN_REF_RESCUED_FALSE_NOVEL
-pangenome      9 isoforms, iso_A -> PAN_REF_RESCUED_FALSE_NOVEL
-consensus      9 isoforms, iso_A -> AMBIGUOUS
-consensus_bam  9 isoforms, iso_A -> AMBIGUOUS
+step4          9 isoforms, iso_A -> UNRESOLVED
+step5          9 isoforms, iso_A -> REFERENCE_BIAS
+pangenome      9 isoforms, iso_A -> REFERENCE_BIAS
+consensus      9 isoforms, iso_A -> UNRESOLVED
+consensus_bam  9 isoforms, iso_A -> UNRESOLVED
 ok   iso_A across the six steps (00)
-ok   iso_C is PARTIAL -> LOW_CONF_PARTIAL (02)
+ok   iso_C is PARTIAL -> UNCONFIRMED (02)
 ok   iso_G is a mapping artifact (03)
 ok   iso_A novel junction absent from SJ.out.tab (02)
 ok   fingerprint of iso_known (06)
@@ -132,7 +132,7 @@ All checks passed.
 ## 정리
 
 - `iso_A`의 판정은 여섯 가지 증거로 정해짐. intron chain, novel junction 하나(501–730), short read 지지 없음, SQANTI3의 `non_canonical`, long read 흔적 없음, haplotype 1에서 canonical이 되는 SNV임.
-- 판정을 실제로 움직인 입력은 short read 표(`AMBIGUOUS` → `ARTIFACT`)와 haplotype과 그 출처(`ARTIFACT` → 보류 → rescue)였음.
+- 판정을 실제로 움직인 입력은 short read 표(`UNRESOLVED` → `ARTIFACT`)와 haplotype과 그 출처(`ARTIFACT` → 보류 → rescue)였음.
 - 이 과정을 표준 라이브러리만으로 다시 계산해서 예제의 81개 판정을 모두 재현했고, CTest로 묶어 두었음. 이것은 설명과 동작이 같다는 확인이지, 판정이 맞다는 증거는 아님.
 
 시리즈를 다 따라왔다면 [README](README.md)의 "문서와 다르게 나온 것들"에서 이 공부 중에 발견해서 고친 문서 오류들을 한 번에 볼 수 있다.
@@ -160,7 +160,7 @@ for i in (3, 5):
 ```text
 MAPQ set to 5 for: ['iso_A.r1', 'iso_A.r2', 'iso_A.r3']
 step3: ('UNSUPPORTED', 'mapping_or_repeat', 'ARTIFACT')
-step5: ('UNKNOWN', 'variant_created', 'PAN_REF_RESCUED_FALSE_NOVEL')
+step5: ('UNKNOWN', 'variant_created', 'REFERENCE_BIAS')
 ```
 
 `iso_A`의 spanning read 5개 중 3개(0.6)가 low MAPQ가 되면 기준 0.5를 넘으니, step3의 기전은 `noncanonical`에서 `mapping_or_repeat`로 바뀐다. 등급은 그대로 `ARTIFACT`다.

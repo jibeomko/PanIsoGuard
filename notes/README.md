@@ -12,12 +12,12 @@ long-read RNA-seq과 isoform이라는 말은 알지만, SQANTI3의 범주나 spl
 
 | 더한 입력 | `iso_A`의 판정 | 노트 |
 |---|---|---|
-| SQANTI3 분류표 + caller GTF | `AMBIGUOUS` | [01](01_intron_chain_and_novelty.md) |
-| + 참조 GTF | `AMBIGUOUS` (novel junction 1개) | [01](01_intron_chain_and_novelty.md) |
+| SQANTI3 분류표 + caller GTF | `UNRESOLVED` | [01](01_intron_chain_and_novelty.md) |
+| + 참조 GTF | `UNRESOLVED` (novel junction 1개) | [01](01_intron_chain_and_novelty.md) |
 | + short-read `SJ.out.tab` | `ARTIFACT` (지지 없음 + non-canonical) | [02](02_short_read_support.md), [04](04_projection.md) |
 | + long-read BAM | `ARTIFACT` (mapping 흔적 없음) | [03](03_artifact_mechanisms.md) |
-| + 개인 haplotype FASTA (출처 unknown) | `AMBIGUOUS` (rescue 보류) | [05](05_reference_bias.md) |
-| + 출처 `wgs` | `PAN_REF_RESCUED_FALSE_NOVEL` | [05](05_reference_bias.md) |
+| + 개인 haplotype FASTA (출처 unknown) | `UNRESOLVED` (rescue 보류) | [05](05_reference_bias.md) |
+| + 출처 `wgs` | `REFERENCE_BIAS` | [05](05_reference_bias.md) |
 
 [08](08_one_isoform_end_to_end.md)에서는 이 표를 PanIsoGuard 없이 Python 표준 라이브러리만으로 처음부터 다시 계산한다.
 
@@ -36,6 +36,18 @@ long-read RNA-seq과 isoform이라는 말은 알지만, SQANTI3의 범주나 spl
 | [08. isoform 하나는 어떻게 등급 하나가 될까?](08_one_isoform_end_to_end.md) | `iso_A`를 입력에서 등급까지 손으로 계산하고 PanIsoGuard와 맞춰 보기 | algorithm |
 
 [check_notes.py](check_notes.py)는 예제의 isoform 아홉 개를 입력 조합 아홉 가지로 PanIsoGuard 없이 다시 판정해서, PanIsoGuard의 결과와 하나라도 다르면 오류를 내며 멈춘다. 노트에 나온 주요 숫자도 함께 확인한다. CTest(`integration_study_notes`)로 CI에서도 돌아가서, 판정 규칙이 바뀌면 노트가 낡았다는 것을 알려 준다.
+
+## 직접 돌려 보려면
+
+bash 블록은 PanIsoGuard 실행 파일과 [data/](data/)의 입력 파일만 있으면 된다. 저장소를 받아 빌드했다면 노트에 적힌 대로 `notes/` 폴더에서 `PIG=../build/panisoguard`로 두면 되고, bioconda로 설치했다면(0.0.6 이상) 저장소 없이도 된다.
+
+```bash
+conda install -c conda-forge -c bioconda panisoguard
+panisoguard example notes-data data   # ./data/ 에 이 폴더의 data/ 와 같은 파일이 생긴다
+PIG=panisoguard                       # 노트의 $PIG 대신
+```
+
+Python 블록 중 `pysam`, `matplotlib`, `scikit-learn`을 쓰는 것은 그 패키지를 따로 설치해야 한다. STAR와 SQANTI-SIM이 필요한 블록은 아래 "확인 방법"에 적힌 준비가 더 필요하다.
 
 ## 확인 방법
 
@@ -71,7 +83,7 @@ PanIsoGuard 0.0.4(이 저장소에서 빌드)로 돌렸다. Python 쪽은 SQANTI
 
 - README의 "AUPRC 0.970 vs 0.831 baseline"에서 0.831은 무작위 순위의 AUPRC(양성 비율)였음.
 - [benchmark/sqanti_sim](../benchmark/sqanti_sim)의 README는 ISM 154개를 놓친 것을 "정답 라벨의 문제"라고 적고 있었음. 이 154개는 지운 전사체와 chain이 정확히 같은 진짜임.
-- `PARTIAL` 지지를 `MEDIUM_CONF_NOVEL`로 올리던 규칙이 가짜 3개를 통과시켰음([02](02_short_read_support.md) 4절).
+- `PARTIAL` 지지를 `NOVEL_PROBABLE`로 올리던 규칙이 가짜 3개를 통과시켰음([02](02_short_read_support.md) 4절).
 
 **아직 남아 있는 것**(고치지 않고 기록만 함)
 

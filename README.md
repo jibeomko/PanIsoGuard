@@ -69,8 +69,10 @@ conda-forge and bioconda, whatever your own conda settings are. The program is n
 
 ```bash
 docker build -t panisoguard .
-docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard examples/tiny/run.sh
-docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard examples/multi_caller/run.sh
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard \
+    bash -c "panisoguard example tiny && tiny/run.sh"
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard \
+    bash -c "panisoguard example multi_caller && multi_caller/run.sh"
 ```
 
 `-u` runs the container as your user, so it can write results into your folder. The image also
@@ -86,9 +88,12 @@ For a step-by-step walk-through of one toy gene, from input files to verdicts, s
 
 ```bash
 conda install -c conda-forge -c bioconda panisoguard
+panisoguard example tiny && tiny/run.sh     # a bundled example, copied to ./tiny (0.0.6 and later)
 ```
 
-PanIsoGuard is on the [bioconda channel](https://anaconda.org/bioconda/panisoguard); the
+The examples ship with the package: `panisoguard example` lists them (`tiny`, `multi_caller`,
+and `notes-data`, the study notes' toy gene), and `panisoguard example <name> [DIR]` copies one
+into a folder you can write to. PanIsoGuard is on the [bioconda channel](https://anaconda.org/bioconda/panisoguard); the
 [files page](https://anaconda.org/bioconda/panisoguard/files) lists the platforms each version
 is built for. The recipe is in [`recipes/bioconda/`](recipes/bioconda/). The optional PDF report tool is not part of this
 package; see [python/](python/).
@@ -130,7 +135,7 @@ ctest --test-dir build            # unit, integration and example tests
 - `--out-prefix`: where to write the results.
 
 Also give `--ref-gtf`, the annotation you gave SQANTI3. Without it no junction can be
-recognized as novel, and every novel isoform ends up `AMBIGUOUS`. All other inputs are
+recognized as novel, and every novel isoform ends up `UNRESOLVED`. All other inputs are
 optional; each one adds one more kind of evidence (see [Evidence it uses](#evidence-it-uses)).
 PanIsoGuard works with any caller and any organism. The file names below are placeholders for
 your own files.
@@ -149,7 +154,8 @@ panisoguard adjudicate \
 **Recommended** — add the short-read junctions from STAR (`--sj-tab`) and the long-read
 alignments (`--bam`). These two are what let PanIsoGuard confirm or reject a novel isoform.
 `--reference`, the genome FASTA, is needed only for CRAM input and for the haplotype check
-below:
+below. The BAM thresholds are calibrated on PacBio HiFi; for ONT reads add `--platform ont`
+(it turns the indel-near check off):
 
 ```bash
 panisoguard adjudicate \
@@ -168,7 +174,7 @@ variant. Give the sample's haplotype sequences with `--reference-haplotype` (onc
 haplotype), and PanIsoGuard reports such isoforms as reference bias instead of artifacts. Say
 where the haplotypes came from with `--haplotype-provenance`. Only `wgs` or `external` (built
 from DNA sequencing or another independent source) can lead to the reference-bias verdict. With
-`rna_derived` or `unknown` the isoform is held as `AMBIGUOUS`, because haplotypes built from the
+`rna_derived` or `unknown` the isoform is held as `UNRESOLVED`, because haplotypes built from the
 same RNA reads cannot independently explain those reads. This guard is called the circularity
 firewall.
 
@@ -191,7 +197,7 @@ some haplotype of the pangenome, the isoform is reported as reference bias. This
 independent evidence only if the junctions come from population assemblies, so
 `--pangenome-provenance` works like `--haplotype-provenance`: `population` or `external` can
 lead to the verdict, while the default `unknown` (or `sample_derived`) holds the isoform as
-`AMBIGUOUS`.
+`UNRESOLVED`.
 
 ```bash
 panisoguard adjudicate \
@@ -228,7 +234,7 @@ panisoguard combine \
 
 | File | What is in it |
 |------|----------|
-| `<prefix>.adjudicated.tsv`   | one row per isoform: the confidence class, the short-read support level, the main artifact cause (if any), and novel-junction counts |
+| `<prefix>.adjudicated.tsv`   | one row per isoform: the confidence class, the `verdict` (known / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), and novel-junction counts |
 | `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used, the `rule_trace` (the rules that decided the verdict, in order), a `graph_trace` (the same result seen as a splice graph; see [docs/method_graph.md](docs/method_graph.md)), and `bio_flags` (SQANTI3 QC values copied through for reference; they do not change the verdict; see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
@@ -240,24 +246,43 @@ decided each verdict.
 
 ### Confidence classes
 
-Every isoform gets one of seven classes. The figures group the six classes for novel isoforms
-into four verdicts.
+Every isoform gets one of seven classes. The `verdict` column groups them into what you do
+with the isoform, and `verdict_reason` names the one rule that decided it.
 
-| Class | Verdict in the figures | Meaning |
+| Class | `verdict` | Meaning |
 |---|---|---|
-| `HIGH_CONF_KNOWN` | — | Not novel: matches a known transcript exactly (SQANTI3 FSM). |
-| `HIGH_CONF_NOVEL` | Confirmed novel | Short reads confirm every novel junction, and there is no sign of an artifact. |
-| `MEDIUM_CONF_NOVEL` | Confirmed novel | Short reads confirm every novel junction, but there is a sign of an artifact. Or short-read support could not be checked, but at least 2 callers found the same isoform and there is no sign of an artifact. |
-| `LOW_CONF_PARTIAL` | Unconfirmed | Not confirmed: short reads confirm only some of the novel junctions; or none of them, but there is no sign of an artifact either; or only callers agree and there is a sign of an artifact. Partial matches to a known transcript (SQANTI3 ISM) also get this class. |
-| `PAN_REF_RESCUED_FALSE_NOVEL` | Reference bias | The junction only looks new or non-canonical because the sample's genome differs from the reference, as shown by the sample's haplotypes or a pangenome. |
-| `AMBIGUOUS` | Unconfirmed | Not enough evidence to decide, for example when no short reads were given. Also used when a reference-bias explanation rests on data that is not independent, and for SQANTI3 categories that PanIsoGuard does not judge (such as genic, antisense, fusion or intergenic). |
-| `ARTIFACT` | Artifact | Probably not real: short reads confirm none of the novel junctions, and there is a sign of an artifact. When short-read support cannot be checked, a long-read alignment problem alone is enough. |
+| `KNOWN` | known | Matches a known transcript exactly (SQANTI3 FSM). Not adjudicated. |
+| `NOVEL_CONFIRMED` | confirmed | Short reads confirm every novel junction, and there is no sign of an artifact. |
+| `NOVEL_PROBABLE` | confirmed | Short reads confirm every novel junction but there is one artifact sign; or short reads were not available and at least 2 callers found the same isoform (`caller_consensus`, methodological rather than experimental support). |
+| `UNCONFIRMED` | unconfirmed | Weak evidence: only some novel junctions confirmed (`partial_support`), or none but no artifact sign (`unsupported_no_sign`). Also every ISM, a truncated known transcript (`ism`, `ism_intrapriming`, `ism_rts`). |
+| `UNRESOLVED` | unconfirmed | Nothing to test: no short reads (`no_short_reads`), no coverage at the locus (`no_coverage`), no novel junction to check (`no_novel_junction`, NIC combinations of known junctions), or a reference-bias explanation held by the circularity firewall (`firewall_held`). SQANTI3 categories PanIsoGuard does not judge (genic, antisense, fusion, intergenic) are here with verdict `not_adjudicated`. |
+| `REFERENCE_BIAS` | reference_bias | The junction is real; it looked novel or non-canonical only because the sample's genome differs from the reference, shown by the sample's haplotypes (`haplotype_variant`) or a pangenome (`pangenome_path`). |
+| `ARTIFACT` | artifact | Probably not real: no short-read support and an artifact sign (`unsupported_<sign>`), or, without short reads, a long-read alignment problem alone (`mapping_without_short_reads`). |
+
+The names before 0.0.6 were `HIGH_CONF_KNOWN`, `HIGH_CONF_NOVEL`, `MEDIUM_CONF_NOVEL`,
+`LOW_CONF_PARTIAL`, `AMBIGUOUS`, `PAN_REF_RESCUED_FALSE_NOVEL` and `ARTIFACT`, in that order.
+
+The classes are labels, not a scale. On SQANTI-SIM truth (chr22, 1 M simulated short-read
+pairs, with the BAM), the share of genuine isoforms in each class is:
+
+| Class | genuine | false | precision |
+|---|---:|---:|---:|
+| `NOVEL_CONFIRMED` | 351 | 3 | 0.992 |
+| `NOVEL_PROBABLE` | 47 | 1 | 0.979 |
+| `UNRESOLVED` | 151 | 6 | 0.962 |
+| `UNCONFIRMED` | 172 | 46 | 0.789 (ISM 0.92; novel isoforms 0.35) |
+| `ARTIFACT` | 9 | 84 | 0.097 |
+
+`UNRESOLVED` is mostly genuine because most of it is NIC isoforms with no novel junction to
+test; `UNCONFIRMED` novel isoforms are below the 0.83 base rate. The same table at every
+short-read depth: `benchmark/sqanti3_filter_h2h/per_class.py`.
 
 The signs of an artifact are checked in this order, and the first one found is reported:
-problems in the long-read alignments at the junction (`mapping_or_repeat`), a non-canonical
-splice site (`noncanonical`), reverse-transcriptase template switching (`rt_switch`), and an
-A-rich stretch right after the 3′ end (`degradation`). The reference-bias checks come before
-all of these. Details: [docs/decision_engine.md](docs/decision_engine.md).
+problems in the long-read alignments at the junction (`mapping_or_repeat`; needs at least 3
+spanning reads), a non-canonical splice site (`noncanonical`), reverse-transcriptase template
+switching (`rt_switch`), and an A-rich stretch right after the 3′ end with no polyA motif
+before it (`degradation`). The reference-bias checks come before all of these. Details:
+[docs/decision_engine.md](docs/decision_engine.md).
 
 ### Evidence it uses
 
@@ -328,7 +353,7 @@ junctions all have short-read support) is just as accurate and simpler; see
   real, whichever matching rule is used ([benchmark/multicaller](benchmark/multicaller)).
 - **You want a clear class and reason for each novel isoform**, not just a filtered GTF. Each
   isoform gets one of 7 classes and a `rule_trace` that scripts can read (plus an optional
-  [PDF report](python/README.md)). You can keep `HIGH_CONF_NOVEL` and `MEDIUM_CONF_NOVEL` and
+  [PDF report](python/README.md)). You can keep `NOVEL_CONFIRMED` and `NOVEL_PROBABLE` and
   review the rest, instead of looking at reads one by one.
 - **You have the sample's haplotypes or a pangenome** and want to find *reference-bias*
   junctions: junctions that look non-canonical on the reference genome but are canonical in the
@@ -337,7 +362,12 @@ junctions all have short-read support) is just as accurate and simpler; see
   genomes, a phasing check agreed for 27 of 28 testable heterozygous junctions: the reads that
   use the junction come from the haplotype on which it is canonical
   ([benchmark/refbias_phasing](benchmark/refbias_phasing)). Homozygous junctions cannot be
-  checked this way.
+  checked this way. Against a full personalized-genome re-analysis of the same reads
+  (HG03516, [benchmark/refbias_3way](benchmark/refbias_3way)), the rescue criterion finds
+  31 of the 32 splice-site-SNV junctions the personal genome makes canonical, in 5 minutes
+  instead of 11 hours; as isoform verdicts it recovers 12 of 32, because a verdict needs
+  every novel junction of the isoform explained. Junctions moved by indels or structural
+  variants it does not see.
 
 **It is not an isoform caller, and it does not redo SQANTI3's QC.** It runs after the callers
 and uses SQANTI3's results as they are
@@ -358,17 +388,17 @@ Full tables, bootstrap confidence intervals and caveats are in
 |---|---|---:|---:|---:|---:|
 | none | SQANTI3 rules filter | 0.918 | 0.886 | **0.902** | **0.909** |
 | none | PanIsoGuard | — (0 calls) | 0.000 | — | 0.824 |
-| none | PanIsoGuard + BAM | — (0 calls) | 0.000 | — | 0.875 |
+| none | PanIsoGuard + BAM | — (0 calls) | 0.000 | — | 0.844 |
 | 1M | SQANTI3 rules filter | 0.918 | 0.890 | 0.904 | 0.909 |
 | 1M | every junction ≥ 3 short reads | 0.976 | **0.945** | **0.960** | 0.968 |
-| 1M | PanIsoGuard | **0.990** | 0.545 | 0.703 | 0.968 |
-| 1M | PanIsoGuard + BAM | **0.990** | 0.545 | 0.703 | **0.977** |
+| 1M | PanIsoGuard | **0.990** | 0.545 | 0.703 | 0.969 |
+| 1M | PanIsoGuard + BAM | **0.990** | 0.545 | 0.703 | **0.973** |
 
 - PanIsoGuard is the most precise, but it keeps fewer of the real isoforms (low recall). It
   holds back on NIC isoforms that only combine known junctions (there is no new junction to
   confirm) and on ISM isoforms.
-- For ranking (AUPRC) it ties the one-line short-read rule. The BAM check adds about 0.01, and
-  that gain is significant only at the lowest short-read depth.
+- For ranking (AUPRC) it ties the one-line short-read rule. The BAM check adds about 0.004,
+  within the bootstrap interval at every short-read depth.
 - Without short reads it confirms nothing, unless you give it caller agreement
   (`--caller-support`).
 
@@ -414,8 +444,10 @@ deletions, and the circularity guard held when the junction file was marked as n
 ([benchmark/pangenome](benchmark/pangenome)). It has been tested on chr22 only; reading the
 graph (GBZ) directly is future work.
 
-Read the confidence classes as an ordered scale of evidence (HIGH above MEDIUM above LOW), not
-as probabilities.
+The confidence classes are labels, not an ordered scale or probabilities: on the same truth
+set, `UNRESOLVED` (mostly NIC isoforms with no novel junction to test) is 96 % genuine while
+`UNCONFIRMED` novel isoforms are 35–40 % genuine (per-class table under
+[Confidence classes](#confidence-classes)).
 
 ## Runtime & memory
 

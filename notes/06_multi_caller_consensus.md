@@ -1,6 +1,6 @@
 # 06. caller 여러 개가 같은 isoform을 찾았다면 믿어도 될까?
 
-short read가 없으면 PanIsoGuard의 novel isoform은 거의 모두 `AMBIGUOUS`다([04](04_projection.md)). 그런데 같은 long-read 데이터에 isoform caller를 여러 개(FLAIR, IsoQuant, Bambu 등) 돌려 보는 일은 흔하다. 서로 다른 알고리즘이 같은 isoform을 찾았다면 그만큼 믿을 만하지 않을까? 이 노트에서는 caller들의 결과를 intron chain으로 맞춰 합치는 `panisoguard combine`, 그 결과를 판정에 넣는 `--caller-support`를 따라가 본다. 그리고 caller의 합의가 어떤 가짜는 잡아내지 못하는지도 예제로 확인한다.
+short read가 없으면 PanIsoGuard의 novel isoform은 거의 모두 `UNRESOLVED`다([04](04_projection.md)). 그런데 같은 long-read 데이터에 isoform caller를 여러 개(FLAIR, IsoQuant, Bambu 등) 돌려 보는 일은 흔하다. 서로 다른 알고리즘이 같은 isoform을 찾았다면 그만큼 믿을 만하지 않을까? 이 노트에서는 caller들의 결과를 intron chain으로 맞춰 합치는 `panisoguard combine`, 그 결과를 판정에 넣는 `--caller-support`를 따라가 본다. 그리고 caller의 합의가 어떤 가짜는 잡아내지 못하는지도 예제로 확인한다.
 
 > 관련 문서: [docs/relationship_to_merge_tools.md](../docs/relationship_to_merge_tools.md), [benchmark/multicaller](../benchmark/multicaller), [benchmark/merge_comparison](../benchmark/merge_comparison) · 코드: `src/core/fingerprint.cpp`, `src/core/consensus.cpp`, `src/cli/cmd_combine.cpp`
 
@@ -68,17 +68,17 @@ column -t out/matrix.tsv
 ```text
 integrated 10 isoforms  (multi-caller: 3, known: 1, novel: 9)
 wrote out/matrix.tsv
-pig_id      chrom  strand  n_introns  n_callers  n_isoforms  callers          novelty  native_ids
-PIG.000001  chrT   +       5          1          1           caller1          novel    caller1=iso_C
-PIG.000002  chrT   +       4          2          2           caller1,caller2  known    caller1=iso_known;caller2=c2_1
-PIG.000003  chrT   +       4          2          2           caller1,caller2  novel    caller1=iso_G;caller2=c2_3
-PIG.000004  chrT   +       4          2          2           caller1,caller2  novel    caller1=iso_B;caller2=c2_2
-PIG.000005  chrT   +       4          1          1           caller2          novel    caller2=c2_4
-PIG.000006  chrT   +       4          1          1           caller1          novel    caller1=iso_A
-PIG.000007  chrT   +       3          1          1           caller1          novel    caller1=iso_E
-PIG.000008  chrT   +       4          1          1           caller1          novel    caller1=iso_F
-PIG.000009  chrT   +       2          1          1           caller1          novel    caller1=iso_D
-PIG.000010  chrT   +       3          1          1           caller1          novel    caller1=iso_ism
+pig_id      chrom  strand  n_introns  n_callers  n_isoforms  callers          novelty  native_ids                      fingerprint
+PIG.000001  chrT   +       5          1          1           caller1          novel    caller1=iso_C                   10954041290435748490
+PIG.000002  chrT   +       4          2          2           caller1,caller2  known    caller1=iso_known;caller2=c2_1  4486241254994410266
+PIG.000003  chrT   +       4          2          2           caller1,caller2  novel    caller1=iso_G;caller2=c2_3      13332283987921940502
+PIG.000004  chrT   +       4          2          2           caller1,caller2  novel    caller1=iso_B;caller2=c2_2      14203394687731003782
+PIG.000005  chrT   +       4          1          1           caller2          novel    caller2=c2_4                    16905696038402022381
+PIG.000006  chrT   +       4          1          1           caller1          novel    caller1=iso_A                   10280539423540787832
+PIG.000007  chrT   +       3          1          1           caller1          novel    caller1=iso_E                   10304000854924771737
+PIG.000008  chrT   +       4          1          1           caller1          novel    caller1=iso_F                   16185630266840774612
+PIG.000009  chrT   +       2          1          1           caller1          novel    caller1=iso_D                   1762008240599116803
+PIG.000010  chrT   +       3          1          1           caller1          novel    caller1=iso_ism                 12649984371697548413
 ```
 
 1절의 Python 묶음과 똑같이 10개로 묶였다. 줄마다 묶음 하나이고, `n_callers`는 그 intron chain을 찾은 caller 수, `native_ids`는 각 caller에서의 원래 이름이다.
@@ -87,7 +87,7 @@ PIG.000010  chrT   +       3          1          1           caller1          no
 
 ## 3. caller 합의는 판정을 어떻게 바꿀까?
 
-`combine`의 표를 `--caller-support`로 주면, PanIsoGuard는 SQANTI3 분류표의 isoform 이름으로 `native_ids`에서 자기 줄을 찾아 `n_callers`를 가져온다. 그리고 short read 지지 수준이 `UNKNOWN`일 때만 이 값을 쓴다. 2 이상이면 흔적이 없을 때 `MEDIUM_CONF_NOVEL`, 흔적이 있을 때 `LOW_CONF_PARTIAL`이다([04](04_projection.md) 3절). short read 없이, BAM도 없이 돌린 결과와 BAM을 더한 결과를 나란히 놓았다.
+`combine`의 표를 `--caller-support`로 주면, PanIsoGuard는 SQANTI3 분류표의 isoform 이름으로 `native_ids`에서 자기 줄을 찾아 `n_callers`를 가져온다. 그리고 short read 지지 수준이 `UNKNOWN`일 때만 이 값을 쓴다. 2 이상이면 흔적이 없을 때 `NOVEL_PROBABLE`, 흔적이 있을 때 `UNCONFIRMED`이다([04](04_projection.md) 3절). short read 없이, BAM도 없이 돌린 결과와 BAM을 더한 결과를 나란히 놓았다.
 
 ```bash
 B="--classification data/caller1_classification.txt --isoforms-gtf data/caller1.gtf --ref-gtf data/reference.gtf --caller-support out/matrix.tsv"
@@ -98,20 +98,20 @@ grep '"iso_B"' out/cs.attribution.jsonl | python3 -c 'import json,sys; r=json.lo
 ```
 
 ```text
-isoform_id  primary_mechanism  confidence_class   primary_mechanism  confidence_class
-iso_A       noncanonical       AMBIGUOUS          noncanonical       AMBIGUOUS
-iso_B       none               MEDIUM_CONF_NOVEL  none               MEDIUM_CONF_NOVEL
-iso_C       none               AMBIGUOUS          none               AMBIGUOUS
-iso_D       none               AMBIGUOUS          none               AMBIGUOUS
-iso_E       none               AMBIGUOUS          none               AMBIGUOUS
-iso_F       noncanonical       AMBIGUOUS          noncanonical       AMBIGUOUS
-iso_G       none               MEDIUM_CONF_NOVEL  mapping_or_repeat  ARTIFACT
-iso_ism     none               LOW_CONF_PARTIAL   none               LOW_CONF_PARTIAL
-iso_known   none               HIGH_CONF_KNOWN    none               HIGH_CONF_KNOWN
-2 ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'caller-consensus n_callers=2 >= 2 corroborates the novel chain (no short-read axis) -> consensus-supported', 'project(UNKNOWN,none) -> MEDIUM_CONF_NOVEL']
+isoform_id  primary_mechanism  confidence_class  primary_mechanism  confidence_class
+iso_A       noncanonical       UNRESOLVED        noncanonical       UNRESOLVED
+iso_B       none               NOVEL_PROBABLE    none               NOVEL_PROBABLE
+iso_C       none               UNRESOLVED        none               UNRESOLVED
+iso_D       none               UNRESOLVED        none               UNRESOLVED
+iso_E       none               UNRESOLVED        none               UNRESOLVED
+iso_F       noncanonical       UNRESOLVED        noncanonical       UNRESOLVED
+iso_G       none               NOVEL_PROBABLE    mapping_or_repeat  ARTIFACT
+iso_ism     none               UNCONFIRMED       none               UNCONFIRMED
+iso_known   none               KNOWN             none               KNOWN
+2 ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'caller-consensus n_callers=2 >= 2 corroborates the novel chain (no short-read axis) -> consensus-supported', 'project(UNKNOWN,none) -> NOVEL_PROBABLE']
 ```
 
-caller 두 개가 찾은 `iso_B`와 `iso_G`가 `MEDIUM_CONF_NOVEL`로 올라갔다. caller 하나만 찾은 나머지는 그대로 `AMBIGUOUS`다.
+caller 두 개가 찾은 `iso_B`와 `iso_G`가 `NOVEL_PROBABLE`로 올라갔다. caller 하나만 찾은 나머지는 그대로 `UNRESOLVED`다.
 
 문제는 `iso_G`다. [03](03_artifact_mechanisms.md)에서 본 대로 `iso_G`는 junction 근처의 indel을 aligner가 intron으로 잘못 그린 가짜다. 그런데 caller 두 개가 모두 이 가짜를 찾았다. 두 caller가 **같은 정렬 파일**에서 isoform을 만들었다면 당연한 일이다. 정렬에서 생긴 오류는 그 정렬을 읽는 caller 모두에게 똑같이 보인다. caller의 합의는 알고리즘의 독립성을 보여 줄 뿐, 데이터의 독립성을 보여 주지 않는다. BAM을 더하자(오른쪽 두 열) mapping 흔적이 잡히면서 `iso_G`만 `ARTIFACT`로 떨어졌다. mapping 흔적이 합의보다 앞서는 이유가 이것이다.
 
@@ -157,7 +157,7 @@ caller 하나만 찾은 novel isoform 1,105개 중 진짜는 13개(1.2%)뿐이�
 
 - `combine`은 isoform을 fingerprint(염색체, strand, 정렬한 intron에 대한 64비트 FNV-1a 해시)로 묶음. 양 끝은 보지 않고, 해시가 같아도 intron 목록이 다르면 따로 묶음.
 - `combine` 표의 `novelty`는 참조 전사체와 intron chain 전체가 똑같은지만 봄. ISM과 NIC도 `novel`로 나옴.
-- `--caller-support`는 short read 지지 수준이 `UNKNOWN`일 때만 쓰이고, caller 2개 이상이면 `MEDIUM_CONF_NOVEL`(흔적이 있으면 `LOW_CONF_PARTIAL`)까지 올림.
+- `--caller-support`는 short read 지지 수준이 `UNKNOWN`일 때만 쓰이고, caller 2개 이상이면 `NOVEL_PROBABLE`(흔적이 있으면 `UNCONFIRMED`)까지 올림.
 - 같은 정렬 파일을 쓴 caller들은 정렬 오류를 함께 부름. `iso_G`는 caller 두 개가 동의했지만 BAM의 mapping 흔적으로만 잡혔음.
 - SQANTI-SIM에서 caller 5개 중 하나만 찾은 novel isoform의 precision은 0.012, 셋 이상은 0.98이었음.
 
@@ -188,12 +188,12 @@ grep '"iso_B"' out/cs_renamed.attribution.jsonl | python3 -c 'import json,sys; r
 PIG.000002	2	caller1=c1_known;caller2=c2_1
 PIG.000003	2	caller1=c1_G;caller2=c2_3
 PIG.000004	2	caller1=c1_B;caller2=c2_2
-read caller-support for 13 native isoform id(s) (consensus axis)
+read caller-support for 10 chain(s) / 13 native isoform id(s) (consensus axis, joined by chain fingerprint)
 WARNING: 7 of 7 novel SQANTI3 isoform id(s) (e.g. "iso_A") are not in the --caller-support matrix; check that the ids match exactly.
-AMBIGUOUS consensus_evaluable False n_callers None
+NOVEL_PROBABLE consensus_evaluable True n_callers 2
 ```
 
-`combine`의 묶음은 그대로다. 하지만 PanIsoGuard는 분류표의 이름 `iso_B`로 `native_ids`를 찾는데, 표에는 `c1_B`만 있다. 그래서 `iso_B`는 합의 정보가 없는 것(`consensus_evaluable = false`)으로 처리되어 `AMBIGUOUS`로 남는다. "13 native isoform id(s)"는 표에서 읽은 이름 수일 뿐이라, 이 노트를 처음 쓸 때는 짝이 맞지 않는다는 것을 알 수 없었다. 지금은 novel isoform 7개 모두 표에 없다고 경고한다. `combine`에는 SQANTI3에 넣은 것과 같은 caller GTF를 줘야 한다.
+`combine`의 묶음은 그대로다. 하지만 PanIsoGuard는 분류표의 이름 `iso_B`로 `native_ids`를 찾는데, 표에는 `c1_B`만 있다. 그래서 `iso_B`는 합의 정보가 없는 것(`consensus_evaluable = false`)으로 처리되어 `UNRESOLVED`로 남는다. "13 native isoform id(s)"는 표에서 읽은 이름 수일 뿐이라, 이 노트를 처음 쓸 때는 짝이 맞지 않는다는 것을 알 수 없었다. 지금은 novel isoform 7개 모두 표에 없다고 경고한다. `combine`에는 SQANTI3에 넣은 것과 같은 caller GTF를 줘야 한다.
 
 </details>
 
@@ -214,8 +214,8 @@ grep -P '^iso_(B|G)\t' out/cs3.adjudicated.tsv | cut -f1,7
 
 ```text
 consensus_min_callers      = 3      # a novel chain recovered by >= this many callers is
-iso_B	AMBIGUOUS
-iso_G	AMBIGUOUS
+iso_B	UNRESOLVED
+iso_G	UNRESOLVED
 ```
 
 caller가 두 개뿐이니 어떤 isoform도 기준을 넘지 못하고, 합의 축이 사실상 꺼진다. 4절에서 caller 다섯 개일 때 3이 가장 좋았다고 해서 기준을 그대로 옮겨 쓰면 이렇게 된다. 기준은 쓰는 caller 수에 맞춰 정해야 한다.

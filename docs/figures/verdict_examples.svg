@@ -62,7 +62,7 @@
 <circle cx="878" cy="136.0" r="14" fill="#0ca30c"/>
 <path d="M871.93,136.47 l4.20,4.20 l7.93,-8.87" stroke="#ffffff" stroke-width="2.61" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="902.0" y="133.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Confirmed novel</text>
-<text x="902.0" y="150.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">HIGH_CONF_NOVEL</text>
+<text x="902.0" y="150.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">NOVEL_CONFIRMED</text>
 <line x1="30" y1="170" x2="1118" y2="170" stroke="#ecebe6" stroke-width="1.2"/>
 <text x="36.0" y="195.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_C</text>
 <text x="89.0" y="195.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">extra exon</text>
@@ -94,7 +94,7 @@
 <circle cx="878" cy="204.0" r="14" fill="#8e8c85"/>
 <text x="878" y="210.53" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="18.7" font-weight="bold" fill="#ffffff" text-anchor="middle">?</text>
 <text x="902.0" y="201.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Unconfirmed</text>
-<text x="902.0" y="218.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">LOW_CONF_PARTIAL</text>
+<text x="902.0" y="218.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">UNCONFIRMED</text>
 <line x1="30" y1="238" x2="1118" y2="238" stroke="#ecebe6" stroke-width="1.2"/>
 <text x="36.0" y="263.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="15" font-weight="bold" fill="#0b0b0b" text-anchor="start">iso_G</text>
 <text x="89.0" y="263.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">acceptor +4 bp</text>
@@ -158,7 +158,7 @@
 <circle cx="878" cy="340.0" r="14" fill="#2a78d6"/>
 <path d="M883.60,337.20 a6.07,6.07 0 1 0 -0.75,5.60" stroke="#ffffff" stroke-width="2.61" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M884.35,331.60 v5.60 h-5.60" stroke="#ffffff" stroke-width="2.61" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="902.0" y="337.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="17" font-weight="bold" fill="#0b0b0b" text-anchor="start">Reference bias</text>
-<text x="902.0" y="354.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">PAN_REF_RESCUED_FALSE_NOVEL</text>
+<text x="902.0" y="354.0" font-family="'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-size="12" font-weight="normal" fill="#52514e" text-anchor="start">REFERENCE_BIAS</text>
 <circle cx="203.5" cy="405.5" r="8" fill="#0ca30c"/>
 <path d="M200.03,405.77 l2.40,2.40 l4.53,-5.07" stroke="#ffffff" stroke-width="1.49" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="217.5" y="410.0" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', sans-serif" font-size="13.5" font-weight="normal" fill="#52514e" text-anchor="start">supports</text>

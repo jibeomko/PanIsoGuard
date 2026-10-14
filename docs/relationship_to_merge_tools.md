@@ -21,7 +21,7 @@ genuinely differentiated vs merely duplicative.
 
 A frequent confusion: **SQANTI3 rescue** recovers a **reference** model that a caller
 *failed to report* (it adds a known transcript back). **PanIsoGuard's reference-bias
-rescue** (`PAN_REF_RESCUED_FALSE_NOVEL`) does the opposite — it **exonerates a sample's
+rescue** (`REFERENCE_BIAS`) does the opposite — it **exonerates a sample's
 novel call** that looks novel only because of *reference bias* (a haplotype/pangenome
 path makes the apparent novel junction explainable without new splicing), and it is gated
 by a **circularity firewall** so a rescue never rests on the sample's own RNA-derived

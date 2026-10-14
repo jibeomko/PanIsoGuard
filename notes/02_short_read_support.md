@@ -124,11 +124,11 @@ iso_G: novel [(800, 1004)] unique reads [0] -> 0/1 UNSUPPORTED | PanIsoGuard UNS
 | `short_read/catalog_axis_absent` | `--sj-tab`이나 `--ref-gtf`가 없음 | [00](00_overview.md) 연습문제 1 |
 | `no_novel_junctions` | 확인할 novel junction이 없음 (알려진 junction의 조합 등) | `iso_D` |
 
-`UNSUPPORTED`와 `UNKNOWN`은 다르다는 점을 기억해 두면 좋다. `UNSUPPORTED`는 "short read를 봤는데 없었다", `UNKNOWN`은 "볼 수 없었다"이다. [04](04_projection.md)에서 보겠지만 같은 artifact 흔적이라도 `UNSUPPORTED`와 만나면 `ARTIFACT`, `UNKNOWN`과 만나면 대개 `AMBIGUOUS`가 된다.
+`UNSUPPORTED`와 `UNKNOWN`은 다르다는 점을 기억해 두면 좋다. `UNSUPPORTED`는 "short read를 봤는데 없었다", `UNKNOWN`은 "볼 수 없었다"이다. [04](04_projection.md)에서 보겠지만 같은 artifact 흔적이라도 `UNSUPPORTED`와 만나면 `ARTIFACT`, `UNKNOWN`과 만나면 대개 `UNRESOLVED`가 된다.
 
-## 4. `PARTIAL`은 왜 더 이상 `MEDIUM_CONF_NOVEL`이 아닐까?
+## 4. `PARTIAL`은 왜 더 이상 `NOVEL_PROBABLE`이 아닐까?
 
-`iso_C`는 새 exon 하나가 끼어들어 novel junction이 두 개 생긴 isoform이다. 앞쪽(801–860)은 read 7개가 확인했지만, 뒤쪽(941–1000)은 read가 1개뿐이라 기준(3개)에 못 미친다. 0.0.3까지는 이런 `PARTIAL`을 `MEDIUM_CONF_NOVEL`로 올렸고, 0.0.4부터는 `LOW_CONF_PARTIAL`에 둔다. 같은 입력을 두 버전에 넣어 봤다. `$OLD`는 `v0.0.3` 태그를 따로 빌드한 바이너리다.
+`iso_C`는 새 exon 하나가 끼어들어 novel junction이 두 개 생긴 isoform이다. 앞쪽(801–860)은 read 7개가 확인했지만, 뒤쪽(941–1000)은 read가 1개뿐이라 기준(3개)에 못 미친다. 0.0.3까지는 이런 `PARTIAL`을 `MEDIUM_CONF_NOVEL`(0.0.6부터의 이름으로는 `NOVEL_PROBABLE`)로 올렸고, 0.0.4부터는 `UNCONFIRMED`(옛 이름 `LOW_CONF_PARTIAL`)에 둔다. 아래 출력에서 0.0.3 바이너리는 옛 이름을 그대로 찍는다. 같은 입력을 두 버전에 넣어 봤다. `$OLD`는 `v0.0.3` 태그를 따로 빌드한 바이너리다.
 
 ```bash
 A="--classification data/caller1_classification.txt --isoforms-gtf data/caller1.gtf --ref-gtf data/reference.gtf --sj-tab data/short_reads.SJ.out.tab"
@@ -141,7 +141,7 @@ done
 
 ```text
 v003  MEDIUM_CONF_NOVEL | sj_support=1/2 -> PARTIAL ; no artifact mechanism flagged -> mechanism=none ; project(PARTIAL,none) -> MEDIUM_CONF_NOVEL
-v004  LOW_CONF_PARTIAL | sj_support=1/2 -> PARTIAL ; no artifact mechanism flagged -> mechanism=none ; project(PARTIAL,none) -> LOW_CONF_PARTIAL
+v004  UNCONFIRMED | sj_support=1/2 -> PARTIAL ; no artifact mechanism flagged -> mechanism=none ; project(PARTIAL,none) -> UNCONFIRMED
 ```
 
 증거는 똑같고 마지막 조합 규칙만 다르다. 왜 바꿨을까? novel junction이 두 개인 isoform에서 하나만 확인됐다면, 나머지 하나는 여전히 long read만의 주장이다. isoform은 junction 전부가 맞아야 맞는 것이니, 확인 안 된 junction이 하나라도 남으면 isoform 전체가 확인됐다고 할 수 없다.
@@ -203,10 +203,10 @@ data/short_reads.SJ.out.tab        default config         UNSUPPORTED noncanonic
 out/star/nofilter/SJ.out.tab       default config         UNSUPPORTED noncanonical ARTIFACT
 out/star/nofilter/SJ.out.tab       out/no_motif.toml      UNSUPPORTED noncanonical ARTIFACT
 out/nofilter_plus.SJ.tab           default config         UNSUPPORTED noncanonical ARTIFACT
-out/nofilter_plus.SJ.tab           out/no_motif.toml      SUPPORTED noncanonical MEDIUM_CONF_NOVEL
+out/nofilter_plus.SJ.tab           out/no_motif.toml      SUPPORTED noncanonical NOVEL_PROBABLE
 ```
 
-관문 세 개(STAR의 필터, strand 0, motif 조건)를 모두 열어야 비로소 `SUPPORTED`가 된다. 이때도 SQANTI3가 `all_canonical = non_canonical`을 적어 두었으니 기전은 `noncanonical`이고, 등급은 `MEDIUM_CONF_NOVEL`에 그친다([04](04_projection.md)).
+관문 세 개(STAR의 필터, strand 0, motif 조건)를 모두 열어야 비로소 `SUPPORTED`가 된다. 이때도 SQANTI3가 `all_canonical = non_canonical`을 적어 두었으니 기전은 `noncanonical`이고, 등급은 `NOVEL_PROBABLE`에 그친다([04](04_projection.md)).
 
 이 세 관문은 모두 같은 사실 하나에서 나온다. **short read는 참조 게놈에 정렬되고, 참조 게놈에서 이 junction은 non-canonical이다.** non-canonical junction은 정렬 오류로 생기는 경우가 훨씬 많아서, STAR도 PanIsoGuard도 이런 junction을 기본적으로 믿지 않는다. 대개는 옳은 판단이다(`iso_F`가 그런 경우다).
 
@@ -227,13 +227,13 @@ grep -E '^(ruleset|config|thresholds)' out/min1.provenance.log
 ```text
 sj_min_uniq_reads = 1      # STAR SJ.tab n_uniq to corroborate a novel junction
 isoform_id  novelty_support  confidence_class  novelty_support  confidence_class
-iso_C       PARTIAL          LOW_CONF_PARTIAL  SUPPORTED        HIGH_CONF_NOVEL
-ruleset_version	default-0.0.2
+iso_C       PARTIAL          UNCONFIRMED       SUPPORTED        NOVEL_CONFIRMED
+ruleset_version	default-0.0.3
 config	out/min1.toml
-thresholds	sj_min_uniq_reads=1 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 min_mapq=20 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
+thresholds	sj_min_uniq_reads=1 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 ```
 
-`iso_C`의 두 번째 junction(read 1개)이 기준을 넘으면서 `iso_C`가 `HIGH_CONF_NOVEL`로 올라간다. 기준 하나로 등급이 두 단계 뛴다.
+`iso_C`의 두 번째 junction(read 1개)이 기준을 넘으면서 `iso_C`가 `NOVEL_CONFIRMED`로 올라간다. 기준 하나로 등급이 두 단계 뛴다.
 
 `provenance.log`의 마지막 세 줄을 같이 보면 조심할 점이 하나 있다. `ruleset_version`은 TOML의 `[meta]`에 적힌 이름을 그대로 옮긴 것이라, 파일을 복사해서 기준값만 바꾸면 이름은 `default-0.0.2` 그대로다. 그래서 실제로 쓴 기준값은 `thresholds` 줄에 따로 적힌다. 여기서는 `sj_min_uniq_reads=1`이 보인다. 설정 파일이 나중에 바뀌거나 사라져도 이 줄로 판정을 재현할 수 있다.
 
@@ -245,7 +245,7 @@ thresholds	sj_min_uniq_reads=1 sj_require_canonical_motif=true consensus_min_cal
 
 - novel junction 하나는 `SJ.out.tab`에 염색체, strand, 좌표가 정확히 같은 줄이 있고, `n_uniq ≥ 3`, `motif ≥ 1`일 때 확인된 것으로 침. `n_multi`와 `annotated`는 쓰지 않음.
 - isoform의 지지 수준은 novel junction `n`개 중 확인된 `k`개로 정함. 모두면 `SUPPORTED`, 일부면 `PARTIAL`, 없으면 `UNSUPPORTED`, 볼 수 없으면 `UNKNOWN`(이유 세 가지)임.
-- 0.0.4부터 `PARTIAL`은 `LOW_CONF_PARTIAL`에 머묾. 확인 안 된 junction이 남은 isoform을 confident novel로 부르던 것이 SQANTI-SIM에서 가짜 3개를 통과시켰기 때문임.
+- 0.0.4부터 `PARTIAL`은 `UNCONFIRMED`에 머묾. 확인 안 된 junction이 남은 isoform을 confident novel로 부르던 것이 SQANTI-SIM에서 가짜 3개를 통과시켰기 때문임.
 - `iso_A`의 junction은 short read 9개가 정렬됐지만 STAR의 non-canonical 필터, strand 0, motif 조건이라는 세 관문에 모두 걸림. 셋 다 "참조 게놈에서 non-canonical"이라는 한 사실에서 나옴. canonical로 만드는 염기는 intron 안에 있어서 read로는 볼 수 없음.
 - 기준은 TOML로 바꿀 수 있음. 실제로 쓴 기준값은 `provenance.log`의 `thresholds` 줄에 남음. `ruleset_version`은 설정 파일에 적힌 이름일 뿐이라 기준값을 바꿔도 따라 바뀌지 않음.
 
@@ -267,12 +267,12 @@ A="--classification data/caller1_classification.txt --isoforms-gtf data/caller1.
 awk 'BEGIN{FS=OFS="\t"} $2==941 && $3==1000 {$7=1; $8=40} 1' data/short_reads.SJ.out.tab > out/multi.SJ.tab
 grep -P '\t941\t1000\t' out/multi.SJ.tab
 $PIG adjudicate $A --sj-tab out/multi.SJ.tab --out-prefix out/multi 2>/dev/null
-grep -P '^iso_C\t' out/multi.adjudicated.tsv | cut -f1,5,7,9
+grep -P '^iso_C\t' out/multi.adjudicated.tsv | cut -f1,5,7,11
 ```
 
 ```text
 chrT	941	1000	1	1	0	1	40	50
-iso_C	PARTIAL	LOW_CONF_PARTIAL	1
+iso_C	PARTIAL	UNCONFIRMED	1
 ```
 
 그대로 `PARTIAL`이다. multi-mapped read는 반복 서열이나 paralog처럼 비슷한 서열이 여러 곳에 있을 때 생긴다. 그런 read가 이 자리의 junction을 걸쳤다는 보장이 없고, 오히려 이 junction 자체가 반복 서열 때문에 생긴 정렬 artifact일 가능성을 시사한다. 그래서 확인 증거로 쓰지 않는다.
@@ -292,14 +292,14 @@ iso_C	PARTIAL	LOW_CONF_PARTIAL	1
 (cat data/short_reads.SJ.out.tab; printf 'chrT\t941\t1000\t1\t1\t0\t2\t0\t44\n') > out/merged.SJ.tab
 grep -P '\t941\t1000\t' out/merged.SJ.tab
 $PIG adjudicate $A --sj-tab out/merged.SJ.tab --out-prefix out/merged 2>&1 | grep 'short-read'
-grep -P '^iso_C\t' out/merged.adjudicated.tsv | cut -f1,5,7,9
+grep -P '^iso_C\t' out/merged.adjudicated.tsv | cut -f1,5,7,11
 ```
 
 ```text
 chrT	941	1000	1	1	0	1	0	50
 chrT	941	1000	1	1	0	2	0	44
 read 10 short-read junctions
-iso_C	SUPPORTED	HIGH_CONF_NOVEL	2
+iso_C	SUPPORTED	NOVEL_CONFIRMED	2
 ```
 
 11줄을 읽었지만 junction은 10개로 세고, 941–1000의 read는 1 + 2 = 3개가 되어 기준을 넘는다. 여러 시료를 합칠 때 편리한 동작이지만, 거꾸로 보면 "시료 하나에서 3개"와 "시료 셋에서 1개씩"을 구별하지 않는다는 뜻이기도 하다.

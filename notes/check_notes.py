@@ -22,7 +22,7 @@ PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "build", "p
 D = lambda name: os.path.join(DATA, name)
 
 NOVEL = ("novel_in_catalog", "novel_not_in_catalog")
-CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_mapq=20, clip_bp=20, window=10,
+CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_mapq=20, min_spanning=3, clip_bp=20, window=10,
            gates={"low_mapq": 0.5, "supplementary": 0.5, "indel_near": 0.5, "softclip": 1.01})
 
 
@@ -123,69 +123,87 @@ def fingerprint(chrom, strand, introns):
 def verdict(iso, row, chain, inp):
     """Return (novelty_support, primary_mechanism, confidence_class, n_novel, n_sr, circular)."""
     catalog, sj, reads = inp.get("catalog"), inp.get("sj"), inp.get("reads")
-    n_novel = n_sr = n_created = n_pan = 0
+    n_novel = n_sr = n_created = n_pan = n_known = n_known_sr = n_gated = 0
+    hap_common = None                                   # haplotypes that explain EVERY created junction
     spanning, worst = 0, dict.fromkeys(CFG["gates"], 0.0)
+
+    def sr_ok(jx):
+        r = sj.get((chrom, strand, jx))
+        return bool(r and r["n_uniq"] >= CFG["min_uniq"] and (r["motif"] >= 1 or not CFG["need_canonical"]))
+
     if chain and catalog is not None:
         chrom, strand, introns = chain
         for jx in introns:
             if (chrom, strand, jx) in catalog:
+                n_known += 1                                # coverage at the known junctions
+                n_known_sr += sj is not None and sr_ok(jx)
                 continue
             n_novel += 1
             if "ref_seq" in inp:
                 hap_ok = [canonical(h, *jx, strand) for h in inp["haps"]]
-                n_created += not canonical(inp["ref_seq"], *jx, strand) and any(hap_ok)
+                if not canonical(inp["ref_seq"], *jx, strand) and any(hap_ok):
+                    n_created += 1
+                    hap_common = hap_ok if hap_common is None else [a and b for a, b in zip(hap_common, hap_ok)]
             if "pangenome" in inp:
                 n_pan += (chrom, strand, jx) in inp["pangenome"]
             if sj is not None:
-                r = sj.get((chrom, strand, jx))
-                n_sr += bool(r and r["n_uniq"] >= CFG["min_uniq"] and (r["motif"] >= 1 or not CFG["need_canonical"]))
+                n_sr += sr_ok(jx)
             if reads is not None:
                 n, hits = bam_features(reads, jx)
                 spanning += n
-                if n:
+                if n >= CFG["min_spanning"]:                # fractions count only with enough reads
+                    n_gated += 1
                     for k in worst:
                         worst[k] = max(worst[k], hits[k] / n)
     cat = row["structural_category"]
     if cat == "full-splice_match":
-        return "SUPPORTED", "none", "HIGH_CONF_KNOWN", n_novel, n_sr, False
+        return "SUPPORTED", "none", "KNOWN", n_novel, n_sr, False
     if cat == "incomplete-splice_match":
-        return "UNKNOWN", "none", "LOW_CONF_PARTIAL", n_novel, n_sr, False
+        return "UNKNOWN", "none", "UNCONFIRMED", n_novel, n_sr, False
     if cat not in NOVEL:
-        return "UNKNOWN", "none", "AMBIGUOUS", n_novel, n_sr, False
+        return "UNKNOWN", "none", "UNRESOLVED", n_novel, n_sr, False
     for axis, n_ok, mech in (("pangenome", n_pan, "population_known"), ("ref_seq", n_created, "variant_created")):
         if axis in inp and n_novel and n_ok == n_novel:
+            if axis == "ref_seq" and not any(hap_common):   # created on different haplotypes: held
+                return "UNKNOWN", mech, "UNRESOLVED", n_novel, n_sr, False
             circular = inp[axis + "_circular"]
-            return ("UNKNOWN", mech, "AMBIGUOUS" if circular else "PAN_REF_RESCUED_FALSE_NOVEL",
+            return ("UNKNOWN", mech, "UNRESOLVED" if circular else "REFERENCE_BIAS",
                     n_novel, n_sr, circular)
     if sj is None or not chain or n_novel == 0:
         sup = "UNKNOWN"
+    elif n_sr == n_novel:
+        sup = "SUPPORTED"
+    elif n_sr == 0:
+        # no reads at the novel junctions is absence only if the known junctions are covered
+        sup = "UNKNOWN" if n_known and n_known_sr == 0 else "UNSUPPORTED"
     else:
-        sup = "SUPPORTED" if n_sr == n_novel else "UNSUPPORTED" if n_sr == 0 else "PARTIAL"
+        sup = "PARTIAL"
     perc_a = row.get("perc_A_downstream_TTS", "NA")
-    if reads is not None and spanning and any(worst[k] > g for k, g in CFG["gates"].items()):
+    motif = row.get("polyA_motif_found", "NA")
+    if reads is not None and n_gated and any(worst[k] > g for k, g in CFG["gates"].items()):
         mech = "mapping_or_repeat"
     elif row.get("all_canonical") == "non_canonical":
         mech = "noncanonical"
     elif row.get("RTS_stage", "").upper() == "TRUE":
         mech = "rt_switch"
-    elif perc_a not in ("NA", "") and float(perc_a) >= 60:
-        mech = "degradation"
+    elif perc_a not in ("NA", "") and float(perc_a) >= 60 and motif.upper() != "TRUE":
+        mech = "degradation"                                # intra-priming: A-rich AND no polyA motif
     else:
         mech = "none"
     if sup == "UNKNOWN":
         n_callers = inp.get("callers", {}).get(iso, 0)
         if mech == "mapping_or_repeat":
             cls = "ARTIFACT"
-        elif n_callers >= CFG["min_callers"]:
-            cls = "MEDIUM_CONF_NOVEL" if mech == "none" else "LOW_CONF_PARTIAL"
+        elif n_callers >= CFG["min_callers"] and chain and catalog is not None:   # agreement on an examined chain only
+            cls = "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
         else:
-            cls = "AMBIGUOUS"
+            cls = "UNRESOLVED"
     elif sup == "SUPPORTED":
-        cls = "HIGH_CONF_NOVEL" if mech == "none" else "MEDIUM_CONF_NOVEL"
+        cls = "NOVEL_CONFIRMED" if mech == "none" else "NOVEL_PROBABLE"
     elif sup == "PARTIAL":
-        cls = "LOW_CONF_PARTIAL"
+        cls = "UNCONFIRMED"
     else:
-        cls = "LOW_CONF_PARTIAL" if mech == "none" else "ARTIFACT"
+        cls = "UNCONFIRMED" if mech == "none" else "ARTIFACT"
     return sup, mech, cls, n_novel, n_sr, False
 
 
@@ -259,16 +277,16 @@ def main():
 
     # The headline numbers quoted in the notes.
     step = [results[f"step{i}"]["iso_A"][2] for i in range(6)]
-    expect = ["AMBIGUOUS", "AMBIGUOUS", "ARTIFACT", "ARTIFACT", "AMBIGUOUS", "PAN_REF_RESCUED_FALSE_NOVEL"]
+    expect = ["UNRESOLVED", "UNRESOLVED", "ARTIFACT", "ARTIFACT", "UNRESOLVED", "REFERENCE_BIAS"]
     checks = [
         ("iso_A across the six steps (00)", step == expect),
-        ("iso_C is PARTIAL -> LOW_CONF_PARTIAL (02)", results["step2"]["iso_C"][:3] == ("PARTIAL", "none", "LOW_CONF_PARTIAL")),
+        ("iso_C is PARTIAL -> UNCONFIRMED (02)", results["step2"]["iso_C"][:3] == ("PARTIAL", "none", "UNCONFIRMED")),
         ("iso_G is a mapping artifact (03)", results["step3"]["iso_G"][1:3] == ("mapping_or_repeat", "ARTIFACT")),
         ("iso_A novel junction absent from SJ.out.tab (02)", ("chrT", "+", (500, 730)) not in sj),
         ("fingerprint of iso_known (06)", fingerprint("chrT", "+", chains["iso_known"][2]) == 4486241254994410266),
         ("unjoined isoform id is warned about (01)", warned),
         ("consensus lifts iso_G, BAM drops it (06)",
-         results["consensus"]["iso_G"][2] == "MEDIUM_CONF_NOVEL" and results["consensus_bam"]["iso_G"][2] == "ARTIFACT"),
+         results["consensus"]["iso_G"][2] == "NOVEL_PROBABLE" and results["consensus_bam"]["iso_G"][2] == "ARTIFACT"),
     ]
     counts = {1.0: (385, 4), 0.75: (45, 1), 0.5: (146, 6), 0.25: (154, 61), 0.1: (0, 8), 0.0: (0, 68)}
     tp = fp = 0

@@ -31,7 +31,7 @@ both files). GTF: `exon` lines grouped by `transcript_id`. BED12: `blockSizes` /
 
 A reference annotation (e.g. GENCODE) used to build the known-intron/known-site
 catalog. Without it, novel-junction-based axes (short-read, BAM, variant) are not
-evaluable and novel isoforms fall to `AMBIGUOUS`.
+evaluable and novel isoforms fall to `UNRESOLVED`.
 
 ## STAR SJ.tab (`--sj-tab`, optional)
 
@@ -67,19 +67,23 @@ adjudicates using this junction set (the in-process GBZ tier stays behind
 `-DWITH_PANGENOME_LIB`). Columns:
 
 ```text
-chrom   intron_start   intron_end   strand   [n_haplotypes]
+chrom   intron_start   intron_end   strand   [n_haplotypes]   [haplotype_ids]
 ```
 
 `intron_start`/`intron_end` are **1-based inclusive** (first/last intronic base, the
 same convention as STAR `SJ.tab` and GTF introns); `strand` is `+`/`-` (`1`/`2` also
 accepted); the optional 5th column is the number of supporting graph haplotypes
 (default `1`, gated by `axis_pangenome.min_haplotypes`; note `1` is a single graph path,
-not a population frequency — raise it for stricter support). When **all** of an isoform's
-novel-vs-linear-reference junctions are found here, the apparent novelty is consistent
-with reference bias → `PAN_REF_RESCUED_FALSE_NOVEL` (mechanism `population_known`). This
+not a population frequency — raise it for stricter support); the optional 6th column is
+a comma-separated list of the haplotype/path ids carrying the junction (e.g.
+`HG002#1,HG005#2`; duplicate rows for one junction union their ids). When **all** of an
+isoform's novel-vs-linear-reference junctions are found here — on **one common path**, if
+path ids are given — the apparent novelty is consistent
+with reference bias → `REFERENCE_BIAS` (mechanism `population_known`); with path ids and
+no common path the call is held `UNRESOLVED` (`path_inconsistent`). This
 is independent evidence only if the file was extracted from population assemblies;
 PanIsoGuard cannot verify that, so the rescue is gated by
 `--pangenome-provenance {population|external|sample_derived|unknown}` — `population`/
 `external` promote, while the default `unknown` (and `sample_derived`) are held
-`AMBIGUOUS` under the same circularity firewall as the variant axis. **Experimental:**
+`UNRESOLVED` under the same circularity firewall as the variant axis. **Experimental:**
 not yet validated on real graph data (GATE-1).

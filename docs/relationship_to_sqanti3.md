@@ -16,7 +16,7 @@ deliberately **does not** recompute any of SQANTI3's descriptors.
 | Feature | Already in SQANTI3 | PanIsoGuard's stance |
 |---------|--------------------|----------------------|
 | TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | **consume, don't recompute** — surfaced verbatim as `bio_flags` |
-| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | **consume** — `perc_A_downstream_TTS` is a degradation prior; the rest are `bio_flags` |
+| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | **consume** — `perc_A_downstream_TTS ≥ 60` **and** `polyA_motif_found ≠ TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
 | ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | **consume** — `predicted_NMD` surfaced as a `bio_flags` annotation |
 | splice-site motif / junction QC (`splice_site`, `RTS_junction`, `indel_near_junct`, `junction_category`) | yes (junctions file) | **consume** — `all_canonical` / `RTS_stage` are mechanism priors |
 | SQANTI-prior artifact rules | yes | already consumed: `RTS_stage`, `all_canonical`, `perc_A_downstream_TTS` |
@@ -48,14 +48,14 @@ orthogonal, largely SQANTI-independent evidence:
 - **pangenome support** — a junction realizable on a population-graph path though absent
   from the linear reference.
 - **circularity firewall** — rescues that would rest on the sample's own RNA-derived
-  data are held `AMBIGUOUS`, never promoted.
+  data are held `UNRESOLVED`, never promoted.
 
 It explicitly avoids re-deriving TSS/TTS, ORF/NMD, polyA motif, or splice motif, and
 makes no SQANTI3-style ML/rule QC filter — those would duplicate SQANTI3.
 
 > **"Rescue" means the opposite thing in the two tools.** SQANTI3 *rescue* recovers a
 > **reference** transcript a caller failed to report (it adds a known model back).
-> PanIsoGuard's reference-bias *rescue* (`PAN_REF_RESCUED_FALSE_NOVEL`) does the reverse —
+> PanIsoGuard's reference-bias *rescue* (`REFERENCE_BIAS`) does the reverse —
 > it **exonerates a sample's novel call** that only *looks* novel because of reference
 > bias, gated by a circularity firewall. Same word, opposite direction; they do not
 > compete. (See also [relationship_to_merge_tools.md](relationship_to_merge_tools.md).)
@@ -70,10 +70,13 @@ the relevant SQANTI3 descriptors verbatim (`null` when the column is absent or `
 "bio_flags": {
   "dist_to_CAGE_peak": 5,
   "dist_to_polyA_site": 8,
-  "predicted_NMD": null,
-  "polyA_motif_found": null
+  "predicted_NMD": null
 }
 ```
+
+(`polyA_motif_found` sat here until 0.0.5; it is now in `evidence`, because it refines the
+intra-priming sign: an A-rich stretch after the 3' end only counts as internal priming when
+no polyA motif precedes it.)
 
 These are **biological-plausibility annotations only** — read from the SQANTI3
 classification, never computed by PanIsoGuard, and they do **not** enter the rule engine
