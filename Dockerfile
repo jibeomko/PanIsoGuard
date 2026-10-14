@@ -20,6 +20,7 @@ RUN micromamba run -n base bash -lc '\
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_PREFIX_PATH="$CONDA_PREFIX" \
         && cmake --build build -j"$(nproc)" \
+        && cmake --install build --prefix /opt/pig \
         && ./build/panisoguard --version'
 
 # --- stage 2: slim runtime (no compiler) -------------------------------------
@@ -32,7 +33,8 @@ USER root
 RUN micromamba install -y -n base -c conda-forge -c bioconda \
         'htslib>=1.18' zlib 'python>=3.9' 'matplotlib>=3.4' \
     && micromamba clean -ay
-COPY --from=build /src/build/panisoguard /opt/conda/bin/panisoguard
+COPY --from=build /opt/pig/bin/panisoguard /opt/conda/bin/panisoguard
+COPY --from=build /opt/pig/share/panisoguard /opt/conda/share/panisoguard
 COPY --from=build /src/python /opt/panisoguard-python
 RUN micromamba run -n base pip install --no-cache-dir /opt/panisoguard-python \
     && micromamba run -n base panisoguard --version \

@@ -87,14 +87,23 @@ add_executable(panisoguard
   src/cli/cmd_adjudicate.cpp
   src/cli/cmd_benchmark.cpp
   src/cli/cmd_ablate.cpp
+  src/cli/cmd_example.cpp
 )
 target_link_libraries(panisoguard PRIVATE panisoguard_core)
 target_compile_definitions(panisoguard PRIVATE PANISOGUARD_VERSION="${PROJECT_VERSION}")
+# `panisoguard example` looks for the bundled examples next to the installed binary
+# (<prefix>/share/panisoguard) and falls back to the source checkout for a build-tree binary.
+target_compile_definitions(panisoguard PRIVATE PANISOGUARD_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 if(WITH_PANGENOME_LIB)
   target_compile_definitions(panisoguard PRIVATE HAVE_GBWTGRAPH=1)
 endif()
 
 install(TARGETS panisoguard RUNTIME DESTINATION bin)
+# The bundled examples ship with the binary (so the bioconda package and the Docker image
+# carry them); `panisoguard example <name>` copies one into a working folder.
+install(DIRECTORY examples/tiny examples/multi_caller DESTINATION share/panisoguard/examples
+        USE_SOURCE_PERMISSIONS PATTERN "output" EXCLUDE)
+install(DIRECTORY notes/data DESTINATION share/panisoguard/notes USE_SOURCE_PERMISSIONS)
 
 # --- Tests -------------------------------------------------------------------
 if(PANISOGUARD_BUILD_TESTS)
@@ -131,6 +140,10 @@ if(PANISOGUARD_BUILD_TESTS)
       COMMAND bash "${CMAKE_SOURCE_DIR}/examples/${ex}/run.sh" "${CMAKE_BINARY_DIR}/example_${ex}_out")
     set_tests_properties(example_${ex} PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
   endforeach()
+  # `panisoguard example` must find a bundled example, copy it, and the copy must still run.
+  add_test(NAME example_copy
+    COMMAND bash -c "rm -rf '${CMAKE_BINARY_DIR}/example_copy' && '$<TARGET_FILE:panisoguard>' example tiny '${CMAKE_BINARY_DIR}/example_copy' && bash '${CMAKE_BINARY_DIR}/example_copy/run.sh'")
+  set_tests_properties(example_copy PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
 
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,

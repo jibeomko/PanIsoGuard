@@ -39,6 +39,8 @@ test:
       > mini.gtf
     - panisoguard combine --gtf flair:mini.gtf --out combine_smoke.tsv
     - test -s combine_smoke.tsv
+    - panisoguard example tiny
+    - bash tiny/run.sh
 
 about:
   home: https://github.com/jibeomko/PanIsoGuard
