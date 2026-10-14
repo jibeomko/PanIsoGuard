@@ -269,7 +269,7 @@ def main():
                 "number of callers (more callers -> require more agreement). engine_demo "
                 "confirms the wired consensus axis reproduces this through `adjudicate "
                 "--caller-support` on real caller output (long-read only, no short-read "
-                "SJ): a single caller yields 0 confident novel calls (all AMBIGUOUS), "
+                "SJ): a single caller yields 0 confident novel calls (all UNRESOLVED), "
                 "while consensus promotes the cross-caller-agreed novels. "
                 "consensus_min_callers is configurable (TOML); the default is 2." %
                 len(per_caller)),

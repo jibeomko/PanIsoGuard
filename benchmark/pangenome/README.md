@@ -32,8 +32,8 @@ include HG002/NA24385, so any graph support comes from *other* population haplot
 | Axis | Setup | Result |
 |------|-------|--------|
 | **Specificity** | real FLAIR chr22 isoforms (1,579; 730 genuine-novel) run through the HPRC junctions, provenance `population` | **0 false rescues** — no genuine novel junction coincides with a population deletion (0 rescued overall) |
-| **Sensitivity** | constructed isoforms whose novel intron **is** a real HPRC deletion ([gate1_check.py](gate1_check.py)) | **6/6 rescued** `PAN_REF_RESCUED_FALSE_NOVEL` under `population` provenance |
-| **Circularity firewall** | same isoforms, default `unknown` provenance | **6/6 held `AMBIGUOUS`** with `circularity_flag=true` (never promoted) |
+| **Sensitivity** | constructed isoforms whose novel intron **is** a real HPRC deletion ([gate1_check.py](gate1_check.py)) | **6/6 rescued** `REFERENCE_BIAS` under `population` provenance |
+| **Circularity firewall** | same isoforms, default `unknown` provenance | **6/6 held `UNRESOLVED`** with `circularity_flag=true` (never promoted) |
 | **Exactness** | near-miss (5 bp off) and off-graph control introns | **0 false rescues** (exact junction match required) |
 
 So the pangenome axis rescues an apparent novel junction **only** when it is a real

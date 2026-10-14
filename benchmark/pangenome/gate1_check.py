@@ -6,9 +6,9 @@ caller output in benchmark/results/pangenome (run a real chr22 FLAIR set through
 HPRC-derived junctions -> 0 rescues). This script is the complementary constructed
 check on REAL graph-derived junction coordinates:
 
-  POS       novel intron == a real HPRC graph junction  -> PAN_REF_RESCUED_FALSE_NOVEL
+  POS       novel intron == a real HPRC graph junction  -> REFERENCE_BIAS
             (only when --pangenome-provenance is population/external)
-  CIRCULAR  same isoform, provenance=unknown (default)   -> held AMBIGUOUS (firewall),
+  CIRCULAR  same isoform, provenance=unknown (default)   -> held UNRESOLVED (firewall),
             circularity_flag=true  (NOT promoted)
   NEARMISS  novel intron 5 bp off a graph junction       -> held (exact match required)
   CONTROL   novel intron absent from the graph           -> held (no support)
@@ -115,18 +115,18 @@ def main():
             cls_pop, _ = vp.get(iso, ("MISSING", ""))
             cls_unk, circ_unk_flag = vu.get(iso, ("MISSING", ""))
             if cat_ == "POS":
-                if cls_pop != "PAN_REF_RESCUED_FALSE_NOVEL":
-                    fails.append(f"{iso}: population -> {cls_pop} (expected PAN_REF_RESCUED_FALSE_NOVEL)")
+                if cls_pop != "REFERENCE_BIAS":
+                    fails.append(f"{iso}: population -> {cls_pop} (expected REFERENCE_BIAS)")
                 else:
                     rescued_pop += 1
-                if cls_unk == "PAN_REF_RESCUED_FALSE_NOVEL":
+                if cls_unk == "REFERENCE_BIAS":
                     fails.append(f"{iso}: unknown provenance was PROMOTED (firewall breach!)")
                 else:
                     held_unk += 1
                     if circ_unk_flag == "true":
                         circ_unk += 1
             else:  # NEARMISS / CONTROL must never be rescued
-                if cls_pop == "PAN_REF_RESCUED_FALSE_NOVEL":
+                if cls_pop == "REFERENCE_BIAS":
                     fails.append(f"{iso} ({cat_}): falsely rescued (expected held)")
 
         print(f"[gate1] POS={npos}  rescued(population)={rescued_pop}/{npos}  "

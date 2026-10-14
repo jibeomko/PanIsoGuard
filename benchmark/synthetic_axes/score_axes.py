@@ -25,8 +25,8 @@ table = defaultdict(Counter)
 for i, c in cat.items():
     table[c][cls.get(i, "MISSING")] += 1
 
-order = ["HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL", "LOW_CONF_PARTIAL",
-         "PAN_REF_RESCUED_FALSE_NOVEL", "ARTIFACT", "AMBIGUOUS"]
+order = ["NOVEL_CONFIRMED", "NOVEL_PROBABLE", "UNCONFIRMED",
+         "REFERENCE_BIAS", "ARTIFACT", "UNRESOLVED"]
 labeldesc = {"A": "A genuine", "B": "B noncanon-artifact",
              "C": "C mapping-artifact", "D": "D reference-bias"}
 print(f"{'category':22} " + "  ".join(k.replace('_CONF','').replace('_FALSE_NOVEL','') for k in order))

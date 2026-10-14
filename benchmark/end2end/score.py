@@ -28,8 +28,8 @@ recovered=sum(1 for c in iso_chain.values() if c in hidden)
 print(f"hidden(genuine) transcripts={len(hidden)}  FLAIR isoforms reconstructing a hidden chain (exact)={recovered}")
 # score the SQANTI-novel set (NIC/NNC) by truth
 def pred(c):
-    if c in ("HIGH_CONF_NOVEL","MEDIUM_CONF_NOVEL"): return "genuine"
-    if c in ("LOW_CONF_PARTIAL","ARTIFACT"): return "false"
+    if c in ("NOVEL_CONFIRMED","NOVEL_PROBABLE"): return "genuine"
+    if c in ("UNCONFIRMED","ARTIFACT"): return "false"
     return "abstain"
 conf=Counter(); bytruth_class=Counter()
 for iso,c in cat.items():

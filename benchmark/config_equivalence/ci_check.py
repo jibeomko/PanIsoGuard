@@ -6,8 +6,8 @@ A `consensus_min_callers` sentinel in the default TOML once silently DISABLED th
 consensus axis when a user passed `--config config/rules.default.toml` (the TOML said
 999 while the built-in was 2). This test would have caught it: it adjudicates the same
 fixture WITH and WITHOUT the default config and asserts the verdicts are byte-identical,
-AND that the consensus axis actually fires (a >=2-caller novel reaches MEDIUM_CONF_NOVEL,
-not AMBIGUOUS). Any future default that drifts between the TOML and the built-ins fails.
+AND that the consensus axis actually fires (a >=2-caller novel reaches NOVEL_PROBABLE,
+not UNRESOLVED). Any future default that drifts between the TOML and the built-ins fails.
 
 Usage: ci_check.py <path-to-panisoguard>   (run by the `integration_config_equivalence` CTest)
 """
@@ -87,9 +87,9 @@ def main():
             return 1
         # (2) the consensus axis must actually fire (guards the silent-disable bug class)
         v = verdict_of(builtin, "isoX")
-        if v != "MEDIUM_CONF_NOVEL":
+        if v != "NOVEL_PROBABLE":
             sys.stderr.write(f"FAIL: consensus axis did not fire — isoX = {v}, expected "
-                             "MEDIUM_CONF_NOVEL (>=2 callers, no short-read support).\n")
+                             "NOVEL_PROBABLE (>=2 callers, no short-read support).\n")
             return 1
         print(f"OK: shipped default config == built-in defaults; consensus fires (isoX -> {v})")
         return 0

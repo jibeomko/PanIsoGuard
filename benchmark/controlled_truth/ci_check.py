@@ -45,11 +45,11 @@ def run(cmd, **kw):
 
 
 def pred(cls: str) -> str:
-    if cls in ("HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL"):
+    if cls in ("NOVEL_CONFIRMED", "NOVEL_PROBABLE"):
         return "genuine"
-    if cls in ("LOW_CONF_PARTIAL", "ARTIFACT"):
+    if cls in ("UNCONFIRMED", "ARTIFACT"):
         return "false"
-    return "abstain"  # AMBIGUOUS / HIGH_CONF_KNOWN
+    return "abstain"  # UNRESOLVED / KNOWN
 
 
 def main() -> int:

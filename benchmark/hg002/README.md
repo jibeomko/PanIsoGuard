@@ -1,6 +1,6 @@
 # HG002 variant-axis validation (real, non-circular)
 
-The acceptance-critical validation of the headline `PAN_REF_RESCUED_FALSE_NOVEL`
+The acceptance-critical validation of the headline `REFERENCE_BIAS`
 mechanism on **real, independent (WGS-derived) variants** — GIAB HG002 — so the
 rescue evidence is genuinely independent of the RNA being adjudicated (the
 circularity firewall's `wgs` provenance).
@@ -35,9 +35,9 @@ overwhelmingly canonical on GRCh38, so motif-altering SNVs are rare — as expec
 
 ```
 label           verdict
-CREATED         PAN_REF_RESCUED_FALSE_NOVEL     <- chr22:23688305-23688721  GT-GG (ref) -> GT-AG (HG002)
-DISRUPTED ×2    AMBIGUOUS                       (not falsely rescued)
-CONTROL  ×5     AMBIGUOUS                       (not falsely rescued)
+CREATED         REFERENCE_BIAS     <- chr22:23688305-23688721  GT-GG (ref) -> GT-AG (HG002)
+DISRUPTED ×2    UNRESOLVED                       (not falsely rescued)
+CONTROL  ×5     UNRESOLVED                       (not falsely rescued)
 ```
 
 PanIsoGuard's variant axis, fed the real HG002 WGS-derived haplotype (non-circular),

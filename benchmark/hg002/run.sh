@@ -4,7 +4,7 @@
 # the variant creates/disrupts -> PanIsoGuard adjudicate (provenance=wgs, non-circular).
 #
 # This is the acceptance-critical, non-circular validation of the headline
-# PAN_REF_RESCUED_FALSE_NOVEL mechanism (reference bias != new splicing).
+# REFERENCE_BIAS mechanism (reference bias != new splicing).
 set -euo pipefail
 
 # ---- config (edit) ----------------------------------------------------------
@@ -41,7 +41,7 @@ python "$HERE/scan_variant_axis.py" ref.fa hap.fa chrom.gtf "$CHROM" .
   --reference ref.fa --reference-haplotype hap.fa --haplotype-provenance wgs --out-prefix vt
 
 # ---- 5) report verdict by label ---------------------------------------------
-echo "=== verdict by label (expect CREATED -> PAN_REF_RESCUED_FALSE_NOVEL) ==="
+echo "=== verdict by label (expect CREATED -> REFERENCE_BIAS) ==="
 join -t$'\t' <(sort vt.truth) \
      <(awk -F'\t' 'NR>1{print $1"\t"$7}' vt.adjudicated.tsv | sort) \
   | awk -F'\t' '{print "  "$2"\t"$1"\t"$3}' | sort

@@ -32,22 +32,22 @@ junctions are short-read-corroborated while an artifact's are not.
 Confusion (truth × PanIsoGuard confidence class):
 
 ```
-truth          HIGH_KNOWN  HIGH_NOVEL  MED_NOVEL  LOW_PARTIAL  AMBIGUOUS  ARTIFACT
+truth          HIGH_KNOWN  HIGH_NOVEL  MED_NOVEL  LOW_PARTIAL  UNRESOLVED  ARTIFACT
 genuine_novel          0         385         45         154        146         0
 known                652           0          0           0          0         0
 false_novel            8           4          1          61          6        68
 ```
 
-Genuine-novel detection (predicted genuine = `HIGH/MEDIUM_CONF_NOVEL`):
+Genuine-novel detection (predicted genuine = `HIGH/NOVEL_PROBABLE`):
 
 ```
 precision = 0.989   recall = 0.589   specificity(false rejected) = 0.966
 AUPRC (genuine vs false) = 0.971   (positive rate 0.831 = a random ranking)
 recall by category:  NNC 297/297 = 1.000 | NIC 133/279 = 0.477 | ISM 0/154 = 0.000
-known -> HIGH_CONF_KNOWN: 652/652 = 1.000
+known -> KNOWN: 652/652 = 1.000
 ```
 
-(0.0.4: `PARTIAL` support no longer promotes to `MEDIUM_CONF_NOVEL`; before that fix the
+(0.0.4: `PARTIAL` support no longer promotes to `NOVEL_PROBABLE`; before that fix the
 same run read 4 false `MEDIUM`, precision 0.982, specificity 0.946, AUPRC 0.970.)
 
 > **Read this with [sqanti3_filter_h2h](../sqanti3_filter_h2h).** The truth SJ.tab is an
@@ -66,10 +66,10 @@ same run read 4 false `MEDIUM`, precision 0.982, specificity 0.946, AUPRC 0.970.
   - **NNC** (novel-not-in-catalog) recall is **perfect (1.000)** — these carry genuinely
     novel junctions that the short-read axis corroborates.
   - **NIC** (novel-in-catalog) recall 0.477 — NIC novelty is a *combination* of known
-    junctions; the isoforms with no individually-novel junction are held `AMBIGUOUS`
+    junctions; the isoforms with no individually-novel junction are held `UNRESOLVED`
     (the engine has nothing to corroborate, so it does not guess — documented behavior).
   - **ISM** (incomplete-splice_match) "recall" 0.000 — ISMs are truncations of known
-    transcripts *relative to the reduced annotation* and are assigned `LOW_CONF_PARTIAL`,
+    transcripts *relative to the reduced annotation* and are assigned `UNCONFIRMED`,
     not a confident novel call — yet each of these 154 chains exactly matches a deleted
     (genuine) transcript, so this is lost recall, not a labelling artifact.
 

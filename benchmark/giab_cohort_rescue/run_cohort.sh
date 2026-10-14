@@ -37,9 +37,9 @@ for s in HG001 HG002 HG003 HG004; do
       --reference "$d/ref.fa" --reference-haplotype "$d/hap.fa" --haplotype-provenance unknown --out-prefix "$d/vtc" >/dev/null
     pk(){ join -t$'\t' <(sort "$d/vt.truth") <(awk -F'\t' 'NR>1{print $1"\t"$7}' "$1"|sort); }
     C=$((C+$(awk -F'\t' '$2=="CREATED"' "$d/vt.truth"|wc -l)))
-    R=$((R+$(pk "$d/vt.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="PAN_REF_RESCUED_FALSE_NOVEL"'|wc -l)))
-    F=$((F+$(pk "$d/vt.adjudicated.tsv"|awk -F'\t' '$2!="CREATED"&&$3=="PAN_REF_RESCUED_FALSE_NOVEL"'|wc -l)))
-    H=$((H+$(pk "$d/vtc.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="AMBIGUOUS"'|wc -l)))
+    R=$((R+$(pk "$d/vt.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="REFERENCE_BIAS"'|wc -l)))
+    F=$((F+$(pk "$d/vt.adjudicated.tsv"|awk -F'\t' '$2!="CREATED"&&$3=="REFERENCE_BIAS"'|wc -l)))
+    H=$((H+$(pk "$d/vtc.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="UNRESOLVED"'|wc -l)))
   done
   printf '%s\t%s\t%s\t%s\t%s\n' "$s" "$C" "$R" "$F" "$H" | tee -a "$OUT/cohort_summary.tsv"
 done

@@ -10,7 +10,7 @@ Truth per FLAIR isoform (matched by exact intron chain):
   monoexonic     - no intron chain (excluded from the novel-detection task)
 
 Reports: confusion (truth x confidence class), genuine-novel detection
-precision/recall at the decisive threshold (HIGH/MEDIUM_CONF_NOVEL = predicted
+precision/recall at the decisive threshold (HIGH/NOVEL_PROBABLE = predicted
 genuine), per-SQANTI-category recall, and AUPRC for genuine-vs-false ranking.
 
 Usage: score.py <flair.isoforms.gtf> <truth.tsv> <adjudicated.tsv>
@@ -69,15 +69,15 @@ rows = [(iid, truth_of(iid), verdict.get(iid, 'NA'), cat.get(iid, 'NA')) for iid
 conf = defaultdict(Counter)
 for _, tl, vc, _ in rows:
     conf[tl][vc] += 1
-classes = ["HIGH_CONF_KNOWN","HIGH_CONF_NOVEL","MEDIUM_CONF_NOVEL","LOW_CONF_PARTIAL","AMBIGUOUS","ARTIFACT"]
+classes = ["KNOWN","NOVEL_CONFIRMED","NOVEL_PROBABLE","UNCONFIRMED","UNRESOLVED","ARTIFACT"]
 print("=== confusion (truth rows x PanIsoGuard class) ===")
 print("truth".ljust(14) + "".join(c[:9].rjust(10) for c in classes) + "   total")
 for tl in ["genuine_novel","known","false_novel","monoexonic"]:
     c = conf[tl]; print(tl.ljust(14) + "".join(str(c[k]).rjust(10) for k in classes) + str(sum(c.values())).rjust(8))
 
-# ---- genuine-novel detection (decisive): predicted genuine = HIGH/MEDIUM_CONF_NOVEL ----
+# ---- genuine-novel detection (decisive): predicted genuine = HIGH/NOVEL_PROBABLE ----
 # restrict to the discrimination task: truth in {genuine_novel, false_novel} (multi-exon)
-GEN = {"HIGH_CONF_NOVEL","MEDIUM_CONF_NOVEL"}
+GEN = {"NOVEL_CONFIRMED","NOVEL_PROBABLE"}
 tp = sum(1 for _,tl,vc,_ in rows if tl=='genuine_novel' and vc in GEN)
 fn = sum(1 for _,tl,vc,_ in rows if tl=='genuine_novel' and vc not in GEN)
 fp = sum(1 for _,tl,vc,_ in rows if tl=='false_novel'  and vc in GEN)
@@ -85,7 +85,7 @@ tn = sum(1 for _,tl,vc,_ in rows if tl=='false_novel'  and vc not in GEN)
 prec = tp/(tp+fp) if tp+fp else float('nan')
 rec  = tp/(tp+fn) if tp+fn else float('nan')
 spec = tn/(tn+fp) if tn+fp else float('nan')
-print("\n=== genuine-novel detection (predicted genuine = HIGH/MEDIUM_CONF_NOVEL) ===")
+print("\n=== genuine-novel detection (predicted genuine = HIGH/NOVEL_PROBABLE) ===")
 print(f"genuine_novel={tp+fn}  false_novel={fp+tn}")
 print(f"precision={prec:.3f}  recall={rec:.3f}  specificity(false rejected)={spec:.3f}")
 
@@ -100,8 +100,8 @@ for ct,(hit,tot) in sorted(catrec.items()):
     print(f"  {ct:28s} {hit}/{tot}  recall={hit/tot:.3f}")
 
 # ---- AUPRC for genuine-vs-false ranking ----
-score = {"HIGH_CONF_NOVEL":1.0,"MEDIUM_CONF_NOVEL":0.75,"AMBIGUOUS":0.5,
-         "LOW_CONF_PARTIAL":0.25,"ARTIFACT":0.0,"HIGH_CONF_KNOWN":0.1,"PAN_REF_RESCUED_FALSE_NOVEL":0.0,"NA":0.0}
+score = {"NOVEL_CONFIRMED":1.0,"NOVEL_PROBABLE":0.75,"UNRESOLVED":0.5,
+         "UNCONFIRMED":0.25,"ARTIFACT":0.0,"KNOWN":0.1,"REFERENCE_BIAS":0.0,"NA":0.0}
 y=[]; s=[]
 for _,tl,vc,_ in rows:
     if tl in ('genuine_novel','false_novel'):

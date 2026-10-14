@@ -1,18 +1,18 @@
 {
   "command": "bash benchmark/hg002/run.sh hg002_work  (GIAB HG002 v4.2.1 VCF -> personalized haplotype) ; adjudicate --reference ref.fa --reference-haplotype hap.fa --haplotype-provenance wgs ; count verdicts by truth label",
   "data_provenance": "GENCODE v49 chr22 + real GIAB HG002 v4.2.1 small-variant benchmark (NIST FTP) -> personalized haplotype, --haplotype-provenance wgs",
-  "generated_utc": null,
+  "generated_utc": "2026-10-14T06:54:28Z",
   "metrics": {
-    "rescues_created": 1,
-    "false_rescues": 0,
+    "control_held_ambiguous": 5,
     "disrupted_held_ambiguous": 2,
-    "control_held_ambiguous": 5
+    "false_rescues": 0,
+    "rescues_created": 1
   },
-  "notes": "Acceptance-critical: the headline PAN_REF_RESCUED_FALSE_NOVEL rescue on real, independent (WGS-derived) variants (non-circular). The CREATED locus (chr22:23688305; ref GT-GG -> HG002 GT-AG) is rescued; both disrupted and all control loci are correctly held AMBIGUOUS -> zero false rescues. Verified: the current 0.0.2 binary reproduces this on the surviving HG002 truth set.",
+  "notes": "Acceptance-critical: the headline PAN_REF_RESCUED_FALSE_NOVEL rescue on real, independent (WGS-derived) variants (non-circular). The CREATED locus (chr22:23688305; ref GT-GG -> HG002 GT-AG) is rescued; both disrupted and all control loci are correctly held AMBIGUOUS -> zero false rescues. Verified: the current 0.0.2 binary reproduces this on the surviving HG002 truth set. [0.0.6] re-run with 0.0.6 (haplotype-consistency rule): 1/1 CREATED rescued, 0 false, 2 DISRUPTED + 5 CONTROL held; unchanged",
   "protocol": "hg002",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.3",
   "scope": "gencode_v49_chr22_giab_hg002_v4.2.1",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.2"
+  "tool_version": "0.0.6"
 }

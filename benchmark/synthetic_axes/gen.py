@@ -5,10 +5,10 @@ Builds a synthetic contig with four labelled isoform categories so each evidence
 axis can be validated end-to-end through `panisoguard adjudicate` against known
 truth (no real genome / simulator needed):
 
-  A genuine            canonical ref motif + short-read support  -> HIGH_CONF_NOVEL
+  A genuine            canonical ref motif + short-read support  -> NOVEL_CONFIRMED
   B noncanon-artifact  non-canonical motif + no SR support       -> ARTIFACT (noncanonical)
   C mapping-artifact   canonical + no SR + low-MAPQ spanning BAM -> ARTIFACT (mapping)   [needs --bam]
-  D reference-bias     non-canonical on ref, canonical on hap    -> PAN_REF_RESCUED_FALSE_NOVEL [needs --reference-haplotype]
+  D reference-bias     non-canonical on ref, canonical on hap    -> REFERENCE_BIAS [needs --reference-haplotype]
 
 Each isoform is a 2-exon transcript with one test intron in its own 1 kb window.
 

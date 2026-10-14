@@ -11,6 +11,15 @@ Usage: analyze.py <work_dir> <gencode.gtf> <rna.aln.bam> [--emit-metrics out.jso
 import sys, os, re, glob, subprocess, statistics, json
 from collections import defaultdict
 
+def _versions(work):
+    """tool/ruleset version of the binary that wrote the scan adjudications (first provenance log found)."""
+    import glob
+    for p in sorted(glob.glob(f"{work}/scan/*/adj_wgs.provenance.log")):
+        kv = dict(l.rstrip("\n").split("\t", 1) for l in open(p) if "\t" in l and not l.startswith("#"))
+        return kv.get("tool_version"), kv.get("ruleset_version")
+    return None, None
+
+
 WORK, GENCODE, BAM = sys.argv[1], sys.argv[2], sys.argv[3]
 EMIT = sys.argv[5] if len(sys.argv) > 5 and sys.argv[4] == "--emit-metrics" else None
 SAM = os.environ.get("SAMTOOLS", "samtools")
@@ -83,9 +92,9 @@ def tally(tag):
             iso = f[hdr['isoform_id']]; cls = f[hdr['confidence_class']]; lab = truth.get(iso)
             if jc.get(iso) == DROP: continue
             if tag == "wgs":
-                if lab == "CREATED" and cls == "PAN_REF_RESCUED_FALSE_NOVEL": resc += 1
-                if lab in ("DISRUPTED", "CONTROL_canon") and cls == "PAN_REF_RESCUED_FALSE_NOVEL": fr += 1
-            elif lab == "CREATED" and cls == "AMBIGUOUS": held += 1
+                if lab == "CREATED" and cls == "REFERENCE_BIAS": resc += 1
+                if lab in ("DISRUPTED", "CONTROL_canon") and cls == "REFERENCE_BIAS": fr += 1
+            elif lab == "CREATED" and cls == "UNRESOLVED": held += 1
     return resc, fr, held
 rescued_rows, false_resc, _ = tally("wgs")
 _, _, held_rows = tally("unk")
@@ -115,7 +124,7 @@ print(json.dumps(m, indent=2))
 if EMIT:
     out = {
         "protocol": "hg03516_refbias", "scope": "hg03516_esn_afr_real_longread",
-        "status": "tracked", "tool_version": "0.0.3", "ruleset_version": "builtin-0.0.1",
+        "status": "tracked", "tool_version": _versions(WORK)[0], "ruleset_version": _versions(WORK)[1],
         "data_provenance": "REAL public HPRC Release 2 HG03516 (ESN/Nigeria, AFR LCL): PacBio Kinnex Iso-Seq "
             "(s3://human-pangenomics .../HG03516/raw_data/PacBio_Kinnex/*.flnc.bam) + HiFi de-novo phased "
             "assembly (pat/mat, GCA_018469415.2/GCA_018469425.2). Personal SNV-consensus haplotype = assembly "
@@ -128,7 +137,7 @@ if EMIT:
             "from a divergent (African, ESN) individual -- 40 caller-reported novel splice junctions are reference "
             "bias (non-canonical on GRCh38, canonical on HG03516's own HiFi-assembly haplotype via a real personal "
             "SNV), 35/40 novel vs GENCODE (a reference-only pipeline would report them as discoveries). All 40 "
-            "rescued (PAN_REF_RESCUED_FALSE_NOVEL) under independent-DNA provenance with 0 false rescues; the "
+            "rescued (REFERENCE_BIAS) under independent-DNA provenance with 0 false rescues; the "
             "circularity firewall holds all under circular-risk provenance. Independently adversarially audited (5 "
             "angles); REQUIRED CAVEATS, all stated honestly: (1) one hit (chr17:3681978-3685514, P2RX5) was DROPPED "
             "-- a 4bp-displaced IsoQuant model coordinate with 0 exact spanning reads whose reads splice to an "

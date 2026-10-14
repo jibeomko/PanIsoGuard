@@ -52,7 +52,7 @@ specificity(false) = 0.996   genuine-recall(decisive) = 1.000   precision(genuin
 - **PanIsoGuard rejected 241/242 (99.6%) of FLAIR's false-novel artifacts** — on real,
   messy caller output it removes essentially all spurious novelty.
 - **No decisive genuine novel was wrongly rejected** (recall 1.0; 0 false negatives).
-- **16/20 genuine novels were honestly abstained** (`AMBIGUOUS`): they are NIC-like,
+- **16/20 genuine novels were honestly abstained** (`UNRESOLVED`): they are NIC-like,
   with every junction already in the reduced annotation, so there is no novel junction
   to corroborate — held, not guessed (the documented behaviour, also seen in
   `controlled_truth`).

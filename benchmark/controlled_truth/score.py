@@ -22,11 +22,11 @@ for ln in open(sys.argv[2]):
     cls[f[header["isoform_id"]]] = f[header["confidence_class"]]
 
 def pred(c):
-    if c in ("HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL"):
+    if c in ("NOVEL_CONFIRMED", "NOVEL_PROBABLE"):
         return "genuine"
-    if c in ("LOW_CONF_PARTIAL", "ARTIFACT"):
+    if c in ("UNCONFIRMED", "ARTIFACT"):
         return "false"
-    return "abstain"  # AMBIGUOUS / HIGH_CONF_KNOWN
+    return "abstain"  # UNRESOLVED / KNOWN
 
 conf = Counter()
 for i, t in truth.items():
@@ -48,5 +48,5 @@ print(f"\nDecisive calls (n={dec}): precision(genuine)={prec:.3f} "
       f"specificity(false)={spec:.3f} F1={f1:.3f} accuracy={acc:.3f}")
 ab_g, ab_f = conf[("genuine", "abstain")], conf[("false", "abstain")]
 g_tot, f_tot = ab_g + TP + FN, ab_f + TN + FP
-print(f"Abstain (AMBIGUOUS): genuine {ab_g}/{g_tot} ({100*ab_g/g_tot:.1f}%), "
+print(f"Abstain (UNRESOLVED): genuine {ab_g}/{g_tot} ({100*ab_g/g_tot:.1f}%), "
       f"false {ab_f}/{f_tot} ({100*ab_f/f_tot:.1f}%)")

@@ -28,11 +28,13 @@ Adjudicating the chr22 SQANTI-SIM FLAIR output **with `--bam`** and stratifying
 | novel-junction set | n | mean indel_near | max / p90 |
 |--------------------|--:|----------------:|----------:|
 | **genuine** | 430 | 0.032 | max **0.190** |
-| **false**   | 124 | **0.350** | p90 **1.000** |
+| **false**   | 124 | **0.129** | 11 % above 0.5 |
 
-Genuine junctions top out at **0.190**; false ones pile up at **1.000** (≈half the false
-set has an indel next to the junction on *every* spanning read). An 11× mean separation on
-a signal the engine was throwing away.
+Genuine junctions top out at **0.190**; a false junction with ≥ 3 spanning reads has an
+indel next to it on every read 11 % of the time. (Before 0.0.6 the fraction was taken over
+every junction with ≥ 1 read, which gave a false mean of 0.350 and 33 % above 0.5: most of
+that came from 1–2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
+`min_spanning = 3` leaves those out.)
 
 **Soft-clip** is ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020) —
 it does not discriminate here. It is wired into the same mapping mechanism but **disabled
@@ -52,7 +54,7 @@ gates):
 
 | gate (`max_indel_near_frac`) | false caught | genuine flagged | precision |
 |:---:|:---:|:---:|:---:|
-| 0.5 | **41 / 124** | **0** | **1.000** |
+| 0.5 | **14 / 124** | **0** | **1.000** |
 
 ## Impact — wired ON vs OFF (same binary, same inputs)
 
@@ -65,16 +67,17 @@ gates above 1.0 (OFF, never fires):
 | genuine **sensitivity** | 0.589 | 0.589 (unchanged) |
 | genuine isoforms lost from confident-novel | — | **0** |
 
-False-novel transitions OFF→ON: **24** `LOW_CONF_PARTIAL → ARTIFACT`. **Zero** genuine
-isoforms changed class.
+False-novel transitions OFF→ON: **9** `UNCONFIRMED → ARTIFACT`. **Zero** genuine
+isoforms changed class. (0.0.4–0.0.5: 41 / 124 caught and 24 relabelled, before the ≥ 3-read
+gate.)
 
 > **Superseded headline.** Before 0.0.4 this table read specificity 0.946 → 0.966: the gain
-> was 3 false novels demoted `MEDIUM_CONF_NOVEL → LOW_CONF_PARTIAL`. All 3 had *partial*
+> was 3 false novels demoted `NOVEL_PROBABLE → UNCONFIRMED`. All 3 had *partial*
 > short-read support, and the PARTIAL-never-promotes fix (see
 > [sqanti3_filter_h2h](../sqanti3_filter_h2h)) now keeps them non-confident without the BAM,
 > so indel-near no longer moves the operating point on this set. What remains is sharper
-> attribution: 24 false calls get an explicit `mapping_or_repeat` mechanism (`ARTIFACT`)
-> instead of an unexplained `LOW_CONF_PARTIAL`.
+> attribution: 9 false calls get an explicit `mapping_or_repeat` mechanism (`ARTIFACT`)
+> instead of an unexplained `UNCONFIRMED`.
 
 ## Reproduce
 

@@ -43,9 +43,9 @@ for chrom in chr{1..22}; do
   created=$(echo "$scan"|grep -oE 'CREATED\(reference-bias\)=[0-9]+'|grep -oE '[0-9]+')
   disr=$(echo "$scan"|grep -oE 'DISRUPTED=[0-9]+'|grep -oE '[0-9]+')
   ctrl=$(echo "$scan"|grep -oE 'CONTROL=[0-9]+'|grep -oE '[0-9]+')
-  rescued=$(pick "$d/vt.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="PAN_REF_RESCUED_FALSE_NOVEL"'|wc -l)
-  false_r=$(pick "$d/vt.adjudicated.tsv"|awk -F'\t' '$2!="CREATED"&&$3=="PAN_REF_RESCUED_FALSE_NOVEL"'|wc -l)
-  held=$(pick "$d/vt_circ.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="AMBIGUOUS"'|wc -l)
+  rescued=$(pick "$d/vt.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="REFERENCE_BIAS"'|wc -l)
+  false_r=$(pick "$d/vt.adjudicated.tsv"|awk -F'\t' '$2!="CREATED"&&$3=="REFERENCE_BIAS"'|wc -l)
+  held=$(pick "$d/vt_circ.adjudicated.tsv"|awk -F'\t' '$2=="CREATED"&&$3=="UNRESOLVED"'|wc -l)
   printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$chrom" "$introns" "$created" "$disr" "$ctrl" "$rescued" "$false_r" "$held" | tee -a summary.tsv
 done
 awk -F'\t' 'NR>1{i+=$2;c+=$3;r+=$6;f+=$7;h+=$8} END{print "TOTAL introns="i" CREATED="c" rescued="r" false="f" held="h}' summary.tsv

@@ -56,7 +56,7 @@ So on **real data with production callers**, the practical value of multi-caller
 is **less "remove artifacts" and more "identify the reproducible high-confidence core"**:
 the 31 cross-caller-agreed novels are the ones you would report with highest confidence,
 while the 254 single-caller novels — though mostly canonical — are unreproducible across
-methods and warrant the `AMBIGUOUS`/lower-confidence treatment the engine gives them. The
+methods and warrant the `UNRESOLVED`/lower-confidence treatment the engine gives them. The
 disagreement itself (89 % single-caller) is the headline finding that generalizes from
 simulation to real, whole-genome data. (Consistent with the project's honest-results ethos,
 cf. [pangenome_public](../results/pangenome_public).)

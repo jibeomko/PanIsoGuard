@@ -67,19 +67,20 @@ isoforms **long-read-only** (no short-read `SJ.tab`), with vs without the 5-call
 
 | setting | confident-novel recall | precision |
 |---------|-----------------------:|----------:|
-| FLAIR alone (no cross-caller info) | 0.000 (all novel held `AMBIGUOUS`) | — |
+| FLAIR alone (no cross-caller info) | 0.000 (all novel held `UNRESOLVED`) | — |
 | **FLAIR + consensus** | 0.685 | **0.975** |
 
-Without orthogonal short-read evidence a single caller's novels are all `AMBIGUOUS` (the
+Without orthogonal short-read evidence a single caller's novels are all `UNRESOLVED` (the
 engine refuses to guess). The consensus axis promotes the **593** novels that ≥ 2 callers
-agree on (513 → `MEDIUM_CONF_NOVEL`, 80 → `LOW_CONF_PARTIAL`); that promoted set is
+agree on (513 → `NOVEL_PROBABLE`, 80 → `UNCONFIRMED`); that promoted set is
 **97.5 % precise** against truth.
 
 ## Integration device (caller-agnostic merge)
 
 The five callers use completely unrelated native ID schemes, yet `combine` collapses
 identical splice chains onto one stable `PIG.NNNNNN` id with every native ID preserved —
-agreement is measured on the **splice chain**, not on names:
+agreement is measured on the **splice chain**, not on names (since 0.0.6 the matrix also
+carries the chain `fingerprint`, which is what `adjudicate --caller-support` joins on):
 
 ```
 PIG.000233  callers=bambu,espresso,flair,isoquant,talon  novelty=novel

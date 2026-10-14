@@ -22,7 +22,7 @@ import json
 import sys
 from collections import defaultdict, Counter
 
-CONF_NOVEL = {"HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL"}
+CONF_NOVEL = {"NOVEL_CONFIRMED", "NOVEL_PROBABLE"}
 
 
 def tid_of(attr):
@@ -85,6 +85,14 @@ def main():
         return m
 
     off, on = load(a.off), load(a.on)
+    # version stamps come from the ON run's provenance log (sibling of the attribution file)
+    prov = {}
+    try:
+        for line in open(a.on.replace(".attribution.jsonl", ".provenance.log")):
+            if "\t" in line and not line.startswith("#"):
+                k, v = line.rstrip("\n").split("\t", 1); prov.setdefault(k, v)
+    except OSError:
+        pass
 
     # --- discrimination: bam_frac_indel_near on genuine vs false novel junctions ---
     g, f = [], []
@@ -168,8 +176,8 @@ def main():
             "protocol": "bam_axis",
             "scope": "gencode_v49_chr22_flair",
             "status": "tracked",
-            "tool_version": "0.0.4",
-            "ruleset_version": "builtin-0.0.2",
+            "tool_version": prov.get("tool_version"),
+            "ruleset_version": prov.get("ruleset_version"),
             "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (simulated PBSIM3 HiFi, one shared "
                                "minimap2 splice:hq alignment); FLAIR collapse + SQANTI3. Public/simulated, "
                                "no private data. OFF = current binary with mapping indel/softclip thresholds "
@@ -184,8 +192,11 @@ def main():
                      "trigger (default frac > 0.5) catches false novel junctions at 100% precision (genuine max "
                      "0.190 < 0.5, so 0 genuine are ever flagged). Since the PARTIAL-never-promotes fix the "
                      "3 false novels it used to demote are already non-confident, so it no longer changes "
-                     "operating-point specificity here (ON == OFF); it relabels 24 false LOW_CONF_PARTIAL -> "
-                     "ARTIFACT. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the "
+                     "operating-point specificity here (ON == OFF); it relabels "
+                     f"{sum(metrics['impact']['false_transitions_off_to_on'].values())} false novels "
+                     "(UNCONFIRMED -> ARTIFACT) with an explicit mapping mechanism. Since 0.0.6 a junction "
+                     "feeds the gate only with >= min_spanning (3) reads, which is why fewer are caught than "
+                     "the 41/124 reported for 0.0.4. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the "
                      "same mapping mechanism for noisy reads but its yield is not claimed on this set.",
         }
         json.dump(out, open(a.emit_metrics, "w"), indent=2, sort_keys=True)

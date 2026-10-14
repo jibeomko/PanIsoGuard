@@ -29,8 +29,8 @@ HiFi assembly (pat + mat) ── minimap2 asm5 + paftools.js call vs GRCh38 ─�
 | &nbsp;&nbsp;novel vs GENCODE v49 | **35** | — |
 | &nbsp;&nbsp;trace to a real personal splice-site SNV | 40/40 | — |
 | &nbsp;&nbsp;read-supported (≥2 exact spanning reads, median 5) | 40/40 | — |
-| **rescued** `PAN_REF_RESCUED_FALSE_NOVEL` (independent-DNA prov.) | **40/40, 0 false** | — |
-| **firewall-held** AMBIGUOUS (circular-risk prov.) | **40/40** | — |
+| **rescued** `REFERENCE_BIAS` (independent-DNA prov.) | **40/40, 0 false** | — |
+| **firewall-held** UNRESOLVED (circular-risk prov.) | **40/40** | — |
 
 **Reading.** On a divergent individual's real transcriptome, **40** novel splice junctions
 are reference bias — **35** of which a reference-only pipeline would report as novel

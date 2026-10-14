@@ -5,9 +5,9 @@ Validates the evidence axes end-to-end through `panisoguard adjudicate` on a ful
 synthetic contig (gen.py), against known per-category truth. Tiered by external-tool
 availability so it stays green in a minimal CI (htslib only, no samtools):
 
-  * short-read axis  (cat A genuine -> HIGH_CONF_NOVEL, cat B noncanon -> ARTIFACT)
+  * short-read axis  (cat A genuine -> NOVEL_CONFIRMED, cat B noncanon -> ARTIFACT)
         -> always run (pure text).
-  * variant axis     (cat D reference-bias -> PAN_REF_RESCUED_FALSE_NOVEL)
+  * variant axis     (cat D reference-bias -> REFERENCE_BIAS)
         -> always run; htslib faidx auto-builds the .fai, so no samtools needed.
   * BAM mapping axis (cat C mapping-artifact -> ARTIFACT/mapping)
         -> run ONLY if `samtools` is on PATH (needs a sorted+indexed BAM); otherwise
@@ -95,7 +95,7 @@ def main() -> int:
         # --- short-read axis (text only) -------------------------------------
         run([pig, "adjudicate", *base, "--out-prefix", str(work / "base")])
         t_base = by_category(cat_of, load_classes(work / "base.adjudicated.tsv"))
-        expect(t_base, "A", "HIGH_CONF_NOVEL", failures, "base")
+        expect(t_base, "A", "NOVEL_CONFIRMED", failures, "base")
         expect(t_base, "B", "ARTIFACT", failures, "base")
 
         # --- variant axis (faidx auto-built; no samtools) --------------------
@@ -105,8 +105,8 @@ def main() -> int:
              "--haplotype-provenance", "external",
              "--out-prefix", str(work / "var")])
         t_var = by_category(cat_of, load_classes(work / "var.adjudicated.tsv"))
-        expect(t_var, "D", "PAN_REF_RESCUED_FALSE_NOVEL", failures, "variant")
-        expect(t_var, "A", "HIGH_CONF_NOVEL", failures, "variant")  # rescue must not perturb A
+        expect(t_var, "D", "REFERENCE_BIAS", failures, "variant")
+        expect(t_var, "A", "NOVEL_CONFIRMED", failures, "variant")  # rescue must not perturb A
         expect(t_var, "B", "ARTIFACT", failures, "variant")        # ...or B
 
         # --- BAM mapping axis (needs samtools to build sorted+indexed BAM) ----

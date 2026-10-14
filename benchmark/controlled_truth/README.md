@@ -14,9 +14,9 @@ From one chromosome of a reference GTF (e.g. GENCODE):
 - **False novels** = kept transcripts with one internal exon boundary shifted,
   creating a junction that is neither annotated nor read-supported.
 
-A correct adjudicator should classify genuine novels as `HIGH/MEDIUM_CONF_NOVEL`
-and fabricated ones as `LOW_CONF_PARTIAL` / `ARTIFACT`, and may honestly **abstain**
-(`AMBIGUOUS`) on genuine isoforms whose every junction is already known (NIC-like:
+A correct adjudicator should classify genuine novels as `HIGH/NOVEL_PROBABLE`
+and fabricated ones as `UNCONFIRMED` / `ARTIFACT`, and may honestly **abstain**
+(`UNRESOLVED`) on genuine isoforms whose every junction is already known (NIC-like:
 no novel junction to corroborate).
 
 ## Run
@@ -38,14 +38,14 @@ genuine         1220           0       986
 false              0        1068         2
 
 Decisive calls (n=2288): precision(genuine)=1.000 specificity(false)=1.000 F1=1.000 accuracy=1.000
-Abstain (AMBIGUOUS): genuine 986/2206 (44.7%), false 2/1070 (0.2%)
+Abstain (UNRESOLVED): genuine 986/2206 (44.7%), false 2/1070 (0.2%)
 ```
 
 **Zero misclassifications on decisive calls**: every short-read-corroborated genuine
 novel was kept and every read-unsupported fabricated junction was rejected. The
 44.7% genuine abstention is by design — those are NIC-like isoforms whose every
 junction is already annotated, so there is no novel junction to corroborate; the
-engine holds them `AMBIGUOUS` rather than guessing.
+engine holds them `UNRESOLVED` rather than guessing.
 
 ## Scope (honest)
 

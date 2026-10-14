@@ -1,7 +1,7 @@
 {
   "command": "benchmark/hg002/run_wholegenome.sh (per-chrom bcftools consensus + scan_variant_axis.py + panisoguard adjudicate variant axis); totals over chr1-22",
   "data_provenance": "REAL GIAB HG002/NA24385 v4.2.1 benchmark variants (biallelic SNVs), whole-genome chr1-22, GRCh38 + GENCODE v49. Per chromosome: bcftools SNV-consensus haplotype, then scan every annotation intron's donor/acceptor dinucleotide for reference bias (non-canonical on the linear reference, canonical on the HG002 haplotype = CREATED), and adjudicate the variant axis (--haplotype-provenance wgs for the rescue, unknown for the firewall). Annotation+variant scan; no RNA-seq/caller runs. No private data.",
-  "generated_utc": null,
+  "generated_utc": "2026-10-14T06:54:28Z",
   "metrics": {
     "base_rate_per_intron": 5.52e-05,
     "false_rescues": 0,
@@ -35,11 +35,11 @@
     "rescued": 33,
     "sensitivity": 1.0
   },
-  "notes": "Whole-genome YIELD of the variant reference-bias rescue (extends the chr22 N=1 result). Reference bias at splice junctions is RARE but not zero: 33 genuine reference-bias junctions across 597,781 introns (~1 in 18,000). When a genuine case exists the axis catches it (33/33 sensitivity) and NEVER over-promotes (0 false rescues); the circularity firewall holds all 33 under circular-risk provenance. So the reference-bias rescue is a HIGH-SPECIFICITY, HIGH-SENSITIVITY GUARDRAIL with a LOW base rate -- a correctness safeguard, not a high-yield discovery engine. Its yield rises for samples from non-reference individuals / personalized-genome contexts. DISRUPTED (236, canonical->non-canonical) is computed but intentionally not consumed by the engine, so it is correctly never rescued.",
+  "notes": "Whole-genome YIELD of the variant reference-bias rescue (extends the chr22 N=1 result). Reference bias at splice junctions is RARE but not zero: 33 genuine reference-bias junctions across 597,781 introns (~1 in 18,000). When a genuine case exists the axis catches it (33/33 sensitivity) and NEVER over-promotes (0 false rescues); the circularity firewall holds all 33 under circular-risk provenance. So the reference-bias rescue is a HIGH-SPECIFICITY, HIGH-SENSITIVITY GUARDRAIL with a LOW base rate -- a correctness safeguard, not a high-yield discovery engine. Its yield rises for samples from non-reference individuals / personalized-genome contexts. DISRUPTED (236, canonical->non-canonical) is computed but intentionally not consumed by the engine, so it is correctly never rescued. [0.0.6] re-run with 0.0.6 (haplotype-consistency rule): 33/33 rescued, 0 false, 33/33 held; unchanged",
   "protocol": "hg002_wholegenome",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.3",
   "scope": "hg002_giab_v4.2.1_wholegenome",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.3"
+  "tool_version": "0.0.6"
 }

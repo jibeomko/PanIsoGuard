@@ -13,6 +13,15 @@ Usage: analyze.py <gencode.gtf> <label:work_dir> [<label:work_dir> ...] [--emit-
 import sys, os, re, glob, subprocess, statistics, json
 from collections import defaultdict
 
+def _versions(work):
+    """tool/ruleset version of the binary that wrote the scan adjudications (first provenance log found)."""
+    import glob
+    for p in sorted(glob.glob(f"{work}/scan/*/adj_wgs.provenance.log")):
+        kv = dict(l.rstrip("\n").split("\t", 1) for l in open(p) if "\t" in l and not l.startswith("#"))
+        return kv.get("tool_version"), kv.get("ruleset_version")
+    return None, None
+
+
 args = [a for a in sys.argv[1:] if a != "--emit-metrics"]
 EMIT = None
 if "--emit-metrics" in sys.argv:
@@ -75,9 +84,9 @@ def analyze(W):
                 iso = f[hdr['isoform_id']]; cls = f[hdr['confidence_class']]; lab = truth.get(iso)
                 if jc.get(iso) not in keptset: continue
                 if tag == "wgs":
-                    if lab == "CREATED" and cls == "PAN_REF_RESCUED_FALSE_NOVEL": resc += 1
-                    if lab in ("DISRUPTED", "CONTROL_canon") and cls == "PAN_REF_RESCUED_FALSE_NOVEL": fr += 1
-                elif lab == "CREATED" and cls == "AMBIGUOUS": held += 1
+                    if lab == "CREATED" and cls == "REFERENCE_BIAS": resc += 1
+                    if lab in ("DISRUPTED", "CONTROL_canon") and cls == "REFERENCE_BIAS": fr += 1
+                elif lab == "CREATED" and cls == "UNRESOLVED": held += 1
         return resc, fr, held
     rw, fr, _ = tally("wgs"); _, _, held = tally("unk")
     uj = set()
@@ -116,7 +125,7 @@ print(json.dumps(out, indent=2))
 if EMIT:
     env = {
         "protocol": "refbias_cohort", "scope": "hprc_r2_west_african_cohort_real_longread",
-        "status": "tracked", "tool_version": "0.0.3", "ruleset_version": "builtin-0.0.1",
+        "status": "tracked", "tool_version": _versions(PAIRS[0][1])[0], "ruleset_version": _versions(PAIRS[0][1])[1],
         "data_provenance": "REAL public HPRC Release 2 long-read RNA (PacBio Kinnex Iso-Seq) + HiFi de-novo "
             "phased assemblies for the SAME individuals: HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, "
             "Gambian Mandinka) -- two independent West African individuals. Personal SNV-consensus haplotypes "
@@ -129,8 +138,8 @@ if EMIT:
             "the reference-bias rescue fires on real long-read RNA -- HG03516 40 + HG02717 46 = 86 reference-bias "
             "novel splice junctions (77 novel vs GENCODE -- discoveries a reference-only pipeline would report), "
             "each non-canonical on GRCh38 but canonical on that individual's own HiFi-assembly haplotype via a real "
-            "personal SNV. 86/86 rescued (PAN_REF_RESCUED_FALSE_NOVEL) under independent-DNA provenance, 0 false "
-            "rescues; the circularity firewall holds all 86 AMBIGUOUS under circular-risk provenance. Both "
+            "personal SNV. 86/86 rescued (REFERENCE_BIAS) under independent-DNA provenance, 0 false "
+            "rescues; the circularity firewall holds all 86 UNRESOLVED under circular-risk provenance. Both "
             "individuals were processed identically; the principled read-support filter (drop junctions with 0 "
             "exact-coordinate spanning reads) removed 1 displaced-coordinate caller-model artifact each. Same "
             "caveats as hg03516_refbias (independently audited): the divergent-vs-reference-grade contrast with "

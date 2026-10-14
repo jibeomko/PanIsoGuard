@@ -12,8 +12,8 @@ is implemented in `src/evidence/variant_motif.cpp` and verified deterministicall
 in `tests/unit/variant_motif_test.cpp` against a controlled fixture
 (`tests/data/tiny/mini_ref.fa` vs `mini_hap.fa`) where a single SNV (G→T) turns a
 non-canonical `GG-AG` donor into a canonical `GT-AG`. The provider returns
-`kCreated`, and the rule engine maps it to `PAN_REF_RESCUED_FALSE_NOVEL` (or holds
-it `AMBIGUOUS` under circular-risk provenance). This is 100% recovery of the
+`kCreated`, and the rule engine maps it to `REFERENCE_BIAS` (or holds
+it `UNRESOLVED` under circular-risk provenance). This is 100% recovery of the
 injected motif at the mechanism level.
 
 **2. Read-simulation recovery (requires external tools; not run in this env).**
