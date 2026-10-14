@@ -18,6 +18,10 @@ struct RunProvenance {
   std::string sj_tab_path;    // "" if none
   std::string bam_path;       // "" if none
   std::string caller_support_path;  // "" if none
+  std::string reference_path;       // "" if none (genome FASTA)
+  std::vector<std::string> reference_haplotype_paths;  // personalized FASTAs (variant axis)
+  std::string pangenome_path;       // "" if none
+  bool hash_inputs = false;         // also write an MD5 per input (--hash-inputs; reads every file once)
   bool variant_axis_on = false;     // a haplotype FASTA was supplied
   bool variant_circular = false;    // haplotype provenance is circular-risk
   bool pangenome_axis_on = false;   // a pangenome junction file was supplied

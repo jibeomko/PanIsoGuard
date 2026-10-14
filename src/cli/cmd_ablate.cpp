@@ -61,6 +61,14 @@ int cmd_ablate(int argc, char** argv) {
   if (axes.empty()) {
     axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome", "consensus"};
   }
+  for (const auto& axis : axes) {  // a typo must fail here, not silently ablate nothing
+    try {
+      (void)RuleEngine().with_axis_disabled(axis);
+    } catch (const std::exception& e) {
+      std::fprintf(stderr, "ablate: %s\n", e.what());
+      return 1;
+    }
+  }
 
   try {
     const LoadedRun run = load_and_adjudicate(common);

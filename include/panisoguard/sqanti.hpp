@@ -41,6 +41,10 @@ struct SqantiRecord {
 };
 
 inline bool sqanti_is_na(double v) { return v <= SqantiRecord::kNaN; }
+// SQANTI3's textual NA spellings (an absent/NA QC column is not_evaluable, never false).
+inline bool sqanti_is_na_token(const std::string& s) {
+  return s.empty() || s == "NA" || s == "NaN" || s == "nan" || s == ".";
+}
 
 // Result of reading a classification file, including schema diagnostics.
 struct SqantiTable {

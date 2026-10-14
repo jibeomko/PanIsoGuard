@@ -101,20 +101,22 @@ HaplotypeProvider::HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
     : ref_(std::move(reference)), haps_(std::move(haplotypes)) {}
 
 VariantVerdict HaplotypeProvider::classify(const std::string& chrom, const Junction& intron,
-                                           Strand strand) const {
+                                           Strand strand, std::vector<bool>* canonical_on) const {
+  if (canonical_on != nullptr) canonical_on->assign(haps_.size(), false);
   const SpliceMotif ref_m = splice_motif(*ref_, chrom, intron, strand);
   if (!ref_m.evaluable) return VariantVerdict::kNotEvaluable;
 
   bool any_hap_eval = false;
   bool any_hap_canonical = false;
   bool all_hap_noncanonical = true;
-  for (const auto& hap : haps_) {
-    const SpliceMotif h = splice_motif(*hap, chrom, intron, strand);
+  for (std::size_t i = 0; i < haps_.size(); ++i) {
+    const SpliceMotif h = splice_motif(*haps_[i], chrom, intron, strand);
     if (!h.evaluable) continue;
     any_hap_eval = true;
     if (h.canonical) {
       any_hap_canonical = true;
       all_hap_noncanonical = false;
+      if (canonical_on != nullptr) (*canonical_on)[i] = true;
     }
   }
   if (!any_hap_eval) return VariantVerdict::kNotEvaluable;

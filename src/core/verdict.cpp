@@ -28,15 +28,15 @@ const char* to_string(Mechanism m) {
 
 const char* to_string(ConfidenceClass c) {
   switch (c) {
-    case ConfidenceClass::kHighConfKnown:             return "HIGH_CONF_KNOWN";
-    case ConfidenceClass::kHighConfNovel:             return "HIGH_CONF_NOVEL";
-    case ConfidenceClass::kMediumConfNovel:           return "MEDIUM_CONF_NOVEL";
-    case ConfidenceClass::kLowConfPartial:            return "LOW_CONF_PARTIAL";
-    case ConfidenceClass::kPanRefRescuedFalseNovel:   return "PAN_REF_RESCUED_FALSE_NOVEL";
-    case ConfidenceClass::kAmbiguous:                 return "AMBIGUOUS";
-    case ConfidenceClass::kArtifact:                  return "ARTIFACT";
+    case ConfidenceClass::kKnown:            return "KNOWN";
+    case ConfidenceClass::kNovelConfirmed:   return "NOVEL_CONFIRMED";
+    case ConfidenceClass::kNovelProbable:    return "NOVEL_PROBABLE";
+    case ConfidenceClass::kUnconfirmed:      return "UNCONFIRMED";
+    case ConfidenceClass::kUnresolved:       return "UNRESOLVED";
+    case ConfidenceClass::kReferenceBias:    return "REFERENCE_BIAS";
+    case ConfidenceClass::kArtifact:         return "ARTIFACT";
   }
-  return "AMBIGUOUS";
+  return "UNRESOLVED";
 }
 
 }  // namespace panisoguard

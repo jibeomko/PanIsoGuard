@@ -17,6 +17,9 @@ struct RuleConfig {
                                          // is consensus-supported (when --caller-support given)
   // BAM (mapping) axis
   int bam_min_mapq = 20;
+  int bam_min_spanning = 3;                 // a novel junction's read fractions count only with >= this many
+                                            // spanning reads; below it the mapping axis is not evaluated there
+  std::string platform = "hifi";            // "hifi" (defaults) or "ont" (indel-near gate off; see apply_platform_preset)
   int bam_softclip_min_bp = 20;
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
@@ -44,7 +47,9 @@ struct RuleConfig {
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes. 0.0.2: PARTIAL no longer promotes (0.0.4).
-  std::string ruleset_version = "builtin-0.0.2";
+  // 0.0.3 (0.0.6): mapping needs >= bam_min_spanning reads; UNSUPPORTED needs coverage at the
+  // known junctions; intra-priming needs no polyA motif; class names renamed.
+  std::string ruleset_version = "builtin-0.0.3";
 };
 
 class RuleEngine {
@@ -55,6 +60,10 @@ class RuleEngine {
   static RuleEngine from_toml(const std::string& path);
 
   const RuleConfig& config() const { return cfg_; }
+
+  // Sequencing-platform preset applied after the config: "hifi" keeps the defaults, "ont"
+  // disables the indel-near mapping gate (HiFi-calibrated; fires on ~90 % of ONT junctions).
+  void apply_platform_preset(const std::string& platform);
 
   // Map an assembled EvidenceVector to a Verdict (2-axis evaluation + projection).
   Verdict evaluate(const EvidenceVector& ev) const;

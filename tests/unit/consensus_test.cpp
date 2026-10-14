@@ -1,5 +1,8 @@
 #include "catch2/catch.hpp"
 
+#include <map>
+#include <utility>
+
 #include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
 #include "test_util.hpp"
@@ -67,13 +70,52 @@ TEST_CASE("read_caller_support round-trips the combine matrix to native_id -> n_
   const std::string path = "caller_support_roundtrip.tsv";
   write_caller_support_matrix(path, b.build());
 
-  const auto support = read_caller_support(path);
+  const CallerSupport support = read_caller_support(path);
   // Every native running id on chainA maps to n_callers=2; chainB's id maps to 1.
-  CHECK(support.at("1-1_x") == 2);
-  CHECK(support.at("1-2_x") == 2);
-  CHECK(support.at("transcript.9") == 2);
-  CHECK(support.at("n1") == 1);
-  CHECK(support.count("absent") == 0);
+  CHECK(support.by_native_id.at("1-1_x") == 2);
+  CHECK(support.by_native_id.at("1-2_x") == 2);
+  CHECK(support.by_native_id.at("transcript.9") == 2);
+  CHECK(support.by_native_id.at("n1") == 1);
+  CHECK(support.by_native_id.count("absent") == 0);
+  // ...and the chain fingerprint (the join key adjudicate uses) carries the same counts.
+  REQUIRE(support.has_fingerprints());
+  CHECK(support.by_chain.at(fingerprint_intron_chain(chainA)) == 2);
+  CHECK(support.by_chain.at(fingerprint_intron_chain(chainB)) == 1);
+  CHECK(support.n_native_id_collisions == 0);
+}
+
+TEST_CASE("consensus: duplicate native ids across callers stay separate per chain", "[consensus]") {
+  // Two callers both name an isoform "transcript_1" but mean different chains. A
+  // native-id join would hand chainX's 2-caller support to caller B's transcript_1
+  // (chainY, 1 caller); the fingerprint join does not.
+  const auto chainX = chain("chr1", Strand::kPlus, {{200, 300}, {400, 500}});
+  const auto chainY = chain("chr1", Strand::kPlus, {{200, 500}});
+  ConsensusBuilder b;
+  b.add("callerA", "transcript_1", chainX);
+  b.add("callerB", "transcript_2", chainX);
+  b.add("callerB", "transcript_1", chainY);
+
+  const std::string path = "caller_support_collision.tsv";
+  write_caller_support_matrix(path, b.build());
+  const CallerSupport s = read_caller_support(path);
+  CHECK(s.n_native_id_collisions == 1);                 // reported, not silently max'ed
+  CHECK(s.by_chain.at(fingerprint_intron_chain(chainX)) == 2);
+  CHECK(s.by_chain.at(fingerprint_intron_chain(chainY)) == 1);
+}
+
+TEST_CASE("consensus: monoexonic PIG ids do not depend on input order", "[consensus]") {
+  const auto mono = chain("chr1", Strand::kPlus, {});
+  auto ids = [&](std::vector<std::pair<const char*, const char*>> order) {
+    ConsensusBuilder b;
+    for (const auto& p : order) b.add(p.first, p.second, mono);
+    std::map<std::string, std::string> id_of;  // native id -> pig id
+    for (const auto& iso : b.build()) id_of[iso.support.begin()->second.front()] = iso.pig_id;
+    return id_of;
+  };
+  const auto forward = ids({{"flair", "m1"}, {"flair", "m2"}, {"bambu", "m3"}});
+  const auto reversed = ids({{"bambu", "m3"}, {"flair", "m2"}, {"flair", "m1"}});
+  REQUIRE(forward.size() == 3);
+  CHECK(forward == reversed);
 }
 
 TEST_CASE("consensus annotates known/novel against a catalog", "[consensus][catalog]") {

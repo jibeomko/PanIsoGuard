@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "panisoguard/bam_features.hpp"
+#include "panisoguard/consensus.hpp"  // CallerSupport
 #include "panisoguard/gtf.hpp"   // Catalog
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/rules.hpp"
@@ -43,7 +44,7 @@ struct AdjudicateInputs {
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
   const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)
   bool pangenome_circular = false;                           // true if junction-set provenance is sample-derived/unknown
-  const std::unordered_map<std::string, int>* caller_support = nullptr;  // optional: native_id -> n_callers (consensus axis)
+  const CallerSupport* caller_support = nullptr;  // optional: `combine` matrix (consensus axis), joined by chain fingerprint
 };
 
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller

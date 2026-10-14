@@ -49,26 +49,32 @@ PANEL_BG = "#FFFFFF"
 ACCENT = "#2D7DD2"       # brand accent (rule under titles)
 
 CLASS_COLORS = {
-    "HIGH_CONF_KNOWN": "#0E7C66",            # teal — trusted catalog pass-through
-    "HIGH_CONF_NOVEL": "#2E9E5B",            # green — confident novel
-    "MEDIUM_CONF_NOVEL": "#86BC4C",          # light green — confident novel
-    "PAN_REF_RESCUED_FALSE_NOVEL": "#2D7DD2",  # blue — reclassification, not a grade
-    "LOW_CONF_PARTIAL": "#E8A33D",           # amber — tentative
-    "AMBIGUOUS": "#9AA5B1",                  # grey — honest abstention
+    "KNOWN": "#0E7C66",                      # teal — trusted catalog pass-through
+    "NOVEL_CONFIRMED": "#2E9E5B",            # green — confirmed novel
+    "NOVEL_PROBABLE": "#86BC4C",             # light green — confirmed with a caveat
+    "REFERENCE_BIAS": "#2D7DD2",             # blue — explained by the sample's genome, not a grade
+    "UNCONFIRMED": "#E8A33D",                # amber — weak evidence
+    "UNRESOLVED": "#9AA5B1",                 # grey — honest abstention
     "ARTIFACT": "#D1495B",                   # red — reject
 }
 CLASS_ORDER = [
-    "HIGH_CONF_KNOWN", "HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL",
-    "PAN_REF_RESCUED_FALSE_NOVEL", "LOW_CONF_PARTIAL", "AMBIGUOUS", "ARTIFACT",
+    "KNOWN", "NOVEL_CONFIRMED", "NOVEL_PROBABLE",
+    "REFERENCE_BIAS", "UNCONFIRMED", "UNRESOLVED", "ARTIFACT",
 ]
 CLASS_LABEL = {
-    "HIGH_CONF_KNOWN": "High-confidence known",
-    "HIGH_CONF_NOVEL": "High-confidence novel",
-    "MEDIUM_CONF_NOVEL": "Medium-confidence novel",
-    "PAN_REF_RESCUED_FALSE_NOVEL": "Reference-bias rescue",
-    "LOW_CONF_PARTIAL": "Low-confidence / partial",
-    "AMBIGUOUS": "Ambiguous",
-    "ARTIFACT": "Likely artifact",
+    "KNOWN": "Known",
+    "NOVEL_CONFIRMED": "Novel, confirmed",
+    "NOVEL_PROBABLE": "Novel, probable",
+    "REFERENCE_BIAS": "Reference bias",
+    "UNCONFIRMED": "Unconfirmed",
+    "UNRESOLVED": "Unresolved",
+    "ARTIFACT": "Artifact",
+}
+# Names before 0.0.6, accepted when reading older attribution files.
+LEGACY_CLASS = {
+    "HIGH_CONF_KNOWN": "KNOWN", "HIGH_CONF_NOVEL": "NOVEL_CONFIRMED",
+    "MEDIUM_CONF_NOVEL": "NOVEL_PROBABLE", "LOW_CONF_PARTIAL": "UNCONFIRMED",
+    "AMBIGUOUS": "UNRESOLVED", "PAN_REF_RESCUED_FALSE_NOVEL": "REFERENCE_BIAS",
 }
 MECH_COLORS = {
     "none": "#CBD2D9", "mapping_or_repeat": "#6D4C41", "noncanonical": "#C77F33",
@@ -318,14 +324,14 @@ def _table(ax, col_labels, rows, title, col_widths=None, max_rows=12, sub=None):
 def projected_class(support, mech):
     has_mech = mech not in (None, "none")
     if support == "SUPPORTED":
-        return "HIGH_CONF_NOVEL" if not has_mech else "MEDIUM_CONF_NOVEL"
+        return "NOVEL_CONFIRMED" if not has_mech else "NOVEL_PROBABLE"
     if support == "PARTIAL":
-        return "LOW_CONF_PARTIAL"
+        return "UNCONFIRMED"
     if support == "UNSUPPORTED":
-        return "LOW_CONF_PARTIAL" if not has_mech else "ARTIFACT"
+        return "UNCONFIRMED" if not has_mech else "ARTIFACT"
     if support == "UNKNOWN":
-        return "ARTIFACT" if mech == "mapping_or_repeat" else "AMBIGUOUS"
-    return "AMBIGUOUS"
+        return "ARTIFACT" if mech == "mapping_or_repeat" else "UNRESOLVED"
+    return "UNRESOLVED"
 
 
 # ---------------------------------------------------------------------------
@@ -643,7 +649,14 @@ def page6(pdf, ctx, prefix):
     cage = D.numeric_values(ctx.records, "bio_flags.dist_to_CAGE_peak")
     polya = D.numeric_values(ctx.records, "bio_flags.dist_to_polyA_site")
     nmd_vals = [D.get_path(r, "bio_flags.predicted_NMD") for r in ctx.records]
-    motif_vals = [D.get_path(r, "bio_flags.polyA_motif_found") for r in ctx.records]
+    # polyA_motif_found moved from bio_flags to evidence in 0.0.6 (it refines the
+    # intra-priming sign); read either location, as "TRUE"/"FALSE" labels.
+    motif_vals = []
+    for r in ctx.records:
+        v = D.get_path(r, "evidence.polyA_motif_found")
+        if v is None:
+            v = D.get_path(r, "bio_flags.polyA_motif_found")
+        motif_vals.append({True: "TRUE", False: "FALSE"}.get(v, v))
     has_nmd = any(v not in (None, "NA") for v in nmd_vals)
     has_motif = any(v not in (None, "NA") for v in motif_vals)
     if not (cage or polya or has_nmd or has_motif):
@@ -651,7 +664,8 @@ def page6(pdf, ctx, prefix):
 
     fig = _newpage()
     _page_header(fig, "SQANTI3 biological priors", 6,
-                 "Passed through verbatim — these are NOT used in the PanIsoGuard verdict.")
+                 "CAGE, polyA site and NMD are passed through and NOT used in the verdict; "
+                 "the polyA motif only exempts an A-rich 3' end from the intra-priming sign.")
     gs = fig.add_gridspec(2, 2, hspace=0.6, wspace=0.32, left=0.14, right=0.95, top=0.80, bottom=0.13)
 
     ax = fig.add_subplot(gs[0, 0])

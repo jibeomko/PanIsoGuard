@@ -37,11 +37,16 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--pangenome-provenance"){ c.pangenome_provenance = next("--pangenome-provenance"); return true; }
   if (a == "--caller-support")     { c.caller_support = next("--caller-support"); return true; }
   if (a == "--config")             { c.config = next("--config"); return true; }
+  if (a == "--platform")           { c.platform = next("--platform"); return true; }
   return false;
 }
 
 bool common_args_ok(const CommonArgs& c, std::string& err) {
   if (c.classification.empty()) { err = "--classification is required"; return false; }
+  if (c.platform != "hifi" && c.platform != "ont") {
+    err = "--platform must be hifi or ont (got '" + c.platform + "')";
+    return false;
+  }
   if (c.isoforms_bed.empty() && c.isoforms_gtf.empty()) {
     err = "one of --isoforms-bed / --isoforms-gtf is required";
     return false;
@@ -96,13 +101,13 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   } else {
     // Without a reference catalog there is no way to tell which junctions are novel,
     // so the whole novel-junction block is skipped: every novel isoform is held
-    // UNKNOWN/AMBIGUOUS and the short-read/BAM/variant/pangenome axes contribute
+    // UNKNOWN/UNRESOLVED and the short-read/BAM/variant/pangenome axes contribute
     // NOTHING even when their inputs are supplied. Warn loudly rather than fail soft.
     const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() ||
                                      !c.reference_haplotypes.empty() || !c.pangenome_junctions.empty();
     std::fprintf(stderr,
         "WARNING: --ref-gtf not supplied: novel-junction classification is disabled; "
-        "every novel isoform is held AMBIGUOUS%s.\n",
+        "every novel isoform is held UNRESOLVED%s.\n",
         novel_axes_supplied ? " and the supplied SJ/BAM/haplotype/pangenome evidence "
                               "will NOT be used" : "");
   }
@@ -144,17 +149,25 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
                  pangenome.size(), c.pangenome_provenance.c_str());
   }
 
-  std::unordered_map<std::string, int> caller_support;
-  const std::unordered_map<std::string, int>* caller_support_ptr = nullptr;
+  CallerSupport caller_support;
+  const CallerSupport* caller_support_ptr = nullptr;
   if (!c.caller_support.empty()) {
     caller_support = read_caller_support(c.caller_support);
     caller_support_ptr = &caller_support;
-    std::fprintf(stderr, "read caller-support for %zu native isoform id(s) (consensus axis)\n",
-                 caller_support.size());
-    warn_unjoined(run.sqanti, caller_support, /*novel_only=*/true, "the --caller-support matrix");
+    std::fprintf(stderr, "read caller-support for %zu chain(s) / %zu native isoform id(s) (consensus axis, "
+                 "joined by %s)\n", caller_support.by_chain.size(), caller_support.by_native_id.size(),
+                 caller_support.has_fingerprints() ? "chain fingerprint" : "native id: matrix predates 0.0.6");
+    if (caller_support.n_native_id_collisions > 0) {
+      std::fprintf(stderr, "warning: %d native id(s) appear under more than one chain in the matrix "
+                   "(two callers reusing a name); %s\n", caller_support.n_native_id_collisions,
+                   caller_support.has_fingerprints() ? "harmless, the join is by chain fingerprint"
+                                                     : "re-run `panisoguard combine` so the join can use chain fingerprints");
+    }
+    warn_unjoined(run.sqanti, caller_support.by_native_id, /*novel_only=*/true, "the --caller-support matrix");
   }
 
   run.engine = c.config.empty() ? RuleEngine() : RuleEngine::from_toml(c.config);
+  run.engine.apply_platform_preset(c.platform);
 
   AdjudicateInputs in;
   in.sqanti = &run.sqanti;

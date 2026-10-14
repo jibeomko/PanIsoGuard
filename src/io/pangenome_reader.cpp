@@ -28,8 +28,13 @@ void PangenomeJunctions::add(PangenomeJunctionRecord rec) {
     // Duplicate graph-junction rows should not create unreachable shadow records.
     // Treat n_haplotypes as an already-aggregated support count and preserve the
     // strongest support seen for this coordinate.
-    records_[it->second].n_haplotypes =
-        std::max(records_[it->second].n_haplotypes, rec.n_haplotypes);
+    PangenomeJunctionRecord& cur = records_[it->second];
+    cur.n_haplotypes = std::max(cur.n_haplotypes, rec.n_haplotypes);
+    for (const auto& id : rec.haplotype_ids) {
+      if (std::find(cur.haplotype_ids.begin(), cur.haplotype_ids.end(), id) == cur.haplotype_ids.end())
+        cur.haplotype_ids.push_back(id);
+    }
+    cur.n_haplotypes = std::max(cur.n_haplotypes, static_cast<int>(cur.haplotype_ids.size()));
     return;
   }
   records_.push_back(std::move(rec));
@@ -100,6 +105,17 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
         throw std::runtime_error("pangenome junctions line " + std::to_string(lineno) +
                                  ": n_haplotypes must be >= 1, got " + f[4]);
       }
+    }
+    if (f.size() >= 6 && !f[5].empty() && f[5] != "NA" && f[5] != ".") {
+      std::size_t start = 0;
+      while (start <= f[5].size()) {
+        const std::size_t comma = f[5].find(',', start);
+        const std::string id = f[5].substr(start, comma == std::string::npos ? std::string::npos : comma - start);
+        if (!id.empty()) rec.haplotype_ids.push_back(id);
+        if (comma == std::string::npos) break;
+        start = comma + 1;
+      }
+      rec.n_haplotypes = std::max(rec.n_haplotypes, static_cast<int>(rec.haplotype_ids.size()));
     }
     table.add(std::move(rec));
   }

@@ -1,5 +1,7 @@
 #include "catch2/catch.hpp"
 
+#include <stdexcept>
+
 #include "panisoguard/rules.hpp"
 
 using namespace panisoguard;
@@ -31,11 +33,11 @@ EvidenceVector novel_ev(int n, int k, bool noncanonical = false, bool rts = fals
 TEST_CASE("rule projection over the 2-axis grid", "[rules]") {
   const RuleEngine eng;  // defaults
 
-  CHECK(eng.evaluate(novel_ev(2, 2)).confidence == ConfidenceClass::kHighConfNovel);
-  CHECK(eng.evaluate(novel_ev(2, 2, /*noncanonical=*/true)).confidence == ConfidenceClass::kMediumConfNovel);
-  CHECK(eng.evaluate(novel_ev(2, 1)).confidence == ConfidenceClass::kLowConfPartial);  // PARTIAL never promotes
-  CHECK(eng.evaluate(novel_ev(2, 1, /*noncanonical=*/true)).confidence == ConfidenceClass::kLowConfPartial);
-  CHECK(eng.evaluate(novel_ev(2, 0)).confidence == ConfidenceClass::kLowConfPartial);
+  CHECK(eng.evaluate(novel_ev(2, 2)).confidence == ConfidenceClass::kNovelConfirmed);
+  CHECK(eng.evaluate(novel_ev(2, 2, /*noncanonical=*/true)).confidence == ConfidenceClass::kNovelProbable);
+  CHECK(eng.evaluate(novel_ev(2, 1)).confidence == ConfidenceClass::kUnconfirmed);  // PARTIAL never promotes
+  CHECK(eng.evaluate(novel_ev(2, 1, /*noncanonical=*/true)).confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(eng.evaluate(novel_ev(2, 0)).confidence == ConfidenceClass::kUnconfirmed);
   CHECK(eng.evaluate(novel_ev(2, 0, /*noncanonical=*/true)).confidence == ConfidenceClass::kArtifact);
   // UNSUPPORTED x rt_switch and x degradation also -> ARTIFACT (explicit grid coverage)
   CHECK(eng.evaluate(novel_ev(2, 0, false, /*rts=*/true)).confidence == ConfidenceClass::kArtifact);
@@ -43,15 +45,15 @@ TEST_CASE("rule projection over the 2-axis grid", "[rules]") {
 
   // perc_A intra-priming threshold matches SQANTI3 default (flag >= 60)
   CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/60.0)).confidence == ConfidenceClass::kArtifact);
-  CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/59.5)).confidence == ConfidenceClass::kLowConfPartial);
+  CHECK(eng.evaluate(novel_ev(2, 0, false, false, /*percA=*/59.5)).confidence == ConfidenceClass::kUnconfirmed);
 }
 
-TEST_CASE("rules: unevaluable novelty support is AMBIGUOUS, not a guess", "[rules]") {
+TEST_CASE("rules: unevaluable novelty support is UNRESOLVED, not a guess", "[rules]") {
   EvidenceVector e = novel_ev(0, 0);
   e.sj_evaluable = false;  // no SR / catalog
   e.n_novel_junctions = 0;
   const Verdict v = RuleEngine().evaluate(e);
-  CHECK(v.confidence == ConfidenceClass::kAmbiguous);
+  CHECK(v.confidence == ConfidenceClass::kUnresolved);
   CHECK_FALSE(v.rule_trace.empty());
   CHECK_FALSE(v.circularity_flag);  // Tier-0 never sets circularity
 }
@@ -62,15 +64,17 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   // SR-supported novel but reads map poorly -> demoted to MEDIUM (conflicting).
   EvidenceVector sup = novel_ev(1, 1);
   sup.bam_evaluable = true;
+  sup.bam_n_junctions_gated = 1;
   sup.bam_n_spanning_total = 10;
   sup.bam_max_frac_low_mapq = 0.8;  // > default 0.5
   Verdict vs = eng.evaluate(sup);
   CHECK(vs.primary_mechanism == Mechanism::kMapping);
-  CHECK(vs.confidence == ConfidenceClass::kMediumConfNovel);
+  CHECK(vs.confidence == ConfidenceClass::kNovelProbable);
 
   // Unsupported novel + mapping artifact -> ARTIFACT.
   EvidenceVector uns = novel_ev(1, 0);
   uns.bam_evaluable = true;
+  uns.bam_n_junctions_gated = 1;
   uns.bam_n_spanning_total = 10;
   uns.bam_max_frac_supplementary = 0.9;  // > default 0.5
   CHECK(eng.evaluate(uns).confidence == ConfidenceClass::kArtifact);
@@ -80,6 +84,7 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   unk.sj_evaluable = false;
   unk.n_novel_junctions = 0;
   unk.bam_evaluable = true;
+  unk.bam_n_junctions_gated = 1;
   unk.bam_n_spanning_total = 5;
   unk.bam_max_frac_low_mapq = 0.9;
   CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
@@ -94,6 +99,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by 
   // junctions at 100% precision (benchmark/bam_axis). UNSUPPORTED -> ARTIFACT.
   EvidenceVector indel = novel_ev(1, 0);
   indel.bam_evaluable = true;
+  indel.bam_n_junctions_gated = 1;
   indel.bam_n_spanning_total = 20;
   indel.bam_max_frac_indel_near = 0.8;  // > default 0.5
   Verdict vi = eng.evaluate(indel);
@@ -104,17 +110,19 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by 
   // ARTIFACT): the conflicting-evidence case the projection grid must preserve.
   EvidenceVector sup = novel_ev(1, 1);
   sup.bam_evaluable = true;
+  sup.bam_n_junctions_gated = 1;
   sup.bam_n_spanning_total = 20;
   sup.bam_max_frac_indel_near = 0.8;
   Verdict vsup = eng.evaluate(sup);
   CHECK(vsup.primary_mechanism == Mechanism::kMapping);
-  CHECK(vsup.confidence == ConfidenceClass::kMediumConfNovel);
+  CHECK(vsup.confidence == ConfidenceClass::kNovelProbable);
 
   // Soft-clip is DISABLED by default (gate 1.01): a terminal soft-clip is not
   // junction-proximal and fires on adapter/poly-A read ends, so even an extreme
   // softclip fraction must NOT flag the mapping mechanism under the shipped defaults.
   EvidenceVector clip = novel_ev(1, 0);
   clip.bam_evaluable = true;
+  clip.bam_n_junctions_gated = 1;
   clip.bam_n_spanning_total = 20;
   clip.bam_max_frac_softclip = 0.99;  // would fire at 0.5, but default gate is 1.01 (off)
   CHECK(eng.evaluate(clip).primary_mechanism == Mechanism::kNone);
@@ -123,23 +131,25 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by 
   // no mapping flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
   EvidenceVector ok = novel_ev(1, 1);
   ok.bam_evaluable = true;
+  ok.bam_n_junctions_gated = 1;
   ok.bam_n_spanning_total = 20;
   ok.bam_max_frac_indel_near = 0.19;
   ok.bam_max_frac_softclip = 0.99;  // soft-clip off by default -> ignored
   Verdict vo = eng.evaluate(ok);
   CHECK(vo.primary_mechanism == Mechanism::kNone);
-  CHECK(vo.confidence == ConfidenceClass::kHighConfNovel);
+  CHECK(vo.confidence == ConfidenceClass::kNovelConfirmed);
 }
 
 TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel chain", "[rules]") {
   const RuleEngine eng;  // defaults: consensus_min_callers = 2
 
   // A novel isoform with NO short-read/catalog axis (UNKNOWN support) and no artifact
-  // mechanism is held AMBIGUOUS by default...
+  // mechanism is held UNRESOLVED by default...
   EvidenceVector base = novel_ev(0, 0);
   base.sj_evaluable = false;
   base.n_novel_junctions = 0;
-  CHECK(eng.evaluate(base).confidence == ConfidenceClass::kAmbiguous);
+  base.catalog_evaluable = true;  // the chain was examined against a catalog
+  CHECK(eng.evaluate(base).confidence == ConfidenceClass::kUnresolved);
 
   // ...but >= 2 independent callers recovering the chain promotes it to MEDIUM (never HIGH:
   // caller agreement is methodological, not experimental, corroboration).
@@ -147,38 +157,67 @@ TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel c
   consensus.consensus_evaluable = true;
   consensus.n_callers = 3;
   Verdict vc = eng.evaluate(consensus);
-  CHECK(vc.confidence == ConfidenceClass::kMediumConfNovel);
+  CHECK(vc.confidence == ConfidenceClass::kNovelProbable);
   CHECK_FALSE(vc.rule_trace.empty());
 
   // A single caller does not reach the gate -> still AMBIGUOUS.
   EvidenceVector single = base;
   single.consensus_evaluable = true;
   single.n_callers = 1;
-  CHECK(eng.evaluate(single).confidence == ConfidenceClass::kAmbiguous);
+  CHECK(eng.evaluate(single).confidence == ConfidenceClass::kUnresolved);
 
   // Consensus + an artifact mechanism (non-canonical) -> LOW_CONF_PARTIAL, not MEDIUM.
   EvidenceVector mech = consensus;
   mech.noncanonical = true;
-  CHECK(eng.evaluate(mech).confidence == ConfidenceClass::kLowConfPartial);
+  CHECK(eng.evaluate(mech).confidence == ConfidenceClass::kUnconfirmed);
 
   // A strong mapping artifact still dominates consensus -> ARTIFACT.
   EvidenceVector mapping = consensus;
   mapping.bam_evaluable = true;
+  mapping.bam_n_junctions_gated = 1;
   mapping.bam_n_spanning_total = 10;
   mapping.bam_max_frac_low_mapq = 0.9;
   CHECK(eng.evaluate(mapping).confidence == ConfidenceClass::kArtifact);
 
   // Ablating the consensus axis reverts the promotion (AMBIGUOUS again).
   CHECK(eng.with_axis_disabled("consensus").evaluate(consensus).confidence ==
-        ConfidenceClass::kAmbiguous);
+        ConfidenceClass::kUnresolved);
+}
+
+TEST_CASE("rules: consensus cannot promote an isoform whose chain or catalog is missing", "[rules]") {
+  const RuleEngine eng;
+  EvidenceVector ev = novel_ev(0, 0);
+  ev.sj_evaluable = false;
+  ev.n_novel_junctions = 0;
+  ev.consensus_evaluable = true;
+  ev.n_callers = 3;
+  // SQANTI id did not join the caller GTF: nothing about the chain was verified.
+  ev.chain_available = false;
+  ev.catalog_evaluable = false;
+  Verdict v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnresolved);
+  CHECK(v.verdict_reason == "caller_chain_absent");
+  // Chain present but no reference catalog (--ref-gtf absent): held too.
+  ev.chain_available = true;
+  v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnresolved);
+  CHECK(v.verdict_reason == "no_short_reads");
+  // Both present: the consensus promotion applies.
+  ev.catalog_evaluable = true;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kNovelProbable);
+}
+
+TEST_CASE("rules: an unknown ablation axis is an error, not a silent no-op", "[rules][ablate]") {
+  REQUIRE_THROWS_AS(RuleEngine().with_axis_disabled("short_reads"), std::invalid_argument);
+  REQUIRE_NOTHROW(RuleEngine().with_axis_disabled("short_read"));
 }
 
 TEST_CASE("rules: known/partial categories pass through", "[rules]") {
   EvidenceVector fsm;
   fsm.structural_category = "full-splice_match";
-  CHECK(RuleEngine().evaluate(fsm).confidence == ConfidenceClass::kHighConfKnown);
+  CHECK(RuleEngine().evaluate(fsm).confidence == ConfidenceClass::kKnown);
 
   EvidenceVector ism;
   ism.structural_category = "incomplete-splice_match";
-  CHECK(RuleEngine().evaluate(ism).confidence == ConfidenceClass::kLowConfPartial);
+  CHECK(RuleEngine().evaluate(ism).confidence == ConfidenceClass::kUnconfirmed);
 }

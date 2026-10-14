@@ -29,6 +29,8 @@ struct PangenomeJunctionRecord {
   Junction intron;             // normalized 0-based half-open
   Strand strand = Strand::kUnknown;
   int n_haplotypes = 1;        // number of graph haplotypes carrying it (>= 1)
+  std::vector<std::string> haplotype_ids;  // optional: WHICH paths carry it (6th column);
+                                           // lets the adjudicator require one common path
 };
 
 class PangenomeJunctions {
@@ -54,11 +56,13 @@ class PangenomeJunctions {
 };
 
 // Parse a pangenome junction file. Tab-separated, no header. Columns:
-//   chrom  intron_start  intron_end  strand  [n_haplotypes]
+//   chrom  intron_start  intron_end  strand  [n_haplotypes]  [haplotype_ids]
 // intron_start/intron_end are 1-based inclusive (first/last intronic base, the
 // same convention as STAR SJ.tab and GTF introns); strand is "+"/"-" (1/2 also
 // accepted). The optional 5th column is the supporting-haplotype count (default
-// 1). Blank lines and lines beginning with '#' are ignored. Throws
+// 1); the optional 6th column is a comma-separated list of the haplotype/path ids
+// carrying the junction (then n_haplotypes >= its length). Blank lines and lines
+// beginning with '#' are ignored. Throws
 // std::runtime_error on open failure or malformed rows.
 PangenomeJunctions read_pangenome_junctions(const std::string& path);
 

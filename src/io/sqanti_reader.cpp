@@ -15,10 +15,6 @@ const std::string& field_at(const std::vector<std::string>& f, int idx) {
   return f[idx];
 }
 
-bool is_na_token(const std::string& s) {
-  return s.empty() || s == "NA" || s == "NaN" || s == "nan" || s == ".";
-}
-
 constexpr int kMaxParseWarnings = 5;
 
 // A non-NA token that does not fully parse as a number is genuinely malformed (not an
@@ -37,7 +33,7 @@ void warn_unparseable(const char* what, std::size_t lineno, const std::string& s
 }
 
 double parse_double_or_na(const std::string& s, const char* what, std::size_t lineno, int& warnings) {
-  if (is_na_token(s)) return SqantiRecord::kNaN;
+  if (sqanti_is_na_token(s)) return SqantiRecord::kNaN;
   try {
     std::size_t pos = 0;
     const double v = std::stod(s, &pos);
@@ -50,7 +46,7 @@ double parse_double_or_na(const std::string& s, const char* what, std::size_t li
 }
 
 int parse_int_or_na(const std::string& s, const char* what, std::size_t lineno, int& warnings) {
-  if (is_na_token(s)) return SqantiRecord::kIntNA;
+  if (sqanti_is_na_token(s)) return SqantiRecord::kIntNA;
   try {
     std::size_t pos = 0;
     const long v = std::stol(s, &pos);

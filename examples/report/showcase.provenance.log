@@ -1,6 +1,6 @@
 # PanIsoGuard adjudicate provenance (SYNTHETIC SHOWCASE FIXTURE)
-tool_version	0.0.3
-ruleset_version	builtin-0.0.1
+tool_version	0.0.6
+ruleset_version	builtin-0.0.3
 sqanti3_version_target	6.0
 config	<built-in defaults>
 classification	showcase (synthetic demo)
@@ -16,11 +16,11 @@ axis.variant	on
 axis.pangenome	on
 axis.consensus	on
 # confidence-class counts
-class.HIGH_CONF_KNOWN	9
-class.HIGH_CONF_NOVEL	7
-class.MEDIUM_CONF_NOVEL	14
-class.LOW_CONF_PARTIAL	14
+class.KNOWN	9
+class.NOVEL_CONFIRMED	7
+class.NOVEL_PROBABLE	14
+class.UNCONFIRMED	14
 class.ARTIFACT	6
-class.PAN_REF_RESCUED_FALSE_NOVEL	5
-class.AMBIGUOUS	7
+class.REFERENCE_BIAS	5
+class.UNRESOLVED	7
 total	62

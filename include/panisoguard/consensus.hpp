@@ -60,11 +60,17 @@ class ConsensusBuilder {
 void write_caller_support_matrix(const std::string& path,
                                  const std::vector<ConsensusIsoform>& isoforms);
 
-// Load a `combine` caller-support matrix into a native_id -> n_callers map, for
-// feeding the multi-caller consensus axis into `adjudicate` (--caller-support).
-// Every native running ID (across all callers, parsed from the native_ids column)
-// maps to the number of distinct callers that recovered its integrated intron chain,
-// so adjudicate can look up the caller-support of each SQANTI record by its id.
-std::unordered_map<std::string, int> read_caller_support(const std::string& path);
+// A `combine` caller-support matrix as `adjudicate --caller-support` consumes it.
+// The join key is the intron-chain fingerprint (column `fingerprint`, written since
+// 0.0.6): two callers may reuse one native id ("transcript_1") for different chains, so
+// a native-id join could hand one chain's support to another. The native-id map is kept
+// for matrices without the column and for monoexonic isoforms (no chain fingerprint).
+struct CallerSupport {
+  std::unordered_map<Fingerprint, int> by_chain;       // fingerprint -> n_callers
+  std::unordered_map<std::string, int> by_native_id;   // native running id -> n_callers (legacy join)
+  int n_native_id_collisions = 0;  // native ids that appear under more than one chain
+  bool has_fingerprints() const { return !by_chain.empty(); }
+};
+CallerSupport read_caller_support(const std::string& path);
 
 }  // namespace panisoguard

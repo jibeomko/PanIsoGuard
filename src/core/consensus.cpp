@@ -91,8 +91,10 @@ std::vector<ConsensusIsoform> ConsensusBuilder::build(const Catalog* catalog) co
     if (a.strand != b.strand) return strand_char(a.strand) < strand_char(b.strand);
     const int64_t sa = first_start(a), sb = first_start(b);
     if (sa != sb) return sa < sb;
-    // tie-break on full intron vector for total order
-    return a.chain.introns < b.chain.introns;
+    if (a.chain.introns != b.chain.introns) return a.chain.introns < b.chain.introns;
+    // Monoexonic isoforms share an empty chain: order them by their first (caller,
+    // native id) so the PIG ids do not depend on input order.
+    return a.support < b.support;
   });
 
   char buf[32];
@@ -135,7 +137,7 @@ void write_caller_support_matrix(const std::string& path,
   std::ofstream out(path);
   if (!out) throw std::runtime_error("cannot write caller support matrix: " + path);
 
-  out << "pig_id\tchrom\tstrand\tn_introns\tn_callers\tn_isoforms\tcallers\tnovelty\tnative_ids\n";
+  out << "pig_id\tchrom\tstrand\tn_introns\tn_callers\tn_isoforms\tcallers\tnovelty\tnative_ids\tfingerprint\n";
   for (const auto& iso : isoforms) {
     std::string novelty = "NA";
     if (iso.monoexonic) {
@@ -146,18 +148,20 @@ void write_caller_support_matrix(const std::string& path,
     out << iso.pig_id << '\t' << iso.chrom << '\t' << strand_char(iso.strand) << '\t'
         << iso.chain.introns.size() << '\t' << iso.n_callers() << '\t' << iso.n_isoforms()
         << '\t' << join_callers(iso.support) << '\t' << novelty << '\t'
-        << join_native_ids(iso.support) << '\n';
+        << join_native_ids(iso.support) << '\t'
+        << (iso.monoexonic ? std::string("NA") : std::to_string(fingerprint_intron_chain(iso.chain)))
+        << '\n';
   }
 }
 
-std::unordered_map<std::string, int> read_caller_support(const std::string& path) {
+CallerSupport read_caller_support(const std::string& path) {
   std::ifstream in(path);
   if (!in) throw std::runtime_error("cannot open caller-support matrix: " + path);
 
-  std::unordered_map<std::string, int> support;
+  CallerSupport support;
   std::string line;
   std::size_t lineno = 0;
-  int col_callers = -1, col_native = -1;
+  int col_callers = -1, col_native = -1, col_fp = -1;
   while (std::getline(in, line)) {
     ++lineno;
     chomp(line);
@@ -168,6 +172,7 @@ std::unordered_map<std::string, int> read_caller_support(const std::string& path
       TsvHeader h(f);
       col_callers = h.col("n_callers");
       col_native = h.col("native_ids");
+      col_fp = h.col("fingerprint");  // absent in matrices written before 0.0.6
       if (col_callers < 0 || col_native < 0) {
         throw std::runtime_error("caller-support matrix " + path +
                                  ": missing required column(s) n_callers/native_ids "
@@ -178,6 +183,9 @@ std::unordered_map<std::string, int> read_caller_support(const std::string& path
     if (static_cast<int>(f.size()) <= std::max(col_callers, col_native)) continue;
     const int n_callers =
         static_cast<int>(parse_int_field(f[col_callers], "n_callers", "caller-support matrix", lineno));
+    if (col_fp >= 0 && col_fp < static_cast<int>(f.size()) && f[col_fp] != "NA" && !f[col_fp].empty()) {
+      support.by_chain[std::stoull(f[col_fp])] = n_callers;
+    }
     // native_ids column is "caller1=id1|id2;caller2=id3" -- explode it so every native
     // running id maps to the per-chain caller count.
     const std::string& native = f[col_native];
@@ -195,8 +203,11 @@ std::unordered_map<std::string, int> read_caller_support(const std::string& path
           const std::string id =
               ids.substr(istart, bar == std::string::npos ? std::string::npos : bar - istart);
           if (!id.empty()) {
-            int& cur = support[id];
-            if (n_callers > cur) cur = n_callers;  // an id should be unique, but keep the max defensively
+            auto ins = support.by_native_id.emplace(id, n_callers);
+            if (!ins.second) {  // the same native id under another chain (two callers, one name)
+              ++support.n_native_id_collisions;
+              if (n_callers > ins.first->second) ins.first->second = n_callers;
+            }
           }
           if (bar == std::string::npos) break;
           istart = bar + 1;

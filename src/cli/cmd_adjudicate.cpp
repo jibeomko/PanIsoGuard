@@ -26,9 +26,12 @@ void usage() {
       "  --reference PATH        genome FASTA (for the variant axis; also decodes a CRAM --bam)\n"
       "  --reference-haplotype PATH   personalized haplotype FASTA for the variant axis (repeatable)\n"
       "  --haplotype-provenance X     rna_derived|wgs|external|unknown (default unknown=circular-risk)\n"
+      "  --platform hifi|ont          BAM-axis threshold preset (default hifi; ont turns the\n"
+      "                               HiFi-calibrated indel-near gate off)\n"
       "  --pangenome-junctions PATH   graph-supported splice junctions (pangenome reference-bias axis; optional)\n"
       "  --pangenome-provenance X     population|external|sample_derived|unknown (default unknown=circular-risk)\n"
       "  --caller-support PATH        `panisoguard combine` matrix for the multi-caller consensus axis (optional)\n"
+      "  --hash-inputs                also record an MD5 per input file in provenance.log (reads every input once)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n"
       "\n"
@@ -42,6 +45,7 @@ int cmd_adjudicate(int argc, char** argv) {
   using namespace panisoguard;
   CommonArgs common;
   std::string out_prefix;
+  bool hash_inputs = false;
 
   for (int i = 2; i < argc; ++i) {
     const std::string a = argv[i];
@@ -49,6 +53,8 @@ int cmd_adjudicate(int argc, char** argv) {
     if (a == "--out-prefix") {
       if (i + 1 >= argc) { std::fprintf(stderr, "adjudicate: --out-prefix requires an argument\n"); return 1; }
       out_prefix = argv[++i];
+    } else if (a == "--hash-inputs") {
+      hash_inputs = true;
     } else if (a == "-h" || a == "--help") {
       usage();
       return 0;
@@ -79,6 +85,10 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.sj_tab_path = common.sj_tab;
     prov.bam_path = common.bam_path;
     prov.caller_support_path = common.caller_support;
+    prov.reference_path = common.reference;
+    prov.reference_haplotype_paths = common.reference_haplotypes;
+    prov.pangenome_path = common.pangenome_junctions;
+    prov.hash_inputs = hash_inputs;
     prov.variant_axis_on = !common.reference_haplotypes.empty();
     prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
     prov.pangenome_axis_on = !common.pangenome_junctions.empty();
@@ -92,7 +102,9 @@ int cmd_adjudicate(int argc, char** argv) {
         " sj_require_canonical_motif=" + (c.sj_require_canonical_motif ? "true" : "false") +
         " consensus_min_callers=" + std::to_string(c.consensus_min_callers) +
         " max_perc_A_downstream_TTS=" + num(c.perc_A_degradation_threshold) +
+        " platform=" + c.platform +
         " min_mapq=" + std::to_string(c.bam_min_mapq) +
+        " min_spanning=" + std::to_string(c.bam_min_spanning) +
         " softclip_min_bp=" + std::to_string(c.bam_softclip_min_bp) +
         " junction_window_bp=" + std::to_string(c.bam_junction_window_bp) +
         " max_low_mapq_frac=" + num(c.bam_max_low_mapq_frac) +

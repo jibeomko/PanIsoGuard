@@ -50,7 +50,7 @@ TEST_CASE("HaplotypeProvider classifies variant-created vs disrupted", "[variant
   CHECK(created.classify("chrZ", intron, Strand::kPlus) == VariantVerdict::kNotEvaluable);
 }
 
-TEST_CASE("rules: variant rescue -> PAN_REF_RESCUED, circular-risk held", "[variant][rules]") {
+TEST_CASE("rules: variant rescue -> REFERENCE_BIAS, circular-risk held", "[variant][rules]") {
   const RuleEngine eng;
   EvidenceVector ev;
   ev.structural_category = "novel_not_in_catalog";
@@ -62,11 +62,11 @@ TEST_CASE("rules: variant rescue -> PAN_REF_RESCUED, circular-risk held", "[vari
   ev.variant_circular = false;  // independent (wgs/external) provenance
   Verdict v = eng.evaluate(ev);
   CHECK(v.primary_mechanism == Mechanism::kVariant);
-  CHECK(v.confidence == ConfidenceClass::kPanRefRescuedFalseNovel);
+  CHECK(v.confidence == ConfidenceClass::kReferenceBias);
   CHECK_FALSE(v.circularity_flag);
 
   ev.variant_circular = true;   // RNA-derived/unknown -> never promoted
   Verdict vc = eng.evaluate(ev);
-  CHECK(vc.confidence == ConfidenceClass::kAmbiguous);
+  CHECK(vc.confidence == ConfidenceClass::kUnresolved);
   CHECK(vc.circularity_flag);
 }

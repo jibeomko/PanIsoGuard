@@ -1,10 +1,13 @@
 #include "catch2/catch.hpp"
 
 #include <filesystem>
+#include <map>
 #include <fstream>
 #include <stdexcept>
 #include <string>
 
+#include "panisoguard/adjudicator.hpp"
+#include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/rules.hpp"
 
@@ -60,7 +63,7 @@ TEST_CASE("pangenome supports() honours the haplotype-count threshold", "[pangen
   REQUIRE_FALSE(pj.supports("chr2", Strand::kMinus, Junction{50, 150}, 1));
 }
 
-TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED", "[pangenome]") {
+TEST_CASE("pangenome rescue: graph-supported novel junction -> REFERENCE_BIAS", "[pangenome]") {
   const RuleEngine engine;  // built-in defaults: use_pangenome = true
   EvidenceVector ev;
   ev.structural_category = "novel_in_catalog";
@@ -71,9 +74,9 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED",
   ev.pangenome_rescue = true;
   ev.n_novel_jx_pangenome = 1;
 
-  SECTION("graph support promotes to PAN_REF_RESCUED with population_known mechanism") {
+  SECTION("graph support promotes to REFERENCE_BIAS with population_known mechanism") {
     const Verdict v = engine.evaluate(ev);
-    REQUIRE(v.confidence == ConfidenceClass::kPanRefRescuedFalseNovel);
+    REQUIRE(v.confidence == ConfidenceClass::kReferenceBias);
     REQUIRE(v.primary_mechanism == Mechanism::kPopulationKnown);
     REQUIRE_FALSE(v.circularity_flag);  // population reference data is non-circular
   }
@@ -83,7 +86,7 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED",
     ev.variant_rescue = true;
     ev.variant_circular = true;  // sample haplotype provenance rna-derived/unknown
     const Verdict v = engine.evaluate(ev);
-    REQUIRE(v.confidence == ConfidenceClass::kPanRefRescuedFalseNovel);
+    REQUIRE(v.confidence == ConfidenceClass::kReferenceBias);
     REQUIRE(v.primary_mechanism == Mechanism::kPopulationKnown);
     REQUIRE_FALSE(v.circularity_flag);
   }
@@ -91,13 +94,13 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> PAN_REF_RESCUED",
   SECTION("disabling the pangenome axis removes the rescue") {
     const RuleEngine off = engine.with_axis_disabled("pangenome");
     const Verdict v = off.evaluate(ev);
-    REQUIRE(v.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
+    REQUIRE(v.confidence != ConfidenceClass::kReferenceBias);
   }
 
   SECTION("sample-derived/unknown provenance is held under the circularity firewall") {
     ev.pangenome_circular = true;  // junction set may derive from the sample's own reads
     const Verdict v = engine.evaluate(ev);
-    REQUIRE(v.confidence == ConfidenceClass::kAmbiguous);
+    REQUIRE(v.confidence == ConfidenceClass::kUnresolved);
     REQUIRE(v.circularity_flag);
   }
 }
@@ -114,4 +117,63 @@ TEST_CASE("pangenome reader rejects malformed rows", "[pangenome]") {
                     std::runtime_error);
   // A well-formed minimal (4-column) row is accepted.
   REQUIRE(read_pangenome_junctions(write_tmp("pig_pg_ok.tsv", "chr1\t101\t200\t+\n")).size() == 1);
+}
+
+TEST_CASE("pangenome reader keeps the optional haplotype/path ids and merges duplicates", "[pangenome]") {
+  const PangenomeJunctions pj = read_pangenome_junctions(write_tmp(
+      "pig_pg_ids.tsv",
+      "chr1\t101\t200\t+\t2\tHG002#1,HG002#2\n"
+      "chr1\t101\t200\t+\t1\tHG005#1\n"      // duplicate row: ids union, count follows
+      "chr1\t301\t400\t+\n"));               // no ids -> path consistency not evaluable
+  const PangenomeJunctionRecord* a = pj.find_exact("chr1", Strand::kPlus, Junction{100, 200});
+  REQUIRE(a != nullptr);
+  CHECK(a->haplotype_ids == std::vector<std::string>{"HG002#1", "HG002#2", "HG005#1"});
+  CHECK(a->n_haplotypes == 3);
+  const PangenomeJunctionRecord* b = pj.find_exact("chr1", Strand::kPlus, Junction{300, 400});
+  REQUIRE(b != nullptr);
+  CHECK(b->haplotype_ids.empty());
+}
+
+TEST_CASE("pangenome rescue requires one path carrying every novel junction", "[pangenome]") {
+  // Both novel junctions are graph-supported, but on disjoint paths -> held; a shared
+  // path -> rescued; rows without path ids -> rescued on counts alone (as before 0.0.6).
+  const Catalog cat = build_catalog_from_gtf(std::string(PANISOGUARD_TEST_DATA_DIR) + "/mini.gtf");
+  SqantiTable sqanti;
+  SqantiRecord r;
+  r.isoform = "iso";
+  r.chrom = "chr1";
+  r.strand = Strand::kPlus;
+  r.structural_category = "novel_not_in_catalog";
+  sqanti.records.push_back(r);
+  std::map<std::string, IntronChain> chains;
+  IntronChain c;
+  c.chrom = "chr1";
+  c.strand = Strand::kPlus;
+  c.introns = {{200, 350}, {400, 550}};  // neither in mini.gtf
+  chains["iso"] = c;
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.pangenome_circular = false;
+  auto run = [&](const std::string& body) {
+    PangenomeJunctions pan = read_pangenome_junctions(write_tmp("pig_pg_path.tsv", body));
+    in.pangenome = &pan;
+    return adjudicate(in, RuleEngine()).front();
+  };
+  const auto disjoint = run("chr1\t201\t350\t+\t1\tP1\nchr1\t401\t550\t+\t1\tP2\n");
+  CHECK(disjoint.evidence.n_novel_jx_pangenome == 2);
+  CHECK(disjoint.evidence.pangenome_path_evaluable);
+  CHECK_FALSE(disjoint.evidence.pangenome_path_consistent);
+  CHECK(disjoint.verdict.confidence == ConfidenceClass::kUnresolved);
+  CHECK(disjoint.verdict.verdict_reason == "path_inconsistent");
+
+  const auto shared = run("chr1\t201\t350\t+\t2\tP1,P2\nchr1\t401\t550\t+\t1\tP2\n");
+  CHECK(shared.evidence.pangenome_path_consistent);
+  CHECK(shared.verdict.confidence == ConfidenceClass::kReferenceBias);
+  CHECK(shared.verdict.verdict_reason == "pangenome_path");
+
+  const auto no_ids = run("chr1\t201\t350\t+\t1\nchr1\t401\t550\t+\t1\n");
+  CHECK_FALSE(no_ids.evidence.pangenome_path_evaluable);
+  CHECK(no_ids.verdict.confidence == ConfidenceClass::kReferenceBias);
 }

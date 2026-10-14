@@ -61,10 +61,20 @@ TEST_CASE("result writer records caller-support provenance", "[io][result_writer
   prov.caller_support_path = "caller_support.tsv";
   prov.consensus_axis_on = true;
 
+  prov.classification_path = std::string(PANISOGUARD_TEST_DATA_DIR) + "/mini_classification.txt";
+  prov.reference_haplotype_paths = {"hap1.fa", "hap2.fa"};
+  prov.hash_inputs = true;
+
   write_adjudication_outputs(pfx, {}, prov);
   const std::string log = slurp(pfx + ".provenance.log");
   CHECK(log.find("caller_support\tcaller_support.tsv") != std::string::npos);
   CHECK(log.find("axis.consensus\ton") != std::string::npos);
+  // Every named input gets an identity line: size + mtime, and an md5 when asked.
+  CHECK(log.find("input.classification\t" + prov.classification_path + "\tsize=") != std::string::npos);
+  CHECK(log.find("\tmtime=20") != std::string::npos);
+  CHECK(log.find("\tmd5=") != std::string::npos);
+  CHECK(log.find("reference_haplotype\thap1.fa") != std::string::npos);
+  CHECK(log.find("input.reference_haplotype\thap2.fa\tsize=NA") != std::string::npos);  // missing file: NA, not a crash
 
   std::remove((pfx + ".adjudicated.tsv").c_str());
   std::remove((pfx + ".attribution.jsonl").c_str());

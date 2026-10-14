@@ -50,7 +50,12 @@ class HaplotypeProvider {
   HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
                     std::vector<std::shared_ptr<FastaFetcher>> haplotypes);
 
-  VariantVerdict classify(const std::string& chrom, const Junction& intron, Strand strand) const;
+  // If `canonical_on` is given it is resized to n_haplotypes() and set true for every
+  // haplotype whose motif at this intron is canonical, so the caller can intersect the
+  // sets across an isoform's junctions (a rescue needs ONE haplotype explaining them all).
+  VariantVerdict classify(const std::string& chrom, const Junction& intron, Strand strand,
+                          std::vector<bool>* canonical_on = nullptr) const;
+  std::size_t n_haplotypes() const { return haps_.size(); }
 
  private:
   std::shared_ptr<FastaFetcher> ref_;

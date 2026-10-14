@@ -1,9 +1,13 @@
 #include "panisoguard/result_writer.hpp"
 
 #include <cstdio>
+#include <ctime>
 #include <fstream>
 #include <map>
 #include <stdexcept>
+#include <sys/stat.h>
+
+#include <htslib/hts.h>
 
 namespace panisoguard {
 namespace {
@@ -35,11 +39,13 @@ void write_tsv(const std::string& path, const std::vector<AdjudicationResult>& r
   std::ofstream out(path);
   if (!out) throw std::runtime_error("cannot write " + path);
   out << "isoform_id\tchrom\tstrand\tstructural_category\tnovelty_support\tprimary_mechanism\t"
-         "confidence_class\tn_novel_junctions\tn_novel_jx_sr_supported\tcircularity_flag\n";
+         "confidence_class\tverdict\tverdict_reason\tn_novel_junctions\tn_novel_jx_sr_supported\t"
+         "circularity_flag\n";
   for (const auto& r : results) {
     out << r.isoform_id << '\t' << r.chrom << '\t' << strand_char(r.strand) << '\t'
         << r.structural_category << '\t' << to_string(r.verdict.novelty_support) << '\t'
         << to_string(r.verdict.primary_mechanism) << '\t' << to_string(r.verdict.confidence)
+        << '\t' << r.verdict.verdict << '\t' << r.verdict.verdict_reason
         << '\t' << r.evidence.n_novel_junctions << '\t' << r.evidence.n_novel_jx_sr_supported
         << '\t' << (r.verdict.circularity_flag ? "true" : "false") << '\n';
   }
@@ -54,6 +60,8 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"isoform\":\"" << json_escape(r.isoform_id) << "\","
         << "\"structural_category\":\"" << json_escape(r.structural_category) << "\","
         << "\"confidence_class\":\"" << to_string(r.verdict.confidence) << "\","
+        << "\"verdict\":\"" << r.verdict.verdict << "\","
+        << "\"verdict_reason\":\"" << json_escape(r.verdict.verdict_reason) << "\","
         << "\"novelty_support\":\"" << to_string(r.verdict.novelty_support) << "\","
         << "\"primary_mechanism\":\"" << to_string(r.verdict.primary_mechanism) << "\","
         << "\"circularity_flag\":" << (r.verdict.circularity_flag ? "true" : "false") << ","
@@ -62,21 +70,28 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"sj_evaluable\":" << (e.sj_evaluable ? "true" : "false") << ","
         << "\"n_novel_junctions\":" << e.n_novel_junctions << ","
         << "\"n_novel_jx_sr_supported\":" << e.n_novel_jx_sr_supported << ","
+        << "\"n_known_junctions\":" << e.n_known_junctions << ","
+        << "\"n_known_jx_sr_supported\":" << e.n_known_jx_sr_supported << ","
         << "\"rts_stage\":" << (e.rts_evaluable ? (e.rts_stage ? "true" : "false") : "null") << ","
         << "\"noncanonical\":" << (e.canon_evaluable ? (e.noncanonical ? "true" : "false") : "null") << ","
+        << "\"polyA_motif_found\":" << (e.polyA_motif_evaluable ? (e.polyA_motif_found ? "true" : "false") : "null") << ","
         << "\"bam_evaluable\":" << (e.bam_evaluable ? "true" : "false") << ","
         << "\"bam_n_spanning\":" << e.bam_n_spanning_total << ","
+        << "\"bam_n_junctions_gated\":" << e.bam_n_junctions_gated << ","
         << "\"bam_frac_low_mapq\":" << e.bam_max_frac_low_mapq << ","
         << "\"bam_frac_supplementary\":" << e.bam_max_frac_supplementary << ","
         << "\"bam_frac_softclip\":" << e.bam_max_frac_softclip << ","
         << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near << ","
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
+        << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
+        << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
         << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
         << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
         << "\"pangenome_rescue\":" << (e.pangenome_rescue ? "true" : "false") << ","
         << "\"pangenome_circular\":" << (e.pangenome_circular ? "true" : "false") << ","
         << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome << ","
+        << "\"pangenome_path_consistent\":" << (e.pangenome_path_evaluable ? (e.pangenome_path_consistent ? "true" : "false") : "null") << ","
         << "\"consensus_evaluable\":" << (e.consensus_evaluable ? "true" : "false") << ","
         << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null")
         << "},";
@@ -99,14 +114,13 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
     // NEVER recomputed) -- biological-plausibility annotations that do NOT affect the
     // verdict. PanIsoGuard does not reimplement SQANTI3's TSS/TTS/ORF/NMD/polyA QC; it
     // surfaces it alongside the independent path-level verdict (docs/relationship_to_sqanti3.md).
+    // polyA_motif_found is in `evidence` (it refines the intra-priming sign since 0.0.6).
     out << "\"bio_flags\":{\"dist_to_CAGE_peak\":";
     if (sqanti_is_na(r.bio_dist_to_CAGE_peak)) out << "null"; else out << r.bio_dist_to_CAGE_peak;
     out << ",\"dist_to_polyA_site\":";
     if (sqanti_is_na(r.bio_dist_to_polyA_site)) out << "null"; else out << r.bio_dist_to_polyA_site;
     out << ",\"predicted_NMD\":"
         << (r.bio_predicted_NMD.empty() ? "null" : "\"" + json_escape(r.bio_predicted_NMD) + "\"")
-        << ",\"polyA_motif_found\":"
-        << (r.bio_polyA_motif_found.empty() ? "null" : "\"" + json_escape(r.bio_polyA_motif_found) + "\"")
         << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
@@ -115,6 +129,34 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
     }
     out << "]}" << '\n';
   }
+}
+
+// "size=<bytes>\tmtime=<UTC>" (+ "\tmd5=<hex>" when hashing) for one input file, so a
+// re-run can tell whether it saw the same bytes. Hashing reads the whole file (a BAM can
+// be large), hence opt-in.
+std::string file_identity(const std::string& path, bool hash) {
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) return "size=NA\tmtime=NA";
+  char when[32] = "NA";
+  struct tm tmv;
+  if (gmtime_r(&st.st_mtime, &tmv) != nullptr) std::strftime(when, sizeof(when), "%Y-%m-%dT%H:%M:%SZ", &tmv);
+  std::string id = "size=" + std::to_string(static_cast<long long>(st.st_size)) + "\tmtime=" + when;
+  if (hash) {
+    std::FILE* f = std::fopen(path.c_str(), "rb");
+    if (f == nullptr) return id + "\tmd5=NA";
+    hts_md5_context* ctx = hts_md5_init();
+    unsigned char buf[1 << 16];
+    std::size_t n;
+    while ((n = std::fread(buf, 1, sizeof(buf), f)) > 0) hts_md5_update(ctx, buf, static_cast<unsigned long>(n));
+    std::fclose(f);
+    unsigned char digest[16];
+    char hex[33];
+    hts_md5_final(digest, ctx);
+    hts_md5_hex(hex, digest);
+    hts_md5_destroy(ctx);
+    id += std::string("\tmd5=") + hex;
+  }
+  return id;
 }
 
 void write_provenance(const std::string& path, const std::vector<AdjudicationResult>& results,
@@ -134,6 +176,25 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "bam\t" << (prov.bam_path.empty() ? "<none>" : prov.bam_path) << '\n';
   out << "caller_support\t"
       << (prov.caller_support_path.empty() ? "<none>" : prov.caller_support_path) << '\n';
+  out << "reference\t" << (prov.reference_path.empty() ? "<none>" : prov.reference_path) << '\n';
+  for (const auto& h : prov.reference_haplotype_paths) out << "reference_haplotype\t" << h << '\n';
+  out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
+  // Input identity (size, mtime, optional md5): the paths above say what was named, these
+  // say what was read. Lines start with "input." so an expected-output diff can skip them.
+  out << "# inputs" << (prov.hash_inputs ? " (md5 via --hash-inputs)" : "") << '\n';
+  auto ident = [&](const char* name, const std::string& p) {
+    if (!p.empty()) out << "input." << name << '\t' << p << '\t' << file_identity(p, prov.hash_inputs) << '\n';
+  };
+  ident("classification", prov.classification_path);
+  ident("isoforms", prov.isoforms_path);
+  ident("ref_gtf", prov.ref_gtf_path);
+  ident("sj_tab", prov.sj_tab_path);
+  ident("bam", prov.bam_path);
+  ident("caller_support", prov.caller_support_path);
+  ident("reference", prov.reference_path);
+  for (const auto& h : prov.reference_haplotype_paths) ident("reference_haplotype", h);
+  ident("pangenome_junctions", prov.pangenome_path);
+  ident("config", prov.config_path);
   // Evidence-axis capabilities for this run.
   out << "axis.short_read\t" << (prov.sj_tab_path.empty() ? "not_evaluable" : "on") << '\n';
   out << "axis.catalog\t" << (prov.ref_gtf_path.empty() ? "not_evaluable" : "on") << '\n';
@@ -149,10 +210,15 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
       << '\n';
   out << "axis.consensus\t" << (prov.consensus_axis_on ? "on" : "not_evaluable") << '\n';
 
-  std::map<std::string, std::size_t> class_counts;
-  for (const auto& r : results) ++class_counts[to_string(r.verdict.confidence)];
+  std::map<std::string, std::size_t> class_counts, verdict_counts;
+  for (const auto& r : results) {
+    ++class_counts[to_string(r.verdict.confidence)];
+    ++verdict_counts[r.verdict.verdict];
+  }
   out << "# confidence-class counts\n";
   for (const auto& kv : class_counts) out << "class." << kv.first << '\t' << kv.second << '\n';
+  out << "# verdict counts\n";
+  for (const auto& kv : verdict_counts) out << "verdict." << kv.first << '\t' << kv.second << '\n';
   out << "total\t" << results.size() << '\n';
 }
 

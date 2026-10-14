@@ -28,8 +28,8 @@ TEST_CASE("non-redundancy 2x2 vs SQANTI3", "[analysis]") {
   std::vector<AdjudicationResult> results = {
       mk("iso1", ConfidenceClass::kArtifact, Mechanism::kMapping),   // PIG flag
       mk("iso2", ConfidenceClass::kArtifact),                        // PIG flag
-      mk("iso3", ConfidenceClass::kHighConfNovel),                   // PIG keep
-      mk("iso4", ConfidenceClass::kHighConfNovel),                   // PIG keep
+      mk("iso3", ConfidenceClass::kNovelConfirmed),                   // PIG keep
+      mk("iso4", ConfidenceClass::kNovelConfirmed),                   // PIG keep
   };
   SqantiTable s;
   s.records = {sq("iso1", "Isoform"),   // SQANTI keep  -> pig_only_flag
@@ -54,7 +54,7 @@ TEST_CASE("non-redundancy 2x2 vs SQANTI3", "[analysis]") {
 TEST_CASE("ablation counts class changes when an axis is masked", "[analysis]") {
   const RuleEngine eng;
 
-  // A novel isoform that is HIGH_CONF_NOVEL only because short-read support is on.
+  // A novel isoform that is NOVEL_CONFIRMED only because short-read support is on.
   EvidenceVector ev;
   ev.structural_category = "novel_not_in_catalog";
   ev.is_novel = true;
@@ -68,12 +68,12 @@ TEST_CASE("ablation counts class changes when an axis is masked", "[analysis]") 
   r.structural_category = ev.structural_category;
   r.evidence = ev;
   r.verdict = eng.evaluate(ev);
-  REQUIRE(r.verdict.confidence == ConfidenceClass::kHighConfNovel);
+  REQUIRE(r.verdict.confidence == ConfidenceClass::kNovelConfirmed);
 
   const AxisAblation ab = compute_ablation({r}, eng, "short_read");
   CHECK(ab.n_total == 1);
-  CHECK(ab.n_changed == 1);  // masking short_read -> support UNKNOWN -> AMBIGUOUS
-  CHECK(ab.transitions.at("HIGH_CONF_NOVEL->AMBIGUOUS") == 1);
+  CHECK(ab.n_changed == 1);  // masking short_read -> support UNKNOWN -> UNRESOLVED
+  CHECK(ab.transitions.at("NOVEL_CONFIRMED->UNRESOLVED") == 1);
 
   // Masking an axis the isoform does not use changes nothing.
   const AxisAblation ab2 = compute_ablation({r}, eng, "degradation");

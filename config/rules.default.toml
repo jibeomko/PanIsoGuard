@@ -8,12 +8,12 @@
 # Status: the thresholds below are conservative defaults. A SQANTI-SIM v49 chr22 sweep
 # (benchmark/results/sqanti_sim/sweep.tsv) finds AUPRC flat (0.970-0.971) across the grid,
 # but on the same truth set PanIsoGuard is not more accurate than a one-line short-read
-# rule (benchmark/sqanti3_filter_h2h); see docs/validation.md. Treat the confidence
-# classes as ordinal, not a tuned probability. Every run writes the effective thresholds
+# rule (benchmark/sqanti3_filter_h2h); see docs/validation.md. The confidence classes are
+# labels, not an ordered scale or a probability. Every run writes the effective thresholds
 # to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.2"   # bump together with the built-in in rules.hpp
+ruleset_version        = "default-0.0.3"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 random_seed            = 1
 
@@ -30,7 +30,10 @@ consensus_min_callers      = 2      # a novel chain recovered by >= this many ca
 # --- Axis B: artifact mechanism (engine-read where noted) --------------------
 # Priority order applied by the engine: mapping > noncanonical > rt_switch > degradation.
 [axis_artifact.degradation]
-max_perc_A_downstream_TTS = 60.0    # SQANTI3 intra-priming default: keep <60, flag >=60 (engine-read)
+max_perc_A_downstream_TTS = 60.0    # SQANTI3 intra-priming default: keep <60, flag >=60 (engine-read).
+                                    # Since 0.0.6 the sign also needs NO polyA motif upstream of the 3' end
+                                    # (SQANTI3's polyA_motif_found, present when it ran with a motif list);
+                                    # 20-30 % of perc_A-flagged ends carry a motif and are kept.
 
 # The rt_switch / noncanonical toggles below are INFORMATIONAL ONLY: the engine
 # always consults the corresponding SQANTI prior (RTS_stage / all_canonical), and
@@ -44,13 +47,16 @@ use_sqanti_all_canonical = true     # informational (engine always uses SQANTI a
 
 [axis_artifact.mapping]             # BAM read-level axis (engine-read; only when --bam supplied)
 min_mapq               = 20         # spanning reads below this MAPQ count as low-confidence
+min_spanning           = 3          # a junction's read fractions count only with >= this many spanning reads;
+                                    #   with 1-2 reads one indel is a fraction of 1.0 (45 % of HG03516's
+                                    #   mapping-artifact calls rested on < 3 reads before 0.0.6)
 softclip_min_bp        = 20         # terminal soft-clip >= this counts toward the soft-clip fraction
 junction_window_bp     = 10         # indel proximity window around each splice boundary
 max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
 max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to the junction -> mapping artifact
                                     #   (an alignment-ambiguous indel mis-rendered as an intron; junction-proximal,
-                                    #    validated to catch 41/124 false novel junctions at 100% precision -- benchmark/bam_axis)
+                                    #    catches 14/124 false novel junctions at 100% precision with min_spanning=3 -- benchmark/bam_axis)
 max_softclip_frac      = 1.01       # DISABLED by default (>1.0 never fires). The soft-clip feature is a TERMINAL
                                     #   soft-clip ANYWHERE on the read (not junction-proximal), so on real long reads
                                     #   it also fires on adapter/poly-A ends of legitimate spanning reads -- a default-on
@@ -60,9 +66,10 @@ max_softclip_frac      = 1.01       # DISABLED by default (>1.0 never fires). Th
 # indel_near was measured-only before v0.0.4.
 
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
-# When ALL of an isoform's novel-vs-linear-reference junctions are realizable on a
-# pangenome graph haplotype path, the apparent novelty is consistent with reference
-# bias. This is independent (non-circular) evidence ONLY if the junction set comes
+# When ALL of an isoform's novel-vs-linear-reference junctions are realizable on ONE
+# pangenome graph haplotype path (path ids are an optional 6th column; without them the
+# per-junction counts decide), the apparent novelty is consistent with reference
+# bias. The haplotype axis applies the same rule: one haplotype must carry every junction. This is independent (non-circular) evidence ONLY if the junction set comes
 # from population assemblies; PanIsoGuard cannot verify the file, so it applies the
 # same circularity firewall as the variant axis (--pangenome-provenance: population/
 # external promote; sample_derived/unknown are held AMBIGUOUS). Experimental: not yet
@@ -71,30 +78,37 @@ max_softclip_frac      = 1.01       # DISABLED by default (>1.0 never fires). Th
 min_haplotypes = 1                  # >= this many graph haplotypes must carry a junction (1 = a single path)
 
 # --- Confidence classes ------------------------------------------------------
-# Output classes (ordinal within the novel tiers). PAN_REF_RESCUED_FALSE_NOVEL is
-# emitted only when the variant axis (--reference-haplotype) or the pangenome axis
-# (--pangenome-junctions) is supplied; without them the run stays in the Tier-0
-# grid (no rescue class).
+# Output classes (names say the verdict; the evidence is in verdict_reason and rule_trace).
+# REFERENCE_BIAS is emitted only when the variant axis (--reference-haplotype) or the
+# pangenome axis (--pangenome-junctions) is supplied. Names before 0.0.6: KNOWN was
+# HIGH_CONF_KNOWN, NOVEL_CONFIRMED HIGH_CONF_NOVEL, NOVEL_PROBABLE MEDIUM_CONF_NOVEL,
+# UNCONFIRMED LOW_CONF_PARTIAL, UNRESOLVED AMBIGUOUS, REFERENCE_BIAS PAN_REF_RESCUED_FALSE_NOVEL.
 [confidence]
 classes = [
-  "HIGH_CONF_KNOWN",
-  "HIGH_CONF_NOVEL",
-  "MEDIUM_CONF_NOVEL",
-  "LOW_CONF_PARTIAL",
-  "PAN_REF_RESCUED_FALSE_NOVEL",      # reference bias: explained by a personalized haplotype
-                                      # (variant axis) or a pangenome graph path (pangenome axis)
-  "AMBIGUOUS",
+  "KNOWN",
+  "NOVEL_CONFIRMED",
+  "NOVEL_PROBABLE",
+  "UNCONFIRMED",
+  "UNRESOLVED",
+  "REFERENCE_BIAS",                   # explained by a personalized haplotype (variant axis)
+                                      # or a pangenome graph path (pangenome axis)
   "ARTIFACT",
 ]
 
-# Projection grid implemented in src/core/rules.cpp (v1) and documented in
-# docs/decision_engine.md:
-#   SUPPORTED   x none      -> HIGH_CONF_NOVEL
-#   SUPPORTED   x mechanism -> MEDIUM_CONF_NOVEL
-#   PARTIAL     x none      -> MEDIUM_CONF_NOVEL
-#   PARTIAL     x mechanism -> LOW_CONF_PARTIAL
-#   UNSUPPORTED x none      -> LOW_CONF_PARTIAL
-#   UNSUPPORTED x mechanism -> ARTIFACT
-#   UNKNOWN (support not evaluable) -> AMBIGUOUS
-# Moving the full grid into this file (table-driven projection) is a planned
-# refinement.
+# Projection grid implemented in src/core/rules.cpp and documented in
+# docs/decision_engine.md (verdict / verdict_reason in parentheses):
+#   SUPPORTED   x none      -> NOVEL_CONFIRMED (confirmed / all_junctions_supported)
+#   SUPPORTED   x mechanism -> NOVEL_PROBABLE  (confirmed / supported_with_<mechanism>)
+#   PARTIAL     x any       -> UNCONFIRMED     (unconfirmed / partial_support[_with_<mechanism>])
+#   UNSUPPORTED x none      -> UNCONFIRMED     (unconfirmed / unsupported_no_sign)
+#   UNSUPPORTED x mechanism -> ARTIFACT        (artifact / unsupported_<mechanism>)
+#   UNKNOWN     x mapping   -> ARTIFACT        (artifact / mapping_without_short_reads)
+#   UNKNOWN + >= consensus_min_callers x none -> NOVEL_PROBABLE (confirmed / caller_consensus)
+#   UNKNOWN + consensus x mechanism -> UNCONFIRMED (unconfirmed / consensus_with_<mechanism>)
+#     (consensus counts only for a chain that joined AND was checked against --ref-gtf)
+#   UNKNOWN otherwise       -> UNRESOLVED      (unconfirmed / no_short_reads | no_coverage |
+#                                               no_novel_junction | caller_chain_absent)
+# Before the grid: FSM -> KNOWN, ISM -> UNCONFIRMED (ism[_intrapriming|_rts]), other
+# categories -> UNRESOLVED (not_adjudicated), reference-bias rescue -> REFERENCE_BIAS or,
+# under circular-risk provenance, UNRESOLVED (firewall_held); junctions explained by
+# different haplotypes/paths -> UNRESOLVED (haplotype_inconsistent / path_inconsistent).

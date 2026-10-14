@@ -118,7 +118,7 @@ def rescue_firewall(records):
         mech = mechanisms[axis]
         rescue = sum(1 for r in records if get_path(r, f"evidence.{axis}_rescue") is True)
         promoted = sum(1 for r in records
-                       if get_path(r, "confidence_class") == "PAN_REF_RESCUED_FALSE_NOVEL"
+                       if get_path(r, "confidence_class") == "REFERENCE_BIAS"
                        and get_path(r, "primary_mechanism") == mech)
         held = sum(1 for r in records
                    if get_path(r, f"evidence.{axis}_rescue") is True
@@ -127,7 +127,7 @@ def rescue_firewall(records):
                    and get_path(r, "primary_mechanism") == mech)
         out[axis] = dict(rescue_fired=rescue, promoted=promoted, held_circular=held)
     promoted = sum(1 for r in records
-                   if get_path(r, "confidence_class") == "PAN_REF_RESCUED_FALSE_NOVEL")
+                   if get_path(r, "confidence_class") == "REFERENCE_BIAS")
     held = sum(1 for r in records if get_path(r, "circularity_flag") is True)
     out["promoted_total"] = promoted
     out["held_by_firewall_total"] = held

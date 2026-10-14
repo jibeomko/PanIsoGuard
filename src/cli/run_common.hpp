@@ -24,6 +24,7 @@ struct CommonArgs {
   std::string pangenome_provenance = "unknown";   // population|external|sample_derived|unknown
   std::string caller_support;                     // `combine` matrix (multi-caller consensus axis)
   std::string config;
+  std::string platform = "hifi";                  // hifi|ont: threshold preset for the BAM axis
 };
 
 // A haplotype provenance is "circular-risk" unless it is independent genomic data.

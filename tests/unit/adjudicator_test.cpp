@@ -1,9 +1,12 @@
 #include "catch2/catch.hpp"
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "panisoguard/adjudicator.hpp"
+#include "panisoguard/variant_motif.hpp"
+#include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
 #include "test_util.hpp"
 
@@ -75,14 +78,14 @@ TEST_CASE("adjudicator end-to-end: SR-supported novel vs unsupported artifact", 
   CHECK(nnc2->evidence.n_novel_junctions == 1);
   CHECK(nnc2->evidence.n_novel_jx_sr_supported == 1);
   CHECK(nnc2->verdict.novelty_support == NoveltySupport::kSupported);
-  CHECK(nnc2->verdict.confidence == ConfidenceClass::kHighConfNovel);
+  CHECK(nnc2->verdict.confidence == ConfidenceClass::kNovelConfirmed);
 
   const AdjudicationResult* fsm = find(out, "isoFSM");
   REQUIRE(fsm != nullptr);
-  CHECK(fsm->verdict.confidence == ConfidenceClass::kHighConfKnown);
+  CHECK(fsm->verdict.confidence == ConfidenceClass::kKnown);
 }
 
-TEST_CASE("adjudicator: pangenome graph-supported novel junction -> PAN_REF_RESCUED", "[adjudicator]") {
+TEST_CASE("adjudicator: pangenome graph-supported novel junction -> REFERENCE_BIAS", "[adjudicator]") {
   // Catalog knows {200,300},{400,500} (T1) and {200,500} (T2); {200,350} is novel.
   const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
 
@@ -110,13 +113,13 @@ TEST_CASE("adjudicator: pangenome graph-supported novel junction -> PAN_REF_RESC
   CHECK(p->evidence.pangenome_evaluable);
   CHECK(p->evidence.pangenome_rescue);
   CHECK(p->evidence.n_novel_jx_pangenome == 1);
-  CHECK(p->verdict.confidence == ConfidenceClass::kPanRefRescuedFalseNovel);
+  CHECK(p->verdict.confidence == ConfidenceClass::kReferenceBias);
   CHECK(p->verdict.primary_mechanism == Mechanism::kPopulationKnown);
   CHECK_FALSE(p->verdict.circularity_flag);  // population reference data is non-circular
 
   // Disabling the pangenome axis must drop the rescue (no SR/variant evidence here).
   const auto out_off = adjudicate(in, RuleEngine().with_axis_disabled("pangenome"));
-  CHECK(find(out_off, "isoPan")->verdict.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
+  CHECK(find(out_off, "isoPan")->verdict.confidence != ConfidenceClass::kReferenceBias);
 }
 
 TEST_CASE("adjudicator: pangenome partial support does NOT rescue (all-or-nothing)", "[adjudicator]") {
@@ -145,7 +148,7 @@ TEST_CASE("adjudicator: pangenome partial support does NOT rescue (all-or-nothin
   CHECK(p->evidence.n_novel_junctions == 2);
   CHECK(p->evidence.n_novel_jx_pangenome == 1);
   CHECK_FALSE(p->evidence.pangenome_rescue);  // 1 of 2 -> the isoform is not fully reference bias
-  CHECK(p->verdict.confidence != ConfidenceClass::kPanRefRescuedFalseNovel);
+  CHECK(p->verdict.confidence != ConfidenceClass::kReferenceBias);
 }
 
 TEST_CASE("adjudicator: sample-derived pangenome provenance is held (circularity firewall)", "[adjudicator]") {
@@ -172,6 +175,127 @@ TEST_CASE("adjudicator: sample-derived pangenome provenance is held (circularity
   REQUIRE(p != nullptr);
   CHECK(p->evidence.pangenome_rescue);  // all novel junctions are graph-supported...
   CHECK(p->evidence.pangenome_circular);
-  CHECK(p->verdict.confidence == ConfidenceClass::kAmbiguous);  // ...but held, not promoted
+  CHECK(p->verdict.confidence == ConfidenceClass::kUnresolved);  // ...but held, not promoted
   CHECK(p->verdict.circularity_flag);
+}
+
+namespace {
+IntronChain chain_on(const char* chrom, std::vector<Junction> introns) {
+  IntronChain c;
+  c.chrom = chrom;
+  c.strand = Strand::kPlus;
+  c.introns = std::move(introns);
+  return c;
+}
+}  // namespace
+
+TEST_CASE("adjudicator: variant rescue requires one haplotype carrying every novel junction",
+          "[adjudicator][variant]") {
+  // chrT2: two non-canonical junctions on the reference. hapA fixes only the first, hapB
+  // only the second, hapC both. Neither junction is in the (chr1) catalog -> both novel.
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  auto hapA = std::make_shared<FastaFetcher>(tiny("two_jx_hapA.fa"));
+  auto hapB = std::make_shared<FastaFetcher>(tiny("two_jx_hapB.fa"));
+  auto hapC = std::make_shared<FastaFetcher>(tiny("two_jx_hapC.fa"));
+
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoBoth", "novel_not_in_catalog", "non_canonical"));
+  sqanti.records.push_back(rec("isoFirst", "novel_not_in_catalog", "non_canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoBoth"] = chain_on("chrT2", {{20, 40}, {60, 80}});
+  chains["isoFirst"] = chain_on("chrT2", {{20, 40}});
+
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.haplotype_circular = false;  // wgs provenance
+
+  SECTION("junction 1 on hapA, junction 2 on hapB: every junction created, no rescue") {
+    HaplotypeProvider split(ref, {hapA, hapB});
+    in.haplotype = &split;
+    const auto out = adjudicate(in, RuleEngine());
+    const AdjudicationResult* both = find(out, "isoBoth");
+    REQUIRE(both != nullptr);
+    CHECK(both->evidence.n_novel_jx_variant_created == 2);  // the per-junction view still says 2/2
+    CHECK_FALSE(both->evidence.haplotype_consistent);
+    CHECK_FALSE(both->evidence.variant_rescue);
+    CHECK(both->verdict.confidence == ConfidenceClass::kUnresolved);
+    CHECK(both->verdict.verdict_reason == "haplotype_inconsistent");
+    // A single created junction is trivially on one haplotype -> rescued as before.
+    const AdjudicationResult* first = find(out, "isoFirst");
+    REQUIRE(first != nullptr);
+    CHECK(first->evidence.haplotype_consistent);
+    CHECK(first->verdict.confidence == ConfidenceClass::kReferenceBias);
+  }
+  SECTION("one haplotype (hapC) carries both: rescued") {
+    HaplotypeProvider joint(ref, {hapA, hapC});
+    in.haplotype = &joint;
+    const auto out = adjudicate(in, RuleEngine());
+    const AdjudicationResult* both = find(out, "isoBoth");
+    REQUIRE(both != nullptr);
+    CHECK(both->evidence.haplotype_consistent);
+    CHECK(both->verdict.confidence == ConfidenceClass::kReferenceBias);
+    CHECK(both->verdict.verdict_reason == "haplotype_variant");
+  }
+}
+
+TEST_CASE("adjudicator: caller support is joined by chain fingerprint, not native id",
+          "[adjudicator][consensus]") {
+  // Caller B's "transcript_1" is chainY (1 caller); caller A's "transcript_1" is chainX
+  // (2 callers). Adjudicating caller B must see 1, whatever the name says.
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  const auto chainX = chain({{200, 300}, {400, 550}});
+  const auto chainY = chain({{200, 550}});
+  ConsensusBuilder b;
+  b.add("callerA", "transcript_1", chainX);
+  b.add("callerB", "transcript_2", chainX);
+  b.add("callerB", "transcript_1", chainY);
+  const std::string path = "adj_caller_support_collision.tsv";
+  write_caller_support_matrix(path, b.build());
+  const CallerSupport support = read_caller_support(path);
+
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("transcript_1", "novel_not_in_catalog", "canonical"));
+  sqanti.records.push_back(rec("transcript_2", "novel_not_in_catalog", "canonical"));
+  std::map<std::string, IntronChain> chains;  // caller B's isoforms
+  chains["transcript_1"] = chainY;
+  chains["transcript_2"] = chainX;
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.caller_support = &support;
+  const auto out = adjudicate(in, RuleEngine());
+  const AdjudicationResult* t1 = find(out, "transcript_1");
+  const AdjudicationResult* t2 = find(out, "transcript_2");
+  REQUIRE(t1 != nullptr);
+  REQUIRE(t2 != nullptr);
+  CHECK(t1->evidence.n_callers == 1);
+  CHECK(t1->verdict.confidence == ConfidenceClass::kUnresolved);     // no promotion from a name clash
+  CHECK(t2->evidence.n_callers == 2);
+  CHECK(t2->verdict.confidence == ConfidenceClass::kNovelProbable);
+}
+
+TEST_CASE("adjudicator: SQANTI3 NA QC columns are not evaluable (not false)", "[adjudicator][sqanti]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  SqantiTable sqanti;
+  SqantiRecord r = rec("isoNA", "novel_not_in_catalog", "NA");
+  r.RTS_stage = "NA";
+  r.polyA_motif_found = "NA";
+  sqanti.records.push_back(r);
+  std::map<std::string, IntronChain> chains;
+  chains["isoNA"] = chain({{200, 350}, {400, 500}});
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  const auto out = adjudicate(in, RuleEngine());
+  const AdjudicationResult* na = find(out, "isoNA");
+  REQUIRE(na != nullptr);
+  CHECK_FALSE(na->evidence.rts_evaluable);
+  CHECK_FALSE(na->evidence.canon_evaluable);
+  CHECK_FALSE(na->evidence.polyA_motif_evaluable);
+  CHECK(na->verdict.primary_mechanism == Mechanism::kNone);
 }
