@@ -236,6 +236,7 @@ panisoguard combine \
 |------|----------|
 | `<prefix>.adjudicated.tsv`   | one row per isoform: the confidence class, the `verdict` (known / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), and novel-junction counts |
 | `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used, the `rule_trace` (the rules that decided the verdict, in order), a `graph_trace` (the same result seen as a splice graph; see [docs/method_graph.md](docs/method_graph.md)), and `bio_flags` (SQANTI3 QC values copied through for reference; they do not change the verdict; see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
+| `<prefix>.junctions.tsv`     | one row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
 Here is what the verdicts look like for four isoforms of the notes' toy gene (real output of one
@@ -533,7 +534,7 @@ flowchart LR
   Consensus["<b>2. Merge callers</b><br/>intron-chain fingerprints<br/>caller support matrix"]
   Evidence["<b>3. Build evidence</b><br/>SQANTI3 QC<br/>short‑read SJ<br/>Long Read BAM mapping<br/>Variant/Haplotype<br/>Pangenome"]
   Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
-  Outputs["<b>Outputs</b><br/>*.adjudicated.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
+  Outputs["<b>Outputs</b><br/>*.adjudicated.tsv | *.junctions.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
 
   CLI --> Normalize
   Iso --> Normalize

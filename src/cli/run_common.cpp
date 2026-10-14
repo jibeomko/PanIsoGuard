@@ -180,7 +180,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.pangenome = pangenome_ptr;
   in.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);
   in.caller_support = caller_support_ptr;
-  run.results = adjudicate(in, run.engine);
+  run.results = adjudicate(in, run.engine, &run.junctions);
   return run;
 }
 

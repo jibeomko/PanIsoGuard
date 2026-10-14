@@ -35,7 +35,7 @@ The main modules and their input → output contracts. Types are defined under
 
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
-| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts; per-isoform `rule_trace` + `graph_trace` ([method_graph.md](method_graph.md)) + `bio_flags` (SQANTI3 descriptors passed through, verdict-neutral; [relationship_to_sqanti3.md](relationship_to_sqanti3.md)) in the JSONL; and run provenance. |
+| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `JunctionRow[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.junctions.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts; per-isoform `rule_trace` + `graph_trace` ([method_graph.md](method_graph.md)) + `bio_flags` (SQANTI3 descriptors passed through, verdict-neutral; [relationship_to_sqanti3.md](relationship_to_sqanti3.md)) in the JSONL; and run provenance. |
 
 ## Key data types
 

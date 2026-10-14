@@ -45,7 +45,7 @@ on two axes; the binned pair is projected to one confidence class.
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
 | mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The soft-clip fraction is computed and reported but its gate is disabled by default (`max_softclip_frac = 1.01`). `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions) | `--bam` |
-| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage` | always (from classification) |
+| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on **every** haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance, off with `ablate --axes variant`) | always (from classification); the haplotype form with `--reference-haplotype` |
 | degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` **and** no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
@@ -145,7 +145,9 @@ one rule that decided it:
 
 `verdict_reason` codes: `full_splice_match`, `ism`, `ism_intrapriming`, `ism_rts`,
 `category_<category>`, `pangenome_path`, `haplotype_variant` (either `;mapping_sign`),
-`firewall_held`, `haplotype_inconsistent`, `path_inconsistent`, `all_junctions_supported`,
+`firewall_held`, `haplotype_inconsistent`, `path_inconsistent`, `all_junctions_supported`
+(a `noncanonical` reason carries `;haplotype_disrupted` when the sign came from the
+haplotypes rather than SQANTI3),
 `supported_with_<mechanism>`,
 `partial_support[_with_<mechanism>]`, `unsupported_no_sign`, `unsupported_<mechanism>`,
 `mapping_without_short_reads`, `caller_consensus`, `consensus_with_<mechanism>`, and the
@@ -201,5 +203,6 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
 - **Table-driven projection**: move the (Axis A × Axis B) grid fully into the TOML.
 - **SQANTI RF concordance**: optionally annotate `rule_trace` with agreement vs the
   SQANTI3 `filter_result`, reinforcing the orthogonal-attribution framing.
-- **Variant-disrupted handling**: `HaplotypeProvider` already computes the disrupted
-  case; its adjudication policy is not yet defined.
+- **Variant-disrupted junctions as a rescue-side signal**: since 0.0.7 a motif that is
+  canonical on the reference only is a `noncanonical` sign (below); whether such
+  junctions should also block a `KNOWN` pass-through is not decided.

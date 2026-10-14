@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <stdexcept>
+#include <type_traits>
 #include <sys/stat.h>
 
 #include <htslib/hts.h>
@@ -85,6 +86,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
         << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
+        << "\"n_novel_jx_variant_disrupted\":" << e.n_novel_jx_variant_disrupted << ","
         << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
         << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
         << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
@@ -223,6 +225,40 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
 }
 
 }  // namespace
+
+void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>& rows) {
+  std::ofstream out(path);
+  if (!out) throw std::runtime_error("cannot write " + path);
+  auto join = [](const auto& v, const char* sep = ",") {
+    std::string s;
+    for (std::size_t i = 0; i < v.size(); ++i) { if (i) s += sep; s += [](const auto& x) {
+      if constexpr (std::is_same_v<std::decay_t<decltype(x)>, std::string>) return x; else return std::to_string(x); }(v[i]); }
+    return s.empty() ? std::string("-") : s;
+  };
+  auto yn = [](bool evaluable, bool v) { return evaluable ? (v ? "true" : "false") : "NA"; };
+  out << "chrom\tstart\tend\tstrand\tn_isoforms\tisoforms\tknown\tsr_n_uniq\tsr_supported\tref_motif\thap_motifs\t"
+         "variant\tcanonical_on_haplotypes\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
+         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_softclip\tbam_frac_indel_near\treference_bias\n";
+  for (const auto& j : rows) {
+    std::string rb;
+    if (j.variant == "created") rb += "haplotype_variant";
+    if (j.pangenome_supported) rb += std::string(rb.empty() ? "" : ";") + "pangenome_path";
+    out << j.chrom << '\t' << j.intron.start + 1 << '\t' << j.intron.end << '\t' << strand_char(j.strand) << '\t'
+        << j.isoforms.size() << '\t' << join(j.isoforms) << '\t' << (j.known ? "true" : "false") << '\t'
+        << (j.sj_evaluable ? std::to_string(j.sj_n_uniq) : "NA") << '\t' << yn(j.sj_evaluable, j.sr_supported) << '\t'
+        << (j.variant_evaluable ? j.ref_motif : "NA") << '\t' << (j.variant_evaluable ? join(j.hap_motifs) : "NA") << '\t'
+        << j.variant << '\t' << (j.variant_evaluable ? join(j.canonical_on) : "NA") << '\t'
+        << (j.pangenome_evaluable ? std::to_string(j.pangenome_n_haplotypes) : "NA") << '\t'
+        << (j.pangenome_evaluable ? join(j.pangenome_paths) : "NA") << '\t' << yn(j.pangenome_evaluable, j.pangenome_supported) << '\t';
+    if (j.bam_evaluable) {
+      out << j.bam.n_spanning << '\t' << j.bam.frac_low_mapq() << '\t' << j.bam.frac_supplementary() << '\t'
+          << j.bam.frac_softclip() << '\t' << j.bam.frac_indel_near();
+    } else {
+      out << "NA\tNA\tNA\tNA\tNA";
+    }
+    out << '\t' << (rb.empty() ? "-" : rb) << '\n';
+  }
+}
 
 void write_adjudication_outputs(const std::string& out_prefix,
                                 const std::vector<AdjudicationResult>& results,

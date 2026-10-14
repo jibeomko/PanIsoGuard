@@ -113,12 +113,13 @@ int cmd_adjudicate(int argc, char** argv) {
         " max_softclip_frac=" + num(c.bam_max_softclip_frac) +
         " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
     write_adjudication_outputs(out_prefix, run.results, prov);
+    write_junctions_tsv(out_prefix + ".junctions.tsv", run.junctions);
 
     std::map<std::string, std::size_t> counts;
     for (const auto& r : run.results) ++counts[to_string(r.verdict.confidence)];
     std::fprintf(stderr, "adjudicated %zu isoforms:\n", run.results.size());
     for (const auto& kv : counts) std::fprintf(stderr, "  %-28s %zu\n", kv.first.c_str(), kv.second);
-    std::fprintf(stderr, "wrote %s.{adjudicated.tsv,attribution.jsonl,provenance.log}\n", out_prefix.c_str());
+    std::fprintf(stderr, "wrote %s.{adjudicated.tsv,attribution.jsonl,junctions.tsv,provenance.log}\n", out_prefix.c_str());
   } catch (const std::exception& e) {
     std::fprintf(stderr, "adjudicate: error: %s\n", e.what());
     return 1;

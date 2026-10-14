@@ -123,7 +123,7 @@ def fingerprint(chrom, strand, introns):
 def verdict(iso, row, chain, inp):
     """Return (novelty_support, primary_mechanism, confidence_class, n_novel, n_sr, circular)."""
     catalog, sj, reads = inp.get("catalog"), inp.get("sj"), inp.get("reads")
-    n_novel = n_sr = n_created = n_pan = n_known = n_known_sr = n_gated = 0
+    n_novel = n_sr = n_created = n_pan = n_known = n_known_sr = n_gated = n_disrupted = 0
     hap_common = None                                   # haplotypes that explain EVERY created junction
     spanning, worst = 0, dict.fromkeys(CFG["gates"], 0.0)
 
@@ -144,6 +144,8 @@ def verdict(iso, row, chain, inp):
                 if not canonical(inp["ref_seq"], *jx, strand) and any(hap_ok):
                     n_created += 1
                     hap_common = hap_ok if hap_common is None else [a and b for a, b in zip(hap_common, hap_ok)]
+                elif canonical(inp["ref_seq"], *jx, strand) and not any(hap_ok):
+                    n_disrupted += 1                        # canonical on the reference only
             if "pangenome" in inp:
                 n_pan += (chrom, strand, jx) in inp["pangenome"]
             if sj is not None:
@@ -182,7 +184,7 @@ def verdict(iso, row, chain, inp):
     motif = row.get("polyA_motif_found", "NA")
     if reads is not None and n_gated and any(worst[k] > g for k, g in CFG["gates"].items()):
         mech = "mapping_or_repeat"
-    elif row.get("all_canonical") == "non_canonical":
+    elif row.get("all_canonical") == "non_canonical" or (n_disrupted and "ref_seq" in inp and not inp["ref_seq_circular"]):
         mech = "noncanonical"
     elif row.get("RTS_stage", "").upper() == "TRUE":
         mech = "rt_switch"

@@ -5,6 +5,25 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Added
+- **`<prefix>.junctions.tsv`**: one row per junction of the adjudicated isoforms with the
+  per-junction evidence the verdict aggregates (isoforms using it, known/novel, short-read
+  count, reference and per-haplotype splice motifs with `created` / `disrupted`, pangenome
+  support and paths, BAM fractions, `reference_bias`). On HG03516 the rescue criterion
+  holds at 35 junctions but only 13 sit in rescued isoforms (the rest share an isoform with
+  an unexplained junction); the table keeps them visible.
+- `benchmark/pangenome/derive_junctions.py` writes the haplotype/path ids (6th column) from
+  the VCF genotypes, so the path-consistency rule runs on the HPRC chr22 set (3,034 of 3,040
+  rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
+
+### Changed
+- **Variant-disrupted motifs are consumed.** A novel junction canonical on the reference
+  but non-canonical on every haplotype of the sample counts as the `noncanonical` sign
+  (reason suffix `;haplotype_disrupted`), under the same provenance firewall as the rescue
+  and off with `ablate --axes variant`. Before, `HaplotypeProvider` computed it and the
+  adjudicator dropped it. `evidence` gains `n_novel_jx_variant_disrupted`. No verdict on the
+  tracked sets changes (support is unknown without short reads there).
+
 ## [0.0.6] - 2026-10-14
 
 ### Changed (breaking: output names and columns)

@@ -45,10 +45,18 @@ enum class VariantVerdict {
   kDisrupted,  // canonical on reference, non-canonical on all haplotypes
 };
 
+// The motif of one intron on the reference and on every haplotype, with the verdict.
+struct JunctionMotifs {
+  SpliceMotif ref;
+  std::vector<SpliceMotif> haps;  // in --reference-haplotype order
+  VariantVerdict verdict = VariantVerdict::kNotEvaluable;
+};
+
 class HaplotypeProvider {
  public:
   HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
                     std::vector<std::shared_ptr<FastaFetcher>> haplotypes);
+  JunctionMotifs motifs(const std::string& chrom, const Junction& intron, Strand strand) const;
 
   // If `canonical_on` is given it is resized to n_haplotypes() and set true for every
   // haplotype whose motif at this intron is canonical, so the caller can intersect the

@@ -139,28 +139,28 @@ print("no short reads, vs SQ3rules:", m["bootstrap_auprc_diff_vs_SQ3rules_95ci_n
 short reads: none
   SQ3rules  TP 647 FP  58 precision 0.918 recall 0.886 AUPRC 0.909
   PIG       TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.824
-  PIG+bam   TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.875
+  PIG+bam   TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.844
 short reads: sr_1000000
   SQ3rules  TP 650 FP  58 precision 0.918 recall 0.890 AUPRC 0.909
   allSJ3    TP 690 FP  17 precision 0.976 recall 0.945 AUPRC 0.968
-  PIG       TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.968
-  PIG+bam   TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.977
+  PIG       TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.969
+  PIG+bam   TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.973
 short reads: oracle
   SQ3rules  TP 652 FP  58 precision 0.918 recall 0.893 AUPRC 0.910
   allSJ3    TP 730 FP  18 precision 0.976 recall 1.000 AUPRC 0.976
   PIG       TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.971
-  PIG+bam   TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.979
+  PIG+bam   TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.975
 bootstrap 95% CI of AUPRC(PanIsoGuard) - AUPRC(allSJ3):
-  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.007, 0.012]
-  sr_1000000 PIG [-0.011, 0.01]  PIG+bam [-0.001, 0.018]
-  sr_250000  PIG [-0.008, 0.013]  PIG+bam [0.002, 0.021]
-  sr_4000000 PIG [-0.011, 0.01]  PIG+bam [-0.002, 0.018]
-no short reads, vs SQ3rules: {'PIG': [-0.106, -0.066], 'PIG+bam': [-0.06, -0.008]}
+  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.011, 0.009]
+  sr_1000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.014]
+  sr_250000  PIG [-0.008, 0.013]  PIG+bam [-0.004, 0.017]
+  sr_4000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.014]
+no short reads, vs SQ3rules: {'PIG': [-0.105, -0.066], 'PIG+bam': [-0.089, -0.042]}
 ```
 
 `allSJ3`가 한 줄 규칙이고 `PIG`가 PanIsoGuard다. 읽을 곳은 세 군데다.
 
-1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard와 한 줄 규칙은 둘 다 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더하면 +0.01 정도 오르는데, 신뢰구간이 0을 넘는 것은 25만 쌍일 때뿐이다.
+1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard 0.969, 한 줄 규칙 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더하면 +0.004 정도 오르는데, 이 차이도 모든 깊이에서 신뢰구간이 0을 포함한다(0.0.6부터 BAM 검사는 junction당 spanning read가 3개 이상일 때만 세기 때문에, 그 전의 "25만 쌍에서만 유의" 결과는 사라졌다).
 2. **기본 선(precision, recall)**: PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다.
 3. **short read가 없을 때**: PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다.
 

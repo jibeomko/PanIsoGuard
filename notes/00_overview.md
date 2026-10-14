@@ -194,7 +194,7 @@ adjudicated 9 isoforms:
   NOVEL_CONFIRMED              2
   UNCONFIRMED                  2
   UNRESOLVED                   1
-wrote out/toy.{adjudicated.tsv,attribution.jsonl,provenance.log}
+wrote out/toy.{adjudicated.tsv,attribution.jsonl,junctions.tsv,provenance.log}
 isoform_id  structural_category      novelty_support  primary_mechanism  confidence_class  n_novel_junctions  n_novel_jx_sr_supported
 iso_A       novel_not_in_catalog     UNSUPPORTED      noncanonical       ARTIFACT          1                  0
 iso_B       novel_not_in_catalog     SUPPORTED        none               NOVEL_CONFIRMED   1                  1
@@ -248,7 +248,7 @@ cat out/toy.provenance.log
 
 ```text
 # PanIsoGuard adjudicate provenance
-tool_version	0.0.5
+tool_version	0.0.6
 ruleset_version	builtin-0.0.3
 sqanti3_version_target	6.0
 config	<built-in defaults>

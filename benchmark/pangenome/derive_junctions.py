@@ -13,6 +13,9 @@ graph-supported junction at the deleted span.
   -> PanIsoGuard junction at that intron, for BOTH strands (a genomic deletion is
      strand-agnostic; the isoform's novel intron may be on either strand).
   n_haplotypes = AC (population allele count) -> feeds the min_haplotypes gate.
+  haplotype_ids = the sample haplotypes whose genotype carries the allele (SAMPLE#1 / #2
+     from the diploid GT columns; haploid samples as SAMPLE#1), written as the optional
+     6th column so PanIsoGuard can require one common path across an isoform's junctions.
 
 Independence (non-circular) holds only because the adjudicated sample is OUT of the
 graph — verify e.g. `vg paths --list-samples` does not include it. The output is the
@@ -56,9 +59,13 @@ def main() -> int:
     vcf, out_path = sys.argv[1], sys.argv[2]
     min_del = int(sys.argv[3]) if len(sys.argv) > 3 else 50
 
-    seen = {}  # (chrom, start, end) -> n_haplotypes (keep the max support seen)
+    seen = {}  # (chrom, start, end) -> [n_haplotypes (max support seen), set(haplotype ids)]
+    samples = []
     n_records = n_del = 0
     for line in open(vcf):
+        if line.startswith("#CHROM"):
+            samples = line.rstrip("\n").split("\t")[9:]
+            continue
         if line.startswith("#"):
             continue
         f = line.rstrip("\n").split("\t")
@@ -84,15 +91,24 @@ def main() -> int:
                 continue
             n_del += 1
             key = (chrom, start, end)
-            if ac[i] > seen.get(key, 0):
-                seen[key] = ac[i]
+            ids = set()
+            for sample, gt in zip(samples, f[9:]):
+                alleles = gt.split(":")[0].replace("/", "|").split("|")
+                for h, a in enumerate(alleles):
+                    if a == str(i + 1):
+                        ids.add(f"{sample}#{h + 1}")
+            rec = seen.setdefault(key, [0, set()])
+            rec[0] = max(rec[0], ac[i])
+            rec[1] |= ids
 
     with open(out_path, "w") as o:
         o.write("# graph-supported junctions from deletions >= %dbp (derive_junctions.py)\n" % min_del)
-        o.write("# chrom\tstart\tend\tstrand\tn_haplotypes  (1-based inclusive intron; both strands emitted)\n")
-        for (chrom, start, end), nhap in sorted(seen.items()):
-            o.write(f"{chrom}\t{start}\t{end}\t+\t{nhap}\n")
-            o.write(f"{chrom}\t{start}\t{end}\t-\t{nhap}\n")
+        o.write("# chrom\tstart\tend\tstrand\tn_haplotypes\thaplotype_ids  (1-based inclusive intron; both strands emitted)\n")
+        for (chrom, start, end), (nhap, ids) in sorted(seen.items()):
+            nhap = max(nhap, len(ids))
+            idcol = ",".join(sorted(ids)) if ids else "."
+            o.write(f"{chrom}\t{start}\t{end}\t+\t{nhap}\t{idcol}\n")
+            o.write(f"{chrom}\t{start}\t{end}\t-\t{nhap}\t{idcol}\n")
 
     sys.stderr.write(f"records={n_records}  deletions>= {min_del}bp={n_del}  "
                      f"unique junctions={len(seen)} (x2 strands = {2*len(seen)} rows)\n")

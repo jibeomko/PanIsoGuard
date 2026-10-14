@@ -299,3 +299,84 @@ TEST_CASE("adjudicator: SQANTI3 NA QC columns are not evaluable (not false)", "[
   CHECK_FALSE(na->evidence.polyA_motif_evaluable);
   CHECK(na->verdict.primary_mechanism == Mechanism::kNone);
 }
+
+TEST_CASE("adjudicator: the junction table carries the per-junction evidence", "[adjudicator][junctions]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoNNC", "novel_not_in_catalog", "non_canonical"));
+  sqanti.records.push_back(rec("isoNNC2", "novel_not_in_catalog", "canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoNNC"] = chain({{200, 350}, {400, 500}});
+  chains["isoNNC2"] = chain({{200, 360}, {400, 500}});
+  SjTable sjt;
+  sjt.add(sj({400, 500}, 8));
+  sjt.add(sj({200, 360}, 10));
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.sj = &sjt;
+  std::vector<JunctionRow> jx;
+  adjudicate(in, RuleEngine(), &jx);
+  REQUIRE(jx.size() == 3);  // {200,350} {200,360} {400,500}, genomic order
+  CHECK(jx[0].intron == Junction{200, 350});
+  CHECK_FALSE(jx[0].known);
+  CHECK(jx[0].sj_evaluable);
+  CHECK(jx[0].sj_n_uniq == 0);
+  CHECK_FALSE(jx[0].sr_supported);
+  CHECK(jx[0].isoforms == std::vector<std::string>{"isoNNC"});
+  CHECK(jx[1].intron == Junction{200, 360});
+  CHECK(jx[1].sj_n_uniq == 10);
+  CHECK(jx[1].sr_supported);
+  CHECK(jx[2].intron == Junction{400, 500});
+  CHECK(jx[2].known);
+  CHECK(jx[2].sj_n_uniq == 8);
+  CHECK(jx[2].isoforms.size() == 2);   // shared by both isoforms
+  CHECK(jx[2].variant == "NA");        // the variant axis is not evaluated on known junctions
+}
+
+TEST_CASE("adjudicator: a motif canonical on the reference only is a non-canonical sign", "[adjudicator][variant]") {
+  // "reference" = hapC (both junctions canonical); the sample's haplotype = the GG/GG sequence.
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_hapC.fa"));
+  auto hap = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  HaplotypeProvider provider(ref, {hap});
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoD", "novel_not_in_catalog", "canonical"));  // SQANTI3 saw the reference
+  std::map<std::string, IntronChain> chains;
+  chains["isoD"] = chain_on("chrT2", {{20, 40}, {60, 80}});
+  SjTable sjt;  // evaluable, no reads anywhere -> UNSUPPORTED (no known junctions to gauge coverage)
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.sj = &sjt;
+  in.haplotype = &provider;
+
+  SECTION("independent provenance: the sign fires, with its own reason suffix") {
+    in.haplotype_circular = false;
+    std::vector<JunctionRow> jx;
+    const auto out = adjudicate(in, RuleEngine(), &jx);
+    REQUIRE(out.size() == 1);
+    CHECK(out[0].evidence.n_novel_jx_variant_disrupted == 2);
+    CHECK(out[0].verdict.primary_mechanism == Mechanism::kNoncanonical);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kArtifact);
+    CHECK(out[0].verdict.verdict_reason == "unsupported_noncanonical;haplotype_disrupted");
+    REQUIRE(jx.size() == 2);
+    CHECK(jx[0].variant == "disrupted");
+    CHECK(jx[0].canonical_on.empty());
+    CHECK(jx[0].ref_motif == "GT-AG");
+    CHECK(jx[0].hap_motifs == std::vector<std::string>{"GG-AG"});
+    // Ablating the variant axis removes the sign.
+    const auto off = adjudicate(in, RuleEngine().with_axis_disabled("variant"));
+    CHECK(off[0].verdict.confidence == ConfidenceClass::kUnconfirmed);
+    CHECK(off[0].verdict.verdict_reason == "unsupported_no_sign");
+  }
+  SECTION("circular-risk provenance: the sign is ignored") {
+    in.haplotype_circular = true;
+    const auto out = adjudicate(in, RuleEngine());
+    CHECK(out[0].evidence.n_novel_jx_variant_disrupted == 2);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kUnconfirmed);
+    CHECK(out[0].verdict.verdict_reason == "unsupported_no_sign");
+  }
+}

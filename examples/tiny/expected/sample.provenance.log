@@ -1,5 +1,5 @@
 # PanIsoGuard adjudicate provenance
-tool_version	0.0.5
+tool_version	0.0.6
 ruleset_version	builtin-0.0.3
 sqanti3_version_target	6.0
 config	<built-in defaults>

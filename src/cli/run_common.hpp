@@ -50,6 +50,7 @@ bool common_args_ok(const CommonArgs& c, std::string& err);
 struct LoadedRun {
   SqantiTable sqanti;
   std::vector<AdjudicationResult> results;
+  std::vector<JunctionRow> junctions;  // one row per junction of the adjudicated isoforms
   RuleEngine engine;
 };
 

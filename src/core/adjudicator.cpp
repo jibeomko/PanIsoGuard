@@ -27,7 +27,8 @@ EvidenceVector build_evidence(const SqantiRecord& r,
                               const PangenomeJunctions* pangenome, bool pangenome_circular,
                               const CallerSupport* caller_support,
                               const RuleConfig& cfg,
-                              std::unordered_map<std::string, JunctionBamFeatures>& bam_cache) {
+                              std::unordered_map<std::string, JunctionBamFeatures>& bam_cache,
+                              std::unordered_map<std::string, JunctionRow>* jrows) {
   EvidenceVector ev;
   ev.structural_category = r.structural_category;
   ev.is_novel = r.is_novel();
@@ -76,7 +77,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bp.softclip_min_bp = cfg.bam_softclip_min_bp;
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
-    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0;
+    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0;
     int n_known = 0, n_known_supported = 0, n_bam_gated = 0;
     bool any_bam_eval = false;
     bool any_variant_eval = false;
@@ -89,28 +90,52 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     std::vector<std::string> path_common;
     bool path_ids_complete = true;  // every graph-supported junction listed its path ids
     bool first_path = true;
-    auto sr_supported = [&](const auto& intron) {
+    auto sr_supported = [&](const auto& intron, JunctionRow* jr) {
       const SjRecord* hit = sj->find_exact(chain.chrom, chain.strand, intron);
-      return hit != nullptr && hit->n_uniq >= cfg.sj_min_uniq_reads &&
-             (!cfg.sj_require_canonical_motif || hit->canonical());
+      const bool ok = hit != nullptr && hit->n_uniq >= cfg.sj_min_uniq_reads &&
+                      (!cfg.sj_require_canonical_motif || hit->canonical());
+      if (jr != nullptr) { jr->sj_evaluable = true; jr->sj_n_uniq = hit ? hit->n_uniq : 0; jr->sr_supported = ok; }
+      return ok;
     };
     for (const auto& intron : chain.introns) {
+      const std::string key = jx_key(chain.chrom, chain.strand, intron);
+      JunctionRow* jr = nullptr;
+      if (jrows != nullptr) {
+        jr = &(*jrows)[key];
+        if (jr->isoforms.empty()) { jr->chrom = chain.chrom; jr->intron = intron; jr->strand = chain.strand; }
+        jr->isoforms.push_back(r.isoform);
+      }
       if (catalog->has_intron(chain.chrom, chain.strand, intron)) {
         // Known junction: its short-read coverage tells whether the locus is covered at all
         // (the rule engine treats "0 reads at the novel junction" as absence only then).
         ++n_known;
-        if (sj != nullptr && sr_supported(intron)) ++n_known_supported;
+        if (jr != nullptr) jr->known = true;
+        if (sj != nullptr && sr_supported(intron, jr)) ++n_known_supported;
         continue;
       }
       ++n_novel;
       if (haplotype != nullptr) {
-        const VariantVerdict vv = haplotype->classify(chain.chrom, intron, chain.strand, &hap_at);
+        const JunctionMotifs jm = haplotype->motifs(chain.chrom, intron, chain.strand);
+        const VariantVerdict vv = jm.verdict;
+        hap_at.assign(jm.haps.size(), false);
+        for (std::size_t h = 0; h < jm.haps.size(); ++h) hap_at[h] = jm.haps[h].evaluable && jm.haps[h].canonical;
+        if (jr != nullptr) {
+          jr->variant_evaluable = vv != VariantVerdict::kNotEvaluable;
+          jr->ref_motif = jm.ref.evaluable ? jm.ref.motif : "NA";
+          jr->hap_motifs.clear();
+          jr->canonical_on.clear();
+          for (std::size_t h = 0; h < jm.haps.size(); ++h) {
+            jr->hap_motifs.push_back(jm.haps[h].evaluable ? jm.haps[h].motif : "NA");
+            if (hap_at[h]) jr->canonical_on.push_back(static_cast<int>(h) + 1);
+          }
+          jr->variant = vv == VariantVerdict::kCreated ? "created" : vv == VariantVerdict::kDisrupted ? "disrupted"
+                      : vv == VariantVerdict::kNone ? "none" : "NA";
+        }
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
-        // Only kCreated (non-canonical on reference, canonical on a haplotype) drives a
-        // reference-bias rescue. kDisrupted (canonical on reference, broken on every
-        // haplotype) is computed by HaplotypeProvider but intentionally NOT consumed
-        // yet -- its adjudication policy is undefined (see docs/decision_engine.md,
-        // "Future work: Variant-disrupted handling").
+        if (vv == VariantVerdict::kDisrupted) ++n_variant_disrupted;
+        // kCreated (non-canonical on reference, canonical on a haplotype) drives the
+        // reference-bias rescue; kDisrupted (canonical on reference, non-canonical on every
+        // haplotype) is a non-canonical sign for the mechanism axis (rules.cpp).
         if (vv == VariantVerdict::kCreated) {
           ++n_variant_created;
           for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
@@ -118,9 +143,17 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       }
       if (pangenome != nullptr) {
         any_pan_eval = true;
-        if (pangenome->supports(chain.chrom, chain.strand, intron, cfg.pangenome_min_haplotypes)) {
+        const PangenomeJunctionRecord* prec = pangenome->find_exact(chain.chrom, chain.strand, intron);
+        const bool pan_ok = prec != nullptr && prec->n_haplotypes >= cfg.pangenome_min_haplotypes;
+        if (jr != nullptr) {
+          jr->pangenome_evaluable = true;
+          jr->pangenome_supported = pan_ok;
+          jr->pangenome_n_haplotypes = prec ? prec->n_haplotypes : 0;
+          jr->pangenome_paths = prec ? prec->haplotype_ids : std::vector<std::string>{};
+        }
+        if (pan_ok) {
           ++n_pan;
-          const auto& ids = pangenome->find_exact(chain.chrom, chain.strand, intron)->haplotype_ids;
+          const auto& ids = prec->haplotype_ids;
           if (ids.empty()) {
             path_ids_complete = false;
           } else if (first_path) {
@@ -134,14 +167,14 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           }
         }
       }
-      if (sj != nullptr && sr_supported(intron)) ++n_supported;
+      if (sj != nullptr && sr_supported(intron, jr)) ++n_supported;
       if (bam != nullptr) {
-        const std::string key = jx_key(chain.chrom, chain.strand, intron);
         auto cit = bam_cache.find(key);
         if (cit == bam_cache.end()) {
           cit = bam_cache.emplace(key, bam->features_at_junction(chain.chrom, intron, bp)).first;
         }
         const JunctionBamFeatures& f = cit->second;
+        if (jr != nullptr) { jr->bam_evaluable = f.evaluated; jr->bam = f; }
         if (f.evaluated) {
           any_bam_eval = true;
           ev.bam_n_spanning_total += f.n_spanning;
@@ -170,6 +203,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.bam_n_junctions_gated = n_bam_gated;
     ev.variant_evaluable = (haplotype != nullptr) && any_variant_eval;
     ev.n_novel_jx_variant_created = n_variant_created;
+    ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
     ev.haplotype_consistent = n_variant_created > 0 &&
                               std::find(hap_common.begin(), hap_common.end(), true) != hap_common.end();
     // Rescue requires ALL of the isoform's novel junctions to be explained by the
@@ -196,12 +230,14 @@ EvidenceVector build_evidence(const SqantiRecord& r,
 
 }  // namespace
 
-std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const RuleEngine& engine) {
+std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const RuleEngine& engine,
+                                           std::vector<JunctionRow>* junctions) {
   if (in.sqanti == nullptr || in.chains == nullptr) {
     throw std::invalid_argument("adjudicate: sqanti and chains inputs are required");
   }
 
   std::unordered_map<std::string, JunctionBamFeatures> bam_cache;
+  std::unordered_map<std::string, JunctionRow> jrows;
   std::vector<AdjudicationResult> out;
   out.reserve(in.sqanti->records.size());
   for (const auto& r : in.sqanti->records) {
@@ -217,9 +253,21 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.bio_polyA_motif_found = r.polyA_motif_found;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
-                                  in.caller_support, engine.config(), bam_cache);
+                                  in.caller_support, engine.config(), bam_cache,
+                                  junctions != nullptr ? &jrows : nullptr);
     res.verdict = engine.evaluate(res.evidence);
     out.push_back(std::move(res));
+  }
+  if (junctions != nullptr) {
+    junctions->clear();
+    junctions->reserve(jrows.size());
+    for (auto& kv : jrows) junctions->push_back(std::move(kv.second));
+    std::sort(junctions->begin(), junctions->end(), [](const JunctionRow& a, const JunctionRow& b) {
+      if (a.chrom != b.chrom) return a.chrom < b.chrom;
+      if (a.intron.start != b.intron.start) return a.intron.start < b.intron.start;
+      if (a.intron.end != b.intron.end) return a.intron.end < b.intron.end;
+      return strand_char(a.strand) < strand_char(b.strand);
+    });
   }
   return out;
 }

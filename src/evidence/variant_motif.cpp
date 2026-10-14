@@ -100,30 +100,34 @@ HaplotypeProvider::HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
                                      std::vector<std::shared_ptr<FastaFetcher>> haplotypes)
     : ref_(std::move(reference)), haps_(std::move(haplotypes)) {}
 
-VariantVerdict HaplotypeProvider::classify(const std::string& chrom, const Junction& intron,
-                                           Strand strand, std::vector<bool>* canonical_on) const {
-  if (canonical_on != nullptr) canonical_on->assign(haps_.size(), false);
-  const SpliceMotif ref_m = splice_motif(*ref_, chrom, intron, strand);
-  if (!ref_m.evaluable) return VariantVerdict::kNotEvaluable;
-
-  bool any_hap_eval = false;
-  bool any_hap_canonical = false;
-  bool all_hap_noncanonical = true;
-  for (std::size_t i = 0; i < haps_.size(); ++i) {
-    const SpliceMotif h = splice_motif(*haps_[i], chrom, intron, strand);
+JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junction& intron,
+                                         Strand strand) const {
+  JunctionMotifs m;
+  m.ref = splice_motif(*ref_, chrom, intron, strand);
+  m.haps.reserve(haps_.size());
+  for (const auto& hap : haps_) m.haps.push_back(splice_motif(*hap, chrom, intron, strand));
+  if (!m.ref.evaluable) return m;
+  bool any_hap_eval = false, any_hap_canonical = false, all_hap_noncanonical = true;
+  for (const auto& h : m.haps) {
     if (!h.evaluable) continue;
     any_hap_eval = true;
-    if (h.canonical) {
-      any_hap_canonical = true;
-      all_hap_noncanonical = false;
-      if (canonical_on != nullptr) (*canonical_on)[i] = true;
-    }
+    if (h.canonical) { any_hap_canonical = true; all_hap_noncanonical = false; }
   }
-  if (!any_hap_eval) return VariantVerdict::kNotEvaluable;
+  if (!any_hap_eval) return m;
+  if (!m.ref.canonical && any_hap_canonical) m.verdict = VariantVerdict::kCreated;
+  else if (m.ref.canonical && all_hap_noncanonical) m.verdict = VariantVerdict::kDisrupted;
+  else m.verdict = VariantVerdict::kNone;
+  return m;
+}
 
-  if (!ref_m.canonical && any_hap_canonical) return VariantVerdict::kCreated;
-  if (ref_m.canonical && all_hap_noncanonical) return VariantVerdict::kDisrupted;
-  return VariantVerdict::kNone;
+VariantVerdict HaplotypeProvider::classify(const std::string& chrom, const Junction& intron,
+                                           Strand strand, std::vector<bool>* canonical_on) const {
+  const JunctionMotifs m = motifs(chrom, intron, strand);
+  if (canonical_on != nullptr) {
+    canonical_on->assign(haps_.size(), false);
+    for (std::size_t i = 0; i < m.haps.size(); ++i) (*canonical_on)[i] = m.haps[i].evaluable && m.haps[i].canonical;
+  }
+  return m.verdict;
 }
 
 }  // namespace panisoguard

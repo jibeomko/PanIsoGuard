@@ -25,9 +25,10 @@ mkdir -p "$OUT_DIR"
   --sj-tab data/short_read.SJ.tab \
   --out-prefix "$OUT_DIR/sample"
 
-if [[ -f expected/sample.adjudicated.tsv && -f expected/sample.attribution.jsonl && -f expected/sample.provenance.log ]]; then
+if [[ -f expected/sample.adjudicated.tsv && -f expected/sample.attribution.jsonl && -f expected/sample.junctions.tsv && -f expected/sample.provenance.log ]]; then
   diff -u expected/sample.adjudicated.tsv "$OUT_DIR/sample.adjudicated.tsv"
   diff -u expected/sample.attribution.jsonl "$OUT_DIR/sample.attribution.jsonl"
+  diff -u expected/sample.junctions.tsv "$OUT_DIR/sample.junctions.tsv"
   # tool_version changes every release and the input.* lines carry file size/mtime;
   # everything else in the log must match.
   diff -u -I "^tool_version" -I "^input\." expected/sample.provenance.log "$OUT_DIR/sample.provenance.log"

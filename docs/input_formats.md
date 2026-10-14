@@ -76,7 +76,9 @@ accepted); the optional 5th column is the number of supporting graph haplotypes
 (default `1`, gated by `axis_pangenome.min_haplotypes`; note `1` is a single graph path,
 not a population frequency — raise it for stricter support); the optional 6th column is
 a comma-separated list of the haplotype/path ids carrying the junction (e.g.
-`HG002#1,HG005#2`; duplicate rows for one junction union their ids). When **all** of an
+`HG002#1,HG005#2`; duplicate rows for one junction union their ids;
+`benchmark/pangenome/derive_junctions.py` writes it from the genotype columns of a
+`vg deconstruct` VCF). When **all** of an
 isoform's novel-vs-linear-reference junctions are found here — on **one common path**, if
 path ids are given — the apparent novelty is consistent
 with reference bias → `REFERENCE_BIAS` (mechanism `population_known`); with path ids and

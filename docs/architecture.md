@@ -93,7 +93,7 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
                     EvidenceVector ─► [RuleEngine.evaluate] ─► Verdict
                               │
                               ▼
-              .adjudicated.tsv / .attribution.jsonl (rule_trace + graph_trace) / .provenance.log
+              .adjudicated.tsv / .junctions.tsv / .attribution.jsonl (rule_trace + graph_trace) / .provenance.log
 ```
 
 ## Design properties

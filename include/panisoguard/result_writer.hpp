@@ -32,6 +32,10 @@ struct RunProvenance {
                               // reproducible even if the config file changes later)
 };
 
+// Write <prefix>.junctions.tsv: one row per junction of the adjudicated isoforms with the
+// per-junction evidence (intron coordinates 1-based inclusive, as in SJ.tab and GTF).
+void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>& rows);
+
 // Write <prefix>.adjudicated.tsv, <prefix>.attribution.jsonl, and
 // <prefix>.provenance.log. Throws std::runtime_error on write failure.
 void write_adjudication_outputs(const std::string& out_prefix,

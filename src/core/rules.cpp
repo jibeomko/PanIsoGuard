@@ -123,6 +123,14 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
           " spanning reads at every novel junction (" + std::to_string(ev.bam_n_spanning_total) + " in total)");
   }
   const std::string mapping_note = mapping_sign ? ";mapping_sign" : "";
+  // A motif that is canonical on the reference only (non-canonical on every haplotype of the
+  // sample) counts as a non-canonical sign, under the same firewall as the rescue.
+  const bool disrupted_sign = cfg_.use_noncanonical && cfg_.use_variant && ev.variant_evaluable &&
+                              ev.n_novel_jx_variant_disrupted > 0 && !ev.variant_circular;
+  if (cfg_.use_variant && ev.variant_evaluable && ev.n_novel_jx_variant_disrupted > 0 && ev.variant_circular) {
+    trace(std::to_string(ev.n_novel_jx_variant_disrupted) +
+          " novel junction(s) variant-disrupted on the haplotypes, but provenance is circular-risk -> sign ignored");
+  }
 
   // --- 1. Reference-bias rescue: pangenome first, then the sample's haplotypes ------
   // Rescue needs ALL of the isoform's novel junctions explained (an isoform is "reference
@@ -236,6 +244,13 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   } else if (cfg_.use_noncanonical && ev.canon_evaluable && ev.noncanonical) {
     mech = Mechanism::kNoncanonical;
     trace("all_canonical=non_canonical -> mechanism=noncanonical");
+  } else if (disrupted_sign) {
+    // SQANTI3 judged the motif on the reference; on every haplotype of this sample it is
+    // non-canonical, so for these reads the junction IS non-canonical.
+    mech = Mechanism::kNoncanonical;
+    trace(std::to_string(ev.n_novel_jx_variant_disrupted) +
+          " novel junction(s) canonical on the reference but non-canonical on every haplotype "
+          "(variant-disrupted, independent provenance) -> mechanism=noncanonical");
   } else if (rts) {
     mech = Mechanism::kRtSwitch;
     trace("RTS_stage=TRUE -> mechanism=rt_switch");
@@ -302,6 +317,8 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   // Reaching the grid means no reference-bias rescue fired (pangenome/variant
   // branches return early), so this verdict never rests on RNA-derived variants.
   v.circularity_flag = false;
+  if (disrupted_sign && mech == Mechanism::kNoncanonical && !(ev.canon_evaluable && ev.noncanonical))
+    reason += ";haplotype_disrupted";  // the sign came from the sample's haplotypes, not from SQANTI3
   return finish(cls, verdict, reason);
 }
 
