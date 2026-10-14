@@ -3,6 +3,94 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
+## [Unreleased]
+
+## [0.0.6] - 2026-10-14
+
+### Changed (breaking: output names and columns)
+- **Confidence classes renamed.** Names now say the verdict; the evidence is in the new
+  columns. `HIGH_CONF_KNOWN` → `KNOWN`, `HIGH_CONF_NOVEL` → `NOVEL_CONFIRMED`,
+  `MEDIUM_CONF_NOVEL` → `NOVEL_PROBABLE`, `LOW_CONF_PARTIAL` → `UNCONFIRMED`,
+  `AMBIGUOUS` → `UNRESOLVED`, `PAN_REF_RESCUED_FALSE_NOVEL` → `REFERENCE_BIAS` (the
+  rescued junction is real; what was false was the artifact flag, not the novelty: 77 of
+  the 86 rescued HG03516/HG02717 junctions are novel on the personal genome too).
+  `ARTIFACT` is unchanged. Class membership is unchanged except where the rules below say.
+- **Two new columns** in `adjudicated.tsv` / `attribution.jsonl`: `verdict` (known /
+  confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and
+  `verdict_reason` (the one rule that decided it, e.g. `partial_support`, `no_coverage`,
+  `firewall_held`, `ism_intrapriming`). They split the situations the classes mix:
+  `UNCONFIRMED` is ISM (0.92 precision on SQANTI-SIM) plus weak novels (0.36–0.56), and
+  `UNRESOLVED` is "nothing to test" (0.96) plus firewall holds plus unadjudicated
+  categories. `provenance.log` adds verdict counts.
+- **Rules (ruleset `0.0.3`).**
+  - The BAM mapping gate needs ≥ `min_spanning` (3) reads at a novel junction; with 1–2
+    reads a single indel made the fraction 1.0 and decided the verdict alone (45 % of
+    HG03516's mapping-artifact calls rested on < 3 reads).
+  - `UNSUPPORTED` needs coverage: if none of the isoform's known junctions has short-read
+    support either, support is `UNKNOWN` (`no_coverage`), not evidence against.
+  - Intra-priming (`degradation`) needs perc_A ≥ 60 **and** no polyA motif upstream
+    (SQANTI3 `polyA_motif_found`, when it ran with `--polyA_motif_list`); 20–30 % of
+    perc_A-flagged 3' ends carry a motif and are no longer flagged. The column moved from
+    `bio_flags` to `evidence`.
+  - A reference-bias rescue carries a BAM mapping sign in its reason
+    (`haplotype_variant;mapping_sign`) instead of hiding it; `evidence` gains
+    `n_novel_jx_variant_created`, `n_known_junctions`, `n_known_jx_sr_supported`,
+    `bam_n_junctions_gated`.
+  - `--platform ont` preset: turns the HiFi-calibrated indel-near gate off (it fires on
+    ~90 % of ONT junctions).
+  - **A reference-bias rescue needs one haplotype (or one pangenome path) carrying every
+    novel junction**, not a different one per junction: the per-junction haplotype sets
+    are intersected (`evidence.haplotype_consistent`); every-junction-created but no
+    common haplotype is held `UNRESOLVED` (`haplotype_inconsistent`). The pangenome
+    junction file takes an optional 6th column of path ids; with it, the same rule
+    applies (`pangenome_path_consistent`, `path_inconsistent`), without it the counts
+    decide as before.
+  - **Caller consensus promotes only a chain that was examined**: with the caller chain
+    absent or no `--ref-gtf`, `n_callers` is reported but the call stays `UNRESOLVED`.
+  - **`--caller-support` is joined by intron-chain fingerprint** (new `fingerprint`
+    column in the `combine` matrix), not by native id: two callers reusing one name
+    (`transcript_1`) for different chains no longer hand one chain's support to the
+    other. Older matrices still join by native id; a name reused across chains is
+    warned about.
+  - SQANTI3 `RTS_stage` / `all_canonical` / `polyA_motif_found` = `NA` are
+    not_evaluable (JSON `null`), no longer `false`.
+- `combine` orders monoexonic isoforms by (caller, native id), so their `PIG.NNNNNN`
+  ids no longer depend on input order.
+- `ablate --axes` rejects an unknown axis name with an error instead of silently ablating
+  nothing.
+- `provenance.log` records every input (also the reference, haplotype FASTAs and the
+  pangenome file) with its size and mtime, and an MD5 per file with `--hash-inputs`.
+
+### Benchmarks (all tracked envelopes re-run with this binary)
+- **New: [benchmark/refbias_3way](benchmark/refbias_3way).** The reference-bias rescue
+  against an independent standard: HG03516's reads through GRCh38, an SNV-personalized
+  diploid, the HPRC phased assembly, and PanIsoGuard post hoc; truth per junction = where
+  the same reads splice on the personal genome. Rule level 31/32 SNV-class junctions
+  (precision 31/35), verdict level 12/32 (precision 12/13); indel/SV-shifted junctions are
+  out of scope by construction; 5 min / 0.4 GB vs 11–12 h / 38–78 GB.
+- The `min_spanning` gate changes two earlier numbers: the BAM indel-near trigger now
+  catches 14/124 false novel junctions on SQANTI-SIM (was 41/124; still 0 genuine flagged),
+  and PanIsoGuard+BAM's AUPRC gain over the one-line short-read rule is within the
+  bootstrap interval at every depth (was significant at 250k pairs). Operating points are
+  unchanged (precision 0.990, recall 0.545). Per-class precision at 1 M pairs with the
+  BAM: NOVEL_CONFIRMED 0.992, NOVEL_PROBABLE 0.979, UNRESOLVED 0.962, UNCONFIRMED 0.789,
+  ARTIFACT 0.097.
+- The haplotype-consistency rule changed no verdict on the real reference-bias sets
+  (HG03516/HG02717 cohort 86/86, GIAB whole-genome cohort 137/137, HG002 chr22, arm C of
+  the 3-way benchmark: all unchanged).
+- `benchmark/sqanti3_filter_h2h/emit_metrics.py` and `score.py --emit-metrics` of the 3-way
+  benchmark now write their envelopes (the head-to-head bootstrap was a scratch script).
+- README no longer calls the classes an ordered scale (HIGH > MEDIUM > LOW); on
+  SQANTI-SIM at every short-read depth `UNRESOLVED` is more precise than `UNCONFIRMED`
+  (`benchmark/sqanti3_filter_h2h/per_class.py`).
+
+### Added
+- **Bundled examples.** `cmake --install` now ships `examples/tiny`, `examples/multi_caller`
+  and the study notes' toy data under `<prefix>/share/panisoguard`, so the bioconda package
+  and the Docker image carry them. `panisoguard example` lists them and
+  `panisoguard example tiny` copies one into the current folder, ready to run
+  (`tiny/run.sh`). The bioconda recipe test and the CI container job run an example this way.
+
 ## [0.0.5] - 2026-10-04
 
 ### Added
