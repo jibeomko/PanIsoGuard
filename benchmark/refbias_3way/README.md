@@ -228,7 +228,8 @@ with `circularity_flag`.
 
 HG03516's B1 and B2 ran partly concurrently, so its walls are upper bounds; HG02717 ran
 sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7–12 h and
-38–78 GB on top of arm A; the post-hoc rescue costs 5–6 minutes and under 1 GB, and recovers
+38–78 GB on top of arm A; the post-hoc rescue costs 3–6 minutes per run (the three provenance
+runs above; 1.8–1.9 min each before the 0.0.7 whole-chain read pass) and under 1 GB, and recovers
 31 of 32 and 37 of 39 SNV-class junctions at the rule level (12 of 32 and 21 of 39 as
 isoform verdicts, because of the all-junctions rule).
 

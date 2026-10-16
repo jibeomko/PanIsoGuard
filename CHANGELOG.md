@@ -41,6 +41,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   167 / 1, UNRESOLVED 0 / 6 (the genuine held NIC moved up), UNCONFIRMED 203 / 46. The
   envelope now carries a risk–coverage point per method (PanIsoGuard + BAM decides 71 %
   of isoforms with 2.1 % wrong; the one-line rule decides all with 6.6 % wrong).
+- [benchmark/refbias_3way](benchmark/refbias_3way) arm C re-run with the chain axis: junction-level
+  numbers and the 18 / 28 rescues unchanged; 5,784 / 7,011 isoforms that SQANTI3's filter
+  keeps and PanIsoGuard used to hold `UNRESOLVED` are now `NOVEL_PROBABLE` (whole-chain
+  reads, no short reads in these samples); `adjudicate` takes 3–6 min per genome-wide run
+  instead of 2.
 - [benchmark/refbias_3way](benchmark/refbias_3way) replicated on HG02717: rule level 37/39
   SNV-class junctions (precision 0.88), verdict level 21/39 (precision 0.95), the same
   miss pattern as HG03516; the envelope now holds both individuals. B2's SQANTI3 step had
