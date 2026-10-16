@@ -100,7 +100,11 @@ B2_build() {
 }
 B2_align()    { [ -s armB2/rna.aln.bam.bai ] || align armB2/diploid.fa armB2/rna.aln.bam; }
 B2_isoquant() { [ -s armB2/isoquant/iq/iq.transcript_models.gtf ] || isoquant armB2/diploid.fa armB2/diploid.gtf armB2/rna.aln.bam armB2/isoquant; }
-B2_sqanti()   { [ -s armB2/sq/rules/rules_RulesFilter_classification.txt ] || sqanti armB2/isoquant/iq/iq.transcript_models.gtf armB2/diploid.gtf armB2/diploid.fa armB2/sq; }
+B2_sqanti() {  # liftoff writes CDS lines without frames and SQANTI3's gtfToGenePred rejects them: feed gene/transcript/exon only
+  [ -s armB2/sq/rules/rules_RulesFilter_classification.txt ] && return
+  awk -F'\t' '$3=="gene" || $3=="transcript" || $3=="exon"' armB2/diploid.gtf > armB2/diploid.sqanti.gtf
+  sqanti armB2/isoquant/iq/iq.transcript_models.gtf armB2/diploid.sqanti.gtf armB2/diploid.fa armB2/sq
+}
 
 # ---- C: PanIsoGuard post hoc on arm A --------------------------------------------------
 C_adjudicate() {

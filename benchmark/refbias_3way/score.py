@@ -37,7 +37,7 @@ def canonical(fa, chrom, s0, e, strand):
 
 def boot(num, den_set, pick, n=1000, seed=1):
     """CI of |pick(x)|/|den| under resampling of den."""
-    den = list(den_set)
+    den = sorted(den_set)   # sorted: set order is hash-randomized per process, the CIs must not be
     if not den: return (float("nan"), float("nan"))
     rng = random.Random(seed); vals = []
     for _ in range(n):
@@ -54,6 +54,7 @@ def main():
     ap.add_argument("--classes", nargs="+", required=True, help="NAME=junction_classes.tsv per B arm")
     ap.add_argument("--out", default=None, help="metrics json (default $WORK/metrics.json)")
     ap.add_argument("--emit-metrics", default=None, help="also write the tracked envelope (benchmark/results/refbias_3way/metrics.json)")
+    ap.add_argument("--label", default="HG03516", help="individual, the key under metrics.samples in the envelope (an existing envelope is updated in place)")
     a = ap.parse_args()
     W, D = a.work, a.data
 
@@ -162,17 +163,23 @@ def main():
         import datetime
         prov = dict(l.rstrip("\n").split("\t", 1) for l in open(f"{W}/armC/wgs.provenance.log") if "\t" in l and not l.startswith("#"))
         arms = {n: {k: v for k, v in arm.items() if k not in ("T_minus_R_snv_class", "R_minus_T", "labels")} for n, arm in out["arms"].items()}
-        env = {"protocol": "refbias_3way", "scope": "hg03516_hprc_r2_grch38_vs_personalized_pipelines", "status": "tracked",
+        sample = {k: out[k] for k in ("n_novel_junctions_A", "n_noncanonical_A", "rescued_isoforms", "R_junctions",
+                                      "R_rule_junctions", "firewall", "rescued_discarded_by_rules_filter", "cost")} | {"arms": arms}
+        samples = {}
+        if os.path.exists(a.emit_metrics):
+            try: samples = json.load(open(a.emit_metrics))["metrics"].get("samples", {})
+            except (KeyError, ValueError): samples = {}
+        samples[a.label] = sample
+        env = {"protocol": "refbias_3way", "scope": "hprc_r2_grch38_vs_personalized_pipelines", "status": "tracked",
                "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
-               "data_provenance": "REAL public HPRC R2 HG03516 Kinnex Iso-Seq (11.3 M aligned reads) through four arms on the same reads: "
+               "data_provenance": "REAL public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: "
                                   "A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on "
                                   "the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; "
                                   "C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
-               "command": "bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; "
-                          "benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --emit-metrics ...",
-               "metrics": {k: out[k] for k in ("n_novel_junctions_A", "n_noncanonical_A", "rescued_isoforms", "R_junctions",
-                                                "R_rule_junctions", "firewall", "rescued_discarded_by_rules_filter", "cost")} | {"arms": arms},
+               "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; "
+                          "benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
+               "metrics": {"samples": samples},
                "notes": "Unit = GRCh38 novel junction of arm A, labelled by where the SAME reads splice on the personal genome. "
                         "T = same-canonical (non-canonical on GRCh38) + shifted-known + unspliced; T_core drops unspliced (short "
                         "introns that minimap2 renders as a deletion on the diploid assembly, median 82 bp; 308/499 of B2's are "

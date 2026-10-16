@@ -1,173 +1,339 @@
 {
-  "command": "bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --emit-metrics ...",
-  "data_provenance": "REAL public HPRC R2 HG03516 Kinnex Iso-Seq (11.3 M aligned reads) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
-  "generated_utc": "2026-10-14T06:58:10Z",
+  "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
+  "data_provenance": "REAL public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
+  "generated_utc": "2026-10-16T10:04:17Z",
   "metrics": {
-    "R_junctions": 13,
-    "R_rule_junctions": 35,
-    "arms": {
-      "B1": {
-        "R": 13,
-        "R_and_T": 12,
-        "T": 88,
-        "T_core": 39,
-        "T_minus_R_by_label": {
-          "same-canonical": 20,
-          "shifted-known": 7,
-          "unspliced": 49
-        },
-        "T_snv_class": 32,
-        "T_snv_minus_R_by_reason": {
-          "criterion-miss": 1,
-          "isoform-category-not-adjudicated": 4,
-          "other-novel-junction-unexplained": 15
-        },
-        "motif_disrupted_in_person": 23,
-        "precision": 0.9230769230769231,
-        "precision_ci": [
-          0.7692307692307693,
-          1.0
-        ],
-        "precision_core": 0.9230769230769231,
-        "rule_level": {
-          "R_rule": 35,
-          "R_rule_and_T": 31,
-          "R_rule_minus_T_by_label": {
-            "same-noncanonical": 4
+    "samples": {
+      "HG02717": {
+        "R_junctions": 22,
+        "R_rule_junctions": 42,
+        "arms": {
+          "B1": {
+            "R": 22,
+            "R_and_T": 21,
+            "T": 71,
+            "T_core": 50,
+            "T_minus_R_by_label": {
+              "same-canonical": 18,
+              "shifted-known": 11,
+              "unspliced": 21
+            },
+            "T_snv_class": 39,
+            "T_snv_minus_R_by_reason": {
+              "criterion-miss": 2,
+              "isoform-category-not-adjudicated": 6,
+              "other-novel-junction-unexplained": 10
+            },
+            "motif_disrupted_in_person": 7,
+            "precision": 0.9545454545454546,
+            "precision_ci": [
+              0.8636363636363636,
+              1.0
+            ],
+            "precision_core": 0.9545454545454546,
+            "rule_level": {
+              "R_rule": 42,
+              "R_rule_and_T": 37,
+              "R_rule_minus_T_by_label": {
+                "same-noncanonical": 5
+              },
+              "precision": 0.8809523809523809,
+              "sensitivity_snv_class": 0.9487179487179487
+            },
+            "rule_precision_core": 0.8809523809523809,
+            "rule_sensitivity_core": 0.74,
+            "sensitivity": 0.29577464788732394,
+            "sensitivity_ci": [
+              0.18309859154929578,
+              0.4084507042253521
+            ],
+            "sensitivity_core": 0.42,
+            "sensitivity_snv_class": 0.5384615384615384,
+            "sensitivity_snv_class_ci": [
+              0.38461538461538464,
+              0.6923076923076923
+            ]
           },
-          "precision": 0.8857142857142857,
-          "sensitivity_snv_class": 0.96875
+          "B2": {
+            "R": 22,
+            "R_and_T": 19,
+            "T": 324,
+            "T_core": 53,
+            "T_minus_R_by_label": {
+              "same-canonical": 24,
+              "shifted-known": 10,
+              "unspliced": 271
+            },
+            "T_snv_class": 43,
+            "T_snv_minus_R_by_reason": {
+              "criterion-miss": 5,
+              "isoform-category-not-adjudicated": 8,
+              "other-novel-junction-unexplained": 11
+            },
+            "motif_disrupted_in_person": 6,
+            "precision": 0.8636363636363636,
+            "precision_ci": [
+              0.7272727272727273,
+              1.0
+            ],
+            "precision_core": 0.8636363636363636,
+            "rule_level": {
+              "R_rule": 42,
+              "R_rule_and_T": 38,
+              "R_rule_minus_T_by_label": {
+                "same-noncanonical": 3,
+                "shifted-novel": 1
+              },
+              "precision": 0.9047619047619048,
+              "sensitivity_snv_class": 0.8837209302325582
+            },
+            "rule_precision_core": 0.9047619047619048,
+            "rule_sensitivity_core": 0.7169811320754716,
+            "sensitivity": 0.05864197530864197,
+            "sensitivity_ci": [
+              0.033950617283950615,
+              0.08641975308641975
+            ],
+            "sensitivity_core": 0.3584905660377358,
+            "sensitivity_snv_class": 0.4418604651162791,
+            "sensitivity_snv_class_ci": [
+              0.3023255813953488,
+              0.5813953488372093
+            ]
+          }
         },
-        "rule_precision_core": 0.8857142857142857,
-        "rule_sensitivity_core": 0.7948717948717948,
-        "sensitivity": 0.13636363636363635,
-        "sensitivity_ci": [
-          0.06818181818181818,
-          0.2159090909090909
-        ],
-        "sensitivity_core": 0.3076923076923077,
-        "sensitivity_snv_class": 0.375,
-        "sensitivity_snv_class_ci": [
-          0.21875,
-          0.5625
-        ]
-      },
-      "B2": {
-        "R": 13,
-        "R_and_T": 12,
-        "T": 546,
-        "T_core": 47,
-        "T_minus_R_by_label": {
-          "same-canonical": 23,
-          "shifted-known": 12,
-          "unspliced": 499
-        },
-        "T_snv_class": 35,
-        "T_snv_minus_R_by_reason": {
-          "criterion-miss": 4,
-          "isoform-category-not-adjudicated": 4,
-          "other-novel-junction-unexplained": 15
-        },
-        "motif_disrupted_in_person": 30,
-        "precision": 0.9230769230769231,
-        "precision_ci": [
-          0.7692307692307693,
-          1.0
-        ],
-        "precision_core": 0.9230769230769231,
-        "rule_level": {
-          "R_rule": 35,
-          "R_rule_and_T": 31,
-          "R_rule_minus_T_by_label": {
-            "same-noncanonical": 4
+        "cost": {
+          "A_align(existing)": {
+            "max_rss_gb": 22.946,
+            "wall_sec": 7674.358
           },
-          "precision": 0.8857142857142857,
-          "sensitivity_snv_class": 0.8857142857142857
+          "A_sqanti": {
+            "max_rss_gb": 4.9,
+            "wall": "4:14.20"
+          },
+          "B1_align": {
+            "max_rss_gb": 37.3,
+            "wall": "4:30:38"
+          },
+          "B1_build": {
+            "max_rss_gb": 0.0,
+            "wall": "1:03.22"
+          },
+          "B1_isoquant": {
+            "max_rss_gb": 14.7,
+            "wall": "2:21:44"
+          },
+          "B1_sqanti": {
+            "max_rss_gb": 9.6,
+            "wall": "7:57.66"
+          },
+          "B2_align": {
+            "max_rss_gb": 37.6,
+            "wall": "3:32:27"
+          },
+          "B2_build": {
+            "max_rss_gb": 0.0,
+            "wall": "1:04.18"
+          },
+          "B2_isoquant": {
+            "max_rss_gb": 16.8,
+            "wall": "1:36:43"
+          },
+          "B2_liftoff": {
+            "max_rss_gb": 77.9,
+            "wall": "1:08:04"
+          },
+          "B2_paf": {
+            "max_rss_gb": 28.6,
+            "wall": "32:24.46"
+          },
+          "B2_sqanti": {
+            "max_rss_gb": 9.4,
+            "wall": "3:39.43"
+          },
+          "C_adjudicate": {
+            "max_rss_gb": 0.5,
+            "wall": "5:42.52"
+          }
         },
-        "rule_precision_core": 0.8857142857142857,
-        "rule_sensitivity_core": 0.6595744680851063,
-        "sensitivity": 0.02197802197802198,
-        "sensitivity_ci": [
-          0.01098901098901099,
-          0.0347985347985348
-        ],
-        "sensitivity_core": 0.2553191489361702,
-        "sensitivity_snv_class": 0.34285714285714286,
-        "sensitivity_snv_class_ci": [
-          0.17142857142857143,
-          0.4857142857142857
-        ]
+        "firewall": {
+          "held_ambiguous_with_flag_unknown": 28,
+          "rescued_unknown": 0,
+          "rescued_wgs": 28
+        },
+        "n_noncanonical_A": 2233,
+        "n_novel_junctions_A": 16014,
+        "rescued_discarded_by_rules_filter": 28,
+        "rescued_isoforms": 28
+      },
+      "HG03516": {
+        "R_junctions": 13,
+        "R_rule_junctions": 35,
+        "arms": {
+          "B1": {
+            "R": 13,
+            "R_and_T": 12,
+            "T": 88,
+            "T_core": 39,
+            "T_minus_R_by_label": {
+              "same-canonical": 20,
+              "shifted-known": 7,
+              "unspliced": 49
+            },
+            "T_snv_class": 32,
+            "T_snv_minus_R_by_reason": {
+              "criterion-miss": 1,
+              "isoform-category-not-adjudicated": 4,
+              "other-novel-junction-unexplained": 15
+            },
+            "motif_disrupted_in_person": 23,
+            "precision": 0.9230769230769231,
+            "precision_ci": [
+              0.7692307692307693,
+              1.0
+            ],
+            "precision_core": 0.9230769230769231,
+            "rule_level": {
+              "R_rule": 35,
+              "R_rule_and_T": 31,
+              "R_rule_minus_T_by_label": {
+                "same-noncanonical": 4
+              },
+              "precision": 0.8857142857142857,
+              "sensitivity_snv_class": 0.96875
+            },
+            "rule_precision_core": 0.8857142857142857,
+            "rule_sensitivity_core": 0.7948717948717948,
+            "sensitivity": 0.13636363636363635,
+            "sensitivity_ci": [
+              0.06818181818181818,
+              0.20454545454545456
+            ],
+            "sensitivity_core": 0.3076923076923077,
+            "sensitivity_snv_class": 0.375,
+            "sensitivity_snv_class_ci": [
+              0.21875,
+              0.5625
+            ]
+          },
+          "B2": {
+            "R": 13,
+            "R_and_T": 12,
+            "T": 546,
+            "T_core": 47,
+            "T_minus_R_by_label": {
+              "same-canonical": 23,
+              "shifted-known": 12,
+              "unspliced": 499
+            },
+            "T_snv_class": 35,
+            "T_snv_minus_R_by_reason": {
+              "criterion-miss": 4,
+              "isoform-category-not-adjudicated": 4,
+              "other-novel-junction-unexplained": 15
+            },
+            "motif_disrupted_in_person": 30,
+            "precision": 0.9230769230769231,
+            "precision_ci": [
+              0.7692307692307693,
+              1.0
+            ],
+            "precision_core": 0.9230769230769231,
+            "rule_level": {
+              "R_rule": 35,
+              "R_rule_and_T": 31,
+              "R_rule_minus_T_by_label": {
+                "same-noncanonical": 4
+              },
+              "precision": 0.8857142857142857,
+              "sensitivity_snv_class": 0.8857142857142857
+            },
+            "rule_precision_core": 0.8857142857142857,
+            "rule_sensitivity_core": 0.6595744680851063,
+            "sensitivity": 0.02197802197802198,
+            "sensitivity_ci": [
+              0.01098901098901099,
+              0.0347985347985348
+            ],
+            "sensitivity_core": 0.2553191489361702,
+            "sensitivity_snv_class": 0.34285714285714286,
+            "sensitivity_snv_class_ci": [
+              0.2,
+              0.5142857142857142
+            ]
+          }
+        },
+        "cost": {
+          "A_align(existing)": {
+            "max_rss_gb": 23.177,
+            "wall_sec": 3989.898
+          },
+          "A_sqanti": {
+            "max_rss_gb": 4.9,
+            "wall": "5:45.39"
+          },
+          "B1_align": {
+            "max_rss_gb": 37.3,
+            "wall": "2:13:18"
+          },
+          "B1_build": {
+            "max_rss_gb": 0.0,
+            "wall": "2:04.93"
+          },
+          "B1_isoquant": {
+            "max_rss_gb": 14.7,
+            "wall": "8:54:48"
+          },
+          "B1_sqanti": {
+            "max_rss_gb": 9.6,
+            "wall": "5:40.07"
+          },
+          "B2_align": {
+            "max_rss_gb": 37.8,
+            "wall": "4:21:05"
+          },
+          "B2_build": {
+            "max_rss_gb": 0.0,
+            "wall": "2:51.60"
+          },
+          "B2_isoquant": {
+            "max_rss_gb": 5.9,
+            "wall": "22:23.79"
+          },
+          "B2_liftoff": {
+            "max_rss_gb": 77.9,
+            "wall": "1:36:54"
+          },
+          "B2_paf": {
+            "max_rss_gb": 26.8,
+            "wall": "1:41:16"
+          },
+          "B2_sqanti": {
+            "max_rss_gb": 9.5,
+            "wall": "8:56.00"
+          },
+          "C_adjudicate": {
+            "max_rss_gb": 0.4,
+            "wall": "5:22.04"
+          }
+        },
+        "firewall": {
+          "held_ambiguous_with_flag_unknown": 18,
+          "rescued_unknown": 0,
+          "rescued_wgs": 18
+        },
+        "n_noncanonical_A": 2959,
+        "n_novel_junctions_A": 21099,
+        "rescued_discarded_by_rules_filter": 18,
+        "rescued_isoforms": 18
       }
-    },
-    "cost": {
-      "A_align(existing)": {
-        "max_rss_gb": 23.177,
-        "wall_sec": 3989.898
-      },
-      "A_sqanti": {
-        "max_rss_gb": 4.9,
-        "wall": "5:45.39"
-      },
-      "B1_align": {
-        "max_rss_gb": 37.3,
-        "wall": "2:13:18"
-      },
-      "B1_build": {
-        "max_rss_gb": 0.0,
-        "wall": "2:04.93"
-      },
-      "B1_isoquant": {
-        "max_rss_gb": 14.7,
-        "wall": "8:54:48"
-      },
-      "B1_sqanti": {
-        "max_rss_gb": 9.6,
-        "wall": "5:40.07"
-      },
-      "B2_align": {
-        "max_rss_gb": 37.8,
-        "wall": "4:21:05"
-      },
-      "B2_build": {
-        "max_rss_gb": 0.0,
-        "wall": "2:51.60"
-      },
-      "B2_isoquant": {
-        "max_rss_gb": 5.9,
-        "wall": "22:23.79"
-      },
-      "B2_liftoff": {
-        "max_rss_gb": 77.9,
-        "wall": "1:36:54"
-      },
-      "B2_paf": {
-        "max_rss_gb": 26.8,
-        "wall": "1:41:16"
-      },
-      "B2_sqanti": {
-        "max_rss_gb": 6.7,
-        "wall": "1:56.80"
-      },
-      "C_adjudicate": {
-        "max_rss_gb": 0.4,
-        "wall": "5:22.04"
-      }
-    },
-    "firewall": {
-      "held_ambiguous_with_flag_unknown": 18,
-      "rescued_unknown": 0,
-      "rescued_wgs": 18
-    },
-    "n_noncanonical_A": 2959,
-    "n_novel_junctions_A": 21099,
-    "rescued_discarded_by_rules_filter": 18,
-    "rescued_isoforms": 18
+    }
   },
   "notes": "Unit = GRCh38 novel junction of arm A, labelled by where the SAME reads splice on the personal genome. T = same-canonical (non-canonical on GRCh38) + shifted-known + unspliced; T_core drops unspliced (short introns that minimap2 renders as a deletion on the diploid assembly, median 82 bp; 308/499 of B2's are spliced on the SNV genome B1). R_rule = junctions meeting the rescue's own criterion (what the axis sees); R = junctions inside isoforms that got the REFERENCE_BIAS verdict (needs ALL of the isoform's novel junctions explained, NIC/NNC only). The gap R_rule -> R (35 -> 13) is the all-junctions rule and the category pass-throughs, not the motif criterion. Precision misses (4/35) are junctions whose reads come from the non-canonical haplotype. Firewall: 0 rescues under unknown provenance, 18/18 held.",
   "protocol": "refbias_3way",
   "ruleset_version": "builtin-0.0.3",
-  "scope": "hg03516_hprc_r2_grch38_vs_personalized_pipelines",
+  "scope": "hprc_r2_grch38_vs_personalized_pipelines",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.5"
+  "tool_version": "0.0.6"
 }

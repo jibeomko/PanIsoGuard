@@ -364,11 +364,11 @@ junctions all have short-read support) is just as accurate and simpler; see
   use the junction come from the haplotype on which it is canonical
   ([benchmark/refbias_phasing](benchmark/refbias_phasing)). Homozygous junctions cannot be
   checked this way. Against a full personalized-genome re-analysis of the same reads
-  (HG03516, [benchmark/refbias_3way](benchmark/refbias_3way)), the rescue criterion finds
-  31 of the 32 splice-site-SNV junctions the personal genome makes canonical, in 5 minutes
-  instead of 11 hours; as isoform verdicts it recovers 12 of 32, because a verdict needs
-  every novel junction of the isoform explained. Junctions moved by indels or structural
-  variants it does not see.
+  (HG03516 and HG02717, [benchmark/refbias_3way](benchmark/refbias_3way)), the rescue
+  criterion finds 31 of 32 and 37 of 39 splice-site-SNV junctions the personal genome makes
+  canonical, in 5 minutes instead of 7–11 hours; as isoform verdicts it recovers 12 of 32
+  and 21 of 39, because a verdict needs every novel junction of the isoform explained.
+  Junctions moved by indels or structural variants it does not see.
 
 **It is not an isoform caller, and it does not redo SQANTI3's QC.** It runs after the callers
 and uses SQANTI3's results as they are

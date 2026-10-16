@@ -16,6 +16,13 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   the VCF genotypes, so the path-consistency rule runs on the HPRC chr22 set (3,034 of 3,040
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
+### Benchmarks
+- [benchmark/refbias_3way](benchmark/refbias_3way) replicated on HG02717: rule level 37/39
+  SNV-class junctions (precision 0.88), verdict level 21/39 (precision 0.95), the same
+  miss pattern as HG03516; the envelope now holds both individuals. B2's SQANTI3 step had
+  failed silently in both runs (frame-less liftoff CDS lines); fixed in `run.sh`, no metric
+  depended on it, the cost row did.
+
 ### Changed
 - **Variant-disrupted motifs are consumed.** A novel junction canonical on the reference
   but non-canonical on every haplotype of the sample counts as the `noncanonical` sign
