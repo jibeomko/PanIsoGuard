@@ -1,6 +1,5 @@
 #include "catch2/catch.hpp"
 
-#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
@@ -10,9 +9,9 @@
 using namespace panisoguard;
 
 TEST_CASE("SJ.tab reader reports a non-integer field with line context", "[sj_tab]") {
-  const auto p = std::filesystem::temp_directory_path() / "pig_sj_bad.SJ.tab";
+  const std::string p = "./.__pig_sj_bad.SJ.tab";  // test working dir; no <filesystem> (macOS < 10.15)
   std::ofstream(p) << "chr1\tNOPE\t300\t1\t1\t1\t10\t0\t30\n";
-  REQUIRE_THROWS_AS(read_sj_tab(p.string()), std::runtime_error);
+  REQUIRE_THROWS_AS(read_sj_tab(p), std::runtime_error);
 }
 
 TEST_CASE("SJ.tab parses and supports exact coordinate lookup", "[sj_tab]") {

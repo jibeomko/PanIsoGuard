@@ -1,6 +1,5 @@
 #include "catch2/catch.hpp"
 
-#include <filesystem>
 #include <map>
 #include <fstream>
 #include <stdexcept>
@@ -16,9 +15,9 @@ using namespace panisoguard;
 namespace {
 // Write a tiny pangenome-junction file to a temp path and return it.
 std::string write_tmp(const std::string& name, const std::string& body) {
-  const auto p = std::filesystem::temp_directory_path() / name;
+  const std::string p = "./.__" + name;  // test working dir; no <filesystem> (macOS < 10.15)
   std::ofstream(p) << body;
-  return p.string();
+  return p;
 }
 }  // namespace
 
