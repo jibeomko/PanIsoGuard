@@ -5,19 +5,25 @@
 // located relative to the running executable; a build-tree binary falls back to the
 // source checkout. They are copied rather than run in place because an install prefix
 // is usually read-only and each example writes its output next to its run.sh.
+//
+// POSIX calls rather than <filesystem>: bioconda's osx-64 builds target macOS 10.9, where
+// libc++'s std::filesystem is unavailable (it needs 10.15).
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <filesystem>
+#include <fstream>
 #include <string>
-#include <system_error>
 #include <vector>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
-
-namespace fs = std::filesystem;
 
 namespace {
 
@@ -37,53 +43,85 @@ const Example kExamples[] = {
      "the study notes' toy gene (notes/ on GitHub walks through it)", nullptr},
 };
 
-fs::path exe_dir() {
-  std::error_code ec;
+bool is_dir(const std::string& p) {
+  struct stat st;
+  return stat(p.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+bool exists(const std::string& p) {
+  struct stat st;
+  return lstat(p.c_str(), &st) == 0;
+}
+
+std::string canonical(const std::string& p) {
+  char buf[PATH_MAX];
+  return realpath(p.c_str(), buf) != nullptr ? std::string(buf) : std::string();
+}
+
+std::string parent(const std::string& p) {
+  const std::size_t i = p.rfind('/');
+  return i == std::string::npos ? std::string(".") : (i == 0 ? std::string("/") : p.substr(0, i));
+}
+
+// Directory of the running executable ("" if it cannot be found).
+std::string exe_dir() {
 #ifdef __APPLE__
   char buf[4096];
   uint32_t n = sizeof buf;
   if (_NSGetExecutablePath(buf, &n) == 0) {
-    fs::path p = fs::weakly_canonical(fs::path(buf), ec);
-    if (!ec) return p.parent_path();
+    const std::string p = canonical(buf);
+    if (!p.empty()) return parent(p);
   }
 #else
-  fs::path p = fs::read_symlink("/proc/self/exe", ec);
-  if (!ec) return p.parent_path();
+  char buf[PATH_MAX];
+  const ssize_t n = readlink("/proc/self/exe", buf, sizeof buf - 1);
+  if (n > 0) { buf[n] = '\0'; return parent(buf); }
 #endif
   return {};
 }
 
 // <prefix>/bin/panisoguard -> <prefix>/share/panisoguard/<rel>; otherwise the source tree.
-fs::path find_example(const Example& ex) {
-  std::vector<fs::path> roots;
-  const fs::path d = exe_dir();
-  if (!d.empty()) roots.push_back(d / ".." / "share" / "panisoguard");
+std::string find_example(const Example& ex) {
+  std::vector<std::string> roots;
+  const std::string d = exe_dir();
+  if (!d.empty()) roots.push_back(d + "/../share/panisoguard");
 #ifdef PANISOGUARD_SOURCE_DIR
   roots.push_back(PANISOGUARD_SOURCE_DIR);
 #endif
   for (const auto& r : roots) {
-    std::error_code ec;
-    const fs::path p = r / ex.rel;
-    if (fs::is_directory(p, ec)) return fs::weakly_canonical(p, ec);
+    const std::string p = r + "/" + ex.rel;
+    if (is_dir(p)) return canonical(p);
   }
   return {};
 }
 
+bool copy_file(const std::string& from, const std::string& to, std::string& err) {
+  std::ifstream in(from, std::ios::binary);
+  std::ofstream out(to, std::ios::binary | std::ios::trunc);
+  if (!in || !out) { err = to + ": cannot copy"; return false; }
+  out << in.rdbuf();
+  if (!out) { err = to + ": write failed"; return false; }
+  struct stat st;
+  if (stat(from.c_str(), &st) == 0) chmod(to.c_str(), st.st_mode & 0777);  // keeps run.sh executable
+  return true;
+}
+
 // Recursive copy that skips an example's own `output/` from an earlier local run.
-bool copy_tree(const fs::path& src, const fs::path& dst, std::string& err) {
-  std::error_code ec;
-  fs::create_directories(dst, ec);
-  if (ec) { err = ec.message(); return false; }
-  for (const auto& e : fs::recursive_directory_iterator(src, ec)) {
-    const fs::path rel = fs::relative(e.path(), src, ec);
-    if (rel.begin() != rel.end() && *rel.begin() == "output") continue;
-    const fs::path to = dst / rel;
-    if (e.is_directory()) {
-      fs::create_directories(to, ec);
-    } else {
-      fs::copy_file(e.path(), to, fs::copy_options::none, ec);   // keeps run.sh executable
-    }
-    if (ec) { err = to.string() + ": " + ec.message(); return false; }
+bool copy_tree(const std::string& src, const std::string& dst, std::string& err, bool top = true) {
+  if (mkdir(dst.c_str(), 0755) != 0 && !is_dir(dst)) { err = dst + ": " + std::strerror(errno); return false; }
+  DIR* d = opendir(src.c_str());
+  if (d == nullptr) { err = src + ": " + std::strerror(errno); return false; }
+  std::vector<std::string> names;
+  while (dirent* e = readdir(d)) {
+    const std::string n = e->d_name;
+    if (n == "." || n == ".." || (top && n == "output")) continue;
+    names.push_back(n);
+  }
+  closedir(d);
+  for (const auto& n : names) {
+    const std::string from = src + "/" + n, to = dst + "/" + n;
+    if (is_dir(from)) { if (!copy_tree(from, to, err, false)) return false; }
+    else if (!copy_file(from, to, err)) return false;
   }
   return true;
 }
@@ -114,15 +152,14 @@ int cmd_example(int argc, char** argv) {
     usage();
     return 1;
   }
-  const fs::path src = find_example(*ex);
+  const std::string src = find_example(*ex);
   if (src.empty()) {
     std::fprintf(stderr, "panisoguard example: '%s' is not installed next to this binary "
                          "(expected <prefix>/share/panisoguard/%s)\n", ex->name, ex->rel);
     return 1;
   }
-  const fs::path dst = argc >= 4 ? fs::path(argv[3]) : fs::path(ex->name);
-  std::error_code ec;
-  if (fs::exists(dst, ec)) {
+  const std::string dst = argc >= 4 ? argv[3] : ex->name;
+  if (exists(dst)) {
     std::fprintf(stderr, "panisoguard example: '%s' already exists; choose another DIR\n", dst.c_str());
     return 1;
   }

@@ -23,6 +23,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   failed silently in both runs (frame-less liftoff CDS lines); fixed in `run.sh`, no metric
   depended on it, the cost row did.
 
+### Fixed
+- `panisoguard example` no longer uses `std::filesystem`, which bioconda's osx-64 build
+  (macOS 10.9 deployment target, libc++ filesystem needs 10.15) cannot compile; the 0.0.6
+  autobump PR failed on osx-64 for this reason. POSIX calls do the same job.
+
 ### Changed
 - **Variant-disrupted motifs are consumed.** A novel junction canonical on the reference
   but non-canonical on every haplotype of the sample counts as the `noncanonical` sign

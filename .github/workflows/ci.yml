@@ -52,12 +52,15 @@ jobs:
             python>=3.8
             samtools>=1.18
 
+      # The macOS deployment target mirrors bioconda's osx-64 builds (old SDK): libc++ marks
+      # C++17 <filesystem> unavailable below 10.15, so a use of it fails here, not on bioconda.
       - name: Configure
         shell: bash -el {0}
         run: >-
           cmake -S . -B build
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_PREFIX_PATH="$CONDA_PREFIX"
+          ${{ matrix.os == 'macos-latest' && '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13' || '' }}
 
       - name: Build
         shell: bash -el {0}
