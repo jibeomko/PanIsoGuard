@@ -6,7 +6,8 @@ each axis does on real data. The headline is a **chemistry-calibration** finding
 **empirically vindicates a conservative design choice**, plus the honest scope of the
 reference-bias rescue on a reference-grade sample.
 
-The inputs are the **285 caller-novel chains** from the
+Section 4 (0.0.7) adds the whole-chain read support on the same reads. The inputs are the
+**285 caller-novel chains** from the
 [wholegenome_multicaller](../wholegenome_multicaller) combine (IsoQuant + Bambu + ESPRESSO),
 adjudicated with the real ONT BAM, plus a reference-bias scan of every novel junction
 against NA12878's own genome (GM12878 = NA12878 = GIAB **HG001**).
@@ -60,11 +61,48 @@ on personalized genomes it fires consistently and perfectly specifically (the
 divergent / non-reference long-read RNA sample with a matched personal genome is the data
 that would show the rescue firing on real RNA calls; sourcing one is the open data-access item.
 
+## 4. Whole-chain read support works on real ONT with exact coordinates (0.0.7)
+
+The 0.0.7 chain axis counts reads whose alignment carries the isoform's entire intron chain
+at **exact** coordinates. ONT reads are expected to wobble at splice sites, so this is the
+test of whether the axis is usable on ONT at all. On the 285 real novel chains
+(`chain_wobble.py`, reads at each chain's first donor site, median 17):
+
+| per-site tolerance | chains with ≥ 1 full-chain read | chains with ≥ 3 |
+|---|---:|---:|
+| exact (what PanIsoGuard counts) | 268 / 285 | **155 / 285** |
+| ± 1 bp | 269 | 155 |
+| ± 2 bp | 271 | 155 |
+| ± 5 bp | 281 | 175 |
+| ± 10 bp | 282 | 188 |
+
+Among reads that match a chain within 10 bp, **94.5 %** of the splice sites are exact; 1–2 bp
+offsets are essentially absent (0.1 %), the rest sit at 3–7 bp. These are caller chains built
+from the same splice-aware alignment (`minimap2 -ax splice -uf`), so the aligner has already
+placed the sites consistently; a tolerance of ± 1–2 bp would change nothing, ± 5 bp would add
+20 chains at the cost of accepting neighbouring alternative sites. **No tolerance is shipped.**
+Exact full-chain support is more frequent among the ≥ 2-caller chains (22 / 31, 71 %) than
+the single-caller ones (133 / 254, 52 %), the same direction as the consensus signal.
+
+What the two presets do with it (no short reads exist for this sample, so every call is
+`UNKNOWN` support):
+
+| preset | ARTIFACT | NOVEL_PROBABLE | UNRESOLVED |
+|---|---:|---:|---:|
+| `--platform hifi` (default; indel-near gate on) | 129 | 53 | 103 |
+| `--platform ont` (indel-near gate off) | 9 | **148** | 128 |
+
+Under the HiFi defaults the over-firing indel-near gate (section 1) turns most chain-supported
+isoforms into `ARTIFACT`; under the ONT preset they become `NOVEL_PROBABLE`. There is no truth
+for these chains, so this section is about whether the axis functions on ONT (it does), not
+about accuracy.
+
 ## Reproduce
 
 ```bash
 WORK=/path/to/gm12878_mc ./run.sh   # needs the wholegenome_multicaller combine + the ONT BAM
                                      # + the HG001 SNV-consensus haplotypes (see giab_cohort_rescue)
+                                     # PY=<python with pysam> for chain_wobble.py
 ```
 
 All inputs are public (ENCODE GM12878 ONT dRNA `ENCFF440ZML`; GIAB HG001 v4.2.1; GENCODE v49);

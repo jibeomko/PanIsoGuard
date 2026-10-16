@@ -33,6 +33,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
 ### Benchmarks
+- [benchmark/gm12878_realdata](benchmark/gm12878_realdata) (real ONT direct-RNA) re-run: the
+  chain axis works with exact coordinates on ONT (94.5 % of splice sites exact among
+  near-matching reads; 155/285 chains with ≥ 3 exact full-chain reads; ± 5 bp would add 20,
+  so no tolerance is shipped); `--platform ont` turns 129 HiFi-gate `ARTIFACT`s into 148
+  `NOVEL_PROBABLE`. No truth on that sample.
 - The head-to-head ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h)) re-run
   with the chain axis: at 1 M pairs PanIsoGuard + BAM goes from precision 0.990 / recall
   0.545 to **0.992 / 0.710** (AUPRC 0.972, still tied with the one-line rule); with no

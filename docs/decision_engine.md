@@ -133,7 +133,10 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        151/151 genuine held NIC isoforms and 0/6 false ones (FLAIR), but the false
        chains of Bambu, ESPRESSO and TALON are read-supported too (alignment-level
        artifacts), so it separates caller-level from alignment-level false chains only
-       ([benchmark/chain_support](../benchmark/chain_support)). Same chain+catalog
+       ([benchmark/chain_support](../benchmark/chain_support)). Coordinates are exact: on
+       real ONT direct-RNA 94.5 % of splice sites among near-matching reads are exact and a
+       ± 5 bp tolerance would add 7 % of chains, so none is shipped
+       ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) § 4). Same chain+catalog
        requirement as consensus. Disable with `ablate --axes chain`.
 - Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
   UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is reported

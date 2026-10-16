@@ -15,9 +15,16 @@ SCAN="$HERE/../hg002/scan_variant_axis.py"
 # 1. build a GTF of the novel chains + a minimal SQANTI classification (keyed by PIG id)
 python3 "$HERE/build_inputs.py" "$WORK" "$OUT"
 
-# 2. adjudicate the novel chains WITH the real ONT BAM (mapping axis on real reads)
+# 2. adjudicate the novel chains WITH the real ONT BAM (mapping axis on real reads): the HiFi
+#    defaults (rb) and the ONT preset (rb_ont; indel-near gate off), both with the 0.0.7
+#    whole-chain read support
 "$PIG" adjudicate --classification "$OUT/novel.cls" --isoforms-gtf "$OUT/novel_chains.gtf" \
     --ref-gtf "$REFGTF" --bam "$WORK/gm12878.main.bam" --out-prefix "$OUT/rb"
+"$PIG" adjudicate --classification "$OUT/novel.cls" --isoforms-gtf "$OUT/novel_chains.gtf" \
+    --ref-gtf "$REFGTF" --bam "$WORK/gm12878.main.bam" --platform ont --out-prefix "$OUT/rb_ont"
+# 2b. how exact are ONT splice sites? chain reads at 0..10 bp tolerance (needs pysam)
+"${PY:-python3}" "$HERE/chain_wobble.py" "$OUT/novel_chains.gtf" "$WORK/gm12878.main.bam" "$OUT/pig_ncallers.json" \
+    --out "$OUT/chain_wobble.json"
 
 # 3. reference-bias scan of every novel junction vs NA12878's own haplotype (chr1-22)
 created=0; scanned=0
@@ -38,4 +45,5 @@ done
 
 # 4. emit the metrics envelope
 python3 "$HERE/analyze.py" "$OUT/rb.attribution.jsonl" "$OUT/pig_ncallers.json" \
-    "$created" "$scanned" --emit-metrics "$HERE/../results/gm12878_realdata/metrics.json"
+    "$created" "$scanned" --ont "$OUT/rb_ont.attribution.jsonl" --wobble "$OUT/chain_wobble.json" \
+    --emit-metrics "$HERE/../results/gm12878_realdata/metrics.json"
