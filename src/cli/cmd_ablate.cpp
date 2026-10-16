@@ -59,7 +59,7 @@ int cmd_ablate(int argc, char** argv) {
     return 1;
   }
   if (axes.empty()) {
-    axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome", "consensus"};
+    axes = {"short_read", "mapping", "noncanonical", "rt_switch", "degradation", "variant", "pangenome", "consensus", "chain"};
   }
   for (const auto& axis : axes) {  // a typo must fail here, not silently ablate nothing
     try {

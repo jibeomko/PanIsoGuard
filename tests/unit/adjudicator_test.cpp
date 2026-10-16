@@ -5,6 +5,7 @@
 #include <string>
 
 #include "panisoguard/adjudicator.hpp"
+#include "panisoguard/bam_features.hpp"
 #include "panisoguard/variant_motif.hpp"
 #include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
@@ -379,4 +380,25 @@ TEST_CASE("adjudicator: a motif canonical on the reference only is a non-canonic
     CHECK(out[0].verdict.confidence == ConfidenceClass::kUnconfirmed);
     CHECK(out[0].verdict.verdict_reason == "unsupported_no_sign");
   }
+}
+
+TEST_CASE("adjudicator: chain support from the BAM fills the evidence and lifts a held isoform", "[adjudicator][chain]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  BamReader bam(tiny("mini.bam"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoChain", "novel_not_in_catalog", "canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoChain"] = chain({{2000, 3000}});   // 4 primary reads carry it; no short reads given
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.bam = &bam;
+  const auto out = adjudicate(in, RuleEngine());
+  REQUIRE(out.size() == 1);
+  CHECK(out[0].evidence.chain_evaluable);
+  CHECK(out[0].evidence.chain_n_full_reads == 4);
+  CHECK(out[0].verdict.novelty_support == NoveltySupport::kUnknown);
+  CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
+  CHECK(out[0].verdict.verdict_reason == "chain_support");
 }

@@ -179,10 +179,10 @@ print(r["confidence_class"], r["rule_trace"])'
 
 ```text
 {'bam_evaluable': True, 'bam_n_spanning': 5, 'bam_n_junctions_gated': 1, 'bam_frac_low_mapq': 0.2, 'bam_frac_supplementary': 0.2, 'bam_frac_softclip': 0.2, 'bam_frac_indel_near': 0.2}
-UNRESOLVED ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'project(UNKNOWN,none) -> UNRESOLVED']
+NOVEL_PROBABLE ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'whole-chain long-read support: 4 read(s) carry the entire intron chain (>= 3; same reads as the caller) -> chain-supported', 'project(UNKNOWN,none) -> NOVEL_PROBABLE']
 ```
 
-걸친 read는 5개이고, 네 특징이 각각 5개 중 1개(0.2)씩이다. 분모가 걸친 read 수라는 점이 중요하다. 네 비율 모두 기준을 넘지 않아서 기전은 `none`이다. (`SJ.out.tab`을 주지 않았으니 지지 수준은 `UNKNOWN`이고, 그래서 `UNRESOLVED`다.)
+걸친 read는 5개이고, 네 특징이 각각 5개 중 1개(0.2)씩이다. 분모가 걸친 read 수라는 점이 중요하다. 네 비율 모두 기준을 넘지 않아서 기전은 `none`이다. `SJ.out.tab`을 주지 않았으니 지지 수준은 `UNKNOWN`인데, 등급은 `UNRESOLVED`가 아니라 `NOVEL_PROBABLE`이다. 0.0.7부터 BAM을 주면 isoform의 intron chain 전체를 한 번에 지나는 read 수도 센다(`rule_trace`의 셋째 줄, 4개; supplementary인 `r3_supp`는 빼고 센다). 이 read가 3개 이상이고 흔적이 없으면 `UNKNOWN`을 `NOVEL_PROBABLE`까지만 올린다. 자세한 규칙은 [04](04_projection.md) 3절.
 
 ## 3. 흔적이 얼마나 많아야 기전으로 인정할까?
 

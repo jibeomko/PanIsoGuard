@@ -139,30 +139,30 @@ print("no short reads, vs SQ3rules:", m["bootstrap_auprc_diff_vs_SQ3rules_95ci_n
 short reads: none
   SQ3rules  TP 647 FP  58 precision 0.918 recall 0.886 AUPRC 0.909
   PIG       TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.824
-  PIG+bam   TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.844
+  PIG+bam   TP 489 FP   4 precision 0.992 recall 0.670 AUPRC 0.947
 short reads: sr_1000000
   SQ3rules  TP 650 FP  58 precision 0.918 recall 0.890 AUPRC 0.909
   allSJ3    TP 690 FP  17 precision 0.976 recall 0.945 AUPRC 0.968
   PIG       TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.969
-  PIG+bam   TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.973
+  PIG+bam   TP 518 FP   4 precision 0.992 recall 0.710 AUPRC 0.972
 short reads: oracle
   SQ3rules  TP 652 FP  58 precision 0.918 recall 0.893 AUPRC 0.910
   allSJ3    TP 730 FP  18 precision 0.976 recall 1.000 AUPRC 0.976
   PIG       TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.971
-  PIG+bam   TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.975
+  PIG+bam   TP 545 FP   5 precision 0.991 recall 0.747 AUPRC 0.974
 bootstrap 95% CI of AUPRC(PanIsoGuard) - AUPRC(allSJ3):
-  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.011, 0.009]
-  sr_1000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.014]
-  sr_250000  PIG [-0.008, 0.013]  PIG+bam [-0.004, 0.017]
-  sr_4000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.014]
-no short reads, vs SQ3rules: {'PIG': [-0.105, -0.066], 'PIG+bam': [-0.089, -0.042]}
+  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.011, 0.008]
+  sr_1000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.013]
+  sr_250000  PIG [-0.008, 0.013]  PIG+bam [-0.003, 0.017]
+  sr_4000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.013]
+no short reads, vs SQ3rules: {'PIG': [-0.105, -0.066], 'PIG+bam': [0.023, 0.055]}
 ```
 
 `allSJ3`가 한 줄 규칙이고 `PIG`가 PanIsoGuard다. 읽을 곳은 세 군데다.
 
-1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard 0.969, 한 줄 규칙 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더하면 +0.004 정도 오르는데, 이 차이도 모든 깊이에서 신뢰구간이 0을 포함한다(0.0.6부터 BAM 검사는 junction당 spanning read가 3개 이상일 때만 세기 때문에, 그 전의 "25만 쌍에서만 유의" 결과는 사라졌다).
-2. **기본 선(precision, recall)**: PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다.
-3. **short read가 없을 때**: PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다.
+1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard 0.969, 한 줄 규칙 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더해도(0.972) 마찬가지로 신뢰구간이 0을 포함한다.
+2. **기본 선(precision, recall)**: short read만 쓰면 PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다. BAM을 더하면(0.0.7) chain 전체를 지나는 long read가 3개 이상인 NIC가 `NOVEL_PROBABLE`로 올라가서 recall이 0.710이 되고 precision은 0.992로 그대로다([04](04_projection.md) 3절). ISM은 여전히 보류다.
+3. **short read가 없을 때**: BAM도 없으면 PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다. BAM이 있으면 진짜 730개 중 489개를 precision 0.992로 잡고(모두 `NOVEL_PROBABLE`) 순위도 rules filter보다 높다(0.947 대 0.909). 다만 이 read는 caller가 쓴 바로 그 read라서 독립된 증거가 아니다.
 
 ![operating points](figures/07_operating_points.png)
 
@@ -177,11 +177,11 @@ import matplotlib.pyplot as plt
 
 m = json.load(open("../benchmark/results/sqanti3_filter_h2h/metrics.json"))["metrics"]["sr_1000000"]
 label = {"SQ3rules": "SQANTI3 rules filter", "SQ3strict": "SQANTI3 rules, min_cov >= 3",
-         "allSJ3": "every junction >= 3 short reads", "PIG": "PanIsoGuard (same with --bam)"}
+         "allSJ3": "every junction >= 3 short reads", "PIG": "PanIsoGuard", "PIG+bam": "PanIsoGuard + BAM"}
 INK, MUTED, GRID, DOT = "#0b0b0b", "#52514e", "#e1e0d9", "#2a78d6"
 fig, ax = plt.subplots(figsize=(7, 4.2), dpi=150)
 # label placement per point: (dx, dy) in points, horizontal and vertical alignment
-PLACE = {"PIG": (8, -4, "left", "top"), "SQ3strict": (-9, 0, "right", "center"),
+PLACE = {"PIG": (8, -6, "left", "top"), "PIG+bam": (8, 6, "left", "bottom"), "SQ3strict": (-9, 0, "right", "center"),
          "allSJ3": (-9, -7, "right", "top"), "SQ3rules": (-9, 0, "right", "center")}
 for key, text in label.items():
     r = m[key]
@@ -205,7 +205,7 @@ print({k: (m[k]["prec"], m[k]["rec"]) for k in label})
 ```
 
 ```text
-{'SQ3rules': (0.918, 0.89), 'SQ3strict': (0.978, 0.84), 'allSJ3': (0.976, 0.945), 'PIG': (0.99, 0.545)}
+{'SQ3rules': (0.918, 0.89), 'SQ3strict': (0.978, 0.84), 'allSJ3': (0.976, 0.945), 'PIG': (0.99, 0.545), 'PIG+bam': (0.992, 0.71)}
 ```
 
 세로축은 0.905에서 시작한다. 점의 위치를 비교하려는 그림이라 0부터 그리면 네 점이 한 줄에 붙어 보이기 때문이다.

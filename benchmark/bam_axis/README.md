@@ -64,7 +64,7 @@ gates above 1.0 (OFF, never fires):
 | | OFF (low-MAPQ/supp only) | ON (+ indel-near) |
 |---|:---:|:---:|
 | false-novel **specificity** | 0.966 | 0.966 (unchanged) |
-| genuine **sensitivity** | 0.589 | 0.589 (unchanged) |
+| genuine **sensitivity** | 0.747 | 0.747 (unchanged; 0.589 before the 0.0.7 whole-chain support, which is on in both) |
 | genuine isoforms lost from confident-novel | — | **0** |
 
 False-novel transitions OFF→ON: **9** `UNCONFIRMED → ARTIFACT`. **Zero** genuine

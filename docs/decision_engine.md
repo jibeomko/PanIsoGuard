@@ -122,6 +122,19 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        is joined by intron-chain fingerprint (the `fingerprint` column `combine`
        writes since 0.0.6), not by native id, because two callers may reuse one name
        for different chains. Disable with `ablate --axes consensus`.
+     - `UNKNOWN × whole-chain long-read support (≥ chain_min_full_reads, no mapping
+       artifact, no consensus) → NOVEL_PROBABLE` (mechanism `none`) or `UNCONFIRMED`
+       (any other mechanism), since 0.0.7. With `--bam`, the adjudicator counts the
+       primary reads whose alignment carries the isoform's entire intron chain
+       (`evidence.chain_n_full_reads`; `chain_n_partial_reads` are shorter reads
+       consistent with it). These are the caller's own reads, so like consensus it is
+       methodological support and never reaches `NOVEL_CONFIRMED`; it never overrides a
+       short-read verdict (`UNSUPPORTED`, `PARTIAL`). On SQANTI-SIM chr22 it keeps
+       151/151 genuine held NIC isoforms and 0/6 false ones (FLAIR), but the false
+       chains of Bambu, ESPRESSO and TALON are read-supported too (alignment-level
+       artifacts), so it separates caller-level from alignment-level false chains only
+       ([benchmark/chain_support](../benchmark/chain_support)). Same chain+catalog
+       requirement as consensus. Disable with `ablate --axes chain`.
 - Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
   UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is reported
   in the reason, `ism_intrapriming` / `ism_rts`, but does not change the class, because
@@ -137,7 +150,7 @@ one rule that decided it:
 | `verdict` | classes | meaning |
 |---|---|---|
 | `known` | KNOWN | matches a known transcript |
-| `confirmed` | NOVEL_CONFIRMED, NOVEL_PROBABLE | keep (PROBABLE via `caller_consensus` is methodological, not experimental, support) |
+| `confirmed` | NOVEL_CONFIRMED, NOVEL_PROBABLE | keep (PROBABLE via `caller_consensus` or `chain_support` is methodological, not experimental, support) |
 | `reference_bias` | REFERENCE_BIAS | the junction is real; it looked novel or non-canonical because of the reference |
 | `unconfirmed` | UNCONFIRMED, UNRESOLVED | review |
 | `artifact` | ARTIFACT | discard |
@@ -150,7 +163,8 @@ one rule that decided it:
 haplotypes rather than SQANTI3),
 `supported_with_<mechanism>`,
 `partial_support[_with_<mechanism>]`, `unsupported_no_sign`, `unsupported_<mechanism>`,
-`mapping_without_short_reads`, `caller_consensus`, `consensus_with_<mechanism>`, and the
+`mapping_without_short_reads`, `caller_consensus`, `consensus_with_<mechanism>`,
+`chain_support`, `chain_support_with_<mechanism>`, and the
 `UNKNOWN`-support reasons `no_short_reads`, `no_coverage`, `no_novel_junction`,
 `caller_chain_absent`. The classes are **not** an ordered scale: on SQANTI-SIM truth
 `UNRESOLVED` (mostly NIC with no novel junction to test) has precision 0.96 while

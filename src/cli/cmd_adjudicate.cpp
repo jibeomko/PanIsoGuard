@@ -101,6 +101,7 @@ int cmd_adjudicate(int argc, char** argv) {
         "sj_min_uniq_reads=" + std::to_string(c.sj_min_uniq_reads) +
         " sj_require_canonical_motif=" + (c.sj_require_canonical_motif ? "true" : "false") +
         " consensus_min_callers=" + std::to_string(c.consensus_min_callers) +
+        " chain_min_full_reads=" + std::to_string(c.chain_min_full_reads) +
         " max_perc_A_downstream_TTS=" + num(c.perc_A_degradation_threshold) +
         " platform=" + c.platform +
         " min_mapq=" + std::to_string(c.bam_min_mapq) +

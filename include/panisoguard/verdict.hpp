@@ -99,6 +99,13 @@ struct EvidenceVector {
 
   // multi-caller consensus (optional)
   bool consensus_evaluable = false;  int n_callers = 0;
+
+  // whole-chain long-read support (--bam): reads whose alignment carries the isoform's
+  // entire intron chain. Same reads the caller used, so methodological (not independent)
+  // corroboration, like caller consensus: it can lift UNKNOWN support to PROBABLE only.
+  bool chain_evaluable = false;
+  int chain_n_full_reads = 0;
+  int chain_n_partial_reads = 0;
 };
 
 struct Verdict {

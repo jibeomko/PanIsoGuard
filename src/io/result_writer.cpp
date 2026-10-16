@@ -36,19 +36,34 @@ std::string json_escape(const std::string& s) {
   return o;
 }
 
+// DNA-side summary, independent of the verdict: do the sample's haplotypes / the pangenome
+// make the isoform's novel junctions canonical / realizable? "haplotype" and "pangenome"
+// mean every novel junction, on one haplotype or path; "partial" some of them; "none" the
+// axis was evaluated and explains nothing; "NA" no genome evidence was supplied.
+std::string genomic_compatibility(const EvidenceVector& e) {
+  if (!e.variant_evaluable && !e.pangenome_evaluable) return "NA";
+  std::string s;
+  if (e.variant_evaluable && e.variant_rescue) s += "haplotype";
+  if (e.pangenome_evaluable && e.pangenome_rescue) s += std::string(s.empty() ? "" : ";") + "pangenome";
+  if (!s.empty()) return s;
+  if (e.n_novel_jx_variant_created > 0 || e.n_novel_jx_pangenome > 0) return "partial";
+  return "none";
+}
+
 void write_tsv(const std::string& path, const std::vector<AdjudicationResult>& results) {
   std::ofstream out(path);
   if (!out) throw std::runtime_error("cannot write " + path);
   out << "isoform_id\tchrom\tstrand\tstructural_category\tnovelty_support\tprimary_mechanism\t"
          "confidence_class\tverdict\tverdict_reason\tn_novel_junctions\tn_novel_jx_sr_supported\t"
-         "circularity_flag\n";
+         "circularity_flag\tgenomic_compatibility\n";
   for (const auto& r : results) {
     out << r.isoform_id << '\t' << r.chrom << '\t' << strand_char(r.strand) << '\t'
         << r.structural_category << '\t' << to_string(r.verdict.novelty_support) << '\t'
         << to_string(r.verdict.primary_mechanism) << '\t' << to_string(r.verdict.confidence)
         << '\t' << r.verdict.verdict << '\t' << r.verdict.verdict_reason
         << '\t' << r.evidence.n_novel_junctions << '\t' << r.evidence.n_novel_jx_sr_supported
-        << '\t' << (r.verdict.circularity_flag ? "true" : "false") << '\n';
+        << '\t' << (r.verdict.circularity_flag ? "true" : "false")
+        << '\t' << genomic_compatibility(r.evidence) << '\n';
   }
 }
 
@@ -66,6 +81,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"novelty_support\":\"" << to_string(r.verdict.novelty_support) << "\","
         << "\"primary_mechanism\":\"" << to_string(r.verdict.primary_mechanism) << "\","
         << "\"circularity_flag\":" << (r.verdict.circularity_flag ? "true" : "false") << ","
+        << "\"genomic_compatibility\":\"" << genomic_compatibility(e) << "\","
         << "\"evidence\":{"
         << "\"chain_available\":" << (e.chain_available ? "true" : "false") << ","
         << "\"sj_evaluable\":" << (e.sj_evaluable ? "true" : "false") << ","
@@ -95,7 +111,10 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome << ","
         << "\"pangenome_path_consistent\":" << (e.pangenome_path_evaluable ? (e.pangenome_path_consistent ? "true" : "false") : "null") << ","
         << "\"consensus_evaluable\":" << (e.consensus_evaluable ? "true" : "false") << ","
-        << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null")
+        << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null") << ","
+        << "\"chain_evaluable\":" << (e.chain_evaluable ? "true" : "false") << ","
+        << "\"chain_n_full_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_full_reads) : "null") << ","
+        << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null")
         << "},";
     // graph_trace: the same evidence re-expressed under the splice-graph framing
     // (docs/method_graph.md) -- a candidate isoform is a path through the gene-local
@@ -211,6 +230,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
               : "not_evaluable")
       << '\n';
   out << "axis.consensus\t" << (prov.consensus_axis_on ? "on" : "not_evaluable") << '\n';
+  out << "axis.chain\t" << (prov.bam_path.empty() ? "not_evaluable" : "on (same reads as the caller)") << '\n';
 
   std::map<std::string, std::size_t> class_counts, verdict_counts;
   for (const auto& r : results) {

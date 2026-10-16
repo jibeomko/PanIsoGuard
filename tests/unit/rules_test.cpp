@@ -221,3 +221,40 @@ TEST_CASE("rules: known/partial categories pass through", "[rules]") {
   ism.structural_category = "incomplete-splice_match";
   CHECK(RuleEngine().evaluate(ism).confidence == ConfidenceClass::kUnconfirmed);
 }
+
+TEST_CASE("rules: whole-chain long-read support lifts UNKNOWN to PROBABLE, never CONFIRMED", "[rules][chain]") {
+  const RuleEngine eng;  // chain_min_full_reads = 3
+  EvidenceVector ev = novel_ev(0, 0);
+  ev.sj_evaluable = false;        // no short reads
+  ev.n_novel_junctions = 0;
+  ev.catalog_evaluable = true;
+  ev.chain_evaluable = true;
+  ev.chain_n_full_reads = 3;
+  Verdict v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kNovelProbable);
+  CHECK(v.verdict_reason == "chain_support");
+  // below the gate: held
+  ev.chain_n_full_reads = 2;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnresolved);
+  // with an artifact sign: unconfirmed, not probable
+  ev.chain_n_full_reads = 10;
+  ev.noncanonical = true;
+  v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(v.verdict_reason == "chain_support_with_noncanonical");
+  ev.noncanonical = false;
+  // needs an examined chain (catalog), like consensus
+  ev.catalog_evaluable = false;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnresolved);
+  ev.catalog_evaluable = true;
+  // a mapping artifact still preempts it
+  ev.bam_evaluable = true; ev.bam_n_junctions_gated = 1; ev.bam_n_spanning_total = 10; ev.bam_max_frac_low_mapq = 0.9;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kArtifact);
+  ev.bam_max_frac_low_mapq = 0.0;
+  // short-read evidence, when present, decides: UNSUPPORTED is not lifted by chain reads
+  ev.sj_evaluable = true; ev.n_novel_junctions = 1; ev.n_novel_jx_sr_supported = 0;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
+  // ablation
+  ev.sj_evaluable = false; ev.n_novel_junctions = 0;
+  CHECK(eng.with_axis_disabled("chain").evaluate(ev).confidence == ConfidenceClass::kUnresolved);
+}

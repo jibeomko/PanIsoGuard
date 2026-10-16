@@ -24,6 +24,17 @@ struct JunctionBamFeatures {
   double frac_indel_near() const   { return n_spanning ? double(n_indel_near) / n_spanning : 0.0; }
 };
 
+// Reads carrying an isoform's whole intron chain: the chain appears as a contiguous run
+// of the read's N ops in one primary alignment (n_full); among the reads at the chain's
+// first donor site, those whose own intron list is a contiguous part of the chain are
+// consistent but too short to carry it (n_partial). Exact coordinates, like the junction
+// features: a wobbling ONT junction does not count.
+struct ChainBamSupport {
+  bool evaluated = false;  // false if the contig is absent from the BAM header
+  int n_full = 0;
+  int n_partial = 0;
+};
+
 struct BamFeatureParams {
   int min_mapq = 20;
   int softclip_min_bp = 20;
@@ -40,6 +51,8 @@ class BamReader {
 
   JunctionBamFeatures features_at_junction(const std::string& chrom, const Junction& intron,
                                            const BamFeatureParams& p) const;
+  // Primary alignments only (secondary/supplementary skipped); monoexonic chains -> not evaluated.
+  ChainBamSupport chain_support(const IntronChain& chain) const;
 
  private:
   struct Impl;

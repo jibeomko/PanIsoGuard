@@ -1,0 +1,388 @@
+{
+  "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
+  "generated_utc": "2026-10-16T10:29:20Z",
+  "metrics": {
+    "bambu": {
+      "n_genuine": 409,
+      "n_non_fsm": 552,
+      "nosr": {
+        "lifted_to_confident": {
+          "false": 114,
+          "genuine": 350
+        },
+        "off": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.748,
+          "coverage": 0.029,
+          "f1": null,
+          "n_decisive": 16,
+          "n_wrong": 8,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": 0.5
+        },
+        "on": {
+          "FP": 114,
+          "TP": 350,
+          "auprc": 0.753,
+          "coverage": 0.87,
+          "f1": 0.802,
+          "n_decisive": 480,
+          "n_wrong": 122,
+          "prec": 0.754,
+          "rec": 0.856,
+          "selective_risk": 0.254
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 114,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 13,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 350,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 51
+        }
+      },
+      "sr1M": {
+        "lifted_to_confident": {
+          "false": 13,
+          "genuine": 66
+        },
+        "off": {
+          "FP": 116,
+          "TP": 306,
+          "auprc": 0.729,
+          "coverage": 0.786,
+          "f1": 0.736,
+          "n_decisive": 434,
+          "n_wrong": 122,
+          "prec": 0.725,
+          "rec": 0.748,
+          "selective_risk": 0.281
+        },
+        "on": {
+          "FP": 129,
+          "TP": 372,
+          "auprc": 0.731,
+          "coverage": 0.929,
+          "f1": 0.818,
+          "n_decisive": 513,
+          "n_wrong": 135,
+          "prec": 0.743,
+          "rec": 0.91,
+          "selective_risk": 0.263
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 13,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 2,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 66,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 18
+        }
+      }
+    },
+    "espresso": {
+      "n_genuine": 555,
+      "n_non_fsm": 573,
+      "nosr": {
+        "lifted_to_confident": {
+          "false": 6,
+          "genuine": 464
+        },
+        "off": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.983,
+          "coverage": 0.016,
+          "f1": null,
+          "n_decisive": 9,
+          "n_wrong": 8,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": 0.889
+        },
+        "on": {
+          "FP": 6,
+          "TP": 464,
+          "auprc": 0.984,
+          "coverage": 0.836,
+          "f1": 0.905,
+          "n_decisive": 479,
+          "n_wrong": 14,
+          "prec": 0.987,
+          "rec": 0.836,
+          "selective_risk": 0.029
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 6,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 1,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 464,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 73
+        }
+      },
+      "sr1M": {
+        "lifted_to_confident": {
+          "false": 1,
+          "genuine": 106
+        },
+        "off": {
+          "FP": 6,
+          "TP": 387,
+          "auprc": 0.984,
+          "coverage": 0.695,
+          "f1": 0.816,
+          "n_decisive": 398,
+          "n_wrong": 10,
+          "prec": 0.985,
+          "rec": 0.697,
+          "selective_risk": 0.025
+        },
+        "on": {
+          "FP": 7,
+          "TP": 493,
+          "auprc": 0.984,
+          "coverage": 0.881,
+          "f1": 0.935,
+          "n_decisive": 505,
+          "n_wrong": 11,
+          "prec": 0.986,
+          "rec": 0.888,
+          "selective_risk": 0.022
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 1,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 106,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 30
+        }
+      }
+    },
+    "flair": {
+      "n_genuine": 730,
+      "n_non_fsm": 870,
+      "nosr": {
+        "lifted_to_confident": {
+          "false": 4,
+          "genuine": 489
+        },
+        "off": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.844,
+          "coverage": 0.036,
+          "f1": null,
+          "n_decisive": 31,
+          "n_wrong": 11,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": 0.355
+        },
+        "on": {
+          "FP": 4,
+          "TP": 489,
+          "auprc": 0.947,
+          "coverage": 0.602,
+          "f1": 0.8,
+          "n_decisive": 524,
+          "n_wrong": 15,
+          "prec": 0.992,
+          "rec": 0.67,
+          "selective_risk": 0.029
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 4,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 14,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 489,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 76
+        }
+      },
+      "sr1M": {
+        "lifted_to_confident": {
+          "false": 0,
+          "genuine": 120
+        },
+        "off": {
+          "FP": 4,
+          "TP": 398,
+          "auprc": 0.973,
+          "coverage": 0.569,
+          "f1": 0.703,
+          "n_decisive": 495,
+          "n_wrong": 13,
+          "prec": 0.99,
+          "rec": 0.545,
+          "selective_risk": 0.026
+        },
+        "on": {
+          "FP": 4,
+          "TP": 518,
+          "auprc": 0.972,
+          "coverage": 0.707,
+          "f1": 0.827,
+          "n_decisive": 615,
+          "n_wrong": 13,
+          "prec": 0.992,
+          "rec": 0.71,
+          "selective_risk": 0.021
+        },
+        "transitions_off_to_on": {
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 120,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 31
+        }
+      }
+    },
+    "isoquant": {
+      "n_genuine": 607,
+      "n_non_fsm": 618,
+      "nosr": {
+        "lifted_to_confident": {
+          "false": 4,
+          "genuine": 386
+        },
+        "off": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.987,
+          "coverage": 0.008,
+          "f1": null,
+          "n_decisive": 5,
+          "n_wrong": 2,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": 0.4
+        },
+        "on": {
+          "FP": 4,
+          "TP": 386,
+          "auprc": 0.989,
+          "coverage": 0.639,
+          "f1": 0.774,
+          "n_decisive": 395,
+          "n_wrong": 6,
+          "prec": 0.99,
+          "rec": 0.636,
+          "selective_risk": 0.015
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 4,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 386,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 61
+        }
+      },
+      "sr1M": {
+        "lifted_to_confident": {
+          "false": 0,
+          "genuine": 92
+        },
+        "off": {
+          "FP": 4,
+          "TP": 319,
+          "auprc": 0.987,
+          "coverage": 0.531,
+          "f1": 0.686,
+          "n_decisive": 328,
+          "n_wrong": 6,
+          "prec": 0.988,
+          "rec": 0.526,
+          "selective_risk": 0.018
+        },
+        "on": {
+          "FP": 4,
+          "TP": 411,
+          "auprc": 0.987,
+          "coverage": 0.68,
+          "f1": 0.804,
+          "n_decisive": 420,
+          "n_wrong": 6,
+          "prec": 0.99,
+          "rec": 0.677,
+          "selective_risk": 0.014
+        },
+        "transitions_off_to_on": {
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 92,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 23
+        }
+      }
+    },
+    "talon": {
+      "n_genuine": 697,
+      "n_non_fsm": 1760,
+      "nosr": {
+        "lifted_to_confident": {
+          "false": 174,
+          "genuine": 439
+        },
+        "off": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.621,
+          "coverage": 0.015,
+          "f1": null,
+          "n_decisive": 27,
+          "n_wrong": 10,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": 0.37
+        },
+        "on": {
+          "FP": 174,
+          "TP": 439,
+          "auprc": 0.598,
+          "coverage": 0.364,
+          "f1": 0.67,
+          "n_decisive": 640,
+          "n_wrong": 184,
+          "prec": 0.716,
+          "rec": 0.63,
+          "selective_risk": 0.287
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 174,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 31,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 439,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 63
+        }
+      },
+      "sr1M": {
+        "lifted_to_confident": {
+          "false": 48,
+          "genuine": 122
+        },
+        "off": {
+          "FP": 145,
+          "TP": 338,
+          "auprc": 0.615,
+          "coverage": 0.289,
+          "f1": 0.573,
+          "n_decisive": 508,
+          "n_wrong": 152,
+          "prec": 0.7,
+          "rec": 0.485,
+          "selective_risk": 0.299
+        },
+        "on": {
+          "FP": 193,
+          "TP": 460,
+          "auprc": 0.602,
+          "coverage": 0.385,
+          "f1": 0.681,
+          "n_decisive": 678,
+          "n_wrong": 200,
+          "prec": 0.704,
+          "rec": 0.66,
+          "selective_risk": 0.295
+        },
+        "transitions_off_to_on": {
+          "false_novel:UNRESOLVED->NOVEL_PROBABLE": 48,
+          "false_novel:UNRESOLVED->UNCONFIRMED": 9,
+          "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 122,
+          "genuine_novel:UNRESOLVED->UNCONFIRMED": 29
+        }
+      }
+    }
+  },
+  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict.",
+  "protocol": "chain_support",
+  "ruleset_version": "default-0.0.4",
+  "scope": "gencode_v49_chr22_5caller_sqanti_sim",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.6"
+}

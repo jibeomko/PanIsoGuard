@@ -6,6 +6,22 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 ## [Unreleased]
 
 ### Added
+- **Whole-chain long-read support (ruleset `builtin-0.0.4`).** With `--bam`, the adjudicator
+  counts the primary reads whose alignment carries the isoform's entire intron chain
+  (`evidence.chain_n_full_reads`, `chain_n_partial_reads`). When short-read support is
+  `UNKNOWN` (no SJ.tab, or a NIC isoform whose junctions are all known) and no artifact
+  sign is present, ≥ `chain_min_full_reads` (3) lifts the call to `NOVEL_PROBABLE`
+  (`chain_support`; `chain_support_with_<mechanism>` → `UNCONFIRMED`). The reads are the
+  caller's own, so it never reaches `NOVEL_CONFIRMED` and never overrides a short-read
+  verdict. On SQANTI-SIM chr22 with 1 M short-read pairs it lifts FLAIR's recall from
+  0.545 to 0.710 at precision 0.992 (120 genuine / 0 false isoforms), IsoQuant 92 / 0,
+  ESPRESSO 106 / 1; Bambu (66 / 13) and TALON (122 / 48) pay precision because their false
+  chains are read-supported too ([benchmark/chain_support](benchmark/chain_support)).
+  `ablate --axes chain`; TOML `[axis_chain] min_full_reads`.
+- **`genomic_compatibility`** column (last in `adjudicated.tsv`, also in the JSON): the DNA
+  side on its own, independent of the verdict: `haplotype` / `pangenome` (every novel
+  junction explained, on one haplotype or path), `partial`, `none`, `NA`. A firewall-held
+  isoform reads `UNRESOLVED` + `haplotype`: genomically compatible, RNA unconfirmed.
 - **`<prefix>.junctions.tsv`**: one row per junction of the adjudicated isoforms with the
   per-junction evidence the verdict aggregates (isoforms using it, known/novel, short-read
   count, reference and per-haplotype splice motifs with `created` / `disrupted`, pangenome
@@ -17,6 +33,14 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
 ### Benchmarks
+- The head-to-head ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h)) re-run
+  with the chain axis: at 1 M pairs PanIsoGuard + BAM goes from precision 0.990 / recall
+  0.545 to **0.992 / 0.710** (AUPRC 0.972, still tied with the one-line rule); with no
+  short reads from 0 calls to 489 genuine / 4 false (recall 0.67, AUPRC 0.947 vs SQANTI3
+  rules 0.909, bootstrap CI [+0.023, +0.055]). Per-class at 1 M + BAM: NOVEL_PROBABLE
+  167 / 1, UNRESOLVED 0 / 6 (the genuine held NIC moved up), UNCONFIRMED 203 / 46. The
+  envelope now carries a risk–coverage point per method (PanIsoGuard + BAM decides 71 %
+  of isoforms with 2.1 % wrong; the one-line rule decides all with 6.6 % wrong).
 - [benchmark/refbias_3way](benchmark/refbias_3way) replicated on HG02717: rule level 37/39
   SNV-class junctions (precision 0.88), verdict level 21/39 (precision 0.95), the same
   miss pattern as HG03516; the envelope now holds both individuals. B2's SQANTI3 step had

@@ -8,9 +8,25 @@ Usage: emit_metrics.py <sqanti_sim work> <h2h work (run.sh OUT)> --emit-metrics 
 """
 import datetime, json, os, random, sys
 
-from score_h2h import build_labels, load, metrics
+from score_h2h import build_labels, load, metrics, table
 
 SETTINGS = ["none", "oracle", "sr_250000", "sr_1000000", "sr_4000000"]
+# risk-coverage: PanIsoGuard abstains (UNRESOLVED / UNCONFIRMED / KNOWN pass-through), the other
+# methods decide every isoform. Decisive positive = NOVEL_CONFIRMED / NOVEL_PROBABLE / REFERENCE_BIAS,
+# decisive negative = ARTIFACT; selective risk = wrong decisive calls / decisive calls.
+POSITIVE = {"NOVEL_CONFIRMED", "NOVEL_PROBABLE", "REFERENCE_BIAS"}
+DECISIVE = POSITIVE | {"ARTIFACT"}
+
+
+def risk_coverage(kind, path, pred, ids, label):
+    if kind == "pig":
+        cls = {r["isoform_id"]: r["confidence_class"] for r in table(path)}
+        dec = [t for t in ids if cls[t] in DECISIVE]
+        wrong = sum(1 for t in dec if (cls[t] in POSITIVE) != (label[t] == "genuine_novel"))
+    else:
+        dec = ids
+        wrong = sum(1 for t in dec if pred[t][0] != (label[t] == "genuine_novel"))
+    return {"coverage": round(len(dec) / len(ids), 3), "selective_risk": round(wrong / len(dec), 3) if dec else None}
 
 
 def methods_for(h2h, s, cls):
@@ -40,12 +56,14 @@ def main():
     env_metrics = {"bootstrap_auprc_diff_vs_allSJ3_95ci": {}, "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {}}
     for s in SETTINGS:
         cls = base_cls if s == "none" else f"{h2h}/{s}/sq/flair_classification.txt"
-        preds = {n: load(k, p) for n, (k, p) in methods_for(h2h, s, cls).items()}
+        specs = methods_for(h2h, s, cls)
+        preds = {n: load(k, p) for n, (k, p) in specs.items()}
         env_metrics[s] = {}
         for n, pred in preds.items():
             m = metrics(pred, ids, label)
             env_metrics[s][n] = {"TP": m["tp"], "FP": m["fp"],
-                                 **{k: (None if m[k] != m[k] else round(m[k], 3)) for k in ("prec", "rec", "spec", "f1", "auprc")}}
+                                 **{k: (None if m[k] != m[k] else round(m[k], 3)) for k in ("prec", "rec", "spec", "f1", "auprc")},
+                                 **risk_coverage(specs[n][0], specs[n][1], pred, ids, label)}
         ref = "SQ3rules" if s == "none" else "allSJ3"
         cis = {n: ci(preds[n], preds[ref]) for n in ("PIG", "PIG+bam")}
         if s == "none":

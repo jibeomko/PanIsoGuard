@@ -35,6 +35,8 @@ struct RuleConfig {
                                             // only with your own per-chemistry validation. See benchmark/bam_axis.
   // Pangenome (reference-bias) axis
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
+  // Whole-chain long-read support (--bam): reads carrying the isoform's entire intron chain
+  int chain_min_full_reads = 3;             // >= this many -> UNKNOWN support becomes PROBABLE (never CONFIRMED)
   // Per-axis enable switches (used by `ablate` to mask one axis at a time).
   bool use_short_read = true;
   bool use_mapping = true;
@@ -44,12 +46,15 @@ struct RuleConfig {
   bool use_variant = true;
   bool use_pangenome = true;
   bool use_consensus = true;
+  bool use_chain = true;
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes. 0.0.2: PARTIAL no longer promotes (0.0.4).
   // 0.0.3 (0.0.6): mapping needs >= bam_min_spanning reads; UNSUPPORTED needs coverage at the
   // known junctions; intra-priming needs no polyA motif; class names renamed.
-  std::string ruleset_version = "builtin-0.0.3";
+  // 0.0.4 (0.0.7): whole-chain long-read support (>= chain_min_full_reads) lifts UNKNOWN to
+  // PROBABLE; a variant-disrupted motif is a noncanonical sign.
+  std::string ruleset_version = "builtin-0.0.4";
 };
 
 class RuleEngine {

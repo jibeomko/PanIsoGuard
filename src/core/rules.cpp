@@ -42,6 +42,10 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
       c.bam_max_softclip_frac = (*map)["max_softclip_frac"].value_or(c.bam_max_softclip_frac);
     }
   }
+  if (auto ch = tbl["axis_chain"].as_table()) {
+    c.chain_min_full_reads = static_cast<int>((*ch)["min_full_reads"].value_or<int64_t>(c.chain_min_full_reads));
+    if (c.chain_min_full_reads < 1) c.chain_min_full_reads = 1;
+  }
   if (auto pg = tbl["axis_pangenome"].as_table()) {
     c.pangenome_min_haplotypes =
         static_cast<int>((*pg)["min_haplotypes"].value_or<int64_t>(c.pangenome_min_haplotypes));
@@ -296,6 +300,17 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
             " corroborates the novel chain (no short-read axis) -> consensus-supported");
       if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "caller_consensus"; }
       else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "consensus_with_" + mc; }
+    } else if (cfg_.use_chain && ev.chain_evaluable && ev.chain_n_full_reads >= cfg_.chain_min_full_reads &&
+               ev.chain_available && ev.catalog_evaluable) {
+      // Whole-chain long-read support: reads that carry every intron of the chain in one
+      // alignment. They are the caller's own reads (not independent evidence), and on
+      // SQANTI-SIM they separate caller-level false chains (FLAIR/IsoQuant), not
+      // alignment-level ones (benchmark/chain_support), so PROBABLE, never CONFIRMED.
+      trace("whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
+            " read(s) carry the entire intron chain (>= " + std::to_string(cfg_.chain_min_full_reads) +
+            "; same reads as the caller) -> chain-supported");
+      if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support"; }
+      else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "chain_support_with_" + mc; }
     } else {
       cls = ConfidenceClass::kUnresolved; verdict = "unconfirmed"; reason = unknown_reason;
     }
@@ -332,8 +347,9 @@ RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
   else if (axis == "variant")      e.cfg_.use_variant = false;
   else if (axis == "pangenome")    e.cfg_.use_pangenome = false;
   else if (axis == "consensus")    e.cfg_.use_consensus = false;
+  else if (axis == "chain")        e.cfg_.use_chain = false;
   else throw std::invalid_argument("unknown ablation axis '" + axis + "' (expected one of: short_read, mapping, "
-                                   "noncanonical, rt_switch, degradation, variant, pangenome, consensus)");
+                                   "noncanonical, rt_switch, degradation, variant, pangenome, consensus, chain)");
   return e;
 }
 

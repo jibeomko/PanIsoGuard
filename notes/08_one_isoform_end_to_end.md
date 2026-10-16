@@ -115,7 +115,7 @@ step4          9 isoforms, iso_A -> UNRESOLVED
 step5          9 isoforms, iso_A -> REFERENCE_BIAS
 pangenome      9 isoforms, iso_A -> REFERENCE_BIAS
 consensus      9 isoforms, iso_A -> UNRESOLVED
-consensus_bam  9 isoforms, iso_A -> UNRESOLVED
+consensus_bam  9 isoforms, iso_A -> UNCONFIRMED
 ok   iso_A across the six steps (00)
 ok   iso_C is PARTIAL -> UNCONFIRMED (02)
 ok   iso_G is a mapping artifact (03)

@@ -68,6 +68,14 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     }
   }
 
+  // Whole-chain long-read support: reads carrying every intron of the caller's chain.
+  if (bam != nullptr && ev.chain_available && !it->second.monoexonic()) {
+    const ChainBamSupport cs = bam->chain_support(it->second);
+    ev.chain_evaluable = cs.evaluated;
+    ev.chain_n_full_reads = cs.n_full;
+    ev.chain_n_partial_reads = cs.n_partial;
+  }
+
   // Novel-junction axes (short-read corroboration + BAM mapping features) require
   // the caller chain AND a catalog to know which junctions are novel.
   if (ev.catalog_evaluable) {

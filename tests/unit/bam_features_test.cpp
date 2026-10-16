@@ -33,3 +33,28 @@ TEST_CASE("BAM features at a junction count spanning reads and artifact signatur
 TEST_CASE("BAM reader throws on a missing file", "[bam]") {
   CHECK_THROWS(BamReader("/nonexistent/path/to.bam"));
 }
+
+TEST_CASE("BAM chain support counts primary reads carrying the whole intron chain", "[bam][chain]") {
+  BamReader r(tiny("mini.bam"));
+  IntronChain one;
+  one.chrom = "chr1";
+  one.strand = Strand::kPlus;
+  one.introns = {{2000, 3000}};
+  const ChainBamSupport s1 = r.chain_support(one);
+  REQUIRE(s1.evaluated);
+  CHECK(s1.n_full == 4);      // r1, r2 (low MAPQ still counts), r4, r5; r3 is supplementary
+  CHECK(s1.n_partial == 0);
+
+  IntronChain two = one;      // a second intron no read has: the reads are consistent but too short
+  two.introns.push_back({3500, 4000});
+  const ChainBamSupport s2 = r.chain_support(two);
+  CHECK(s2.n_full == 0);
+  CHECK(s2.n_partial == 4);
+
+  IntronChain mono = one;
+  mono.introns.clear();
+  CHECK_FALSE(r.chain_support(mono).evaluated);
+  IntronChain absent = one;
+  absent.chrom = "chrZ";
+  CHECK_FALSE(r.chain_support(absent).evaluated);
+}

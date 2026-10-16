@@ -99,19 +99,19 @@ grep '"iso_B"' out/cs.attribution.jsonl | python3 -c 'import json,sys; r=json.lo
 
 ```text
 isoform_id  primary_mechanism  confidence_class  primary_mechanism  confidence_class
-iso_A       noncanonical       UNRESOLVED        noncanonical       UNRESOLVED
+iso_A       noncanonical       UNRESOLVED        noncanonical       UNCONFIRMED
 iso_B       none               NOVEL_PROBABLE    none               NOVEL_PROBABLE
-iso_C       none               UNRESOLVED        none               UNRESOLVED
+iso_C       none               UNRESOLVED        none               NOVEL_PROBABLE
 iso_D       none               UNRESOLVED        none               UNRESOLVED
-iso_E       none               UNRESOLVED        none               UNRESOLVED
-iso_F       noncanonical       UNRESOLVED        noncanonical       UNRESOLVED
+iso_E       none               UNRESOLVED        none               NOVEL_PROBABLE
+iso_F       noncanonical       UNRESOLVED        noncanonical       UNCONFIRMED
 iso_G       none               NOVEL_PROBABLE    mapping_or_repeat  ARTIFACT
 iso_ism     none               UNCONFIRMED       none               UNCONFIRMED
 iso_known   none               KNOWN             none               KNOWN
 2 ['novelty-support UNKNOWN reason=short_read/catalog_axis_absent', 'no artifact mechanism flagged -> mechanism=none', 'caller-consensus n_callers=2 >= 2 corroborates the novel chain (no short-read axis) -> consensus-supported', 'project(UNKNOWN,none) -> NOVEL_PROBABLE']
 ```
 
-caller 두 개가 찾은 `iso_B`와 `iso_G`가 `NOVEL_PROBABLE`로 올라갔다. caller 하나만 찾은 나머지는 그대로 `UNRESOLVED`다.
+왼쪽 두 열(BAM 없음)에서 caller 두 개가 찾은 `iso_B`와 `iso_G`가 `NOVEL_PROBABLE`로 올라갔다. caller 하나만 찾은 나머지는 그대로 `UNRESOLVED`다. 오른쪽 두 열(BAM 추가)에서 `iso_C`와 `iso_E`가 `NOVEL_PROBABLE`, `iso_A`와 `iso_F`가 `UNCONFIRMED`으로 바뀐 것은 합의가 아니라 [04](04_projection.md) 3절의 둘째 예외, chain 전체를 지나는 long read 때문이다.
 
 문제는 `iso_G`다. [03](03_artifact_mechanisms.md)에서 본 대로 `iso_G`는 junction 근처의 indel을 aligner가 intron으로 잘못 그린 가짜다. 그런데 caller 두 개가 모두 이 가짜를 찾았다. 두 caller가 **같은 정렬 파일**에서 isoform을 만들었다면 당연한 일이다. 정렬에서 생긴 오류는 그 정렬을 읽는 caller 모두에게 똑같이 보인다. caller의 합의는 알고리즘의 독립성을 보여 줄 뿐, 데이터의 독립성을 보여 주지 않는다. BAM을 더하자(오른쪽 두 열) mapping 흔적이 잡히면서 `iso_G`만 `ARTIFACT`로 떨어졌다. mapping 흔적이 합의보다 앞서는 이유가 이것이다.
 

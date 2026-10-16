@@ -13,7 +13,7 @@
 # to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.3"   # bump together with the built-in in rules.hpp
+ruleset_version        = "default-0.0.4"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 random_seed            = 1
 
@@ -65,6 +65,17 @@ max_softclip_frac      = 1.01       # DISABLED by default (>1.0 never fires). Th
 # Mapping mechanism = OR of low_mapq / supplementary / indel_near (on) + softclip (off by default).
 # indel_near was measured-only before v0.0.4.
 
+# --- Whole-chain long-read support (engine-read; only when --bam supplied) ----------------
+# Reads whose alignment carries the isoform's entire intron chain (exact coordinates, primary
+# alignments). They are the caller's own reads, so this is methodological corroboration like
+# caller consensus: when short-read support is UNKNOWN (no SJ.tab, or a NIC isoform with no
+# novel junction to test) and no artifact sign is present, >= min_full_reads lifts the call
+# to NOVEL_PROBABLE (never CONFIRMED). On SQANTI-SIM chr22 it keeps 151/151 genuine held NIC
+# isoforms and 0/6 false ones for FLAIR, but Bambu/ESPRESSO/TALON's false chains are read-
+# supported too (alignment-level artifacts): see benchmark/chain_support before relying on it.
+[axis_chain]
+min_full_reads = 3
+
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
 # When ALL of an isoform's novel-vs-linear-reference junctions are realizable on ONE
 # pangenome graph haplotype path (path ids are an optional 6th column; without them the
@@ -106,6 +117,8 @@ classes = [
 #   UNKNOWN + >= consensus_min_callers x none -> NOVEL_PROBABLE (confirmed / caller_consensus)
 #   UNKNOWN + consensus x mechanism -> UNCONFIRMED (unconfirmed / consensus_with_<mechanism>)
 #     (consensus counts only for a chain that joined AND was checked against --ref-gtf)
+#   UNKNOWN + >= min_full_reads whole-chain reads x none -> NOVEL_PROBABLE (confirmed / chain_support)
+#   UNKNOWN + chain support x mechanism -> UNCONFIRMED (unconfirmed / chain_support_with_<mechanism>)
 #   UNKNOWN otherwise       -> UNRESOLVED      (unconfirmed / no_short_reads | no_coverage |
 #                                               no_novel_junction | caller_chain_absent)
 # Before the grid: FSM -> KNOWN, ISM -> UNCONFIRMED (ism[_intrapriming|_rts]), other

@@ -249,10 +249,10 @@ cat out/toy.provenance.log
 ```text
 # PanIsoGuard adjudicate provenance
 tool_version	0.0.6
-ruleset_version	builtin-0.0.3
+ruleset_version	builtin-0.0.4
 sqanti3_version_target	6.0
 config	<built-in defaults>
-thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
+thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 chain_min_full_reads=3 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 classification	data/caller1_classification.txt
 isoforms	data/caller1.gtf
 ref_gtf	data/reference.gtf
@@ -273,6 +273,7 @@ axis.bam	on
 axis.variant	not_evaluable
 axis.pangenome	not_evaluable
 axis.consensus	not_evaluable
+axis.chain	on (same reads as the caller)
 # confidence-class counts
 class.ARTIFACT	3
 class.KNOWN	1

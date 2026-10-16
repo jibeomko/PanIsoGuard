@@ -22,7 +22,7 @@ PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "build", "p
 D = lambda name: os.path.join(DATA, name)
 
 NOVEL = ("novel_in_catalog", "novel_not_in_catalog")
-CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_mapq=20, min_spanning=3, clip_bp=20, window=10,
+CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_chain=3, min_mapq=20, min_spanning=3, clip_bp=20, window=10,
            gates={"low_mapq": 0.5, "supplementary": 0.5, "indel_near": 0.5, "softclip": 1.01})
 
 
@@ -100,6 +100,24 @@ def bam_features(reads, jx):
             clip += c
             indel += d
     return n, {"low_mapq": low, "supplementary": supp, "softclip": clip, "indel_near": indel}
+
+
+def chain_full_reads(reads, introns):
+    """Primary reads whose N ops contain the whole intron chain as a contiguous run."""
+    n = 0
+    for flag, pos, mapq, cig in reads:
+        if flag & (4 | 256 | 2048):
+            continue
+        ri = []
+        for ln, op in cig:
+            ln = int(ln)
+            if op == "N":
+                ri.append((pos, pos + ln)); pos += ln
+            elif op in "M=XD":
+                pos += ln
+        k = len(introns)
+        n += any(tuple(ri[i:i + k]) == tuple(introns) for i in range(len(ri) - k + 1))
+    return n
 
 
 CANON = {("GT", "AG"), ("GC", "AG"), ("AT", "AC")}
@@ -198,6 +216,8 @@ def verdict(iso, row, chain, inp):
             cls = "ARTIFACT"
         elif n_callers >= CFG["min_callers"] and chain and catalog is not None:   # agreement on an examined chain only
             cls = "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
+        elif reads is not None and chain and catalog is not None and chain_full_reads(reads, introns) >= CFG["min_chain"]:
+            cls = "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"      # whole-chain long-read support
         else:
             cls = "UNRESOLVED"
     elif sup == "SUPPORTED":
