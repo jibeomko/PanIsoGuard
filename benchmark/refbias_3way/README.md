@@ -196,10 +196,13 @@ acceptor chr6:130,022,220), all `same-noncanonical` in the person: candidate fal
 ### Isoform level, firewall, and what the rescue changes for a user
 
 SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated novel models
-and `Isoform` 9,253. PanIsoGuard's `REFERENCE_BIAS` isoforms (18 and 28) are all among the
-`Artifact`s in both individuals: without the rescue a user following the filter discards
-them. The rest: `ARTIFACT` 741 / 605 and `UNRESOLVED` 18,380 / 20,055 (no short reads exist
-for these samples, so nothing is confirmed).
+and `Isoform` 9,253 (HG02717: 7,202 / 10,067). PanIsoGuard's `REFERENCE_BIAS` isoforms (18
+and 28) are all among the `Artifact`s in both individuals: without the rescue a user
+following the filter discards them. The rest (HG03516 / HG02717): `NOVEL_PROBABLE` 5,784 /
+7,011, every one of them an SQANTI3 `Isoform` whose whole intron chain ≥ 3 long reads carry
+(0.0.7 chain support; no short reads exist for these samples, so nothing is `CONFIRMED`);
+`UNCONFIRMED` 15,618 / 8,335 (chain-supported but with an artifact sign, or ISM);
+`UNRESOLVED` 15,398 / 8,961; `ARTIFACT` 741 / 605.
 
 Firewall: 18 and 28 rescued under `wgs` provenance, 0 under `unknown`, all held `UNRESOLVED`
 with `circularity_flag`.
@@ -221,7 +224,7 @@ with `circularity_flag`.
 | B2 | minimap2 splice:hq | 4 h 21 min | 38 GB | 3 h 32 min | 38 GB |
 | B2 | IsoQuant | 22 min (resumed after an OOM kill next to B1) | 5.9 GB | 1 h 37 min | 17 GB |
 | B2 | SQANTI3 | 8.9 min | 9.5 GB | 3.7 min | 9.4 GB |
-| **C** | **`adjudicate` × 3 provenance runs, genome-wide with `--bam`** | **5.4 min** | **0.4 GB** | **5.7 min** | **0.5 GB** |
+| **C** | **`adjudicate` × 3 provenance runs, genome-wide with `--bam`** | **9.7 min** | **0.5 GB** | **18.1 min** | **0.5 GB** |
 
 HG03516's B1 and B2 ran partly concurrently, so its walls are upper bounds; HG02717 ran
 sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7–12 h and
