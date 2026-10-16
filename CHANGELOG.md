@@ -33,6 +33,10 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
 ### Benchmarks
+- [benchmark/chain_support](benchmark/chain_support) adds the SIRV-Set4 truth set: the
+  read-level separation replicates (FLAIR genuine 8/12 vs false 13/178 with ≥ 3 full-chain
+  reads; IsoQuant 5/6 vs 0/4); the engine-level comparison is not evaluable there because
+  SQANTI3 classifies most SIRV models `antisense` (not adjudicated).
 - [benchmark/gm12878_realdata](benchmark/gm12878_realdata) (real ONT direct-RNA) re-run: the
   chain axis works with exact coordinates on ONT (94.5 % of splice sites exact among
   near-matching reads; 155/285 chains with ≥ 3 exact full-chain reads; ± 5 bp would add 20,

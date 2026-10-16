@@ -301,6 +301,98 @@
         }
       }
     },
+    "sirv_set4": {
+      "engine_flair": {
+        "nosr": {
+          "lifted_to_confident": {
+            "false": 0,
+            "genuine": 0
+          },
+          "off": {
+            "FP": 0,
+            "TP": 0,
+            "auprc": 0.055,
+            "coverage": 0.179,
+            "f1": null,
+            "n_decisive": 34,
+            "n_wrong": 4,
+            "prec": null,
+            "rec": 0.0,
+            "selective_risk": 0.118
+          },
+          "on": {
+            "FP": 0,
+            "TP": 0,
+            "auprc": 0.055,
+            "coverage": 0.179,
+            "f1": null,
+            "n_decisive": 34,
+            "n_wrong": 4,
+            "prec": null,
+            "rec": 0.0,
+            "selective_risk": 0.118
+          },
+          "transitions_off_to_on": {}
+        },
+        "sr": {
+          "lifted_to_confident": {
+            "false": 0,
+            "genuine": 0
+          },
+          "off": {
+            "FP": 1,
+            "TP": 4,
+            "auprc": 0.325,
+            "coverage": 0.226,
+            "f1": 0.471,
+            "n_decisive": 43,
+            "n_wrong": 1,
+            "prec": 0.8,
+            "rec": 0.333,
+            "selective_risk": 0.023
+          },
+          "on": {
+            "FP": 1,
+            "TP": 4,
+            "auprc": 0.325,
+            "coverage": 0.226,
+            "f1": 0.471,
+            "n_decisive": 43,
+            "n_wrong": 1,
+            "prec": 0.8,
+            "rec": 0.333,
+            "selective_risk": 0.023
+          },
+          "transitions_off_to_on": {}
+        }
+      },
+      "flair_genuine_sqanti3_categories": {
+        "antisense": 7,
+        "intergenic": 1,
+        "novel_not_in_catalog": 4
+      },
+      "n_hidden_truth": 13,
+      "per_caller": {
+        "flair": {
+          "false": 178,
+          "false_full_ge3": 13,
+          "false_median": 1.0,
+          "genuine": 12,
+          "genuine_full_ge3": 8,
+          "genuine_median": 11.5,
+          "novel": 190
+        },
+        "isoquant": {
+          "false": 4,
+          "false_full_ge3": 0,
+          "false_median": 0.5,
+          "genuine": 6,
+          "genuine_full_ge3": 5,
+          "genuine_median": 25.5,
+          "novel": 10
+        }
+      }
+    },
     "talon": {
       "n_genuine": 697,
       "n_non_fsm": 1760,
@@ -378,7 +470,7 @@
       }
     }
   },
-  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict.",
+  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF.",
   "protocol": "chain_support",
   "ruleset_version": "default-0.0.4",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",

@@ -55,6 +55,25 @@ them. Full numbers, including every OFF→ON transition by truth label, in
   molecule-level hold-out would turn this into experimental corroboration; neither exists in
   the tracked data.
 
+## A second truth set: SIRV-Set4
+
+The same read-level signal on the Lexogen SIRV-Set4 spike-in reference (PBSIM3 reads, the
+[multicaller](../multicaller) SIRV run; truth = the 13 SIRV transcripts hidden from the
+reduced annotation; `score_sirv_chain.py`):
+
+| caller | novel chains (genuine / false) | genuine with ≥ 3 full-chain reads | false with ≥ 3 |
+|---|---:|---:|---:|
+| FLAIR | 190 (12 / 178) | 8 / 12 | 13 / 178 |
+| IsoQuant | 10 (6 / 4) | 5 / 6 | 0 / 4 |
+
+The separation replicates (medians 11.5 vs 1.0 reads for FLAIR). The engine-level ON/OFF
+comparison is **not evaluable** on SIRV: SQANTI3 puts 152 of FLAIR's 228 SIRV models, 7 of
+the 12 genuine ones among them, into `antisense` / `intergenic` (the SIRV annotation's strand
+against FLAIR's), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry
+mapping or non-canonical signs from the simulated reads. So on SIRV the rule lifts nothing
+either way (recorded as `sirv_set4` in the envelope); the evidence it rests on is the
+read-level table above.
+
 ## Reproduce
 
 ```bash
@@ -62,6 +81,12 @@ them. Full numbers, including every OFF→ON transition by truth label, in
 #   sqanti3_qc.py --isoforms <caller.gtf> --refGTF chr22_modified.gtf --refFasta chr22.fa -o <caller> -d sq_<caller> --report skip
 WORK=/path/to/sqanti_sim/work MC=/path/to/multicaller/data SJ=/path/to/h2h_sr/sr_1000000/SJ.out.tab \
   GENOME=/path/to/chr22.fa OUT=/tmp/chain_support bash run.sh
+```
+
+```bash
+# SIRV-Set4 replication (needs pysam):
+score_sirv_chain.py --work /path/to/pig_sirv/work --mc /path/to/pig_sirv_mc --out /tmp/sirv_chain \
+  --pig ../../build/panisoguard --cfg ../../config/rules.default.toml --emit-metrics ../results/chain_support/metrics.json
 ```
 
 `score_chain.py` imports the labelling and metrics of
