@@ -10,6 +10,7 @@
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/result_writer.hpp"
 #include "panisoguard/sj_tab.hpp"
+#include "test_util.hpp"
 
 using namespace panisoguard;
 
@@ -20,7 +21,7 @@ struct TempFile {
   std::string path;
   explicit TempFile(const std::string& content) {
     static int counter = 0;
-    path = "./.__pig_malformed_" + std::to_string(counter++) + ".tmp";
+    path = scratch("malformed_" + std::to_string(counter++) + ".tmp");
     std::ofstream(path) << content;
   }
   ~TempFile() { std::remove(path.c_str()); }
@@ -53,7 +54,7 @@ bool throws_containing(const std::function<void()>& fn, std::initializer_list<co
 }  // namespace
 
 TEST_CASE("result writer records caller-support provenance", "[io][result_writer]") {
-  const std::string pfx = "./.__pig_writer_prov";
+  const std::string pfx = scratch("writer_prov");
   RunProvenance prov;
   prov.tool_version = "test";
   prov.ruleset_version = "rules";

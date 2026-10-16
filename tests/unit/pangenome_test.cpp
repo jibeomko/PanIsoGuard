@@ -9,13 +9,14 @@
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/rules.hpp"
+#include "test_util.hpp"
 
 using namespace panisoguard;
 
 namespace {
 // Write a tiny pangenome-junction file to a temp path and return it.
 std::string write_tmp(const std::string& name, const std::string& body) {
-  const std::string p = "./.__" + name;  // test working dir; no <filesystem> (macOS < 10.15)
+  const std::string p = scratch(name);
   std::ofstream(p) << body;
   return p;
 }

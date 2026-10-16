@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 
+#include <cstdio>
 #include <map>
 #include <utility>
 
@@ -67,7 +68,7 @@ TEST_CASE("read_caller_support round-trips the combine matrix to native_id -> n_
   b.add("isoquant", "transcript.9", chainA);
   b.add("bambu", "n1", chainB);
 
-  const std::string path = "caller_support_roundtrip.tsv";
+  const std::string path = scratch("caller_support_roundtrip.tsv");
   write_caller_support_matrix(path, b.build());
 
   const CallerSupport support = read_caller_support(path);
@@ -82,6 +83,7 @@ TEST_CASE("read_caller_support round-trips the combine matrix to native_id -> n_
   CHECK(support.by_chain.at(fingerprint_intron_chain(chainA)) == 2);
   CHECK(support.by_chain.at(fingerprint_intron_chain(chainB)) == 1);
   CHECK(support.n_native_id_collisions == 0);
+  std::remove(path.c_str());
 }
 
 TEST_CASE("consensus: duplicate native ids across callers stay separate per chain", "[consensus]") {
@@ -95,12 +97,13 @@ TEST_CASE("consensus: duplicate native ids across callers stay separate per chai
   b.add("callerB", "transcript_2", chainX);
   b.add("callerB", "transcript_1", chainY);
 
-  const std::string path = "caller_support_collision.tsv";
+  const std::string path = scratch("caller_support_collision.tsv");
   write_caller_support_matrix(path, b.build());
   const CallerSupport s = read_caller_support(path);
   CHECK(s.n_native_id_collisions == 1);                 // reported, not silently max'ed
   CHECK(s.by_chain.at(fingerprint_intron_chain(chainX)) == 2);
   CHECK(s.by_chain.at(fingerprint_intron_chain(chainY)) == 1);
+  std::remove(path.c_str());
 }
 
 TEST_CASE("consensus: monoexonic PIG ids do not depend on input order", "[consensus]") {

@@ -321,7 +321,11 @@ def _table(ax, col_labels, rows, title, col_widths=None, max_rows=12, sub=None):
 # ---------------------------------------------------------------------------
 # Projection rulebook (Page 2 heatmap borders)
 # ---------------------------------------------------------------------------
-def projected_class(support, mech):
+def projected_class(support, mech, lifted=False):
+    """RuleEngine::evaluate()'s (support x mechanism) grid. `lifted` = the UNKNOWN-row
+    exceptions that need evidence outside the grid: caller consensus (>= 2 callers) or
+    >= 3 whole-chain long reads (0.0.7); either lifts UNKNOWN to NOVEL_PROBABLE (no
+    mechanism) or UNCONFIRMED (any mechanism). A strong mapping artifact wins regardless."""
     has_mech = mech not in (None, "none")
     if support == "SUPPORTED":
         return "NOVEL_CONFIRMED" if not has_mech else "NOVEL_PROBABLE"
@@ -330,7 +334,11 @@ def projected_class(support, mech):
     if support == "UNSUPPORTED":
         return "UNCONFIRMED" if not has_mech else "ARTIFACT"
     if support == "UNKNOWN":
-        return "ARTIFACT" if mech == "mapping_or_repeat" else "UNRESOLVED"
+        if mech == "mapping_or_repeat":
+            return "ARTIFACT"
+        if lifted:
+            return "NOVEL_PROBABLE" if not has_mech else "UNCONFIRMED"
+        return "UNRESOLVED"
     return "UNRESOLVED"
 
 
@@ -423,7 +431,8 @@ def page2(pdf, ctx, prefix):
     borders = [[CLASS_COLORS.get(projected_class(rl, cl)) for cl in cols] for rl in rows]
     _heatmap(ax, mat, [SUPPORT_LABEL[r] for r in rows], [MECH_LABEL[c] for c in cols],
              "Novelty support  ×  artifact mechanism",
-             border_colors=borders, sub="cell = isoform count · coloured border = the class this pair projects to")
+             border_colors=borders, sub="cell = isoform count · coloured border = the class this pair projects to\n"
+                                          "(UNKNOWN row: UNRESOLVED unless caller consensus or ≥ 3 whole-chain reads lift it)")
 
     ax = fig.add_subplot(gs[0, 1])
     cats = sorted({D.get_path(r, "structural_category") for r in nov})

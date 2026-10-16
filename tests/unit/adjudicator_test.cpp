@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 
+#include <cstdio>
 #include <map>
 #include <memory>
 #include <string>
@@ -253,9 +254,10 @@ TEST_CASE("adjudicator: caller support is joined by chain fingerprint, not nativ
   b.add("callerA", "transcript_1", chainX);
   b.add("callerB", "transcript_2", chainX);
   b.add("callerB", "transcript_1", chainY);
-  const std::string path = "adj_caller_support_collision.tsv";
+  const std::string path = scratch("adj_caller_support_collision.tsv");
   write_caller_support_matrix(path, b.build());
   const CallerSupport support = read_caller_support(path);
+  std::remove(path.c_str());
 
   SqantiTable sqanti;
   sqanti.records.push_back(rec("transcript_1", "novel_not_in_catalog", "canonical"));
