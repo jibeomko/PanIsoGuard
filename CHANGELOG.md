@@ -18,6 +18,10 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   ESPRESSO 106 / 1; Bambu (66 / 13) and TALON (122 / 48) pay precision because their false
   chains are read-supported too ([benchmark/chain_support](benchmark/chain_support)).
   `ablate --axes chain`; TOML `[axis_chain] min_full_reads`.
+- **`--validation-bam PATH`**: a second, independent library from which the whole-chain
+  reads are counted instead of the caller's own BAM (`evidence.chain_independent`, reason
+  `chain_support;independent_library`; `provenance.log` records it). The class stays
+  `NOVEL_PROBABLE`: no tracked dataset has such a library to validate a stronger lift.
 - **`genomic_compatibility`** column (last in `adjudicated.tsv`, also in the JSON): the DNA
   side on its own, independent of the verdict: `haplotype` / `pangenome` (every novel
   junction explained, on one haplotype or path), `partial`, `none`, `NA`. A firewall-held

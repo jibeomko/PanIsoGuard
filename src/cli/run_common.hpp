@@ -17,6 +17,7 @@ struct CommonArgs {
   std::string ref_gtf;
   std::string sj_tab;
   std::string bam_path;
+  std::string validation_bam;                     // a second, independent library: whole-chain reads come from it
   std::string reference;                          // genome FASTA (variant axis + CRAM decode)
   std::vector<std::string> reference_haplotypes;  // personalized FASTAs (variant axis)
   std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown

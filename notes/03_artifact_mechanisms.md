@@ -232,11 +232,11 @@ print("mean indel_near fraction:", m["indel_near_mean_by_consensus"])
 ```
 
 ```text
-indel_near_gt_0.5      175/191 = 92%
-low_mapq_gt_0.5         11/191 = 6%
-softclip_gt_0.5        187/191 = 98%
-supplementary_gt_0.5     4/191 = 2%
-mean indel_near fraction: {'ge2_caller': 0.732, 'single_caller': 0.925}
+indel_near_gt_0.5      128/191 = 67%
+low_mapq_gt_0.5          9/191 = 5%
+softclip_gt_0.5        134/191 = 70%
+supplementary_gt_0.5     3/191 = 2%
+mean indel_near fraction: {'ge2_caller': 0.667, 'single_caller': 0.629}
 ```
 
 soft-clip을 켰다면 novel junction 191개 중 187개(98%)가 `mapping_or_repeat`이 되었을 것이다. 문제는 soft-clip만이 아니다. indel near도 92%에서 켜진다. ONT read는 시퀀싱 오류 자체가 대부분 indel이라, 진짜 junction 근처에도 indel이 흔하다. caller 두 개 이상이 찾은(더 믿을 만한) junction도 평균 비율이 0.73이다. 기준 0.5는 오류가 적은 PacBio HiFi read(SQANTI-SIM은 HiFi를 흉내 냄)에 맞춘 값이라, ONT에는 그대로 쓸 수 없다. `--bam`은 선택 입력이고, 쓴다면 시퀀싱 화학에 맞게 기준을 다시 정해야 한다.

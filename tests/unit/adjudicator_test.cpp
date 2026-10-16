@@ -404,3 +404,25 @@ TEST_CASE("adjudicator: chain support from the BAM fills the evidence and lifts 
   CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
   CHECK(out[0].verdict.verdict_reason == "chain_support");
 }
+
+TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and marks them independent", "[adjudicator][chain]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  BamReader vbam(tiny("mini.bam"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoChain", "novel_not_in_catalog", "canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoChain"] = chain({{2000, 3000}});
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.validation_bam = &vbam;   // no --bam at all: the mapping axis stays off, chain reads come from here
+  const auto out = adjudicate(in, RuleEngine());
+  REQUIRE(out.size() == 1);
+  CHECK_FALSE(out[0].evidence.bam_evaluable);
+  CHECK(out[0].evidence.chain_evaluable);
+  CHECK(out[0].evidence.chain_independent);
+  CHECK(out[0].evidence.chain_n_full_reads == 4);
+  CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
+  CHECK(out[0].verdict.verdict_reason == "chain_support;independent_library");
+}

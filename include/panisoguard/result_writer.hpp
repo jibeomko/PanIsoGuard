@@ -17,6 +17,7 @@ struct RunProvenance {
   std::string ref_gtf_path;   // "" if none
   std::string sj_tab_path;    // "" if none
   std::string bam_path;       // "" if none
+  std::string validation_bam_path;  // "" if none (independent library for whole-chain reads)
   std::string caller_support_path;  // "" if none
   std::string reference_path;       // "" if none (genome FASTA)
   std::vector<std::string> reference_haplotype_paths;  // personalized FASTAs (variant axis)

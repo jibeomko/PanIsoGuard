@@ -258,6 +258,7 @@ isoforms	data/caller1.gtf
 ref_gtf	data/reference.gtf
 sj_tab	data/short_reads.SJ.out.tab
 bam	data/long_reads.bam
+validation_bam	<none>
 caller_support	<none>
 reference	<none>
 pangenome_junctions	<none>

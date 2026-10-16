@@ -295,7 +295,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
 | Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). Soft-clipping is measured but not used by default. The defaults suit PacBio HiFi; ONT reads need different thresholds. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
-| Whole-chain reads | `--bam` (same file as above) | with the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms (the reads are the caller's own) |
+| Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | with the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
 | Sample's genome | `--reference` and `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |
 | Pangenome | `--pangenome-junctions` | optional | whether every novel junction is found in a pangenome (reference bias; tested on HPRC v1.1 chr22) |
 

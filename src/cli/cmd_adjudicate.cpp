@@ -23,6 +23,8 @@ void usage() {
       "  --ref-gtf PATH          reference GTF; enables novel-junction classification (recommended)\n"
       "  --sj-tab PATH           STAR SJ.tab for short-read corroboration (optional)\n"
       "  --bam PATH              indexed BAM/CRAM for the read-level mapping axis (optional)\n"
+      "  --validation-bam PATH   a second, independent library: whole-chain read support is counted\n"
+      "                          there instead of in --bam (optional; evidence is then independent)\n"
       "  --reference PATH        genome FASTA (for the variant axis; also decodes a CRAM --bam)\n"
       "  --reference-haplotype PATH   personalized haplotype FASTA for the variant axis (repeatable)\n"
       "  --haplotype-provenance X     rna_derived|wgs|external|unknown (default unknown=circular-risk)\n"
@@ -84,6 +86,7 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.ref_gtf_path = common.ref_gtf;
     prov.sj_tab_path = common.sj_tab;
     prov.bam_path = common.bam_path;
+    prov.validation_bam_path = common.validation_bam;
     prov.caller_support_path = common.caller_support;
     prov.reference_path = common.reference;
     prov.reference_haplotype_paths = common.reference_haplotypes;

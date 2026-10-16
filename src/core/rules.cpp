@@ -308,9 +308,10 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
       // alignment-level ones (benchmark/chain_support), so PROBABLE, never CONFIRMED.
       trace("whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
             " read(s) carry the entire intron chain (>= " + std::to_string(cfg_.chain_min_full_reads) +
-            "; same reads as the caller) -> chain-supported");
-      if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support"; }
-      else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "chain_support_with_" + mc; }
+            (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
+      const std::string src = ev.chain_independent ? ";independent_library" : "";
+      if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support" + src; }
+      else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "chain_support_with_" + mc + src; }
     } else {
       cls = ConfidenceClass::kUnresolved; verdict = "unconfirmed"; reason = unknown_reason;
     }

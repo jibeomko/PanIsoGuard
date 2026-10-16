@@ -30,6 +30,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--ref-gtf")            { c.ref_gtf = next("--ref-gtf"); return true; }
   if (a == "--sj-tab")             { c.sj_tab = next("--sj-tab"); return true; }
   if (a == "--bam")                { c.bam_path = next("--bam"); return true; }
+  if (a == "--validation-bam")     { c.validation_bam = next("--validation-bam"); return true; }
   if (a == "--reference")          { c.reference = next("--reference"); return true; }
   if (a == "--reference-haplotype"){ c.reference_haplotypes.push_back(next("--reference-haplotype")); return true; }
   if (a == "--haplotype-provenance"){ c.haplotype_provenance = next("--haplotype-provenance"); return true; }
@@ -103,7 +104,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     // so the whole novel-junction block is skipped: every novel isoform is held
     // UNKNOWN/UNRESOLVED and the short-read/BAM/variant/pangenome axes contribute
     // NOTHING even when their inputs are supplied. Warn loudly rather than fail soft.
-    const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() ||
+    const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() || !c.validation_bam.empty() ||
                                      !c.reference_haplotypes.empty() || !c.pangenome_junctions.empty();
     std::fprintf(stderr,
         "WARNING: --ref-gtf not supplied: novel-junction classification is disabled; "
@@ -124,6 +125,12 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   if (!c.bam_path.empty()) {
     bam = std::make_unique<BamReader>(c.bam_path, c.reference);
     std::fprintf(stderr, "opened BAM for mapping axis: %s\n", c.bam_path.c_str());
+  }
+  std::unique_ptr<BamReader> validation_bam;
+  if (!c.validation_bam.empty()) {
+    validation_bam = std::make_unique<BamReader>(c.validation_bam, c.reference);
+    std::fprintf(stderr, "opened validation BAM for whole-chain read support (independent library): %s\n",
+                 c.validation_bam.c_str());
   }
 
   std::shared_ptr<FastaFetcher> ref_fa;
@@ -175,6 +182,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.catalog = catalog_ptr;
   in.sj = sj_ptr;
   in.bam = bam.get();
+  in.validation_bam = validation_bam.get();
   in.haplotype = haplo.get();
   in.haplotype_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
   in.pangenome = pangenome_ptr;

@@ -113,6 +113,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"consensus_evaluable\":" << (e.consensus_evaluable ? "true" : "false") << ","
         << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null") << ","
         << "\"chain_evaluable\":" << (e.chain_evaluable ? "true" : "false") << ","
+        << "\"chain_independent\":" << (e.chain_independent ? "true" : "false") << ","
         << "\"chain_n_full_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_full_reads) : "null") << ","
         << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null")
         << "},";
@@ -195,6 +196,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "ref_gtf\t" << (prov.ref_gtf_path.empty() ? "<none>" : prov.ref_gtf_path) << '\n';
   out << "sj_tab\t" << (prov.sj_tab_path.empty() ? "<none>" : prov.sj_tab_path) << '\n';
   out << "bam\t" << (prov.bam_path.empty() ? "<none>" : prov.bam_path) << '\n';
+  out << "validation_bam\t" << (prov.validation_bam_path.empty() ? "<none>" : prov.validation_bam_path) << '\n';
   out << "caller_support\t"
       << (prov.caller_support_path.empty() ? "<none>" : prov.caller_support_path) << '\n';
   out << "reference\t" << (prov.reference_path.empty() ? "<none>" : prov.reference_path) << '\n';
@@ -211,6 +213,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   ident("ref_gtf", prov.ref_gtf_path);
   ident("sj_tab", prov.sj_tab_path);
   ident("bam", prov.bam_path);
+  ident("validation_bam", prov.validation_bam_path);
   ident("caller_support", prov.caller_support_path);
   ident("reference", prov.reference_path);
   for (const auto& h : prov.reference_haplotype_paths) ident("reference_haplotype", h);
@@ -230,7 +233,9 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
               : "not_evaluable")
       << '\n';
   out << "axis.consensus\t" << (prov.consensus_axis_on ? "on" : "not_evaluable") << '\n';
-  out << "axis.chain\t" << (prov.bam_path.empty() ? "not_evaluable" : "on (same reads as the caller)") << '\n';
+  out << "axis.chain\t"
+      << (!prov.validation_bam_path.empty() ? "on (independent library: --validation-bam)"
+          : prov.bam_path.empty() ? "not_evaluable" : "on (same reads as the caller)") << '\n';
 
   std::map<std::string, std::size_t> class_counts, verdict_counts;
   for (const auto& r : results) {

@@ -104,6 +104,7 @@ struct EvidenceVector {
   // entire intron chain. Same reads the caller used, so methodological (not independent)
   // corroboration, like caller consensus: it can lift UNKNOWN support to PROBABLE only.
   bool chain_evaluable = false;
+  bool chain_independent = false;   // counted in --validation-bam (a library the caller did not use)
   int chain_n_full_reads = 0;
   int chain_n_partial_reads = 0;
 };

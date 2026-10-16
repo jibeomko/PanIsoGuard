@@ -39,7 +39,8 @@ struct AdjudicateInputs {
   const std::map<std::string, IntronChain>* chains = nullptr;  // isoform_id -> chain (required)
   const Catalog* catalog = nullptr;                          // optional (needed for novel-junction axes)
   const SjTable* sj = nullptr;                               // optional (short-read corroboration)
-  const BamReader* bam = nullptr;                            // optional (mapping axis)
+  const BamReader* bam = nullptr;                            // optional (mapping axis + whole-chain reads)
+  const BamReader* validation_bam = nullptr;                 // optional: an independent library; whole-chain reads come from it instead
   const HaplotypeProvider* haplotype = nullptr;              // optional (variant/reference-bias axis)
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
   const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)

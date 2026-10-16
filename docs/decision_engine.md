@@ -136,7 +136,12 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        ([benchmark/chain_support](../benchmark/chain_support)). Coordinates are exact: on
        real ONT direct-RNA 94.5 % of splice sites among near-matching reads are exact and a
        ± 5 bp tolerance would add 7 % of chains, so none is shipped
-       ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) § 4). Same chain+catalog
+       ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) § 4). With
+       `--validation-bam` (a second library the caller did not see) the reads are counted
+       there instead; the evidence is then independent (`evidence.chain_independent`,
+       reason `chain_support;independent_library`), but the class is still `PROBABLE`: the
+       tracked data have no such library, so the lift to `CONFIRMED` is not validated.
+       Same chain+catalog
        requirement as consensus. Disable with `ablate --axes chain`.
 - Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
   UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is reported

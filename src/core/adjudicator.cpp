@@ -23,6 +23,7 @@ std::string jx_key(const std::string& chrom, Strand strand, const Junction& j) {
 EvidenceVector build_evidence(const SqantiRecord& r,
                               const std::map<std::string, IntronChain>& chains,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
+                              const BamReader* validation_bam,
                               const HaplotypeProvider* haplotype, bool haplotype_circular,
                               const PangenomeJunctions* pangenome, bool pangenome_circular,
                               const CallerSupport* caller_support,
@@ -68,10 +69,13 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     }
   }
 
-  // Whole-chain long-read support: reads carrying every intron of the caller's chain.
-  if (bam != nullptr && ev.chain_available && !it->second.monoexonic()) {
-    const ChainBamSupport cs = bam->chain_support(it->second);
+  // Whole-chain long-read support: reads carrying every intron of the caller's chain. From
+  // --validation-bam when given (an independent library), else from the caller's own BAM.
+  const BamReader* chain_bam = validation_bam != nullptr ? validation_bam : bam;
+  if (chain_bam != nullptr && ev.chain_available && !it->second.monoexonic()) {
+    const ChainBamSupport cs = chain_bam->chain_support(it->second);
     ev.chain_evaluable = cs.evaluated;
+    ev.chain_independent = validation_bam != nullptr;
     ev.chain_n_full_reads = cs.n_full;
     ev.chain_n_partial_reads = cs.n_partial;
   }
@@ -259,7 +263,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.bio_dist_to_polyA_site = r.dist_to_polyA_site;
     res.bio_predicted_NMD = r.predicted_NMD;
     res.bio_polyA_motif_found = r.polyA_motif_found;
-    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.haplotype,
+    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.validation_bam, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
                                   in.caller_support, engine.config(), bam_cache,
                                   junctions != nullptr ? &jrows : nullptr);
