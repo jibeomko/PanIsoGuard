@@ -1,22 +1,38 @@
 {
-  "command": "GENOME=.../GRCh38.primary_assembly.genome.fa GTF=.../gencode.v49.annotation.gtf bash benchmark/end2end/run_e2e.sh e2e_work  (seeded: pbsim --seed 7)",
-  "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads (seed 7) -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate (+BAM mapping axis)",
-  "generated_utc": null,
+  "command": "GENOME=.../GRCh38.primary_assembly.genome.fa GTF=.../gencode.v49.annotation.gtf bash benchmark/end2end/run_e2e.sh e2e_work  (seeded: pbsim --seed 7); python score.py --emit-metrics ...",
+  "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads (seed 7) -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate (+ short-read SJ.tab + BAM mapping/whole-chain axes)",
+  "generated_utc": "2026-10-16T11:55:27Z",
   "metrics": {
+    "FN": 4,
+    "FP": 0,
+    "TN": 242,
+    "TP": 15,
+    "class_by_truth": {
+      "false": {
+        "ARTIFACT": 166,
+        "UNCONFIRMED": 76,
+        "UNRESOLVED": 7
+      },
+      "genuine": {
+        "NOVEL_PROBABLE": 15,
+        "UNCONFIRMED": 4,
+        "UNRESOLVED": 1
+      }
+    },
+    "false_abstain": 7,
+    "flair_exact_reconstructions": 27,
+    "genuine_abstain": 1,
+    "hidden_genuine_transcripts": 30,
     "n_sqanti_isoforms": 397,
-    "specificity_false": 0.996,
-    "recall_genuine_decisive": 1.000,
-    "precision_genuine": 0.800,
-    "TP": 4,
-    "FP": 1,
-    "TN": 241,
-    "FN": 0
+    "precision_genuine": 1.0,
+    "recall_genuine_decisive": 0.789,
+    "specificity_false": 1.0
   },
-  "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads. Verified: a fresh seeded (pbsim --seed 7) v49 chr22 run with the current 0.0.2 binary reproduces the documented result exactly (397 isoforms; 241/242 false-novel artifacts rejected; no genuine novel wrongly rejected).",
+  "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads, re-run with the current binary. Positive = NOVEL_CONFIRMED/NOVEL_PROBABLE, negative = UNCONFIRMED/ARTIFACT, UNRESOLVED = abstain, on the SQANTI NIC/NNC set.",
   "protocol": "end2end",
-  "ruleset_version": "builtin-0.0.1",
+  "ruleset_version": "builtin-0.0.4",
   "scope": "gencode_v49_chr22",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.2"
+  "tool_version": "0.0.6"
 }

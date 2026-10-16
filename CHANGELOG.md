@@ -37,6 +37,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
 ### Benchmarks
+- [benchmark/end2end](benchmark/end2end) re-run (its envelope was from 0.0.2): on the seeded
+  chr22 pipeline, precision 1.000 / specificity 1.000, 15 of 20 genuine novels
+  `NOVEL_PROBABLE` through whole-chain reads; `score.py --emit-metrics` writes the envelope.
 - [benchmark/chain_support](benchmark/chain_support) adds the SIRV-Set4 truth set: the
   read-level separation replicates (FLAIR genuine 8/12 vs false 13/178 with ≥ 3 full-chain
   reads; IsoQuant 5/6 vs 0/4); the engine-level comparison is not evaluable there because

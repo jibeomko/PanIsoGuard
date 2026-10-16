@@ -50,3 +50,22 @@ print("\n=== class breakdown by truth ===")
 for t in ("genuine","false"):
     cc=", ".join(f"{k}={v}" for (tt,k),v in sorted(bytruth_class.items()) if tt==t)
     print(f"  {t}: {cc}")
+
+# optional tracked envelope: score.py --emit-metrics <path>   (run from the work dir)
+import sys, json, datetime
+if "--emit-metrics" in sys.argv:
+    out = sys.argv[sys.argv.index("--emit-metrics") + 1]
+    prov = dict(l.rstrip("\n").split("\t", 1) for l in open("e2e_adj.provenance.log") if "\t" in l and not l.startswith("#"))
+    env = {"protocol": "end2end", "scope": "gencode_v49_chr22", "status": "tracked",
+           "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
+           "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
+           "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads (seed 7) -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate (+ short-read SJ.tab + BAM mapping/whole-chain axes)",
+           "command": "GENOME=.../GRCh38.primary_assembly.genome.fa GTF=.../gencode.v49.annotation.gtf bash benchmark/end2end/run_e2e.sh e2e_work  (seeded: pbsim --seed 7); python score.py --emit-metrics ...",
+           "metrics": {"n_sqanti_isoforms": len(cls), "hidden_genuine_transcripts": len(hidden), "flair_exact_reconstructions": recovered,
+                       "specificity_false": round(spec, 3), "recall_genuine_decisive": round(rec, 3), "precision_genuine": round(prec, 3),
+                       "TP": TP, "FP": FP, "TN": TN, "FN": FN, "genuine_abstain": conf[("genuine", "abstain")], "false_abstain": conf[("false", "abstain")],
+                       "class_by_truth": {t: {k: v for (tt, k), v in sorted(bytruth_class.items()) if tt == t} for t in ("genuine", "false")}},
+           "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads, re-run with the current binary. Positive = "
+                    "NOVEL_CONFIRMED/NOVEL_PROBABLE, negative = UNCONFIRMED/ARTIFACT, UNRESOLVED = abstain, on the SQANTI NIC/NNC set."}
+    json.dump(env, open(out, "w"), indent=2, sort_keys=True); open(out, "a").write("\n")
+    print("wrote", out, file=sys.stderr)
