@@ -46,7 +46,8 @@ v49:
   `NOVEL_PROBABLE` through `chain_support`, the 2 / 4 with an RTS sign `UNCONFIRMED`
   (`chain_support_with_rt_switch`). That is the real-data counterpart of the SQANTI-SIM
   result in [chain_support](../chain_support).
-- All 24 (PacBio) / 24 (ONT) called FSM targets are `KNOWN`; the 2 / 1 called `likely`
+- The called FSM targets (14 of 23 on PacBio, 18 of 23 on ONT) are all `KNOWN`, as are the
+  10 / 6 NIC/NNC targets that GENCODE v49 has since annotated; the 2 / 1 called `likely`
   targets are `KNOWN` or `NOVEL_PROBABLE`.
 - **Unsupported targets (7)**: IsoQuant reconstructed none of the six novel ones on either
   platform (so PanIsoGuard had nothing to judge), and the one FSM (ZBTB45, annotated) is
