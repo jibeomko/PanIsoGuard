@@ -414,6 +414,10 @@ Full tables, bootstrap confidence intervals and caveats are in
   the BAM it gives a decisive class to 71 % of the isoforms and 2.1 % of those are wrong;
   the one-line rule decides all of them and 6.6 % are wrong
   ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), risk–coverage).
+- On real data with experimentally validated isoforms (LRGASP WTC11, PacBio and ONT), none
+  of the validated isoforms the caller reconstructed is called an artifact, and without
+  short reads the whole-chain reads keep 15 of 17 (PacBio) and 12 of 16 (ONT) as
+  `NOVEL_PROBABLE` ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
 
 So use it for the reason behind each call, not for a better score.
 

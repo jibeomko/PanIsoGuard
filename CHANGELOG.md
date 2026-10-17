@@ -37,6 +37,13 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   rows carry ids; results unchanged: 0 rescues on the real FLAIR set, gate1 6/6).
 
 ### Benchmarks
+- **New: [benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11).** First check against experimentally
+  validated isoforms on real data: LRGASP's 89 WTC11 RT-PCR/amplicon targets, our own
+  IsoQuant/SQANTI3/PanIsoGuard run on the public PacBio cDNA, ONT cDNA and Illumina reads.
+  Of the supported NIC/NNC targets the caller reconstructed and that are novel in v49
+  (17 PacBio / 16 ONT): 0 `ARTIFACT` either way; 15 / 12 confident with short reads, and
+  the same 15 / 12 `NOVEL_PROBABLE` through whole-chain reads without them. Recall-side
+  only; the negatives were not reconstructed by the caller.
 - [benchmark/end2end](benchmark/end2end) re-run (its envelope was from 0.0.2): on the seeded
   chr22 pipeline, precision 1.000 / specificity 1.000, 15 of 20 genuine novels
   `NOVEL_PROBABLE` through whole-chain reads; `score.py --emit-metrics` writes the envelope.
