@@ -34,7 +34,15 @@ if [ -z "${_INNER:-}" ]; then
   exit 0
 fi
 
-targets() { [ -s targets/targets.tsv ] || python3 "$HERE/targets.py" supp/wtc11_validation_targets.tsv models/WTC11_consolidated.bed.gz targets; }
+targets() {  # LRGASP transcript-model BEDs (public) + the two validation sheets -> target chains
+  cd models
+  [ -s WTC11_consolidated.bed.gz ] || curl -sL -o WTC11_consolidated.bed.gz https://cgl.gi.ucsc.edu/data/LRGASP/consolidated-models/hg38/WTC11_consolidated.bed.gz
+  for f in LRGASP_manual_annotation.human.all.bed.gz human_GENCODE_tmerge_transcripts.bed.gz; do
+    [ -s $f ] || curl -sL -o $f https://cgl.gi.ucsc.edu/data/LRGASP/annotations/human/$f
+  done
+  cd ..
+  [ -s targets/targets_gencode.tsv ] || python3 "$HERE/targets.py" supp models targets
+}
 align_pb() {
   [ -s pb/pb.bam.bai ] && return
   zcat raw/pb_cdna_rep1.fastq.gz raw/pb_cdna_rep2.fastq.gz raw/pb_cdna_rep3.fastq.gz \

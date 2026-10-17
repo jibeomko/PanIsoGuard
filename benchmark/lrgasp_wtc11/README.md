@@ -54,6 +54,35 @@ v49:
   `KNOWN` on PacBio. The validation set carries too few negatives to say anything about
   precision; this protocol is a recall-side check.
 
+## The GENCODE-reviewed targets: do the negatives help?
+
+Supplementary Data 15's second sheet holds 79 targets that GENCODE annotators reviewed
+(`known` 27, `novel` 43, `rejected` 9; chains from LRGASP's manual-annotation BEDs, 76
+resolvable), with **26 unsupported** by the amplicons. This is the only experimentally
+confirmed negative set available, so it was the natural place to look for real-data
+precision. It does not deliver it:
+
+| GENCODE-reviewed, PacBio + Illumina | n | called exactly by IsoQuant | PanIsoGuard |
+|---|---:|---:|---|
+| supported | 46 | 16 | 14 `KNOWN`, 1 `NOVEL_PROBABLE`, 1 `UNCONFIRMED` |
+| likely | 4 | 2 | 1 `KNOWN`, 1 `UNCONFIRMED` |
+| unsupported, GENCODE `rejected` (the true negatives) | 7 | **0** | — |
+| unsupported, GENCODE `known` / `novel` | 19 | 6 | 5 `KNOWN` (annotated transcripts whose amplicon failed), 1 `UNRESOLVED` (DLX4, NIC) |
+
+ONT: 11 / 1 / 0 / 3 called, all `KNOWN`. The seven `rejected` models, the negatives that
+matter, were not reconstructed by IsoQuant on either platform, so there was nothing for
+PanIsoGuard to judge; the unsupported `known` ones are annotated transcripts (`KNOWN` by
+pass-through, not adjudicated). The one unsupported novel chain the caller did produce
+(DLX4+B) was held `UNRESOLVED` on both platforms, with and without short reads (fewer than
+3 whole-chain reads). One case, in the right direction, is not a precision estimate.
+
+**SQANTI3's RT-switching sign on validated isoforms.** Of the experimentally supported
+targets IsoQuant reconstructed, `RTS_stage = TRUE` on 5 of 41 (PacBio; 3 FSM, 2 NIC) and
+7 of 40 (ONT; 3 FSM, 3 NIC, 1 NNC): a 12–18 % false-sign rate on isoforms that exist.
+PanIsoGuard consumes the sign as SQANTI3 reports it; this is the measured cost of doing so,
+and why a sign alone never makes an `ARTIFACT` when short reads or whole-chain reads
+support the chain.
+
 **What it does not show.** 29 (PacBio) / 34 (ONT) supported novel targets were not
 reconstructed by IsoQuant at all, and only one of them sits inside a longer model. They are
 the rarely detected targets (median 1 LRGASP PacBio pipeline found them, against 11 for the
@@ -69,8 +98,9 @@ bash raw/dl.sh                         # ENCODE downloads (see the script; ~26 G
 WORK=/path/to/pig_lrgasp bash run.sh all   # targets, align, STAR, IsoQuant, SQANTI3, adjudicate, score
 ```
 
-`targets.py` joins Supplementary Data 15 (`supp/wtc11_validation_targets.tsv`, parsed from
-the xlsx) to `models/WTC11_consolidated.bed.gz`; `score_lrgasp.py` matches our IsoQuant
+`targets.py` joins Supplementary Data 15 (`supp/wtc11_validation_targets.tsv` and
+`supp/gencode_validation_targets.tsv`, parsed from the xlsx) to `models/WTC11_consolidated.bed.gz`
+and the two LRGASP manual-annotation BEDs (fetched by the `targets` stage); `score_lrgasp.py` matches our IsoQuant
 chains to the targets exactly and writes `targets/per_target_verdicts.tsv` plus the envelope
 [../results/lrgasp_wtc11/metrics.json](../results/lrgasp_wtc11/metrics.json). The STAR
 binary must be the version that built the genome index.

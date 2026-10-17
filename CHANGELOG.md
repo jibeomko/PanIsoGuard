@@ -43,7 +43,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   Of the supported NIC/NNC targets the caller reconstructed and that are novel in v49
   (17 PacBio / 16 ONT): 0 `ARTIFACT` either way; 15 / 12 confident with short reads, and
   the same 15 / 12 `NOVEL_PROBABLE` through whole-chain reads without them. Recall-side
-  only; the negatives were not reconstructed by the caller.
+  only: the GENCODE-rejected negatives were not reconstructed by the caller (the one
+  unsupported novel chain it produced was held `UNRESOLVED`). SQANTI3's `RTS_stage` is TRUE
+  on 12–18 % of the experimentally supported isoforms, a measured false-sign rate.
 - [benchmark/end2end](benchmark/end2end) re-run (its envelope was from 0.0.2): on the seeded
   chr22 pipeline, precision 1.000 / specificity 1.000, 15 of 20 genuine novels
   `NOVEL_PROBABLE` through whole-chain reads; `score.py --emit-metrics` writes the envelope.

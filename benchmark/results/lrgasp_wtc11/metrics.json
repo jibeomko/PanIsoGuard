@@ -1,9 +1,299 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
-  "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation of 89 WTC11 targets) joined to the WTC11 consolidated models BED (cgl.gi.ucsc.edu/data/LRGASP). No private data.",
-  "generated_utc": "2026-10-17T15:31:18Z",
+  "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
+  "generated_utc": "2026-10-17T23:39:06Z",
   "metrics": {
-    "ont_nosr": {
+    "gencode_ont_nosr": {
+      "likely": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 1,
+            "not_called:-": 1
+          },
+          "novel": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 1,
+        "class_counts": {
+          "KNOWN": 1
+        },
+        "confident": 1,
+        "contained_only": 0,
+        "n": 4
+      },
+      "rts_sign_on_validated_called": {
+        "n": 11,
+        "rts_stage_true": 1
+      },
+      "supported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 11,
+            "not_called:-": 9
+          },
+          "novel": {
+            "not_called:-": 24
+          },
+          "rejected": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 11,
+        "class_counts": {
+          "KNOWN": 11
+        },
+        "confident": 11,
+        "contained_only": 0,
+        "n": 46
+      },
+      "unsupported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 3,
+            "not_called:-": 2
+          },
+          "novel": {
+            "not_called:-": 14
+          },
+          "rejected": {
+            "not_called:-": 7
+          }
+        },
+        "called_exact": 3,
+        "class_counts": {
+          "KNOWN": 3
+        },
+        "confident": 3,
+        "contained_only": 1,
+        "n": 26
+      }
+    },
+    "gencode_ont_sr": {
+      "likely": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 1,
+            "not_called:-": 1
+          },
+          "novel": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 1,
+        "class_counts": {
+          "KNOWN": 1
+        },
+        "confident": 1,
+        "contained_only": 0,
+        "n": 4
+      },
+      "rts_sign_on_validated_called": {
+        "n": 11,
+        "rts_stage_true": 1
+      },
+      "supported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 11,
+            "not_called:-": 9
+          },
+          "novel": {
+            "not_called:-": 24
+          },
+          "rejected": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 11,
+        "class_counts": {
+          "KNOWN": 11
+        },
+        "confident": 11,
+        "contained_only": 0,
+        "n": 46
+      },
+      "unsupported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 3,
+            "not_called:-": 2
+          },
+          "novel": {
+            "not_called:-": 14
+          },
+          "rejected": {
+            "not_called:-": 7
+          }
+        },
+        "called_exact": 3,
+        "class_counts": {
+          "KNOWN": 3
+        },
+        "confident": 3,
+        "contained_only": 1,
+        "n": 26
+      }
+    },
+    "gencode_pb_nosr": {
+      "likely": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 1,
+            "not_called:-": 1
+          },
+          "novel": {
+            "called:UNRESOLVED": 1,
+            "not_called:-": 1
+          }
+        },
+        "called_exact": 2,
+        "class_counts": {
+          "KNOWN": 1,
+          "UNRESOLVED": 1
+        },
+        "confident": 1,
+        "contained_only": 0,
+        "n": 4
+      },
+      "rts_sign_on_validated_called": {
+        "n": 16,
+        "rts_stage_true": 1
+      },
+      "supported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 12,
+            "not_called:-": 8
+          },
+          "novel": {
+            "called:KNOWN": 2,
+            "called:NOVEL_PROBABLE": 2,
+            "not_called:-": 20
+          },
+          "rejected": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 16,
+        "class_counts": {
+          "KNOWN": 14,
+          "NOVEL_PROBABLE": 2
+        },
+        "confident": 16,
+        "contained_only": 0,
+        "n": 46
+      },
+      "unsupported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 5
+          },
+          "novel": {
+            "called:UNRESOLVED": 1,
+            "not_called:-": 13
+          },
+          "rejected": {
+            "not_called:-": 7
+          }
+        },
+        "called_exact": 6,
+        "class_counts": {
+          "KNOWN": 5,
+          "UNRESOLVED": 1
+        },
+        "confident": 5,
+        "contained_only": 1,
+        "n": 26
+      }
+    },
+    "gencode_pb_sr": {
+      "likely": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 1,
+            "not_called:-": 1
+          },
+          "novel": {
+            "called:UNCONFIRMED": 1,
+            "not_called:-": 1
+          }
+        },
+        "called_exact": 2,
+        "class_counts": {
+          "KNOWN": 1,
+          "UNCONFIRMED": 1
+        },
+        "confident": 1,
+        "contained_only": 0,
+        "n": 4
+      },
+      "rts_sign_on_validated_called": {
+        "n": 16,
+        "rts_stage_true": 1
+      },
+      "supported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 12,
+            "not_called:-": 8
+          },
+          "novel": {
+            "called:KNOWN": 2,
+            "called:NOVEL_PROBABLE": 1,
+            "called:UNCONFIRMED": 1,
+            "not_called:-": 20
+          },
+          "rejected": {
+            "not_called:-": 2
+          }
+        },
+        "called_exact": 16,
+        "class_counts": {
+          "KNOWN": 14,
+          "NOVEL_PROBABLE": 1,
+          "UNCONFIRMED": 1
+        },
+        "confident": 15,
+        "contained_only": 0,
+        "n": 46
+      },
+      "unsupported": {
+        "artifact": 0,
+        "by_type": {
+          "known": {
+            "called:KNOWN": 5
+          },
+          "novel": {
+            "called:UNRESOLVED": 1,
+            "not_called:-": 13
+          },
+          "rejected": {
+            "not_called:-": 7
+          }
+        },
+        "called_exact": 6,
+        "class_counts": {
+          "KNOWN": 5,
+          "UNRESOLVED": 1
+        },
+        "confident": 5,
+        "contained_only": 1,
+        "n": 26
+      }
+    },
+    "wtc11_ont_nosr": {
       "likely": {
         "artifact": 0,
         "by_type": {
@@ -22,7 +312,12 @@
           "KNOWN": 1
         },
         "confident": 1,
+        "contained_only": 0,
         "n": 3
+      },
+      "rts_sign_on_validated_called": {
+        "n": 40,
+        "rts_stage_true": 7
       },
       "supported": {
         "artifact": 0,
@@ -50,6 +345,7 @@
           "UNCONFIRMED": 4
         },
         "confident": 36,
+        "contained_only": 1,
         "n": 79
       },
       "unsupported": {
@@ -68,10 +364,11 @@
         "called_exact": 0,
         "class_counts": {},
         "confident": 0,
+        "contained_only": 0,
         "n": 7
       }
     },
-    "ont_sr": {
+    "wtc11_ont_sr": {
       "likely": {
         "artifact": 0,
         "by_type": {
@@ -90,7 +387,12 @@
           "KNOWN": 1
         },
         "confident": 1,
+        "contained_only": 0,
         "n": 3
+      },
+      "rts_sign_on_validated_called": {
+        "n": 40,
+        "rts_stage_true": 7
       },
       "supported": {
         "artifact": 0,
@@ -121,6 +423,7 @@
           "UNCONFIRMED": 4
         },
         "confident": 36,
+        "contained_only": 1,
         "n": 79
       },
       "unsupported": {
@@ -139,10 +442,11 @@
         "called_exact": 0,
         "class_counts": {},
         "confident": 0,
+        "contained_only": 0,
         "n": 7
       }
     },
-    "pb_nosr": {
+    "wtc11_pb_nosr": {
       "likely": {
         "artifact": 0,
         "by_type": {
@@ -162,7 +466,12 @@
           "UNCONFIRMED": 1
         },
         "confident": 1,
+        "contained_only": 0,
         "n": 3
+      },
+      "rts_sign_on_validated_called": {
+        "n": 41,
+        "rts_stage_true": 5
       },
       "supported": {
         "artifact": 0,
@@ -190,6 +499,7 @@
           "UNCONFIRMED": 2
         },
         "confident": 39,
+        "contained_only": 1,
         "n": 79
       },
       "unsupported": {
@@ -210,10 +520,11 @@
           "KNOWN": 1
         },
         "confident": 1,
+        "contained_only": 0,
         "n": 7
       }
     },
-    "pb_sr": {
+    "wtc11_pb_sr": {
       "likely": {
         "artifact": 0,
         "by_type": {
@@ -233,7 +544,12 @@
           "NOVEL_PROBABLE": 1
         },
         "confident": 2,
+        "contained_only": 0,
         "n": 3
+      },
+      "rts_sign_on_validated_called": {
+        "n": 41,
+        "rts_stage_true": 5
       },
       "supported": {
         "artifact": 0,
@@ -264,6 +580,7 @@
           "UNCONFIRMED": 2
         },
         "confident": 39,
+        "contained_only": 1,
         "n": 79
       },
       "unsupported": {
@@ -284,11 +601,12 @@
           "KNOWN": 1
         },
         "confident": 1,
+        "contained_only": 0,
         "n": 7
       }
     }
   },
-  "notes": "Per platform and short-read setting: of the LRGASP WTC11 validation targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets. The validation set is mostly positives (79 supported, 3 likely, 7 unsupported), so this is primarily a check that experimentally supported isoforms are not called ARTIFACT and are kept, on real data with both platforms; it is not a precision estimate.",
+  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence.",
   "protocol": "lrgasp_wtc11",
   "ruleset_version": "builtin-0.0.4",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",
