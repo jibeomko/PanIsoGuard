@@ -25,6 +25,23 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   and `notes/check_notes.py` follow.
 
 ### Added
+- **`adjudicate --write-kept PATH [--keep-verdicts LIST]`**: copies the input isoform GTF /
+  BED12 keeping only the isoforms whose verdict is in the list (default `known,
+  known_fragment,confirmed,reference_bias`), a verdict-filtered annotation for
+  quantification; `provenance.log` records `kept_isoforms` / `kept_verdicts`.
+- **`panisoguard decoys`**: a per-dataset false-lift check for the whole-chain read support.
+  It joins the 5' introns of one annotated transcript to the 3' introns of another of the
+  same gene at a shared intron (novel-in-catalog chains that are neither annotated nor a
+  piece of an annotated chain), counts the reads carrying each end to end with the same code
+  the chain axis uses, and reports the fraction ≥ `--min-full-reads` (default 3) next to the
+  same fraction for the annotated parents (`<prefix>.decoys.tsv` / `.decoys.json`). On
+  SQANTI-SIM the truth separates decoys that are deleted genuine transcripts from the rest
+  (`benchmark/chain_support/score_decoys.py`): wrong combinations reach 3 reads 0–0.1 % of the
+  time, the genuine ones 100 % (31 / 31). On real PacBio / Kinnex data 33–46 % of the
+  recombinants of two expressed isoforms are carried by ≥ 3 reads, with as many reads as
+  their parents (unannotated combinatorial isoforms rather than chimeras), so the rate is an
+  upper bound on the false lift and a measure of annotation incompleteness
+  ([benchmark/chain_support](benchmark/chain_support)).
 - **`KNOWN_FRAGMENT` class / `known_fragment` verdict (ruleset `builtin-0.0.5`).** An ISM
   whose whole intron chain ≥ `chain_min_full_reads` long reads carry, with no intra-priming
   sign at the 3' end, is a known structure the reads saw end to end (`ism_chain_support`,

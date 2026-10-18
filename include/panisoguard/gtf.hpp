@@ -14,6 +14,7 @@ namespace panisoguard {
 struct Transcript {
   std::string id;
   IntronChain chain;
+  std::string gene_id;  // GTF gene_id ("" when the source has none, e.g. BED12)
 };
 
 // Parse a GTF into transcripts (groups `exon` lines by transcript_id, derives the

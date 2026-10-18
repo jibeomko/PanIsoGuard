@@ -64,6 +64,7 @@ add_library(panisoguard_core OBJECT
   src/core/rules.cpp
   src/core/adjudicator.cpp
   src/core/analysis.cpp
+  src/core/decoys.cpp
   src/evidence/bam_features.cpp
   src/evidence/variant_motif.cpp
   src/io/sj_tab_reader.cpp
@@ -88,6 +89,7 @@ add_executable(panisoguard
   src/cli/cmd_benchmark.cpp
   src/cli/cmd_ablate.cpp
   src/cli/cmd_example.cpp
+  src/cli/cmd_decoys.cpp
 )
 target_link_libraries(panisoguard PRIVATE panisoguard_core)
 target_compile_definitions(panisoguard PRIVATE PANISOGUARD_VERSION="${PROJECT_VERSION}")
@@ -127,6 +129,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/bam_features_test.cpp
     tests/unit/analysis_test.cpp
     tests/unit/variant_motif_test.cpp
+    tests/unit/decoys_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
   target_include_directories(panisoguard_tests PRIVATE
@@ -144,6 +147,11 @@ if(PANISOGUARD_BUILD_TESTS)
   add_test(NAME example_copy
     COMMAND bash -c "rm -rf '${CMAKE_BINARY_DIR}/example_copy' && '$<TARGET_FILE:panisoguard>' example tiny '${CMAKE_BINARY_DIR}/example_copy' && bash '${CMAKE_BINARY_DIR}/example_copy/run.sh'")
   set_tests_properties(example_copy PROPERTIES ENVIRONMENT "PANISOGUARD=$<TARGET_FILE:panisoguard>")
+  # --write-kept: the input GTF filtered to the kept verdicts (tiny: iso_known known,
+  # iso_novel_supported confirmed, iso_novel_artifact artifact; the kept file must hold the
+  # first two and not the third).
+  add_test(NAME integration_write_kept
+    COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/write_kept' && cd '${CMAKE_SOURCE_DIR}/examples/tiny' && '$<TARGET_FILE:panisoguard>' adjudicate --classification data/classification.tsv --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --sj-tab data/short_read.SJ.tab --out-prefix '${CMAKE_BINARY_DIR}/write_kept/sample' --write-kept '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' >/dev/null 2>&1 && grep -q 'transcript_id \"iso_novel_supported\"' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && grep -q 'transcript_id \"iso_known\"' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && ! grep -q 'iso_novel_artifact' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && grep -q '^kept_verdicts' '${CMAKE_BINARY_DIR}/write_kept/sample.provenance.log'")
 
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,

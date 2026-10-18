@@ -4,8 +4,10 @@
 
 #include <cstdio>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include "panisoguard/result_writer.hpp"
 #include "panisoguard/version.hpp"
@@ -34,6 +36,9 @@ void usage() {
       "  --pangenome-provenance X     population|external|sample_derived|unknown (default unknown=circular-risk)\n"
       "  --caller-support PATH        `panisoguard combine` matrix for the multi-caller consensus axis (optional)\n"
       "  --hash-inputs                also record an MD5 per input file in provenance.log (reads every input once)\n"
+      "  --write-kept PATH            also write the input isoform GTF/BED12 filtered to the kept verdicts\n"
+      "  --keep-verdicts LIST         verdicts --write-kept keeps (comma-separated; default\n"
+      "                               known,known_fragment,confirmed,reference_bias)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
       "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n"
       "\n"
@@ -46,7 +51,8 @@ void usage() {
 int cmd_adjudicate(int argc, char** argv) {
   using namespace panisoguard;
   CommonArgs common;
-  std::string out_prefix;
+  std::string out_prefix, write_kept;
+  std::string keep_verdicts = "known,known_fragment,confirmed,reference_bias";
   bool hash_inputs = false;
 
   for (int i = 2; i < argc; ++i) {
@@ -57,6 +63,12 @@ int cmd_adjudicate(int argc, char** argv) {
       out_prefix = argv[++i];
     } else if (a == "--hash-inputs") {
       hash_inputs = true;
+    } else if (a == "--write-kept") {
+      if (i + 1 >= argc) { std::fprintf(stderr, "adjudicate: --write-kept requires an argument\n"); return 1; }
+      write_kept = argv[++i];
+    } else if (a == "--keep-verdicts") {
+      if (i + 1 >= argc) { std::fprintf(stderr, "adjudicate: --keep-verdicts requires an argument\n"); return 1; }
+      keep_verdicts = argv[++i];
     } else if (a == "-h" || a == "--help") {
       usage();
       return 0;
@@ -64,6 +76,22 @@ int cmd_adjudicate(int argc, char** argv) {
       std::fprintf(stderr, "adjudicate: unknown option '%s'\n", a.c_str());
       usage();
       return 1;
+    }
+  }
+
+  std::set<std::string> keep;
+  {
+    static const std::set<std::string> known_verdicts = {"known", "known_fragment", "confirmed", "reference_bias",
+                                                         "unconfirmed", "artifact", "not_adjudicated"};
+    std::stringstream ss(keep_verdicts);
+    std::string tok;
+    while (std::getline(ss, tok, ',')) {
+      if (tok.empty()) continue;
+      if (known_verdicts.count(tok) == 0) {
+        std::fprintf(stderr, "adjudicate: --keep-verdicts: unknown verdict '%s'\n", tok.c_str());
+        return 1;
+      }
+      keep.insert(tok);
     }
   }
 
@@ -91,6 +119,8 @@ int cmd_adjudicate(int argc, char** argv) {
     prov.reference_path = common.reference;
     prov.reference_haplotype_paths = common.reference_haplotypes;
     prov.pangenome_path = common.pangenome_junctions;
+    prov.kept_path = write_kept;
+    prov.kept_verdicts = keep_verdicts;
     prov.hash_inputs = hash_inputs;
     prov.variant_axis_on = !common.reference_haplotypes.empty();
     prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
@@ -118,6 +148,13 @@ int cmd_adjudicate(int argc, char** argv) {
         " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
     write_adjudication_outputs(out_prefix, run.results, prov);
     write_junctions_tsv(out_prefix + ".junctions.tsv", run.junctions);
+    if (!write_kept.empty()) {
+      std::unordered_set<std::string> ids;
+      for (const auto& r : run.results) if (keep.count(r.verdict.verdict)) ids.insert(r.isoform_id);
+      const std::size_t n = write_kept_isoforms(prov.isoforms_path, !common.isoforms_bed.empty(), write_kept, ids);
+      std::fprintf(stderr, "kept %zu of %zu isoforms (%s) -> %s\n", n, run.results.size(), keep_verdicts.c_str(),
+                   write_kept.c_str());
+    }
 
     std::map<std::string, std::size_t> counts;
     for (const auto& r : run.results) ++counts[to_string(r.verdict.confidence)];

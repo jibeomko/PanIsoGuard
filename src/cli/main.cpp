@@ -19,6 +19,7 @@ int cmd_adjudicate(int argc, char** argv);
 int cmd_benchmark(int argc, char** argv);
 int cmd_ablate(int argc, char** argv);
 int cmd_example(int argc, char** argv);
+int cmd_decoys(int argc, char** argv);
 
 namespace {
 
@@ -43,6 +44,7 @@ void print_usage() {
       "  benchmark         Non-redundancy vs SQANTI3 (McNemar / 2x2 / Jaccard)\n"
       "  ablate            Per-evidence-axis ablation (confidence-class changes)\n"
       "  combine           Integrate multiple callers' isoforms by intron-chain fingerprint\n"
+      "  decoys            Per-dataset false-lift check of the whole-chain read support (recombined known chains)\n"
       "  example           Copy a bundled example (tiny, multi_caller, notes-data) into a folder\n"
       "  version           Print version, linked htslib, and compiled-in capabilities\n"
       "\n"
@@ -78,6 +80,7 @@ int main(int argc, char** argv) {
   if (sub == "benchmark")       return cmd_benchmark(argc, argv);
   if (sub == "ablate")          return cmd_ablate(argc, argv);
   if (sub == "combine")         return cmd_combine(argc, argv);
+  if (sub == "decoys")          return cmd_decoys(argc, argv);
   if (sub == "example")         return cmd_example(argc, argv);
 
   std::fprintf(stderr, "panisoguard: unknown subcommand '%s'\n\n", sub.c_str());

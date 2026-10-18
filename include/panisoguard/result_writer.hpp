@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "panisoguard/adjudicator.hpp"
@@ -22,6 +23,8 @@ struct RunProvenance {
   std::string reference_path;       // "" if none (genome FASTA)
   std::vector<std::string> reference_haplotype_paths;  // personalized FASTAs (variant axis)
   std::string pangenome_path;       // "" if none
+  std::string kept_path;            // "" if none (--write-kept: the isoform file filtered to kept verdicts)
+  std::string kept_verdicts;        // the --keep-verdicts list that selected them
   bool hash_inputs = false;         // also write an MD5 per input (--hash-inputs; reads every file once)
   bool variant_axis_on = false;     // a haplotype FASTA was supplied
   bool variant_circular = false;    // haplotype provenance is circular-risk
@@ -32,6 +35,12 @@ struct RunProvenance {
   std::string thresholds;     // effective rule thresholds, "key=value ..." (so a run is
                               // reproducible even if the config file changes later)
 };
+
+// Copy the caller isoform file (GTF, or BED12 when is_bed) to out_path keeping only the
+// records whose transcript_id / name is in `keep`; GTF comment lines are kept, gene lines
+// (no transcript_id) are dropped. Returns the number of distinct ids written.
+std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const std::string& out_path,
+                                const std::unordered_set<std::string>& keep);
 
 // Write <prefix>.junctions.tsv: one row per junction of the adjudicated isoforms with the
 // per-junction evidence (intron coordinates 1-based inclusive, as in SJ.tab and GTF).

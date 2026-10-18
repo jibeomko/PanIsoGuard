@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
-  "generated_utc": "2026-10-18T00:49:58Z",
+  "generated_utc": "2026-10-18T02:27:42Z",
   "metrics": {
     "bambu": {
       "n_genuine": 409,
@@ -75,6 +75,232 @@
           "false_novel:UNRESOLVED->NOVEL_PROBABLE": 15,
           "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 83,
           "genuine_novel:UNRESOLVED->UNCONFIRMED": 1
+        }
+      }
+    },
+    "decoys": {
+      "gm12878_ont_drna": {
+        "decoys": {
+          "lifted": 7,
+          "n": 139003,
+          "rate": 0.0001
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 0,
+          "n": 5,
+          "rate": 0
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 884,
+          "n": 153588,
+          "rate": 0.0058
+        }
+      },
+      "hg02717_kinnex": {
+        "decoys": {
+          "lifted": 4043,
+          "n": 139003,
+          "rate": 0.0291
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 2308,
+          "n": 5516,
+          "rate": 0.4184
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 22729,
+          "n": 153588,
+          "rate": 0.148
+        }
+      },
+      "hg03516_kinnex": {
+        "decoys": {
+          "lifted": 1996,
+          "n": 139003,
+          "rate": 0.0144
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 976,
+          "n": 2106,
+          "rate": 0.4634
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 12825,
+          "n": 153588,
+          "rate": 0.0835
+        }
+      },
+      "lrgasp_ont": {
+        "decoys": {
+          "lifted": 848,
+          "n": 139003,
+          "rate": 0.0061
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 411,
+          "n": 1259,
+          "rate": 0.3265
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 8205,
+          "n": 153588,
+          "rate": 0.0534
+        }
+      },
+      "lrgasp_pacbio": {
+        "decoys": {
+          "lifted": 3415,
+          "n": 139003,
+          "rate": 0.0246
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 1872,
+          "n": 4323,
+          "rate": 0.433
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 21638,
+          "n": 153588,
+          "rate": 0.1409
+        }
+      },
+      "sqsim_full": {
+        "by_truth": {
+          "false": {
+            "lifted": 0,
+            "n": 3198,
+            "rate": 0.0
+          },
+          "genuine": {
+            "lifted": 0,
+            "n": 0,
+            "rate": null
+          }
+        },
+        "by_truth_both_parents_lifted": {
+          "false": {
+            "lifted": 0,
+            "n": 45,
+            "rate": 0.0
+          },
+          "genuine": {
+            "lifted": 0,
+            "n": 0,
+            "rate": null
+          }
+        },
+        "decoys": {
+          "lifted": 0,
+          "n": 3198,
+          "rate": 0
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 0,
+          "n": 45,
+          "rate": 0
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 479,
+          "n": 3572,
+          "rate": 0.1341
+        }
+      },
+      "sqsim_reduced": {
+        "by_truth": {
+          "false": {
+            "lifted": 4,
+            "n": 3014,
+            "rate": 0.0013
+          },
+          "genuine": {
+            "lifted": 31,
+            "n": 31,
+            "rate": 1.0
+          }
+        },
+        "by_truth_both_parents_lifted": {
+          "false": {
+            "lifted": 0,
+            "n": 26,
+            "rate": 0.0
+          },
+          "genuine": {
+            "lifted": 3,
+            "n": 3,
+            "rate": 1.0
+          }
+        },
+        "decoys": {
+          "lifted": 35,
+          "n": 3045,
+          "rate": 0.0115
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 3,
+          "n": 29,
+          "rate": 0.1034
+        },
+        "max_per_gene": 10,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 272,
+          "n": 3397,
+          "rate": 0.0801
+        }
+      },
+      "sqsim_reduced_all": {
+        "by_truth": {
+          "false": {
+            "lifted": 19,
+            "n": 40401,
+            "rate": 0.0005
+          },
+          "genuine": {
+            "lifted": 70,
+            "n": 70,
+            "rate": 1.0
+          }
+        },
+        "by_truth_both_parents_lifted": {
+          "false": {
+            "lifted": 2,
+            "n": 210,
+            "rate": 0.0095
+          },
+          "genuine": {
+            "lifted": 4,
+            "n": 4,
+            "rate": 1.0
+          }
+        },
+        "decoys": {
+          "lifted": 89,
+          "n": 40471,
+          "rate": 0.0022
+        },
+        "decoys_both_parents_lifted": {
+          "lifted": 6,
+          "n": 214,
+          "rate": 0.028
+        },
+        "max_per_gene": 0,
+        "min_full_reads": 3,
+        "parents": {
+          "lifted": 581,
+          "n": 6278,
+          "rate": 0.0925
         }
       }
     },
@@ -484,7 +710,7 @@
       }
     }
   },
-  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF.",
+  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them).",
   "protocol": "chain_support",
   "ruleset_version": "default-0.0.5",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",

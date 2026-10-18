@@ -37,6 +37,7 @@ namespace {
 
 struct ExonAcc {
   std::string chrom;
+  std::string gene_id;
   Strand strand = Strand::kUnknown;
   std::vector<std::pair<int64_t, int64_t>> exons;  // 1-based inclusive [s, e]
 };
@@ -85,6 +86,7 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
     if (it == acc.end()) {
       ExonAcc a;
       a.chrom = f[0];
+      a.gene_id = extract_gtf_attr(f[8], "gene_id");
       a.strand = parse_strand(f[6].empty() ? '.' : f[6][0]);
       it = acc.emplace(tid, std::move(a)).first;
       order.push_back(tid);
@@ -98,7 +100,7 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
   std::vector<Transcript> out;
   out.reserve(order.size());
   for (const auto& tid : order) {
-    out.push_back(Transcript{tid, chain_from_exons(acc[tid])});
+    out.push_back(Transcript{tid, chain_from_exons(acc[tid]), acc[tid].gene_id});
   }
   return out;
 }

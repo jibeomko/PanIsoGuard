@@ -77,6 +77,53 @@ mapping or non-canonical signs from the simulated reads. So on SIRV the rule lif
 either way (recorded as `sirv_set4` in the envelope); the evidence it rests on is the
 read-level table above.
 
+## Decoy chains: how often does the lift fire on a chain the annotation does not know?
+
+`panisoguard decoys` recombines each gene's annotated transcripts: the 5′ introns of one joined
+to the 3′ introns of another at an intron they share, keeping only chains that are neither
+annotated nor a contiguous piece of an annotated chain (at most 10 per gene, seed 1). Every
+junction is known, so these are exactly the NIC chains that only the chain axis can lift, and
+their whole-chain reads are counted with the same code the axis uses. `score_decoys.py`
+summarizes the runs and, on SQANTI-SIM, splits the decoys by the truth.
+
+| dataset (annotation) | decoys | ≥ 3 reads | both parents ≥ 3 → ≥ 3 reads | annotated parents ≥ 3 |
+|---|---:|---:|---:|---:|
+| SQANTI-SIM chr22, reduced annotation (the truth set) | 3,045 | 35 (1.1 %) | 3 / 29 | 272 / 3,397 (8 %) |
+| same, every decoy (no cap) | 40,471 | 89 (0.2 %) | 6 / 214 | 581 / 6,278 (9 %) |
+| SQANTI-SIM chr22, full annotation | 3,198 | **0** | 0 / 45 | 479 / 3,572 (13 %) |
+| LRGASP WTC11 PacBio cDNA (GENCODE v49) | 139,003 | 3,415 (2.5 %) | 1,872 / 4,323 (**43 %**) | 21,638 / 153,588 (14 %) |
+| LRGASP WTC11 ONT cDNA | 139,003 | 848 (0.6 %) | 411 / 1,259 (33 %) | 8,205 (5 %) |
+| HG03516 Kinnex Iso-Seq | 139,003 | 1,996 (1.4 %) | 976 / 2,106 (46 %) | 12,825 (8 %) |
+| HG02717 Kinnex Iso-Seq | 139,003 | 4,043 (2.9 %) | 2,308 / 5,516 (42 %) | 22,729 (15 %) |
+| GM12878 ONT direct RNA | 139,003 | 7 (0.01 %) | 0 / 5 | 884 (0.6 %) |
+
+On the reduced SQANTI-SIM annotation the truth tells the two kinds of decoy apart: 31 of the 35
+lifted decoys are deleted genuine transcripts (31 / 31 of the genuine decoys are lifted), and
+the wrong ones reach 3 reads 4 / 3,014 times (0.13 %; 19 / 40,401 = 0.05 % without the cap;
+0 / 26 and 2 / 210 among decoys whose parents are both expressed). With the full annotation,
+where nothing expressed is unannotated, 0 / 3,198.
+
+- **In simulation the lift almost never fires on a wrong combination of known junctions**
+  (0–0.1 %) and always on the right ones. The decoy check recovers the truth set's own result
+  without the truth.
+- **On real data a third to a half of the recombinants of two expressed isoforms are carried by
+  ≥ 3 reads.** They do not look like RT or PCR chimeras: the lifted decoys carry about as many
+  reads as their parents (median 7 against the weaker parent's 5; read-count ratio to that
+  parent median 0.92–1.00, under 0.05 in fewer than 1 %), whereas a chimera is a small
+  fraction of the parent molecules. They look like combinatorial isoforms GENCODE does not
+  list, in weakly expressed genes where 3 reads is most of the evidence there is. On real data
+  the decoy rate is therefore an upper bound that mostly measures annotation incompleteness;
+  the simulation, which has no unannotated isoforms, gives the lower bound.
+- **Scope.** A decoy is a wrong *combination* of right junctions. Chains with a wrong junction
+  (the shifted-coordinate, alignment-level false chains that cost Bambu and TALON precision
+  above) are outside its reach by construction.
+- **What it says about the rule.** ≥ 3 whole-chain reads is rarely an accident of combination
+  (and a 4-bp shifted junction is a different problem), but it cannot tell a biologically
+  distinct isoform from a rare recombinant of two expressed ones: that is why the lift stops at
+  `NOVEL_PROBABLE`. The conditional column is a per-dataset knob: run `decoys` on your own
+  BAM to see how combinatorial your expressed genes are at your depth before trusting the
+  lifted NIC calls as a set. 1–12 min genome-wide, 0.4 GB.
+
 ## Reproduce
 
 ```bash
@@ -90,6 +137,13 @@ WORK=/path/to/sqanti_sim/work MC=/path/to/multicaller/data SJ=/path/to/h2h_sr/sr
 # SIRV-Set4 replication (needs pysam):
 score_sirv_chain.py --work /path/to/pig_sirv/work --mc /path/to/pig_sirv_mc --out /tmp/sirv_chain \
   --pig ../../build/panisoguard --cfg ../../config/rules.default.toml --emit-metrics ../results/chain_support/metrics.json
+```
+
+```bash
+# decoy chains (any dataset; the truth split needs the SQANTI-SIM truth table):
+panisoguard decoys --ref-gtf /path/to/chr22_modified.gtf --bam /path/to/aln.bam --out /tmp/decoys/sqsim
+score_decoys.py --run sqsim=/tmp/decoys/sqsim --truth sqsim=/path/to/truth.truth.tsv \
+  --emit-metrics ../results/chain_support/metrics.json
 ```
 
 `score_chain.py` imports the labelling and metrics of

@@ -153,8 +153,11 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        there instead; the evidence is then independent (`evidence.chain_independent`,
        reason `chain_support;independent_library`), but the class is still `PROBABLE`: the
        tracked data have no such library, so the lift to `CONFIRMED` is not validated.
-       Same chain+catalog
-       requirement as consensus. Disable with `ablate --axes chain`.
+       Same chain+catalog requirement as consensus. Disable with `ablate --axes chain`.
+       `panisoguard decoys` measures the lift's false-fire rate on a user's own BAM: it
+       recombines each gene's annotated transcripts at a shared intron into
+       novel-in-catalog chains and reports the fraction that ≥ `chain_min_full_reads` reads
+       carry end to end (an upper bound; some decoys are real, unannotated isoforms).
 - Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
   KNOWN_FRAGMENT` (verdict `known_fragment`, reason `ism_chain_support`) when
   ≥ `chain_min_full_reads` long reads carry its whole intron chain and the 3' end shows

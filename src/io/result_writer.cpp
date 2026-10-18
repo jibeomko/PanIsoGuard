@@ -1,5 +1,7 @@
 #include "panisoguard/result_writer.hpp"
 
+#include "panisoguard/gtf.hpp"
+
 #include <cstdio>
 #include <ctime>
 #include <fstream>
@@ -181,6 +183,43 @@ std::string file_identity(const std::string& path, bool hash) {
   return id;
 }
 
+}  // namespace
+
+std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const std::string& out_path,
+                                const std::unordered_set<std::string>& keep) {
+  std::ifstream in(in_path);
+  if (!in) throw std::runtime_error("cannot open " + in_path);
+  std::ofstream out(out_path);
+  if (!out) throw std::runtime_error("cannot write " + out_path);
+  std::unordered_set<std::string> written;
+  std::string line;
+  while (std::getline(in, line)) {
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (line.empty()) continue;
+    if (line[0] == '#' || (is_bed && (line.rfind("track", 0) == 0 || line.rfind("browser", 0) == 0))) {
+      if (!is_bed) out << line << '\n';
+      continue;
+    }
+    std::string id;
+    if (is_bed) {
+      std::size_t a = 0;
+      for (int col = 0; col < 3; ++col) { a = line.find('\t', a); if (a == std::string::npos) break; ++a; }
+      if (a == std::string::npos) continue;
+      id = line.substr(a, line.find('\t', a) - a);
+    } else {
+      const std::size_t tab = line.rfind('\t');
+      if (tab == std::string::npos) continue;
+      id = extract_gtf_attr(line.substr(tab + 1), "transcript_id");
+    }
+    if (id.empty() || keep.count(id) == 0) continue;
+    out << line << '\n';
+    written.insert(id);
+  }
+  return written.size();
+}
+
+namespace {
+
 void write_provenance(const std::string& path, const std::vector<AdjudicationResult>& results,
                       const RunProvenance& prov) {
   std::ofstream out(path);
@@ -202,6 +241,10 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "reference\t" << (prov.reference_path.empty() ? "<none>" : prov.reference_path) << '\n';
   for (const auto& h : prov.reference_haplotype_paths) out << "reference_haplotype\t" << h << '\n';
   out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
+  if (!prov.kept_path.empty()) {
+    out << "kept_isoforms\t" << prov.kept_path << '\n';
+    out << "kept_verdicts\t" << prov.kept_verdicts << '\n';
+  }
   // Input identity (size, mtime, optional md5): the paths above say what was named, these
   // say what was read. Lines start with "input." so an expected-output diff can skip them.
   out << "# inputs" << (prov.hash_inputs ? " (md5 via --hash-inputs)" : "") << '\n';

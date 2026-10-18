@@ -239,6 +239,11 @@ panisoguard combine \
 | `<prefix>.junctions.tsv`     | one row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
+With `--write-kept PATH`, `adjudicate` also copies the input isoform GTF (or BED12) keeping only
+the isoforms whose verdict is in `--keep-verdicts` (default `known,known_fragment,confirmed,
+reference_bias`), so the filtered annotation can go straight to quantification; the provenance
+log records both.
+
 Here is what the verdicts look like for four isoforms of the notes' toy gene (real output of one
 run with short reads, a long-read BAM and two haplotypes). The outlined evidence is what
 decided each verdict.
@@ -310,6 +315,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 | `benchmark`  | compares PanIsoGuard's calls on novel isoforms with the SQANTI3 filter (2×2 table, Jaccard index, McNemar test) |
 | `ablate`     | turns off one kind of evidence at a time and shows which calls change |
 | `combine`    | matches several callers' isoforms by intron chain and writes which callers found each one |
+| `decoys`     | measures, on your own BAM, how often the whole-chain read support would lift a chain the annotation does not know (recombined known transcripts), as an upper bound on its false-lift rate |
 | `version`    | shows the version, the linked htslib, and the built-in features |
 
 Run `panisoguard <command> --help` for all options. Input file formats:
@@ -323,7 +329,21 @@ panisoguard benchmark [adjudicate options] --out bench/
 
 # which calls change when one kind of evidence is turned off
 panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
+
+# how often >= 3 whole-chain reads carry a chain the annotation does not know, in this BAM
+panisoguard decoys    --ref-gtf ref.gtf --bam aln.bam --out decoys/sample
 ```
+
+`decoys` joins the 5′ introns of one annotated transcript to the 3′ introns of another of the
+same gene at a shared intron (a novel combination of known junctions, which no short-read test
+can reach) and counts the reads that carry each such chain end to end. The fraction with at
+least 3 is what the `chain_support` lift would do to chains that are probably wrong, in your
+data. In simulation, where nothing expressed is unannotated, wrong combinations reach 3 reads
+in 0–0.1 % of cases (and the deleted genuine transcripts in 100 %); on real PacBio and Kinnex
+data a third to a half of the recombinants of two expressed isoforms do, with as many reads as
+their parents, which is what unannotated combinatorial isoforms look like rather than chimeras
+([benchmark/chain_support](benchmark/chain_support)). The number is an upper bound on the
+false-lift rate and a measure of how much of your transcriptome the annotation misses.
 
 ## Study notes
 
