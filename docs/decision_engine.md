@@ -155,10 +155,9 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        reason `chain_support;independent_library`), but the class is still `PROBABLE`. On
        LRGASP WTC11, with the other platform's library as the independent one, 13 of 17
        (PacBio → ONT) and 14 of 16 (ONT → PacBio) validated novel isoforms are carried by
-       ≥ 3 independent reads (the misses have 0–2), but genome-wide the novel lifts reproduce
-       below expressed known transcripts at matched depth (PacBio → ONT 60–75 % of the FSM
-       rate), and a second library attests expression, not correct splicing, so the evidence
-       is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
+       ≥ 3 independent reads (the misses have 0–2), and within genes the other library
+       covers the novel lifts reproduce like known transcripts; but a second library attests
+       expression, not correct splicing, so the evidence is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
        Same chain+catalog requirement as consensus. Disable with `ablate --axes chain`.
        `panisoguard decoys` measures the lift's false-fire rate on a user's own BAM: it
        recombines each gene's annotated transcripts at a shared intron into

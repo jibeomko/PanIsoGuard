@@ -76,22 +76,30 @@ and at about the same rate from ONT to PacBio (34 / 59 / 67 / 88 / 92 % vs 56 / 
 98 %); `KNOWN_FRAGMENT`s reproduce like FSM (43 % and 92 %). The per-isoform counts and bins
 are in the envelope (`cross_library`).
 
+Most of that gap is genes the other library does not cover. Within genes where some isoform
+has ≥ 3 ONT reads, the PacBio novel lifts without a sign reproduce like the known transcripts
+or better (NIC 23 / 32 / 44 / 60 / 78 %, NNC 30 / 47 / 50 / 77 / 84 %, against FSM 18 / 29 /
+39 / 50 / 72 % in the same depth bins).
+
 **The RT-switch sign, seen from the other library.** PacBio lifts that carry SQANTI3's
 `RTS_stage` reproduce in ONT at about half the rate of the unflagged lifts in every depth bin
 (3–5: 4.5 % vs 12.6 %; 6–10: 7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs
-40.1 %; > 50: 40.7 % vs 51.1 %), which is what a mix of real isoforms and library-specific
-artifacts looks like: roughly half of the flagged PacBio lifts behave as artifacts of that
-library. From ONT to PacBio the flagged lifts reproduce as well as or better than the
-unflagged ones (55 / 69 / 86 / 100 / 89 % vs 34 / 59 / 67 / 88 / 92 %). This is the first
-real-data measurement of the flag's artifact side; its consequences for the ruleset-0.0.5
-policy are discussed in [../rts_sensitivity](../rts_sensitivity).
+40.1 %; > 50: 40.7 % vs 51.1 %). That is not evidence of RT artifacts, because the annotated
+transcripts show the same deficit: FSM with ≥ 3 PacBio reads reproduce in ONT at 18 / 29 /
+39 / 50 / 72 % without the flag and 6 / 11 / 21 / 29 / 55 % with it. `RTS_stage` marks a
+junction flanked by a direct repeat, and the chain count demands exact splice coordinates,
+which ONT reads reach less often across a repeat; the flag lowers the ONT count of any chain,
+real or not. From ONT to PacBio the flagged chains reproduce as well as or better than the
+unflagged ones (FSM 70 / 83 / 93 / 94 / 98 % vs 55 / 69 / 82 / 93 / 98 %; lifts 55 / 69 / 86 /
+100 / 89 % vs 34 / 59 / 67 / 88 / 92 %). So the cross-library test says nothing about the
+flag's artifact side either way ([../rts_sensitivity](../rts_sensitivity)); it does say that
+an ONT library is a poor independent witness for repeat-flanked junctions.
 
 **Why `;independent_library` still stops at `NOVEL_PROBABLE`.** A second library attests that
 the chain is expressed in the sample, not that it is spliced as called: an artifact that
 recurs across protocols (a sequence-driven template switch, a systematic misalignment) passes
-it too, and the novel lifts reproduce below the known transcripts even at matched depth. The
-evidence is reported (`evidence.chain_independent`, the reason suffix) so a user can require
-it; it is not promoted.
+it too. The evidence is reported (`evidence.chain_independent`, the reason suffix) so a user
+can require it; it is not promoted.
 
 ## The GENCODE-reviewed targets: do the negatives help?
 

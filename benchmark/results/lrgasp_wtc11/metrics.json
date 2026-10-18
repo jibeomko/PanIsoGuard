@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-10-18T03:09:21Z",
+  "generated_utc": "2026-10-18T03:15:18Z",
   "metrics": {
     "cross_library": {
       "ont_nosr": {
@@ -31,6 +31,168 @@
               "frac": 0.699,
               "independent_ge3": 1878,
               "n": 2688
+            }
+          },
+          "fsm_rts_flag_false": {
+            "11-20": {
+              "frac": 0.821,
+              "independent_ge3": 1692,
+              "n": 2062
+            },
+            "21-50": {
+              "frac": 0.927,
+              "independent_ge3": 1879,
+              "n": 2028
+            },
+            "3-5": {
+              "frac": 0.549,
+              "independent_ge3": 2046,
+              "n": 3725
+            },
+            "51-inf": {
+              "frac": 0.982,
+              "independent_ge3": 3395,
+              "n": 3456
+            },
+            "6-10": {
+              "frac": 0.685,
+              "independent_ge3": 1677,
+              "n": 2447
+            }
+          },
+          "fsm_rts_flag_true": {
+            "11-20": {
+              "frac": 0.929,
+              "independent_ge3": 183,
+              "n": 197
+            },
+            "21-50": {
+              "frac": 0.945,
+              "independent_ge3": 188,
+              "n": 199
+            },
+            "3-5": {
+              "frac": 0.699,
+              "independent_ge3": 270,
+              "n": 386
+            },
+            "51-inf": {
+              "frac": 0.981,
+              "independent_ge3": 261,
+              "n": 266
+            },
+            "6-10": {
+              "frac": 0.834,
+              "independent_ge3": 201,
+              "n": 241
+            }
+          },
+          "lifts_nic_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.829,
+              "independent_ge3": 170,
+              "n": 205
+            },
+            "21-50": {
+              "frac": 0.941,
+              "independent_ge3": 112,
+              "n": 119
+            },
+            "3-5": {
+              "frac": 0.623,
+              "independent_ge3": 292,
+              "n": 469
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 78,
+              "n": 78
+            },
+            "6-10": {
+              "frac": 0.815,
+              "independent_ge3": 229,
+              "n": 281
+            }
+          },
+          "lifts_nic_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.938,
+              "independent_ge3": 15,
+              "n": 16
+            },
+            "21-50": {
+              "frac": 1.0,
+              "independent_ge3": 3,
+              "n": 3
+            },
+            "3-5": {
+              "frac": 0.712,
+              "independent_ge3": 47,
+              "n": 66
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 8,
+              "n": 8
+            },
+            "6-10": {
+              "frac": 0.872,
+              "independent_ge3": 34,
+              "n": 39
+            }
+          },
+          "lifts_nnc_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.552,
+              "independent_ge3": 91,
+              "n": 165
+            },
+            "21-50": {
+              "frac": 0.825,
+              "independent_ge3": 99,
+              "n": 120
+            },
+            "3-5": {
+              "frac": 0.219,
+              "independent_ge3": 129,
+              "n": 588
+            },
+            "51-inf": {
+              "frac": 0.787,
+              "independent_ge3": 37,
+              "n": 47
+            },
+            "6-10": {
+              "frac": 0.427,
+              "independent_ge3": 97,
+              "n": 227
+            }
+          },
+          "lifts_nnc_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.667,
+              "independent_ge3": 4,
+              "n": 6
+            },
+            "21-50": {
+              "frac": 1.0,
+              "independent_ge3": 4,
+              "n": 4
+            },
+            "3-5": {
+              "frac": 0.423,
+              "independent_ge3": 22,
+              "n": 52
+            },
+            "51-inf": {
+              "frac": 0.0,
+              "independent_ge3": 0,
+              "n": 1
+            },
+            "6-10": {
+              "frac": 0.333,
+              "independent_ge3": 6,
+              "n": 18
             }
           },
           "lifts_plain": {
@@ -271,6 +433,168 @@
               "n": 2688
             }
           },
+          "fsm_rts_flag_false": {
+            "11-20": {
+              "frac": 0.821,
+              "independent_ge3": 1692,
+              "n": 2062
+            },
+            "21-50": {
+              "frac": 0.927,
+              "independent_ge3": 1879,
+              "n": 2028
+            },
+            "3-5": {
+              "frac": 0.549,
+              "independent_ge3": 2046,
+              "n": 3725
+            },
+            "51-inf": {
+              "frac": 0.982,
+              "independent_ge3": 3395,
+              "n": 3456
+            },
+            "6-10": {
+              "frac": 0.685,
+              "independent_ge3": 1677,
+              "n": 2447
+            }
+          },
+          "fsm_rts_flag_true": {
+            "11-20": {
+              "frac": 0.929,
+              "independent_ge3": 183,
+              "n": 197
+            },
+            "21-50": {
+              "frac": 0.945,
+              "independent_ge3": 188,
+              "n": 199
+            },
+            "3-5": {
+              "frac": 0.699,
+              "independent_ge3": 270,
+              "n": 386
+            },
+            "51-inf": {
+              "frac": 0.981,
+              "independent_ge3": 261,
+              "n": 266
+            },
+            "6-10": {
+              "frac": 0.834,
+              "independent_ge3": 201,
+              "n": 241
+            }
+          },
+          "lifts_nic_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.884,
+              "independent_ge3": 130,
+              "n": 147
+            },
+            "21-50": {
+              "frac": 0.962,
+              "independent_ge3": 76,
+              "n": 79
+            },
+            "3-5": {
+              "frac": 0.696,
+              "independent_ge3": 229,
+              "n": 329
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 48,
+              "n": 48
+            },
+            "6-10": {
+              "frac": 0.882,
+              "independent_ge3": 187,
+              "n": 212
+            }
+          },
+          "lifts_nic_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.938,
+              "independent_ge3": 15,
+              "n": 16
+            },
+            "21-50": {
+              "frac": 1.0,
+              "independent_ge3": 1,
+              "n": 1
+            },
+            "3-5": {
+              "frac": 0.741,
+              "independent_ge3": 43,
+              "n": 58
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 8,
+              "n": 8
+            },
+            "6-10": {
+              "frac": 0.912,
+              "independent_ge3": 31,
+              "n": 34
+            }
+          },
+          "lifts_nnc_plain_gene_covered": {
+            "11-20": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "21-50": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "3-5": {
+              "frac": 0.0,
+              "independent_ge3": 0,
+              "n": 5
+            },
+            "51-inf": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "6-10": {
+              "frac": 1.0,
+              "independent_ge3": 1,
+              "n": 1
+            }
+          },
+          "lifts_nnc_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "21-50": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "3-5": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "51-inf": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "6-10": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            }
+          },
           "lifts_plain": {
             "11-20": {
               "frac": 0.878,
@@ -508,6 +832,168 @@
               "frac": 0.265,
               "independent_ge3": 1183,
               "n": 4471
+            }
+          },
+          "fsm_rts_flag_false": {
+            "11-20": {
+              "frac": 0.39,
+              "independent_ge3": 1200,
+              "n": 3079
+            },
+            "21-50": {
+              "frac": 0.497,
+              "independent_ge3": 1651,
+              "n": 3321
+            },
+            "3-5": {
+              "frac": 0.184,
+              "independent_ge3": 1126,
+              "n": 6108
+            },
+            "51-inf": {
+              "frac": 0.717,
+              "independent_ge3": 5693,
+              "n": 7939
+            },
+            "6-10": {
+              "frac": 0.295,
+              "independent_ge3": 1107,
+              "n": 3756
+            }
+          },
+          "fsm_rts_flag_true": {
+            "11-20": {
+              "frac": 0.206,
+              "independent_ge3": 116,
+              "n": 563
+            },
+            "21-50": {
+              "frac": 0.287,
+              "independent_ge3": 161,
+              "n": 560
+            },
+            "3-5": {
+              "frac": 0.063,
+              "independent_ge3": 78,
+              "n": 1230
+            },
+            "51-inf": {
+              "frac": 0.546,
+              "independent_ge3": 711,
+              "n": 1303
+            },
+            "6-10": {
+              "frac": 0.106,
+              "independent_ge3": 76,
+              "n": 715
+            }
+          },
+          "lifts_nic_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.442,
+              "independent_ge3": 237,
+              "n": 536
+            },
+            "21-50": {
+              "frac": 0.601,
+              "independent_ge3": 233,
+              "n": 388
+            },
+            "3-5": {
+              "frac": 0.232,
+              "independent_ge3": 171,
+              "n": 738
+            },
+            "51-inf": {
+              "frac": 0.78,
+              "independent_ge3": 252,
+              "n": 323
+            },
+            "6-10": {
+              "frac": 0.324,
+              "independent_ge3": 200,
+              "n": 618
+            }
+          },
+          "lifts_nic_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.343,
+              "independent_ge3": 35,
+              "n": 102
+            },
+            "21-50": {
+              "frac": 0.532,
+              "independent_ge3": 42,
+              "n": 79
+            },
+            "3-5": {
+              "frac": 0.105,
+              "independent_ge3": 12,
+              "n": 114
+            },
+            "51-inf": {
+              "frac": 0.765,
+              "independent_ge3": 39,
+              "n": 51
+            },
+            "6-10": {
+              "frac": 0.208,
+              "independent_ge3": 22,
+              "n": 106
+            }
+          },
+          "lifts_nnc_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.497,
+              "independent_ge3": 87,
+              "n": 175
+            },
+            "21-50": {
+              "frac": 0.768,
+              "independent_ge3": 96,
+              "n": 125
+            },
+            "3-5": {
+              "frac": 0.303,
+              "independent_ge3": 151,
+              "n": 499
+            },
+            "51-inf": {
+              "frac": 0.845,
+              "independent_ge3": 49,
+              "n": 58
+            },
+            "6-10": {
+              "frac": 0.474,
+              "independent_ge3": 135,
+              "n": 285
+            }
+          },
+          "lifts_nnc_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.25,
+              "independent_ge3": 5,
+              "n": 20
+            },
+            "21-50": {
+              "frac": 0.417,
+              "independent_ge3": 5,
+              "n": 12
+            },
+            "3-5": {
+              "frac": 0.111,
+              "independent_ge3": 8,
+              "n": 72
+            },
+            "51-inf": {
+              "frac": 0.778,
+              "independent_ge3": 7,
+              "n": 9
+            },
+            "6-10": {
+              "frac": 0.107,
+              "independent_ge3": 3,
+              "n": 28
             }
           },
           "lifts_plain": {
@@ -753,6 +1239,168 @@
               "frac": 0.265,
               "independent_ge3": 1183,
               "n": 4471
+            }
+          },
+          "fsm_rts_flag_false": {
+            "11-20": {
+              "frac": 0.39,
+              "independent_ge3": 1200,
+              "n": 3079
+            },
+            "21-50": {
+              "frac": 0.497,
+              "independent_ge3": 1651,
+              "n": 3321
+            },
+            "3-5": {
+              "frac": 0.184,
+              "independent_ge3": 1126,
+              "n": 6108
+            },
+            "51-inf": {
+              "frac": 0.717,
+              "independent_ge3": 5693,
+              "n": 7939
+            },
+            "6-10": {
+              "frac": 0.295,
+              "independent_ge3": 1107,
+              "n": 3756
+            }
+          },
+          "fsm_rts_flag_true": {
+            "11-20": {
+              "frac": 0.206,
+              "independent_ge3": 116,
+              "n": 563
+            },
+            "21-50": {
+              "frac": 0.287,
+              "independent_ge3": 161,
+              "n": 560
+            },
+            "3-5": {
+              "frac": 0.063,
+              "independent_ge3": 78,
+              "n": 1230
+            },
+            "51-inf": {
+              "frac": 0.546,
+              "independent_ge3": 711,
+              "n": 1303
+            },
+            "6-10": {
+              "frac": 0.106,
+              "independent_ge3": 76,
+              "n": 715
+            }
+          },
+          "lifts_nic_plain_gene_covered": {
+            "11-20": {
+              "frac": 0.4,
+              "independent_ge3": 171,
+              "n": 428
+            },
+            "21-50": {
+              "frac": 0.586,
+              "independent_ge3": 205,
+              "n": 350
+            },
+            "3-5": {
+              "frac": 0.208,
+              "independent_ge3": 113,
+              "n": 542
+            },
+            "51-inf": {
+              "frac": 0.781,
+              "independent_ge3": 235,
+              "n": 301
+            },
+            "6-10": {
+              "frac": 0.308,
+              "independent_ge3": 156,
+              "n": 507
+            }
+          },
+          "lifts_nic_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": 0.33,
+              "independent_ge3": 30,
+              "n": 91
+            },
+            "21-50": {
+              "frac": 0.538,
+              "independent_ge3": 42,
+              "n": 78
+            },
+            "3-5": {
+              "frac": 0.118,
+              "independent_ge3": 11,
+              "n": 93
+            },
+            "51-inf": {
+              "frac": 0.765,
+              "independent_ge3": 39,
+              "n": 51
+            },
+            "6-10": {
+              "frac": 0.205,
+              "independent_ge3": 17,
+              "n": 83
+            }
+          },
+          "lifts_nnc_plain_gene_covered": {
+            "11-20": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "21-50": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "3-5": {
+              "frac": 0.25,
+              "independent_ge3": 2,
+              "n": 8
+            },
+            "51-inf": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "6-10": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            }
+          },
+          "lifts_nnc_rt_switch_sign_gene_covered": {
+            "11-20": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "21-50": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "3-5": {
+              "frac": 0.0,
+              "independent_ge3": 0,
+              "n": 1
+            },
+            "51-inf": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
+            },
+            "6-10": {
+              "frac": null,
+              "independent_ge3": 0,
+              "n": 0
             }
           },
           "lifts_plain": {
@@ -1570,7 +2218,7 @@
       }
     }
   },
-  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
+  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
   "protocol": "lrgasp_wtc11",
   "ruleset_version": "builtin-0.0.5",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",

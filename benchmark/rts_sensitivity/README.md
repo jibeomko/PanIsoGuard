@@ -31,31 +31,32 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   ones the policy keeps, and all four are carried by ≥ 3 reads in the other platform's
   library too (CENPK 4 / 16, MTHFS 49 / 57, RND2 38 / 76, USF1 7 / 1 PacBio / ONT reads; USF1
   is the one with a single PacBio read).
-- **The artifact side, from the independent library.** [../lrgasp_wtc11](../lrgasp_wtc11)
+- **The artifact side is still unmeasured.** [../lrgasp_wtc11](../lrgasp_wtc11)
   (`cross_library.py`) counts each lifted PacBio isoform's reads in the ONT library of the same
   cells and the reverse. PacBio lifts carrying the sign reproduce in ONT at about half the rate
   of the unflagged lifts in every bin of PacBio depth (own count 3–5: 4.5 % vs 12.6 %; 6–10:
-  7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs 40.1 %; > 50: 40.7 % vs 51.1 %).
-  If the flagged set were real isoforms with an artifact-free sign it would reproduce like the
-  unflagged one; a 50 % deficit at every depth is what a mix of real isoforms and
-  library-specific artifacts looks like, so about half of the flagged PacBio lifts behave as
-  artifacts of that library. From ONT to PacBio the flagged lifts reproduce as well as or
-  better than the unflagged ones (55 / 69 / 86 / 100 / 89 % vs 34 / 59 / 67 / 88 / 92 %): the
-  sign carries information in one library and not in the other. Template switching is
-  sequence-driven, so it can recur across molecules of one library; read count alone does not
-  rule it out, and this is the evidence that it does not.
+  7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs 40.1 %; > 50: 40.7 % vs 51.1 %),
+  which at first looks like half of them being library-specific artifacts. The control says
+  otherwise: the annotated transcripts carrying the flag show the same deficit (FSM 6 / 11 /
+  21 / 29 / 55 % flagged vs 18 / 29 / 39 / 50 / 72 % unflagged). The flag marks a
+  repeat-flanked junction, the chain count demands exact coordinates, and ONT reads reach
+  them less often across a repeat, so the deficit measures ONT alignment, not RT switching;
+  from ONT to PacBio the flagged chains reproduce as well as or better than the unflagged
+  ones. What remains unmeasured is how often a real RT-switching chimera that ≥ 3 reads carry
+  end to end is flagged, which is what "hold" would protect against. Template switching is
+  sequence-driven, so it can recur across molecules; read count alone does not rule it out.
 - **What the choice moves.** On real Iso-Seq about one `NOVEL_PROBABLE` in six (1,297 / 7,081;
   1,357 / 8,368) rests on it, and every one of those is an isoform SQANTI3's rules filter
   discards. Under "hold" they are `UNCONFIRMED` (review), not `ARTIFACT`.
-- **The trade.** The flag is wrong about one time in six on isoforms known to exist, and
-  right about half the time on PacBio chain lifts, as far as reproducibility can tell. Under
-  "annotate" the confident set keeps the flagged lifts (about one `NOVEL_PROBABLE` in six on
-  real Iso-Seq, perhaps half of them library-specific); under "hold" they go to review and the
-  validated flagged isoforms go with them. Whichever policy is the default, the information is
-  not lost: the reason string keeps the sign, so the other policy is one filter on
-  `;rt_switch_sign` away, and a paper table can report both. The intra-priming sign still
-  holds (no real-data measurement either way, and thousands of chain-supported isoforms per
-  sample).
+- **The trade, and why annotate.** The one real-data number is the false-sign rate: the flag
+  is wrong about one time in six on isoforms known to exist, and a sign that weak should not
+  by itself move a read-supported chain from "keep" to "review". Under "annotate" the
+  confident set keeps the flagged lifts (about one `NOVEL_PROBABLE` in six on real Iso-Seq);
+  under "hold" they go to review and the validated flagged isoforms go with them. Whichever
+  policy is the default, the information is not lost: the reason string keeps the sign, so the
+  other policy is one filter on `;rt_switch_sign` away, and a paper table can report both. The
+  intra-priming sign still holds (no real-data measurement either way, and thousands of
+  chain-supported isoforms per sample).
 
 ## Reproduce
 

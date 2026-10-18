@@ -11,6 +11,9 @@ import argparse, collections, csv, datetime, json, sys
 MIN = 3
 
 
+gene_of = {}
+
+
 def load(prefix):
     out = {}
     for ln in open(prefix + ".attribution.jsonl"):
@@ -18,7 +21,7 @@ def load(prefix):
         e = d["evidence"]
         out[d["isoform"]] = {"cat": d["structural_category"], "cls": d["confidence_class"], "reason": d["verdict_reason"],
                              "full": e.get("chain_n_full_reads") or 0, "indep": bool(e.get("chain_independent")),
-                             "rts": bool(e.get("rts_stage"))}
+                             "rts": bool(e.get("rts_stage")), "gene": gene_of.get(d["isoform"], "?")}
     return out
 
 
@@ -34,6 +37,8 @@ def main():
     res = {}
     for p, other in (("pb", "ont"), ("ont", "pb")):
         for s in ("sr", "nosr"):
+            gene_of.clear()
+            gene_of.update({r["isoform"]: r["associated_gene"] for r in csv.DictReader(open(f"{a.work}/{p}/sq/iq_classification.txt"), delimiter="\t")})
             same, ind = load(f"{a.work}/{p}/adj_{s}"), load(f"{a.work}/{p}/adjx_{s}")
             assert all(v["indep"] for v in ind.values() if v["full"] or v["cls"] != "UNRESOLVED") or True
             r = {"independent_library": other}
@@ -65,6 +70,18 @@ def main():
                 return out
             r["by_same_library_count"] = {"fsm": binned(fsm), "lifts_plain": binned([i for i in lifted if same[i]["reason"] == "chain_support"]),
                                           "lifts_rt_switch_sign": binned([i for i in lifted if same[i]["reason"] == "chain_support;rt_switch_sign"])}
+            # control 1: the annotated transcripts split by the same RTS flag. If the flagged FSM show the same
+            # deficit, the deficit is about exact alignment across the repeat the flag marks, not about artifacts.
+            r["by_same_library_count"]["fsm_rts_flag_false"] = binned([i for i in fsm if not same[i]["rts"]])
+            r["by_same_library_count"]["fsm_rts_flag_true"] = binned([i for i in fsm if same[i]["rts"]])
+            # control 2: only genes the independent library covers (some isoform of the gene has >= MIN reads there)
+            gmax = collections.defaultdict(int)
+            for i, v in ind.items(): gmax[v["gene"]] = max(gmax[v["gene"]], v["full"])
+            covered = lambda i: gmax[same[i]["gene"]] >= MIN
+            for cat_tag, cat in (("nic", "novel_in_catalog"), ("nnc", "novel_not_in_catalog")):
+                for tag, reason in (("plain", "chain_support"), ("rt_switch_sign", "chain_support;rt_switch_sign")):
+                    sel = [i for i in lifted if same[i]["cat"] == cat and same[i]["reason"] == reason and covered(i)]
+                    r["by_same_library_count"][f"lifts_{cat_tag}_{tag}_gene_covered"] = binned(sel)
             # KNOWN_FRAGMENT reproducibility
             kf = [i for i, v in same.items() if v["cls"] == "KNOWN_FRAGMENT"]
             r["known_fragment"] = {"n": len(kf), "independent_ge3": sum(ind[i]["full"] >= MIN for i in kf), "frac": frac(sum(ind[i]["full"] >= MIN for i in kf), len(kf))}

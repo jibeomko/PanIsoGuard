@@ -72,9 +72,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   independent one (`benchmark/lrgasp_wtc11/cross_library.py`): 13 / 17 (PacBio → ONT) and
   14 / 16 (ONT → PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0–2
   reads); genome-wide the novel lifts reproduce at 60–75 % of the expressed-FSM rate at
-  matched depth from PacBio to ONT and at about the FSM rate from ONT to PacBio; PacBio
-  lifts carrying SQANTI3's RT-switch sign reproduce at half the rate of the unflagged ones in
-  every depth bin, ONT's do not. A second library attests expression, not correct splicing,
+  matched depth from PacBio to ONT (like FSM within genes the ONT library covers) and at
+  about the FSM rate from ONT to PacBio. Chains carrying SQANTI3's RT-switch sign reproduce
+  at half the rate from PacBio to ONT, known transcripts included: the flag marks
+  repeat-flanked junctions where ONT reads reach exact coordinates less often, an alignment
+  effect, not an artifact signal. A second library attests expression, not correct splicing,
   so the lift is recorded, not promoted.
 - **`genomic_compatibility`** column (last in `adjudicated.tsv`, also in the JSON): the DNA
   side on its own, independent of the verdict: `haplotype` / `pangenome` (every novel
