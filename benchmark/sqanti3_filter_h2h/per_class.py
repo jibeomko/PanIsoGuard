@@ -26,7 +26,7 @@ for t, e in ex.items():
 label = {t: l for t, l in label.items() if l in ("genuine_novel", "false_novel")}
 pos_rate = sum(l == "genuine_novel" for l in label.values()) / len(label)
 print(f"labelled multi-exon isoforms: {len(label)}  genuine={sum(l == 'genuine_novel' for l in label.values())}  positive rate={pos_rate:.3f}")
-order = ["KNOWN", "NOVEL_CONFIRMED", "NOVEL_PROBABLE", "UNRESOLVED", "UNCONFIRMED", "ARTIFACT"]
+order = ["KNOWN", "KNOWN_FRAGMENT", "NOVEL_CONFIRMED", "NOVEL_PROBABLE", "UNRESOLVED", "UNCONFIRMED", "ARTIFACT"]
 for setting in ["none", "oracle", "sr_250000", "sr_1000000", "sr_4000000"]:
     for run in ["pig", "pigbam"]:
         p = f"{h2h}/{setting}/{run}.adjudicated.tsv"

@@ -55,7 +55,7 @@ AUPRC = 0.9712   (baseline = 0.8314)
 - **recall** = 실제 진짜 중 진짜라고 부른 비율 = 430 / 730 = **0.589**
 - **specificity** = 실제 가짜 중 진짜라고 부르지 않은 비율 = (148 − 5) / 148 = **0.966**
 
-precision은 아주 높고 recall은 60%가 안 된다. 진짜를 놓친 300개는 어디 있을까? 표의 첫 줄을 보면 `UNCONFIRMED` 154개와 `UNRESOLVED` 146개다. 범주별 recall을 보면 그 정체가 나온다. NNC는 297개를 모두 찾았다. NIC는 절반을 못 찾았는데, [01](01_intron_chain_and_novelty.md) 4절에서 본 대로 대부분 알려진 junction의 조합이라 확인할 novel junction이 없어서 `UNRESOLVED`로 보류된 것이다. ISM 154개는 전부 놓쳤다. SQANTI-SIM이 지운 전사체 중에는 남은 전사체의 일부처럼 보이는 것이 있어서, SQANTI3가 ISM으로 분류하고 PanIsoGuard는 ISM을 늘 `UNCONFIRMED`로 둔다([04](04_projection.md) 2절). 이 154개도 chain이 지운 전사체와 정확히 같으니 진짜다. 판정을 내리지 않은 것이지 틀리게 내린 것은 아니지만, 놓친 것은 놓친 것이다.
+precision은 아주 높고 recall은 60%가 안 된다. 진짜를 놓친 300개는 어디 있을까? 표의 첫 줄을 보면 `UNCONFIRMED` 154개와 `UNRESOLVED` 146개다. 범주별 recall을 보면 그 정체가 나온다. NNC는 297개를 모두 찾았다. NIC는 절반을 못 찾았는데, [01](01_intron_chain_and_novelty.md) 4절에서 본 대로 대부분 알려진 junction의 조합이라 확인할 novel junction이 없어서 `UNRESOLVED`로 보류된 것이다. ISM 154개는 전부 놓쳤다. SQANTI-SIM이 지운 전사체 중에는 남은 전사체의 일부처럼 보이는 것이 있어서, SQANTI3가 ISM으로 분류하고, BAM 없이 돌린 이 실행에서 PanIsoGuard는 ISM을 `UNCONFIRMED`로 둔다([04](04_projection.md) 2절. BAM이 있으면 chain 전체를 지나는 read가 3개 이상인 ISM은 `KNOWN_FRAGMENT`가 되지만, 그것도 novel이라는 판정은 아니다). 이 154개도 chain이 지운 전사체와 정확히 같으니 진짜다. 판정을 내리지 않은 것이지 틀리게 내린 것은 아니지만, 놓친 것은 놓친 것이다.
 
 ## 3. AUPRC와 "baseline"은 무엇일까?
 
@@ -139,30 +139,30 @@ print("no short reads, vs SQ3rules:", m["bootstrap_auprc_diff_vs_SQ3rules_95ci_n
 short reads: none
   SQ3rules  TP 647 FP  58 precision 0.918 recall 0.886 AUPRC 0.909
   PIG       TP   0 FP   0 precision   -   recall 0.000 AUPRC 0.824
-  PIG+bam   TP 489 FP   4 precision 0.992 recall 0.670 AUPRC 0.947
+  PIG+bam   TP 546 FP   4 precision 0.993 recall 0.748 AUPRC 0.953
 short reads: sr_1000000
   SQ3rules  TP 650 FP  58 precision 0.918 recall 0.890 AUPRC 0.909
   allSJ3    TP 690 FP  17 precision 0.976 recall 0.945 AUPRC 0.968
   PIG       TP 398 FP   4 precision 0.990 recall 0.545 AUPRC 0.969
-  PIG+bam   TP 518 FP   4 precision 0.992 recall 0.710 AUPRC 0.972
+  PIG+bam   TP 544 FP   4 precision 0.993 recall 0.745 AUPRC 0.974
 short reads: oracle
   SQ3rules  TP 652 FP  58 precision 0.918 recall 0.893 AUPRC 0.910
   allSJ3    TP 730 FP  18 precision 0.976 recall 1.000 AUPRC 0.976
   PIG       TP 430 FP   5 precision 0.989 recall 0.589 AUPRC 0.971
-  PIG+bam   TP 545 FP   5 precision 0.991 recall 0.747 AUPRC 0.974
+  PIG+bam   TP 571 FP   5 precision 0.991 recall 0.782 AUPRC 0.977
 bootstrap 95% CI of AUPRC(PanIsoGuard) - AUPRC(allSJ3):
-  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.011, 0.008]
-  sr_1000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.013]
-  sr_250000  PIG [-0.008, 0.013]  PIG+bam [-0.003, 0.017]
-  sr_4000000 PIG [-0.01, 0.01]  PIG+bam [-0.006, 0.013]
-no short reads, vs SQ3rules: {'PIG': [-0.105, -0.066], 'PIG+bam': [0.023, 0.055]}
+  oracle     PIG [-0.015, 0.005]  PIG+bam [-0.009, 0.011]
+  sr_1000000 PIG [-0.01, 0.01]  PIG+bam [-0.004, 0.016]
+  sr_250000  PIG [-0.008, 0.013]  PIG+bam [-0.002, 0.019]
+  sr_4000000 PIG [-0.01, 0.01]  PIG+bam [-0.004, 0.016]
+no short reads, vs SQ3rules: {'PIG': [-0.105, -0.066], 'PIG+bam': [0.029, 0.061]}
 ```
 
 `allSJ3`가 한 줄 규칙이고 `PIG`가 PanIsoGuard다. 읽을 곳은 세 군데다.
 
-1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard 0.969, 한 줄 규칙 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더해도(0.972) 마찬가지로 신뢰구간이 0을 포함한다.
-2. **기본 선(precision, recall)**: short read만 쓰면 PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다. BAM을 더하면(0.0.7) chain 전체를 지나는 long read가 3개 이상인 NIC가 `NOVEL_PROBABLE`로 올라가서 recall이 0.710이 되고 precision은 0.992로 그대로다([04](04_projection.md) 3절). ISM은 여전히 보류다.
-3. **short read가 없을 때**: BAM도 없으면 PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다. BAM이 있으면 진짜 730개 중 489개를 precision 0.992로 잡고(모두 `NOVEL_PROBABLE`) 순위도 rules filter보다 높다(0.947 대 0.909). 다만 이 read는 caller가 쓴 바로 그 read라서 독립된 증거가 아니다.
+1. **순위(AUPRC)**: short read 100만 쌍일 때 PanIsoGuard 0.969, 한 줄 규칙 0.968이다. 차이의 bootstrap 95% 신뢰구간(isoform을 복원 추출로 2,000번 다시 뽑아 매번 차이를 계산한 범위)이 모든 깊이에서 0을 포함한다. 통계적으로 구분되지 않는다는 뜻이다. BAM을 더해도(0.974) 마찬가지로 신뢰구간이 0을 포함한다.
+2. **기본 선(precision, recall)**: short read만 쓰면 PanIsoGuard는 가장 정확하지만(0.990) 절반쯤만 찾는다(0.545). 한 줄 규칙은 조금 덜 정확하지만(0.976) 거의 다 찾는다(0.945). 차이는 2절에서 본 NIC와 ISM의 보류에서 온다. BAM을 더하면(0.0.7) chain 전체를 지나는 long read가 3개 이상인 NIC가 `NOVEL_PROBABLE`로 올라가서 recall이 0.745가 되고 precision은 0.993으로 그대로다([04](04_projection.md) 3절). ISM은 chain 전체를 지나는 read가 3개 이상이면 `KNOWN_FRAGMENT`가 되지만, novel로 세지 않으니 recall에는 들어가지 않는다.
+3. **short read가 없을 때**: BAM도 없으면 PanIsoGuard는 진짜라고 부르는 것이 하나도 없고(모두 `UNRESOLVED`), 순위도 SQANTI3 rules filter보다 신뢰구간이 0 아래로 떨어질 만큼 나쁘다. BAM이 있으면 진짜 730개 중 546개를 precision 0.993으로 잡고(모두 `NOVEL_PROBABLE`) 순위도 rules filter보다 높다(0.953 대 0.909). 다만 이 read는 caller가 쓴 바로 그 read라서 독립된 증거가 아니다.
 
 ![operating points](figures/07_operating_points.png)
 
@@ -205,7 +205,7 @@ print({k: (m[k]["prec"], m[k]["rec"]) for k in label})
 ```
 
 ```text
-{'SQ3rules': (0.918, 0.89), 'SQ3strict': (0.978, 0.84), 'allSJ3': (0.976, 0.945), 'PIG': (0.99, 0.545), 'PIG+bam': (0.992, 0.71)}
+{'SQ3rules': (0.918, 0.89), 'SQ3strict': (0.978, 0.84), 'allSJ3': (0.976, 0.945), 'PIG': (0.99, 0.545), 'PIG+bam': (0.993, 0.745)}
 ```
 
 세로축은 0.905에서 시작한다. 점의 위치를 비교하려는 그림이라 0부터 그리면 네 점이 한 줄에 붙어 보이기 때문이다.

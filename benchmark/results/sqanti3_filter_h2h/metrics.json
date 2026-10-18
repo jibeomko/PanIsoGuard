@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/sqanti3_filter_h2h/run.sh (after benchmark/sqanti_sim/run.sh); benchmark/sqanti3_filter_h2h/emit_metrics.py <work> <h2h> --emit-metrics ...; bootstrap CIs: 2000 resamples of the non-FSM isoforms, seed 1",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 truth set of benchmark/sqanti_sim (FLAIR + SQANTI3 6.0.1); non-FSM multi-exon isoforms, 730 genuine / 140 false. Short reads: none, the oracle truth SJ.tab, or wgsim 2x100 pairs (250k/1M/4M) from the simulated transcripts weighted by long-read counts -> STAR 2.7.4a 2-pass. Public/simulated.",
-  "generated_utc": "2026-10-16T10:29:53Z",
+  "generated_utc": "2026-10-18T00:49:49Z",
   "metrics": {
     "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
       "PIG": [
@@ -9,8 +9,8 @@
         -0.066
       ],
       "PIG+bam": [
-        0.023,
-        0.055
+        0.029,
+        0.061
       ]
     },
     "bootstrap_auprc_diff_vs_allSJ3_95ci": {
@@ -20,8 +20,8 @@
           0.005
         ],
         "PIG+bam": [
-          -0.011,
-          0.008
+          -0.009,
+          0.011
         ]
       },
       "sr_1000000": {
@@ -30,8 +30,8 @@
           0.01
         ],
         "PIG+bam": [
-          -0.006,
-          0.013
+          -0.004,
+          0.016
         ]
       },
       "sr_250000": {
@@ -40,8 +40,8 @@
           0.013
         ],
         "PIG+bam": [
-          -0.003,
-          0.017
+          -0.002,
+          0.019
         ]
       },
       "sr_4000000": {
@@ -50,8 +50,8 @@
           0.01
         ],
         "PIG+bam": [
-          -0.006,
-          0.013
+          -0.004,
+          0.016
         ]
       }
     },
@@ -69,13 +69,13 @@
       },
       "PIG+bam": {
         "FP": 4,
-        "TP": 489,
-        "auprc": 0.947,
-        "coverage": 0.602,
-        "f1": 0.8,
-        "prec": 0.992,
-        "rec": 0.67,
-        "selective_risk": 0.029,
+        "TP": 546,
+        "auprc": 0.953,
+        "coverage": 0.632,
+        "f1": 0.853,
+        "prec": 0.993,
+        "rec": 0.748,
+        "selective_risk": 0.007,
         "spec": 0.971
       },
       "SQ3ml": {
@@ -115,12 +115,12 @@
       },
       "PIG+bam": {
         "FP": 5,
-        "TP": 545,
-        "auprc": 0.974,
-        "coverage": 0.729,
-        "f1": 0.852,
+        "TP": 571,
+        "auprc": 0.977,
+        "coverage": 0.759,
+        "f1": 0.874,
         "prec": 0.991,
-        "rec": 0.747,
+        "rec": 0.782,
         "selective_risk": 0.008,
         "spec": 0.964
       },
@@ -183,13 +183,13 @@
       },
       "PIG+bam": {
         "FP": 4,
-        "TP": 518,
-        "auprc": 0.972,
-        "coverage": 0.707,
-        "f1": 0.827,
-        "prec": 0.992,
-        "rec": 0.71,
-        "selective_risk": 0.021,
+        "TP": 544,
+        "auprc": 0.974,
+        "coverage": 0.734,
+        "f1": 0.851,
+        "prec": 0.993,
+        "rec": 0.745,
+        "selective_risk": 0.019,
         "spec": 0.971
       },
       "SQ3ml": {
@@ -251,13 +251,13 @@
       },
       "PIG+bam": {
         "FP": 4,
-        "TP": 507,
-        "auprc": 0.971,
-        "coverage": 0.695,
-        "f1": 0.817,
-        "prec": 0.992,
-        "rec": 0.695,
-        "selective_risk": 0.023,
+        "TP": 533,
+        "auprc": 0.973,
+        "coverage": 0.723,
+        "f1": 0.841,
+        "prec": 0.993,
+        "rec": 0.73,
+        "selective_risk": 0.021,
         "spec": 0.971
       },
       "SQ3ml": {
@@ -319,13 +319,13 @@
       },
       "PIG+bam": {
         "FP": 4,
-        "TP": 516,
-        "auprc": 0.972,
-        "coverage": 0.706,
-        "f1": 0.826,
-        "prec": 0.992,
-        "rec": 0.707,
-        "selective_risk": 0.023,
+        "TP": 542,
+        "auprc": 0.974,
+        "coverage": 0.733,
+        "f1": 0.85,
+        "prec": 0.993,
+        "rec": 0.742,
+        "selective_risk": 0.02,
         "spec": 0.971
       },
       "SQ3ml": {
@@ -376,7 +376,7 @@
   },
   "notes": "Per setting: non-FSM genuine-vs-false metrics per method. allSJ3 = keep an isoform iff every junction has >= 3 unique short reads (SQANTI3 min_cov). SQ3strict = SQANTI3 rules filter with min_cov >= 3 required. SQ3ml uses SQANTI3's default TP/TN (FSM vs NNC) which is mismatched to this simulation (most NNC are genuine), so it is reported but not used for conclusions. Conclusion: PanIsoGuard is not more accurate than a one-line short-read rule; PIG+bam's small AUPRC gain is within the bootstrap CI at every depth since 0.0.6 (the BAM gate needs >= 3 spanning reads); with no short reads it is worse than the SQANTI3 rules filter.",
   "protocol": "sqanti3_filter_h2h",
-  "ruleset_version": "builtin-0.0.4",
+  "ruleset_version": "builtin-0.0.5",
   "scope": "gencode_v49_chr22_sqanti_sim",
   "source": null,
   "status": "tracked",

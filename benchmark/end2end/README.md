@@ -39,24 +39,24 @@ Tools (each typically its own conda env): `pbsim3`, `minimap2`, `samtools`,
 ## Result (GENCODE v49 chr22; 150 transcripts, 30 hidden; 6000 PBSIM3 reads)
 
 FLAIR produced 397 isoforms (5019/6000 reads aligned). On the SQANTI-novel
-(NIC/NNC) set, scored by intron-chain truth:
+(NIC/NNC) set, scored by intron-chain truth (0.0.7 binary, ruleset 0.0.5, with the BAM):
 
 ```
             pred_genuine  pred_false  abstain
-genuine            4           0         16
-false              1         241          7
+genuine           19           0          1
+false              0         242          7
 
-specificity(false) = 0.996   genuine-recall(decisive) = 1.000   precision(genuine) = 0.800
+precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisive) = 1.000
 ```
 
-- **PanIsoGuard rejected 241/242 (99.6%) of FLAIR's false-novel artifacts** — on real,
-  messy caller output it removes essentially all spurious novelty.
-- **No decisive genuine novel was wrongly rejected** (recall 1.0; 0 false negatives).
-- **16/20 genuine novels were honestly abstained** (`UNRESOLVED`): they are NIC-like,
-  with every junction already in the reduced annotation, so there is no novel junction
-  to corroborate — held, not guessed (the documented behaviour, also seen in
-  `controlled_truth`).
-- One false positive (a single artifact called genuine).
+- **PanIsoGuard rejected 242/249 (97%) of FLAIR's false-novel artifacts** and abstained on
+  the other 7 — on real, messy caller output it removes essentially all spurious novelty.
+- **No genuine novel was wrongly rejected** (0 false negatives) and **no artifact was called
+  genuine** (0 false positives).
+- **19/20 genuine novels are `NOVEL_PROBABLE`** through whole-chain long-read support: they
+  are NIC-like, every junction already in the reduced annotation, so the short-read axis has
+  nothing to test; before 0.0.7 they were held `UNRESOLVED` (16/20) or `UNCONFIRMED`. The
+  remaining one has fewer than 3 whole-chain reads and stays `UNRESOLVED`.
 
 This validates PanIsoGuard end-to-end on real FLAIR/SQANTI3 output; the clean
 per-axis correctness is established in the sibling controlled benchmarks.

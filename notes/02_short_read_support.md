@@ -228,7 +228,7 @@ grep -E '^(ruleset|config|thresholds)' out/min1.provenance.log
 sj_min_uniq_reads = 1      # STAR SJ.tab n_uniq to corroborate a novel junction
 isoform_id  novelty_support  confidence_class  novelty_support  confidence_class
 iso_C       PARTIAL          UNCONFIRMED       SUPPORTED        NOVEL_CONFIRMED
-ruleset_version	default-0.0.4
+ruleset_version	default-0.0.5
 config	out/min1.toml
 thresholds	sj_min_uniq_reads=1 sj_require_canonical_motif=true consensus_min_callers=2 chain_min_full_reads=3 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
 ```

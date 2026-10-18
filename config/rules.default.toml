@@ -13,7 +13,7 @@
 # to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.4"   # bump together with the built-in in rules.hpp
+ruleset_version        = "default-0.0.5"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 random_seed            = 1
 
@@ -97,6 +97,7 @@ min_haplotypes = 1                  # >= this many graph haplotypes must carry a
 [confidence]
 classes = [
   "KNOWN",
+  "KNOWN_FRAGMENT",                   # ISM carried end to end by >= min_full_reads long reads, no intra-priming sign
   "NOVEL_CONFIRMED",
   "NOVEL_PROBABLE",
   "UNCONFIRMED",
@@ -118,10 +119,12 @@ classes = [
 #   UNKNOWN + consensus x mechanism -> UNCONFIRMED (unconfirmed / consensus_with_<mechanism>)
 #     (consensus counts only for a chain that joined AND was checked against --ref-gtf)
 #   UNKNOWN + >= min_full_reads whole-chain reads x none -> NOVEL_PROBABLE (confirmed / chain_support)
-#   UNKNOWN + chain support x mechanism -> UNCONFIRMED (unconfirmed / chain_support_with_<mechanism>)
+#   UNKNOWN + chain support x rt_switch -> NOVEL_PROBABLE (chain_support;rt_switch_sign; same for consensus)
+#   UNKNOWN + chain support x noncanonical|degradation -> UNCONFIRMED (unconfirmed / chain_support_with_<mechanism>)
 #   UNKNOWN otherwise       -> UNRESOLVED      (unconfirmed / no_short_reads | no_coverage |
 #                                               no_novel_junction | caller_chain_absent)
-# Before the grid: FSM -> KNOWN, ISM -> UNCONFIRMED (ism[_intrapriming|_rts]), other
+# Before the grid: FSM -> KNOWN, ISM -> KNOWN_FRAGMENT (ism_chain_support) when >= min_full_reads
+# whole-chain reads carry it and no intra-priming sign, else UNCONFIRMED (ism[_intrapriming|_rts]), other
 # categories -> UNRESOLVED (not_adjudicated), reference-bias rescue -> REFERENCE_BIAS or,
 # under circular-risk provenance, UNRESOLVED (firewall_held); junctions explained by
 # different haplotypes/paths -> UNRESOLVED (haplotype_inconsistent / path_inconsistent).

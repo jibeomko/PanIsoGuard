@@ -94,7 +94,7 @@ def main():
                     called = [d for d in sel if d["status"] == "called"]
                     summ[val] = {"n": len(sel), "called_exact": len(called), "contained_only": sum(1 for d in sel if d["status"] != "called" and d["n_containing"] > 0),
                                  "class_counts": dict(collections.Counter(d["class"] for d in called)),
-                                 "confident": sum(d["class"] in ("NOVEL_CONFIRMED", "NOVEL_PROBABLE", "KNOWN") for d in called),
+                                 "confident": sum(d["class"] in ("NOVEL_CONFIRMED", "NOVEL_PROBABLE", "KNOWN", "KNOWN_FRAGMENT") for d in called),
                                  "artifact": sum(d["class"] == "ARTIFACT" for d in called),
                                  "by_type": {ty: dict(collections.Counter(f'{d["status"]}:{d["class"] or "-"}' for d in sel if d["lrgasp_type"] == ty))
                                              for ty in sorted({d["lrgasp_type"] for d in sel})}}

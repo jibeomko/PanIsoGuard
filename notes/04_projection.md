@@ -30,7 +30,7 @@ grid = {  # (row, col): (class, toy examples)
     (2, 2): ("ARTIFACT", "iso_G"),
     (3, 0): ("UNRESOLVED", "iso_D\n(>=2 callers: MEDIUM)"),
     (3, 1): ("UNRESOLVED", "iso_A without SJ\n(>=2 callers: LOW)"),
-    (3, 2): ("ARTIFACT", "iso_G without SJ"),
+    (3, 2): ("UNCONFIRMED", "iso_G without SJ"),
 }
 # Ordinal diverging: confident novel (blue) <-> artifact (red), neutral gray for "no call".
 FILL = {"NOVEL_CONFIRMED": ("#256abf", "#ffffff"), "NOVEL_PROBABLE": ("#9ec5f4", "#0b0b0b"),
@@ -76,7 +76,7 @@ cells: 12
 
 `RuleEngine::evaluate()`는 조합표에 오기 전에 세 가지를 차례로 확인하고, 하나라도 해당되면 거기서 판정을 끝낸다.
 
-1. **범주가 FSM이면** `KNOWN`, **ISM이면** `UNCONFIRMED`이다. 증거를 보지 않는다.
+1. **범주가 FSM이면** `KNOWN`이다. 증거를 보지 않는다. **ISM이면** BAM 하나만 본다. intron chain 전체를 한 번에 지나는 long read가 3개 이상이고 3′ 끝에 intra-priming 흔적(`perc_A_downstream_TTS` ≥ 60, polyA motif 없음)이 없으면 `KNOWN_FRAGMENT`, 아니면 `UNCONFIRMED`이다(0.0.7부터). 알려진 구조의 조각이라 novel isoform으로 판정하지 않고, read가 그 조각을 통째로 지났는지만 적어 둔다.
 2. **NIC나 NNC가 아니면**(`genic`, `antisense`, `intergenic`, `fusion` 등) `UNRESOLVED`다. PanIsoGuard가 판정하려고 만든 대상이 아니다.
 3. **reference bias로 설명되면**(pangenome 축을 먼저, 그다음 variant 축) `REFERENCE_BIAS`이다. 출처가 불확실하면 `UNRESOLVED`로 보류한다([05](05_reference_bias.md)).
 
@@ -84,7 +84,7 @@ cells: 12
 
 ## 3. `UNKNOWN` 줄의 예외 세 가지는 무엇일까?
 
-첫째, **mapping 흔적은 short read 없이도 `ARTIFACT`를 만든다.** short read 표 없이 참조 GTF와 BAM만 넣고 돌려 본다.
+첫째, **mapping 흔적은 short read 없이도 판정을 `UNCONFIRMED`에 묶어 둔다.** short read 표 없이 참조 GTF와 BAM만 넣고 돌려 본다.
 
 ```bash
 PIG=../build/panisoguard; mkdir -p out
@@ -101,16 +101,16 @@ iso_C       UNKNOWN          none               NOVEL_PROBABLE
 iso_D       UNKNOWN          none               UNRESOLVED
 iso_E       UNKNOWN          none               NOVEL_PROBABLE
 iso_F       UNKNOWN          noncanonical       UNCONFIRMED
-iso_G       UNKNOWN          mapping_or_repeat  ARTIFACT
-iso_ism     UNKNOWN          none               UNCONFIRMED
+iso_G       UNKNOWN          mapping_or_repeat  UNCONFIRMED
+iso_ism     UNKNOWN          none               KNOWN_FRAGMENT
 iso_known   SUPPORTED        none               KNOWN
 ```
 
-novel isoform이 모두 `UNKNOWN`인데 `iso_G`만 `ARTIFACT`다. 같은 `UNKNOWN`이라도 `iso_A`와 `iso_F`의 `noncanonical`은 `ARTIFACT`가 되지 않는다. 두 흔적을 다르게 대하는 이유는 흔적이 어디서 왔는지에 있다. mapping 흔적은 이 isoform을 만든 long read의 정렬 자체를 직접 본 결과다. non-canonical motif는 참조 게놈의 서열일 뿐이라, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈이 틀린 경우도 있다.
+novel isoform이 모두 `UNKNOWN`인데 `iso_G`만 이유가 `mapping_without_short_reads`인 `UNCONFIRMED`이다. 아래 둘째 예외대로라면 `iso_G`도 chain 전체를 지나는 read가 4개라 `NOVEL_PROBABLE`로 올라갈 수 있었는데, mapping 흔적이 그 길을 막는다. 반면 `iso_A`와 `iso_F`의 `noncanonical`은 둘째 예외를 막지 않고 `UNCONFIRMED`으로 낮출 뿐이다. 두 흔적을 다르게 대하는 이유는 흔적이 어디서 왔는지에 있다. mapping 흔적은 이 isoform을 만든 long read의 정렬 자체를 직접 본 결과다. non-canonical motif는 참조 게놈의 서열일 뿐이라, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈이 틀린 경우도 있다. 그렇다고 mapping 흔적만으로 `ARTIFACT`를 만들지는 않는다(ruleset 0.0.5부터; 그전에는 `ARTIFACT`였다). SQANTI-SIM에서 short read 없이 mapping 흔적만으로 `ARTIFACT`가 된 31개 중 11개가 진짜였고, 실제 ONT 데이터에서는 HiFi 기준으로 맞춘 indel 흔적이 junction 대부분에서 걸렸기 때문이다([benchmark/gm12878_realdata](../benchmark/gm12878_realdata)). short read로 확인했는데 없고 흔적까지 있을 때만 `ARTIFACT`다.
 
-둘째, **long read가 intron chain 전체를 한 번에 지나면 `NOVEL_PROBABLE`까지 올린다**(0.0.7부터). 위 표에서 `iso_B`, `iso_C`, `iso_E`가 `UNRESOLVED`가 아니라 `NOVEL_PROBABLE`이고, `iso_A`와 `iso_F`가 `UNCONFIRMED`인 이유다. BAM을 주면 isoform마다 모든 intron을 한 정렬 안에 가진 primary read 수(`chain_n_full_reads`)를 센다. 3개 이상이면(`[axis_chain] min_full_reads`) 흔적이 없을 때 `NOVEL_PROBABLE`, 흔적이 있을 때 `UNCONFIRMED`이다. `iso_D`는 그대로 `UNRESOLVED`인데, 이 isoform의 chain을 통째로 지나는 read가 2개뿐이기 때문이다. 이 read는 caller가 isoform을 만들 때 쓴 바로 그 read라서 독립된 증거가 아니다. 그래서 `NOVEL_CONFIRMED`까지는 올리지 않고, short read 결과가 있으면(`UNSUPPORTED`, `PARTIAL`) 그쪽을 따른다. 정답을 아는 데이터에서는 caller가 잘못 조립한 가짜는 잘 걸러내지만 정렬 단계에서 생긴 가짜는 read도 같이 틀려 있어서 못 걸러낸다([benchmark/chain_support](../benchmark/chain_support)).
+둘째, **long read가 intron chain 전체를 한 번에 지나면 `NOVEL_PROBABLE`까지 올린다**(0.0.7부터). 위 표에서 `iso_B`, `iso_C`, `iso_E`가 `UNRESOLVED`가 아니라 `NOVEL_PROBABLE`이고, `iso_A`와 `iso_F`가 `UNCONFIRMED`인 이유다. BAM을 주면 isoform마다 모든 intron을 한 정렬 안에 가진 primary read 수(`chain_n_full_reads`)를 센다. 3개 이상이면(`[axis_chain] min_full_reads`) 흔적이 없을 때 `NOVEL_PROBABLE`, `noncanonical`이나 intra-priming 흔적이 있을 때 `UNCONFIRMED`이다. RT switching 흔적은 `NOVEL_PROBABLE`을 막지 않고 이유에만 적힌다(`chain_support;rt_switch_sign`). SQANTI-SIM에서 이 흔적 때문에 `UNCONFIRMED`에 묶였던 isoform이 모두 진짜였고(57개 중 57개), LRGASP가 실험으로 확인한 isoform에서도 SQANTI3의 RTS 표시가 12–18%에 붙어 있었기 때문이다([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)). intra-priming 흔적은 ISM과 마찬가지로 그대로 막는다(`chain_support_with_degradation`). 시뮬레이션은 intra-priming을 만들지 않아 근거가 없고, 실제 Iso-Seq에서는 chain 지지가 있는 isoform 수천 개에 이 흔적이 붙기 때문이다. `iso_D`는 그대로 `UNRESOLVED`인데, 이 isoform의 chain을 통째로 지나는 read가 2개뿐이기 때문이다. 이 read는 caller가 isoform을 만들 때 쓴 바로 그 read라서 독립된 증거가 아니다. 그래서 `NOVEL_CONFIRMED`까지는 올리지 않고, short read 결과가 있으면(`UNSUPPORTED`, `PARTIAL`) 그쪽을 따른다. 정답을 아는 데이터에서는 caller가 잘못 조립한 가짜는 잘 걸러내지만 정렬 단계에서 생긴 가짜는 read도 같이 틀려 있어서 못 걸러낸다([benchmark/chain_support](../benchmark/chain_support)).
 
-셋째, **caller 여러 개의 합의가 short read를 대신할 수 있다.** `--caller-support`로 caller별 결과를 합친 표를 주면, short read가 없을 때 caller 2개 이상이 같은 intron chain을 찾은 isoform은 흔적이 없으면 `NOVEL_PROBABLE`, 흔적이 있으면 `UNCONFIRMED`이 된다. 합의로는 `HIGH`까지 올라가지 않는다. 같은 read로 돌린 caller들의 합의는 독립된 실험 증거가 아니기 때문이다. mapping 흔적이 있으면 합의가 있어도 `ARTIFACT`다. [06](06_multi_caller_consensus.md)에서 직접 돌려 본다.
+셋째, **caller 여러 개의 합의가 short read를 대신할 수 있다.** `--caller-support`로 caller별 결과를 합친 표를 주면, short read가 없을 때 caller 2개 이상이 같은 intron chain을 찾은 isoform은 흔적이 없거나 RT switching 흔적뿐이면 `NOVEL_PROBABLE`, `noncanonical`이나 intra-priming 흔적이 있으면 `UNCONFIRMED`이 된다. 합의로는 `HIGH`까지 올라가지 않는다. 같은 read로 돌린 caller들의 합의는 독립된 실험 증거가 아니기 때문이다. mapping 흔적이 있으면 합의가 있어도 `UNCONFIRMED`에 묶인다. [06](06_multi_caller_consensus.md)에서 직접 돌려 본다.
 
 ## 4. 축 하나를 끄면 판정이 얼마나 바뀔까?
 
@@ -125,19 +125,19 @@ cat out/abl.ablation_transitions.tsv
 
 ```text
 ablation over 9 isoforms:
-  short_read            5 / 9 changed (55.556%)
+  short_read            6 / 9 changed (66.667%)
   mapping               1 / 9 changed (11.111%)
   noncanonical          2 / 9 changed (22.222%)
 wrote out/abl.{ablation,ablation_transitions}.tsv
 axis	transition	count
-short_read	ARTIFACT->UNCONFIRMED	2
+short_read	ARTIFACT->UNCONFIRMED	3
 short_read	NOVEL_CONFIRMED->NOVEL_PROBABLE	2
 short_read	UNCONFIRMED->NOVEL_PROBABLE	1
 mapping	ARTIFACT->UNCONFIRMED	1
 noncanonical	ARTIFACT->UNCONFIRMED	2
 ```
 
-short read 축을 끄면 다섯 개가 바뀐다. `iso_A`와 `iso_F`의 `ARTIFACT`는 `UNCONFIRMED`, `iso_B`와 `iso_E`의 `NOVEL_CONFIRMED`와 `iso_C`의 `UNCONFIRMED`은 `NOVEL_PROBABLE`이 된다. 다섯 모두 지지 수준이 `UNKNOWN`이 되고 chain 전체를 지나는 read가 3개 이상이라 3절의 둘째 예외를 탄 것이다. `iso_G`는 3절의 첫째 예외 때문에 `ARTIFACT`로 남는다(연습문제 2). mapping 축을 끄면 `iso_G` 하나가, noncanonical 축을 끄면 `iso_A`와 `iso_F`가 `ARTIFACT`에서 `UNCONFIRMED`로 올라간다. 이 예제에서는 short read 축이 판정을 가장 많이 좌우한다. `ablate`는 어느 축이 결과를 얼마나 움직이는지 보여 줄 뿐, 그 판정이 맞는지는 알려 주지 않는다. 맞는지는 정답이 있는 데이터로만 알 수 있다([07](07_evaluation.md)).
+short read 축을 끄면 여섯 개가 바뀐다. `iso_A`, `iso_F`, `iso_G`의 `ARTIFACT`는 `UNCONFIRMED`, `iso_B`와 `iso_E`의 `NOVEL_CONFIRMED`와 `iso_C`의 `UNCONFIRMED`은 `NOVEL_PROBABLE`이 된다. 여섯 모두 지지 수준이 `UNKNOWN`이 되는데, 다섯은 chain 전체를 지나는 read가 3개 이상이라 3절의 둘째 예외를 탄 것이고, `iso_G`는 3절의 첫째 예외 때문에 read가 4개 있어도 `UNCONFIRMED`에 묶인 것이다(연습문제 2). mapping 축을 끄면 `iso_G` 하나가, noncanonical 축을 끄면 `iso_A`와 `iso_F`가 `ARTIFACT`에서 `UNCONFIRMED`로 올라간다. 이 예제에서는 short read 축이 판정을 가장 많이 좌우한다. `ablate`는 어느 축이 결과를 얼마나 움직이는지 보여 줄 뿐, 그 판정이 맞는지는 알려 주지 않는다. 맞는지는 정답이 있는 데이터로만 알 수 있다([07](07_evaluation.md)).
 
 ## 5. 규칙 전체를 Python으로 옮기면 판정이 똑같이 나올까?
 
@@ -154,7 +154,9 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
     """RuleEngine::evaluate() with the built-in defaults, on one attribution.jsonl record."""
     if cat == "full-splice_match":
         return "KNOWN"
-    if cat == "incomplete-splice_match":
+    if cat == "incomplete-splice_match":                      # a known structure: only "did reads carry it whole?"
+        if e["chain_evaluable"] and e["chain_n_full_reads"] >= min_chain and not (perc_a is not None and perc_a >= 60):
+            return "KNOWN_FRAGMENT"
         return "UNCONFIRMED"
     if cat not in NOVEL:
         return "UNRESOLVED"
@@ -177,12 +179,13 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
     else:
         mech = "none"
     if sup == "UNKNOWN":
+        weak = mech in ("none", "rt_switch")                     # the RT-switch sign does not demote a lift
         if mech == "mapping_or_repeat":
-            return "ARTIFACT"
+            return "UNCONFIRMED"                                 # held, not rejected, without short reads
         if e["consensus_evaluable"] and e["n_callers"] >= min_callers:
-            return "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
+            return "NOVEL_PROBABLE" if weak else "UNCONFIRMED"
         if e["chain_evaluable"] and e["chain_n_full_reads"] >= min_chain:   # whole-chain long reads
-            return "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
+            return "NOVEL_PROBABLE" if weak else "UNCONFIRMED"
         return "UNRESOLVED"
     if sup == "SUPPORTED":
         return "NOVEL_CONFIRMED" if mech == "none" else "NOVEL_PROBABLE"
@@ -227,9 +230,9 @@ isoform 1,579개도 모두 같다. 판정 규칙 전체가 이 40줄 안에 있�
 
 ## 정리
 
-- `SUPPORTED`는 흔적이 없으면 `HIGH`, 있으면 `MEDIUM`임. `PARTIAL`은 늘 `UNCONFIRMED`임. `UNSUPPORTED`는 흔적이 없으면 `UNCONFIRMED`, 있으면 `ARTIFACT`임. `UNKNOWN`은 원칙적으로 `UNRESOLVED`이되, mapping 흔적은 `ARTIFACT`, chain 전체를 지나는 long read 3개 이상이나 caller 합의는 `NOVEL_PROBABLE`(흔적이 있으면 `UNCONFIRMED`)까지 올림.
-- 조합표보다 먼저 FSM/ISM의 통과, NIC/NNC가 아닌 범주의 `UNRESOLVED`, reference-bias rescue를 확인함. rescue된 isoform은 지지 수준이 `UNKNOWN`으로 남음.
-- `UNKNOWN` 줄의 예외는 둘임. mapping 흔적은 short read 없이도 `ARTIFACT`를 만들고, caller 2개 이상의 합의는 `MEDIUM`(흔적 있으면 `LOW`)까지 올림.
+- `SUPPORTED`는 흔적이 없으면 `HIGH`, 있으면 `MEDIUM`임. `PARTIAL`은 늘 `UNCONFIRMED`임. `UNSUPPORTED`는 흔적이 없으면 `UNCONFIRMED`, 있으면 `ARTIFACT`임. `UNKNOWN`은 원칙적으로 `UNRESOLVED`이되, chain 전체를 지나는 long read 3개 이상이나 caller 합의는 `NOVEL_PROBABLE`(`noncanonical`이나 intra-priming 흔적이 있으면 `UNCONFIRMED`)까지 올리고, mapping 흔적은 그 길을 막아 `UNCONFIRMED`에 묶어 둠.
+- 조합표보다 먼저 FSM의 `KNOWN`, ISM의 `KNOWN_FRAGMENT`(chain 전체를 지나는 read 3개 이상, intra-priming 흔적 없음) 또는 `UNCONFIRMED`, NIC/NNC가 아닌 범주의 `UNRESOLVED`, reference-bias rescue를 확인함. rescue된 isoform은 지지 수준이 `UNKNOWN`으로 남음.
+- `UNKNOWN` 줄의 예외는 셋임. mapping 흔적은 short read 없이도 판정을 `UNCONFIRMED`에 묶어 두고, chain 전체를 지나는 long read 3개 이상이나 caller 2개 이상의 합의는 `NOVEL_PROBABLE`까지 올림. 어느 쪽도 `NOVEL_CONFIRMED`나 `ARTIFACT`는 만들지 않음.
 - `ablate`는 축 하나를 끄고 판정을 다시 내려서 각 축이 결과를 얼마나 움직이는지 보여 줌. 맞는지는 알려 주지 않음.
 - 판정 규칙 전체를 Python 40줄로 옮겨 예제 82개와 SQANTI-SIM 1,579개의 판정을 모두 똑같이 재현함.
 
@@ -244,7 +247,7 @@ isoform 1,579개도 모두 같다. 판정 규칙 전체가 이 40줄 안에 있�
 <details>
 <summary>풀이</summary>
 
-`UNSUPPORTED`는 short read를 봤는데 이 junction이 없었다는 **관찰**이다. 흔적은 없지만 확인도 안 됐으니 "믿기 어려운 쪽"인 `UNCONFIRMED`에 둔다. `UNKNOWN`은 short read를 볼 수 없었다는 뜻이라 관찰 자체가 없다. 여기에 non-canonical motif 하나만으로 판정을 내리면, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈 쪽이 틀린 경우에도 가짜로 몰게 된다. 그래서 보류(`UNRESOLVED`)한다. 단, `UNKNOWN`이라도 mapping 흔적은 long read 정렬을 직접 본 것이라 예외로 `ARTIFACT`를 만들고, chain 전체를 지나는 long read나 caller 합의가 있으면 `UNCONFIRMED`까지는 올린다(3절).
+`UNSUPPORTED`는 short read를 봤는데 이 junction이 없었다는 **관찰**이다. 흔적은 없지만 확인도 안 됐으니 "믿기 어려운 쪽"인 `UNCONFIRMED`에 둔다. `UNKNOWN`은 short read를 볼 수 없었다는 뜻이라 관찰 자체가 없다. 여기에 non-canonical motif 하나만으로 판정을 내리면, [02](02_short_read_support.md)의 `iso_A`처럼 참조 게놈 쪽이 틀린 경우에도 가짜로 몰게 된다. 그래서 보류(`UNRESOLVED`)한다. 단, `UNKNOWN`이라도 chain 전체를 지나는 long read나 caller 합의가 있으면 `NOVEL_PROBABLE`까지 올리고, mapping 흔적은 long read 정렬을 직접 본 것이라 그 길을 막는다(3절).
 
 결과표를 필터로 쓸 때 이 차이가 중요하다. `UNRESOLVED`는 "나쁘다"가 아니라 "모른다"이고, `UNCONFIRMED`은 "확인하려 했지만 안 됐다"이다.
 
@@ -252,12 +255,12 @@ isoform 1,579개도 모두 같다. 판정 규칙 전체가 이 40줄 안에 있�
 
 ### 문제 2
 
-> 4절의 `ablate`에서 short read 축을 끄자 `iso_A`와 `iso_F`의 `ARTIFACT`는 `UNCONFIRMED`으로 바뀌었는데 `iso_G`의 `ARTIFACT`는 그대로였다. 왜일까?
+> 4절의 `ablate`에서 short read 축을 끄자 `iso_A`, `iso_F`, `iso_G`의 `ARTIFACT`가 모두 `UNCONFIRMED`으로 바뀌었다. 셋 다 같은 이유일까?
 
 <details>
 <summary>풀이</summary>
 
-short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서 `UNKNOWN`으로 바뀐다. 그다음은 기전에 달렸다. `iso_A`와 `iso_F`의 기전은 `noncanonical`이라 `UNKNOWN × noncanonical`은 원래 `UNRESOLVED`인데, 둘 다 chain 전체를 지나는 read가 3개 이상이라 3절의 둘째 예외로 `UNCONFIRMED`(흔적이 있으니 `NOVEL_PROBABLE`은 아님)이 된다. `iso_G`의 기전은 `mapping_or_repeat`이고, 3절의 첫째 예외 때문에 `UNKNOWN × mapping_or_repeat → ARTIFACT`다. 3절의 실행(`out/nosj`, 처음부터 short read 표를 주지 않은 경우)과 같은 결과다. `ablate`가 파일을 다시 읽지 않고 증거에서 축 하나만 끈 뒤 판정을 다시 내리기 때문에 두 결과가 일치한다.
+short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서 `UNKNOWN`으로 바뀐다. 그다음은 기전에 달렸다. `iso_A`와 `iso_F`의 기전은 `noncanonical`이라 `UNKNOWN × noncanonical`은 원래 `UNRESOLVED`인데, 둘 다 chain 전체를 지나는 read가 3개 이상이라 3절의 둘째 예외로 `UNCONFIRMED`(흔적이 있으니 `NOVEL_PROBABLE`은 아님)이 된다. `iso_G`의 기전은 `mapping_or_repeat`이고, 3절의 첫째 예외 때문에 chain 전체를 지나는 read가 4개 있어도 `UNCONFIRMED`에 묶인다(`mapping_without_short_reads`). 같은 `UNCONFIRMED`이지만 이유가 다르고, `verdict_reason` 열이 그 차이를 적는다. 3절의 실행(`out/nosj`, 처음부터 short read 표를 주지 않은 경우)과 같은 결과다. `ablate`가 파일을 다시 읽지 않고 증거에서 축 하나만 끈 뒤 판정을 다시 내리기 때문에 두 결과가 일치한다.
 
 </details>
 
@@ -266,7 +269,7 @@ short read 축을 끄면 세 isoform 모두 지지 수준이 `UNSUPPORTED`에서
 <details>
 <summary><code>ARTIFACT</code>를 필터로 쓸 때 주의할 점</summary>
 
-[docs/decision_engine.md](../docs/decision_engine.md)는 `ARTIFACT`를 "(`UNSUPPORTED` × 흔적) 또는 (`UNKNOWN` × mapping)이라는 조합 신호이지, 가짜라는 단독 주장이 아니다"라고 적고 있다. 이 시리즈의 `iso_A`가 좋은 예다. step2와 step3에서 `ARTIFACT`였지만, 이 사람의 게놈 서열을 더하자 reference bias로 설명되었다([05](05_reference_bias.md)). `ARTIFACT`인 isoform을 결과에서 지우기 전에는 원래 read를 한 번 더 보는 것이 안전하다.
+[docs/decision_engine.md](../docs/decision_engine.md)는 `ARTIFACT`를 "(`UNSUPPORTED` × 흔적)이라는 조합 신호이지, 가짜라는 단독 주장이 아니다"라고 적고 있다. short read 없이는 `ARTIFACT`가 나오지 않는다. 이 시리즈의 `iso_A`가 좋은 예다. step2와 step3에서 `ARTIFACT`였지만, 이 사람의 게놈 서열을 더하자 reference bias로 설명되었다([05](05_reference_bias.md)). `ARTIFACT`인 isoform을 결과에서 지우기 전에는 원래 read를 한 번 더 보는 것이 안전하다.
 
 </details>
 

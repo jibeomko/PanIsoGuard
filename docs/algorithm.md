@@ -53,7 +53,8 @@ Applied in priority order; the full grid and rationale are in
 ```text
 1. Pass-through categories:
      full-splice_match        -> KNOWN
-     incomplete-splice_match  -> UNCONFIRMED
+     incomplete-splice_match  -> KNOWN_FRAGMENT (>= 3 whole-chain long reads, no intra-priming sign)
+                                 else UNCONFIRMED
      non-targeted (not novel) -> UNRESOLVED
 2. Reference-bias rescue (highest priority for novel isoforms):
      if ALL novel junctions are graph-supported (pangenome axis) -> REFERENCE_BIAS

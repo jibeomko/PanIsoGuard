@@ -50,6 +50,7 @@ ACCENT = "#2D7DD2"       # brand accent (rule under titles)
 
 CLASS_COLORS = {
     "KNOWN": "#0E7C66",                      # teal — trusted catalog pass-through
+    "KNOWN_FRAGMENT": "#5FA897",             # light teal — a known structure seen end to end in the reads
     "NOVEL_CONFIRMED": "#2E9E5B",            # green — confirmed novel
     "NOVEL_PROBABLE": "#86BC4C",             # light green — confirmed with a caveat
     "REFERENCE_BIAS": "#2D7DD2",             # blue — explained by the sample's genome, not a grade
@@ -58,11 +59,12 @@ CLASS_COLORS = {
     "ARTIFACT": "#D1495B",                   # red — reject
 }
 CLASS_ORDER = [
-    "KNOWN", "NOVEL_CONFIRMED", "NOVEL_PROBABLE",
+    "KNOWN", "KNOWN_FRAGMENT", "NOVEL_CONFIRMED", "NOVEL_PROBABLE",
     "REFERENCE_BIAS", "UNCONFIRMED", "UNRESOLVED", "ARTIFACT",
 ]
 CLASS_LABEL = {
     "KNOWN": "Known",
+    "KNOWN_FRAGMENT": "Known fragment",
     "NOVEL_CONFIRMED": "Novel, confirmed",
     "NOVEL_PROBABLE": "Novel, probable",
     "REFERENCE_BIAS": "Reference bias",
@@ -325,7 +327,8 @@ def projected_class(support, mech, lifted=False):
     """RuleEngine::evaluate()'s (support x mechanism) grid. `lifted` = the UNKNOWN-row
     exceptions that need evidence outside the grid: caller consensus (>= 2 callers) or
     >= 3 whole-chain long reads (0.0.7); either lifts UNKNOWN to NOVEL_PROBABLE (no
-    mechanism) or UNCONFIRMED (any mechanism). A strong mapping artifact wins regardless."""
+    mechanism, or an RT-switch sign) or UNCONFIRMED (noncanonical, intra-priming). A strong
+    mapping artifact holds the call UNCONFIRMED regardless (ruleset 0.0.5; was ARTIFACT)."""
     has_mech = mech not in (None, "none")
     if support == "SUPPORTED":
         return "NOVEL_CONFIRMED" if not has_mech else "NOVEL_PROBABLE"
@@ -335,9 +338,9 @@ def projected_class(support, mech, lifted=False):
         return "UNCONFIRMED" if not has_mech else "ARTIFACT"
     if support == "UNKNOWN":
         if mech == "mapping_or_repeat":
-            return "ARTIFACT"
+            return "UNCONFIRMED"
         if lifted:
-            return "NOVEL_PROBABLE" if not has_mech else "UNCONFIRMED"
+            return "NOVEL_PROBABLE" if mech in (None, "none", "rt_switch") else "UNCONFIRMED"
         return "UNRESOLVED"
     return "UNRESOLVED"
 

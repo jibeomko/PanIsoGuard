@@ -29,6 +29,7 @@ const char* to_string(Mechanism m) {
 const char* to_string(ConfidenceClass c) {
   switch (c) {
     case ConfidenceClass::kKnown:            return "KNOWN";
+    case ConfidenceClass::kKnownFragment:    return "KNOWN_FRAGMENT";
     case ConfidenceClass::kNovelConfirmed:   return "NOVEL_CONFIRMED";
     case ConfidenceClass::kNovelProbable:    return "NOVEL_PROBABLE";
     case ConfidenceClass::kUnconfirmed:      return "UNCONFIRMED";

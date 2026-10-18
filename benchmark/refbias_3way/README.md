@@ -198,11 +198,17 @@ acceptor chr6:130,022,220), all `same-noncanonical` in the person: candidate fal
 SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated novel models
 and `Isoform` 9,253 (HG02717: 7,202 / 10,067). PanIsoGuard's `REFERENCE_BIAS` isoforms (18
 and 28) are all among the `Artifact`s in both individuals: without the rescue a user
-following the filter discards them. The rest (HG03516 / HG02717): `NOVEL_PROBABLE` 5,784 /
-7,011, every one of them an SQANTI3 `Isoform` whose whole intron chain ≥ 3 long reads carry
-(0.0.7 chain support; no short reads exist for these samples, so nothing is `CONFIRMED`);
-`UNCONFIRMED` 15,618 / 8,335 (chain-supported but with an artifact sign, or ISM);
-`UNRESOLVED` 15,398 / 8,961; `ARTIFACT` 741 / 605.
+following the filter discards them. The rest (HG03516 / HG02717, ruleset 0.0.5):
+`NOVEL_PROBABLE` 7,081 / 8,368, every one with ≥ 3 whole-chain long reads (0.0.7 chain
+support; no short reads exist for these samples, so nothing is `CONFIRMED`): 5,784 / 7,011
+are SQANTI3 `Isoform`s and 1,297 / 1,357 are SQANTI3 `Artifact`s whose only sign is
+`RTS_stage` (`chain_support;rt_switch_sign`; held `UNCONFIRMED` before ruleset 0.0.5), which
+is the real-data size of the RT-switch decision; `KNOWN_FRAGMENT` 3,925 / 1,854 (ISM carried
+end to end with no intra-priming sign; 314 / 177 of them SQANTI3 `Artifact`s); `UNCONFIRMED`
+11,137 / 5,729 (ISM with the intra-priming sign 6,612 / 2,273; chain-supported isoforms with
+an intra-priming sign 2,891 / 1,979 or a non-canonical motif 631 / 747, both still held; the
+mapping sign without short reads 741 / 605, `ARTIFACT` before 0.0.5); `UNRESOLVED` 15,398 /
+8,961; `ARTIFACT` 0 / 0, because no short reads were given.
 
 Firewall: 18 and 28 rescued under `wgs` provenance, 0 under `unknown`, all held `UNRESOLVED`
 with `circularity_flag`.

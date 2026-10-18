@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-10-17T23:39:06Z",
+  "generated_utc": "2026-10-18T01:05:55Z",
   "metrics": {
     "gencode_ont_nosr": {
       "likely": {
@@ -327,24 +327,21 @@
             "not_called:-": 5
           },
           "NIC": {
-            "called:NOVEL_PROBABLE": 7,
-            "called:UNCONFIRMED": 3,
+            "called:NOVEL_PROBABLE": 10,
             "not_called:-": 24
           },
           "NNC": {
             "called:KNOWN": 6,
-            "called:NOVEL_PROBABLE": 5,
-            "called:UNCONFIRMED": 1,
+            "called:NOVEL_PROBABLE": 6,
             "not_called:-": 10
           }
         },
         "called_exact": 40,
         "class_counts": {
           "KNOWN": 24,
-          "NOVEL_PROBABLE": 12,
-          "UNCONFIRMED": 4
+          "NOVEL_PROBABLE": 16
         },
-        "confident": 36,
+        "confident": 40,
         "contained_only": 1,
         "n": 79
       },
@@ -403,8 +400,8 @@
           },
           "NIC": {
             "called:NOVEL_CONFIRMED": 5,
-            "called:NOVEL_PROBABLE": 2,
-            "called:UNCONFIRMED": 3,
+            "called:NOVEL_PROBABLE": 4,
+            "called:UNCONFIRMED": 1,
             "not_called:-": 24
           },
           "NNC": {
@@ -419,10 +416,10 @@
         "class_counts": {
           "KNOWN": 24,
           "NOVEL_CONFIRMED": 9,
-          "NOVEL_PROBABLE": 3,
-          "UNCONFIRMED": 4
+          "NOVEL_PROBABLE": 5,
+          "UNCONFIRMED": 2
         },
-        "confident": 36,
+        "confident": 38,
         "contained_only": 1,
         "n": 79
       },
@@ -457,15 +454,15 @@
             "not_called:-": 1
           },
           "NNC": {
-            "called:UNCONFIRMED": 1
+            "called:NOVEL_PROBABLE": 1
           }
         },
         "called_exact": 2,
         "class_counts": {
           "KNOWN": 1,
-          "UNCONFIRMED": 1
+          "NOVEL_PROBABLE": 1
         },
-        "confident": 1,
+        "confident": 2,
         "contained_only": 0,
         "n": 3
       },
@@ -482,8 +479,7 @@
           },
           "NIC": {
             "called:KNOWN": 3,
-            "called:NOVEL_PROBABLE": 11,
-            "called:UNCONFIRMED": 2,
+            "called:NOVEL_PROBABLE": 13,
             "not_called:-": 18
           },
           "NNC": {
@@ -495,10 +491,9 @@
         "called_exact": 41,
         "class_counts": {
           "KNOWN": 24,
-          "NOVEL_PROBABLE": 15,
-          "UNCONFIRMED": 2
+          "NOVEL_PROBABLE": 17
         },
-        "confident": 39,
+        "confident": 41,
         "contained_only": 1,
         "n": 79
       },
@@ -561,8 +556,7 @@
           "NIC": {
             "called:KNOWN": 3,
             "called:NOVEL_CONFIRMED": 7,
-            "called:NOVEL_PROBABLE": 5,
-            "called:UNCONFIRMED": 1,
+            "called:NOVEL_PROBABLE": 6,
             "not_called:-": 18
           },
           "NNC": {
@@ -576,10 +570,10 @@
         "class_counts": {
           "KNOWN": 24,
           "NOVEL_CONFIRMED": 10,
-          "NOVEL_PROBABLE": 5,
-          "UNCONFIRMED": 2
+          "NOVEL_PROBABLE": 6,
+          "UNCONFIRMED": 1
         },
-        "confident": 39,
+        "confident": 40,
         "contained_only": 1,
         "n": 79
       },
@@ -608,7 +602,7 @@
   },
   "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence.",
   "protocol": "lrgasp_wtc11",
-  "ruleset_version": "builtin-0.0.4",
+  "ruleset_version": "builtin-0.0.5",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",
   "source": null,
   "status": "tracked",

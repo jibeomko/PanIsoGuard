@@ -17,16 +17,16 @@ short-read pairs (`sr1M`) and with none (`nosr`). Positive = `NOVEL_CONFIRMED` /
 
 | caller | short reads | n (genuine) | precision OFF → ON | recall OFF → ON | lifted to confident: genuine / false | selective risk @ coverage, OFF → ON |
 |---|---|---:|---|---|---:|---|
-| FLAIR | 1 M | 870 (730) | 0.990 → 0.992 | 0.545 → **0.710** | **120 / 0** | 0.026 @ 0.57 → 0.021 @ 0.71 |
-| FLAIR | none | 870 (730) | — → 0.992 | 0.000 → **0.670** | 489 / 4 | 0.355 @ 0.04 → 0.029 @ 0.60 |
-| IsoQuant | 1 M | 618 (607) | 0.988 → 0.990 | 0.526 → 0.677 | 92 / 0 | 0.018 @ 0.53 → 0.014 @ 0.68 |
-| IsoQuant | none | 618 (607) | — → 0.990 | 0.000 → 0.636 | 386 / 4 | 0.400 @ 0.01 → 0.015 @ 0.64 |
-| ESPRESSO | 1 M | 573 (555) | 0.985 → 0.986 | 0.697 → 0.888 | 106 / 1 | 0.025 @ 0.70 → 0.022 @ 0.88 |
-| ESPRESSO | none | 573 (555) | — → 0.987 | 0.000 → 0.836 | 464 / 6 | 0.889 @ 0.02 → 0.029 @ 0.84 |
-| Bambu | 1 M | 552 (409) | 0.725 → 0.743 | 0.748 → 0.910 | 66 / 13 | 0.281 @ 0.79 → 0.263 @ 0.93 |
-| Bambu | none | 552 (409) | — → 0.754 | 0.000 → 0.856 | 350 / 114 | 0.500 @ 0.03 → 0.254 @ 0.87 |
-| TALON | 1 M | 1,760 (697) | 0.700 → 0.704 | 0.485 → 0.660 | 122 / 48 | 0.299 @ 0.29 → 0.295 @ 0.39 |
-| TALON | none | 1,760 (697) | — → 0.716 | 0.000 → 0.630 | 439 / 174 | 0.370 @ 0.02 → 0.287 @ 0.36 |
+| FLAIR | 1 M | 870 (730) | 0.990 → 0.993 | 0.545 → **0.745** | **146 / 0** | 0.024 @ 0.57 → 0.019 @ 0.73 |
+| FLAIR | none | 870 (730) | — → 0.993 | 0.000 → **0.748** | 546 / 4 | — @ 0.00 → 0.007 @ 0.63 |
+| IsoQuant | 1 M | 618 (607) | 0.988 → 0.991 | 0.526 → 0.708 | 111 / 0 | 0.018 @ 0.53 → 0.014 @ 0.71 |
+| IsoQuant | none | 618 (607) | — → 0.991 | 0.000 → 0.708 | 430 / 4 | — @ 0.00 → 0.009 @ 0.70 |
+| ESPRESSO | 1 M | 573 (555) | 0.985 → 0.987 | 0.697 → 0.935 | 132 / 1 | 0.025 @ 0.70 → 0.021 @ 0.93 |
+| ESPRESSO | none | 573 (555) | — → 0.987 | 0.000 → 0.939 | 521 / 7 | — @ 0.00 → 0.013 @ 0.92 |
+| Bambu | 1 M | 552 (409) | 0.725 → 0.748 | 0.748 → 0.951 | 83 / 15 | 0.281 @ 0.78 → 0.257 @ 0.96 |
+| Bambu | none | 552 (409) | — → 0.764 | 0.000 → 0.951 | 389 / 120 | — @ 0.00 → 0.236 @ 0.92 |
+| TALON | 1 M | 1,760 (697) | 0.700 → 0.709 | 0.485 → 0.697 | 148 / 54 | 0.299 @ 0.29 → 0.290 @ 0.40 |
+| TALON | none | 1,760 (697) | — → 0.716 | 0.000 → 0.709 | 494 / 196 | — @ 0.00 → 0.284 @ 0.39 |
 
 Coverage = fraction of non-FSM isoforms that received a decisive class (`NOVEL_CONFIRMED`,
 `NOVEL_PROBABLE`, `ARTIFACT`, `REFERENCE_BIAS`); selective risk = wrong decisive calls among
@@ -36,15 +36,18 @@ them. Full numbers, including every OFF→ON transition by truth label, in
 ## Reading
 
 - **Where the recall was.** With 1 M short-read pairs, FLAIR's recall goes from 0.545 to
-  0.710 at precision 0.992: 120 genuine isoforms lifted, 0 false. They are the NIC isoforms
-  whose junctions are all individually known, which the short-read axis cannot test. The
-  same for IsoQuant (92 / 0) and ESPRESSO (106 / 1).
-- **Without short reads** PanIsoGuard used to confirm nothing (coverage 0.04, and the few
-  BAM-only `ARTIFACT` calls were 36 % wrong). With chain support it decides 60–88 % of the
-  isoforms at 1.5–3 % risk for FLAIR, IsoQuant and ESPRESSO.
+  0.745 at precision 0.993: 146 genuine isoforms lifted, 0 false. They are the NIC isoforms
+  whose junctions are all individually known, which the short-read axis cannot test (26 of
+  them carry SQANTI3's RT-switch sign, which ruleset 0.0.5 no longer lets demote the lift;
+  the 4 with an intra-priming sign stay `UNCONFIRMED`). The same for IsoQuant (111 / 0) and
+  ESPRESSO (132 / 1).
+- **Without short reads** PanIsoGuard confirms nothing (and, since ruleset 0.0.5, rejects
+  nothing either: the BAM-only `ARTIFACT` calls it used to make were 36 % wrong). With chain
+  support it decides 63–92 % of the isoforms at 0.7–1.3 % risk for FLAIR, IsoQuant and
+  ESPRESSO.
 - **Where it costs precision.** Bambu and TALON's false novel chains are carried by reads
-  too (they pass alignment artifacts through), so the lift adds false positives there: 13
-  and 48 with short reads, 114 and 174 without. Their precision is low to begin with
+  too (they pass alignment artifacts through), so the lift adds false positives there: 15
+  and 54 with short reads, 120 and 196 without. Their precision is low to begin with
   (0.70–0.75) and barely moves, but a user of a permissive caller should know that read
   support cannot separate what the caller did not. Caller-level false chains (a caller
   stitching junctions no single read carries) are what the signal removes; alignment-level

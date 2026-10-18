@@ -176,9 +176,14 @@ def verdict(iso, row, chain, inp):
                     for k in worst:
                         worst[k] = max(worst[k], hits[k] / n)
     cat = row["structural_category"]
+    perc_a = row.get("perc_A_downstream_TTS", "NA")
+    motif = row.get("polyA_motif_found", "NA")
+    intrapriming = perc_a not in ("NA", "") and float(perc_a) >= 60 and motif.upper() != "TRUE"
     if cat == "full-splice_match":
         return "SUPPORTED", "none", "KNOWN", n_novel, n_sr, False
     if cat == "incomplete-splice_match":
+        if reads is not None and chain and chain_full_reads(reads, chain[2]) >= CFG["min_chain"] and not intrapriming:
+            return "UNKNOWN", "none", "KNOWN_FRAGMENT", n_novel, n_sr, False   # a known structure, read end to end
         return "UNKNOWN", "none", "UNCONFIRMED", n_novel, n_sr, False
     if cat not in NOVEL:
         return "UNKNOWN", "none", "UNRESOLVED", n_novel, n_sr, False
@@ -198,26 +203,25 @@ def verdict(iso, row, chain, inp):
         sup = "UNKNOWN" if n_known and n_known_sr == 0 else "UNSUPPORTED"
     else:
         sup = "PARTIAL"
-    perc_a = row.get("perc_A_downstream_TTS", "NA")
-    motif = row.get("polyA_motif_found", "NA")
     if reads is not None and n_gated and any(worst[k] > g for k, g in CFG["gates"].items()):
         mech = "mapping_or_repeat"
     elif row.get("all_canonical") == "non_canonical" or (n_disrupted and "ref_seq" in inp and not inp["ref_seq_circular"]):
         mech = "noncanonical"
     elif row.get("RTS_stage", "").upper() == "TRUE":
         mech = "rt_switch"
-    elif perc_a not in ("NA", "") and float(perc_a) >= 60 and motif.upper() != "TRUE":
+    elif intrapriming:
         mech = "degradation"                                # intra-priming: A-rich AND no polyA motif
     else:
         mech = "none"
     if sup == "UNKNOWN":
         n_callers = inp.get("callers", {}).get(iso, 0)
+        weak = mech in ("none", "rt_switch")                         # the RT-switch sign does not demote methodological support
         if mech == "mapping_or_repeat":
-            cls = "ARTIFACT"
+            cls = "UNCONFIRMED"                                          # held, not ARTIFACT, without short reads
         elif n_callers >= CFG["min_callers"] and chain and catalog is not None:   # agreement on an examined chain only
-            cls = "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"
+            cls = "NOVEL_PROBABLE" if weak else "UNCONFIRMED"
         elif reads is not None and chain and catalog is not None and chain_full_reads(reads, introns) >= CFG["min_chain"]:
-            cls = "NOVEL_PROBABLE" if mech == "none" else "UNCONFIRMED"      # whole-chain long-read support
+            cls = "NOVEL_PROBABLE" if weak else "UNCONFIRMED"            # whole-chain long-read support
         else:
             cls = "UNRESOLVED"
     elif sup == "SUPPORTED":
@@ -308,7 +312,7 @@ def main():
         ("fingerprint of iso_known (06)", fingerprint("chrT", "+", chains["iso_known"][2]) == 4486241254994410266),
         ("unjoined isoform id is warned about (01)", warned),
         ("consensus lifts iso_G, BAM drops it (06)",
-         results["consensus"]["iso_G"][2] == "NOVEL_PROBABLE" and results["consensus_bam"]["iso_G"][2] == "ARTIFACT"),
+         results["consensus"]["iso_G"][2] == "NOVEL_PROBABLE" and results["consensus_bam"]["iso_G"][2] == "UNCONFIRMED"),
     ]
     counts = {1.0: (385, 4), 0.75: (45, 1), 0.5: (146, 6), 0.25: (154, 61), 0.1: (0, 8), 0.0: (0, 68)}
     tp = fp = 0

@@ -30,22 +30,24 @@ v49:
 |---|---:|---:|---:|---:|
 | n | 17 | 17 | 16 | 16 |
 | `NOVEL_CONFIRMED` | 10 | 0 | 9 | 0 |
-| `NOVEL_PROBABLE` | 5 (4 `chain_support`, 1 `supported_with_rt_switch`) | **15** (`chain_support`) | 3 | **12** (`chain_support`) |
-| `UNCONFIRMED` | 2 | 2 | 4 | 4 |
+| `NOVEL_PROBABLE` | 6 (4 `chain_support`, 1 `chain_support;rt_switch_sign`, 1 `supported_with_rt_switch`) | **17** (`chain_support`, 2 of them `;rt_switch_sign`) | 5 (1 `chain_support`, 2 `chain_support;rt_switch_sign`, 2 `supported_with_rt_switch`) | **16** (`chain_support`, 4 of them `;rt_switch_sign`) |
+| `UNCONFIRMED` | 1 | 0 | 2 | 0 |
 | `ARTIFACT` | **0** | **0** | **0** | **0** |
 
 - **No experimentally supported isoform is called an artifact**, on either platform, with
   or without short reads.
-- With short reads, 15 of 17 (PacBio) and 12 of 16 (ONT) are confident. The `UNCONFIRMED`
-  ones are CALB1 (NNC; its novel junction has no short-read coverage in this one Illumina
-  replicate) and, on both platforms, MTHFS and (ONT) USF1 and SAC3D1, where SQANTI3 flags
-  an RT-switching sign or short reads are absent at the junction. The validated status of
-  those four says the RTS sign is a false sign at least sometimes; PanIsoGuard keeps them as
-  `UNCONFIRMED` (a sign plus no corroboration), never `ARTIFACT`.
-- **Without short reads, whole-chain read support does the work**: the same 15 / 12 become
-  `NOVEL_PROBABLE` through `chain_support`, the 2 / 4 with an RTS sign `UNCONFIRMED`
-  (`chain_support_with_rt_switch`). That is the real-data counterpart of the SQANTI-SIM
-  result in [chain_support](../chain_support).
+- With short reads, 16 of 17 (PacBio) and 14 of 16 (ONT) are confident. The `UNCONFIRMED`
+  ones are CALB1 (NNC) and, on ONT, SAC3D1 (NIC): their novel junction has no short-read
+  support in this one Illumina replicate (`unsupported_no_sign`), never `ARTIFACT`. Four
+  validated isoforms (MTHFS, CENPK, USF1, RND2) carry SQANTI3's RT-switching sign; since
+  ruleset 0.0.5 the sign is noted in the reason (`chain_support;rt_switch_sign`,
+  `supported_with_rt_switch`) and does not hold them `UNCONFIRMED` (under 0.0.4 MTHFS and,
+  on ONT, USF1 were held).
+- **Without short reads, whole-chain read support does the work**: all 17 / 16 become
+  `NOVEL_PROBABLE` through `chain_support` (2 / 4 with `;rt_switch_sign`), CALB1 and SAC3D1
+  included: the long reads carry their chains, and only the short-read axis could not see
+  them. That is the real-data counterpart of the SQANTI-SIM result in
+  [chain_support](../chain_support).
 - The called FSM targets (14 of 23 on PacBio, 18 of 23 on ONT) are all `KNOWN`, as are the
   10 / 6 NIC/NNC targets that GENCODE v49 has since annotated; the 2 / 1 called `likely`
   targets are `KNOWN` or `NOVEL_PROBABLE`.
@@ -79,9 +81,10 @@ pass-through, not adjudicated). The one unsupported novel chain the caller did p
 **SQANTI3's RT-switching sign on validated isoforms.** Of the experimentally supported
 targets IsoQuant reconstructed, `RTS_stage = TRUE` on 5 of 41 (PacBio; 3 FSM, 2 NIC) and
 7 of 40 (ONT; 3 FSM, 3 NIC, 1 NNC): a 12–18 % false-sign rate on isoforms that exist.
-PanIsoGuard consumes the sign as SQANTI3 reports it; this is the measured cost of doing so,
-and why a sign alone never makes an `ARTIFACT` when short reads or whole-chain reads
-support the chain.
+PanIsoGuard consumes the sign as SQANTI3 reports it; this measured rate is why, since
+ruleset 0.0.5, the sign only annotates a call that short reads or whole-chain reads support
+(`;rt_switch_sign`) instead of holding it `UNCONFIRMED`, and why a sign alone never makes
+an `ARTIFACT`.
 
 **What it does not show.** 29 (PacBio) / 34 (ONT) supported novel targets were not
 reconstructed by IsoQuant at all, and only one of them sits inside a longer model. They are

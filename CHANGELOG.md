@@ -5,7 +5,33 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Changed
+- **Ruleset `builtin-0.0.5`: artifact signs without short reads.** `UNKNOWN × mapping` is
+  `UNCONFIRMED` (`mapping_without_short_reads`), no longer `ARTIFACT`: on SQANTI-SIM 11 of
+  the 31 isoforms that cell rejected were genuine, and on real ONT data the HiFi-calibrated
+  indel gate fires on most junctions. `ARTIFACT` now requires short reads checked at a
+  covered locus (`UNSUPPORTED × sign`). The RT-switch sign no longer demotes
+  caller-consensus or whole-chain support to `UNCONFIRMED`; the lift stands with the sign in
+  the reason (`chain_support;rt_switch_sign`, `caller_consensus;rt_switch_sign`): every
+  isoform it held on SQANTI-SIM was genuine (26 / 0 with short reads, 57 / 0 without), and
+  SQANTI3's `RTS_stage` is TRUE on 12–18 % of LRGASP's experimentally validated isoforms.
+  `noncanonical` (5 genuine / 13 false) and the intra-priming sign still hold the lift
+  (`chain_support_with_<mechanism>`): the simulator does not model intra-priming, and on
+  real Iso-Seq the sign marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's
+  filter also rejects, so there is no evidence to lift them. Effect at 1 M pairs + BAM:
+  recall 0.710 → 0.745 at precision 0.993 (AUPRC 0.974); without short reads 489 / 4 →
+  546 genuine / 4 false (AUPRC 0.953 vs SQANTI3 rules 0.909, bootstrap CI [+0.029, +0.061]);
+  end2end 19 of 20 genuine novels `NOVEL_PROBABLE`, 0 false. `panisoguard-report`'s rulebook
+  and `notes/check_notes.py` follow.
+
 ### Added
+- **`KNOWN_FRAGMENT` class / `known_fragment` verdict (ruleset `builtin-0.0.5`).** An ISM
+  whose whole intron chain ≥ `chain_min_full_reads` long reads carry, with no intra-priming
+  sign at the 3' end, is a known structure the reads saw end to end (`ism_chain_support`,
+  `;rts_sign` when SQANTI3 flags RT switching) instead of `UNCONFIRMED`. On SQANTI-SIM chr22
+  with the BAM: 153 genuine / 11 false (0.93; the simulator does not model intra-priming, so
+  the 3' sign cannot separate them there). Not a novel call: the h2h and LRGASP scorers rank
+  it with `KNOWN`.
 - **Whole-chain long-read support (ruleset `builtin-0.0.4`).** With `--bam`, the adjudicator
   counts the primary reads whose alignment carries the isoform's entire intron chain
   (`evidence.chain_n_full_reads`, `chain_n_partial_reads`). When short-read support is
@@ -14,8 +40,8 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   (`chain_support`; `chain_support_with_<mechanism>` → `UNCONFIRMED`). The reads are the
   caller's own, so it never reaches `NOVEL_CONFIRMED` and never overrides a short-read
   verdict. On SQANTI-SIM chr22 with 1 M short-read pairs it lifts FLAIR's recall from
-  0.545 to 0.710 at precision 0.992 (120 genuine / 0 false isoforms), IsoQuant 92 / 0,
-  ESPRESSO 106 / 1; Bambu (66 / 13) and TALON (122 / 48) pay precision because their false
+  0.545 to 0.745 at precision 0.993 (146 genuine / 0 false isoforms), IsoQuant 111 / 0,
+  ESPRESSO 132 / 1; Bambu (83 / 15) and TALON (148 / 54) pay precision because their false
   chains are read-supported too ([benchmark/chain_support](benchmark/chain_support)).
   `ablate --axes chain`; TOML `[axis_chain] min_full_reads`.
 - **`--validation-bam PATH`**: a second, independent library from which the whole-chain
@@ -41,13 +67,14 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   validated isoforms on real data: LRGASP's 89 WTC11 RT-PCR/amplicon targets, our own
   IsoQuant/SQANTI3/PanIsoGuard run on the public PacBio cDNA, ONT cDNA and Illumina reads.
   Of the supported NIC/NNC targets the caller reconstructed and that are novel in v49
-  (17 PacBio / 16 ONT): 0 `ARTIFACT` either way; 15 / 12 confident with short reads, and
-  the same 15 / 12 `NOVEL_PROBABLE` through whole-chain reads without them. Recall-side
+  (17 PacBio / 16 ONT): 0 `ARTIFACT` either way; 16 / 14 confident with short reads, and
+  all 17 / 16 `NOVEL_PROBABLE` through whole-chain reads without them (ruleset 0.0.5; 15 / 12
+  under 0.0.4, which held the RT-switch-flagged ones). Recall-side
   only: the GENCODE-rejected negatives were not reconstructed by the caller (the one
   unsupported novel chain it produced was held `UNRESOLVED`). SQANTI3's `RTS_stage` is TRUE
   on 12–18 % of the experimentally supported isoforms, a measured false-sign rate.
 - [benchmark/end2end](benchmark/end2end) re-run (its envelope was from 0.0.2): on the seeded
-  chr22 pipeline, precision 1.000 / specificity 1.000, 15 of 20 genuine novels
+  chr22 pipeline, precision 1.000 / specificity 1.000, 19 of 20 genuine novels
   `NOVEL_PROBABLE` through whole-chain reads; `score.py --emit-metrics` writes the envelope.
 - [benchmark/chain_support](benchmark/chain_support) adds the SIRV-Set4 truth set: the
   read-level separation replicates (FLAIR genuine 8/12 vs false 13/178 with ≥ 3 full-chain
@@ -56,21 +83,26 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - [benchmark/gm12878_realdata](benchmark/gm12878_realdata) (real ONT direct-RNA) re-run: the
   chain axis works with exact coordinates on ONT (94.5 % of splice sites exact among
   near-matching reads; 155/285 chains with ≥ 3 exact full-chain reads; ± 5 bp would add 20,
-  so no tolerance is shipped); `--platform ont` turns 129 HiFi-gate `ARTIFACT`s into 148
-  `NOVEL_PROBABLE`. No truth on that sample.
+  so no tolerance is shipped); `--platform ont` turns 129 HiFi-gate holds
+  (`mapping_without_short_reads`; `ARTIFACT` before ruleset 0.0.5) into 148 `NOVEL_PROBABLE`.
+  No truth on that sample.
 - The head-to-head ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h)) re-run
   with the chain axis: at 1 M pairs PanIsoGuard + BAM goes from precision 0.990 / recall
-  0.545 to **0.992 / 0.710** (AUPRC 0.972, still tied with the one-line rule); with no
-  short reads from 0 calls to 489 genuine / 4 false (recall 0.67, AUPRC 0.947 vs SQANTI3
-  rules 0.909, bootstrap CI [+0.023, +0.055]). Per-class at 1 M + BAM: NOVEL_PROBABLE
-  167 / 1, UNRESOLVED 0 / 6 (the genuine held NIC moved up), UNCONFIRMED 203 / 46. The
-  envelope now carries a risk–coverage point per method (PanIsoGuard + BAM decides 71 %
-  of isoforms with 2.1 % wrong; the one-line rule decides all with 6.6 % wrong).
+  0.545 to **0.993 / 0.745** (AUPRC 0.974, still tied with the one-line rule); with no
+  short reads from 0 calls to 546 genuine / 4 false (recall 0.75, AUPRC 0.953 vs SQANTI3
+  rules 0.909, bootstrap CI [+0.029, +0.061]). Per-class at 1 M + BAM: NOVEL_PROBABLE
+  193 / 1, KNOWN_FRAGMENT 153 / 11, UNRESOLVED 0 / 6 (the genuine held NIC moved up),
+  UNCONFIRMED 25 / 36. The envelope now carries a risk–coverage point per method
+  (PanIsoGuard + BAM decides 73 % of isoforms with 1.9 % wrong; the one-line rule decides
+  all with 6.6 % wrong).
 - [benchmark/refbias_3way](benchmark/refbias_3way) arm C re-run with the chain axis: junction-level
   numbers and the 18 / 28 rescues unchanged; 5,784 / 7,011 isoforms that SQANTI3's filter
   keeps and PanIsoGuard used to hold `UNRESOLVED` are now `NOVEL_PROBABLE` (whole-chain
   reads, no short reads in these samples); `adjudicate` takes 3–6 min per genome-wide run
-  instead of 2.
+  instead of 2. Under ruleset 0.0.5: `NOVEL_PROBABLE` 7,081 / 8,368, of which 1,297 / 1,357 are
+  SQANTI3 `Artifact`s lifted over the RT-switch sign; `KNOWN_FRAGMENT` 3,925 / 1,854; the
+  741 / 605 BAM-only `ARTIFACT`s are now `UNCONFIRMED` (`mapping_without_short_reads`);
+  chain-supported isoforms with the intra-priming sign (2,891 / 1,979) stay held.
 - [benchmark/refbias_3way](benchmark/refbias_3way) replicated on HG02717: rule level 37/39
   SNV-class junctions (precision 0.88), verdict level 21/39 (precision 0.95), the same
   miss pattern as HG03516; the envelope now holds both individuals. B2's SQANTI3 step had

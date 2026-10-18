@@ -37,15 +37,15 @@ Methods:
 |---|---|---:|---:|---:|---:|
 | none | SQ3rules | 0.918 | 0.886 | **0.902** | **0.909** |
 | none | PIG | — (0 calls) | 0.000 | — | 0.824 |
-| none | PIG+bam | **0.992** | 0.670 | 0.800 | **0.947** |
+| none | PIG+bam | **0.993** | 0.748 | 0.853 | **0.953** |
 | sr_1M | SQ3rules | 0.918 | 0.890 | 0.904 | 0.909 |
 | sr_1M | SQ3strict | 0.978 | 0.840 | 0.903 | 0.955 |
 | sr_1M | allSJ3 | 0.976 | **0.945** | **0.960** | 0.968 |
 | sr_1M | PIG | **0.990** | 0.545 | 0.703 | 0.969 |
-| sr_1M | PIG+bam | **0.992** | 0.710 | 0.827 | **0.972** |
+| sr_1M | PIG+bam | **0.993** | 0.745 | 0.851 | **0.974** |
 | oracle | allSJ3 | 0.976 | **1.000** | **0.988** | 0.976 |
 | oracle | PIG | 0.989 | 0.589 | 0.738 | 0.971 |
-| oracle | PIG+bam | 0.991 | 0.747 | 0.852 | 0.974 |
+| oracle | PIG+bam | 0.991 | 0.782 | 0.874 | 0.977 |
 
 250k and 4M pairs give the same picture (chr22 junction discovery saturates by ~1M); full
 tables, per SQANTI category, in
@@ -56,9 +56,9 @@ AUPRC difference vs `allSJ3`, bootstrap 95 % CI (2000 resamples):
 | | oracle | sr_250k | sr_1M | sr_4M |
 |---|---|---|---|---|
 | PIG | [−0.015, +0.005] | [−0.008, +0.013] | [−0.010, +0.010] | [−0.010, +0.010] |
-| PIG+bam | [−0.011, +0.008] | [−0.003, +0.017] | [−0.006, +0.013] | [−0.006, +0.013] |
+| PIG+bam | [−0.009, +0.011] | [−0.002, +0.019] | [−0.004, +0.016] | [−0.004, +0.016] |
 
-With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam **[+0.023, +0.055]**
+With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam **[+0.029, +0.061]**
 (better, since the 0.0.7 whole-chain read support). Before 0.0.6 the BAM gain with short
 reads was significant at 250k pairs ([+0.002, +0.021]); the 0.0.6 rule that a junction feeds
 the BAM gate only with ≥ 3 spanning reads removed that.
@@ -75,8 +75,8 @@ Coverage = share of the 870 isoforms given a decisive class (`NOVEL_CONFIRMED`,
 | SQ3strict | 1.000 | 0.151 |
 | allSJ3 | 1.000 | 0.066 |
 | PIG | 0.545 | 0.017 |
-| PIG+bam | 0.707 | 0.021 |
-| PIG+bam, no short reads | 0.602 | 0.029 |
+| PIG+bam | 0.734 | 0.019 |
+| PIG+bam, no short reads | 0.632 | 0.007 |
 
 Every setting's point is in the envelope (`coverage`, `selective_risk` per method).
 
@@ -88,12 +88,13 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
   Without the BAM it holds nearly all NIC isoforms `UNRESOLVED` (no individually-novel
   junction to corroborate) and all ISM isoforms `UNCONFIRMED`, so it recalls ~0.55 against
   `allSJ3`'s ~0.94. With the BAM (0.0.7), NIC isoforms whose whole intron chain is carried
-  by ≥ 3 long reads become `NOVEL_PROBABLE`: recall 0.71, 120 genuine gained, 0 false
-  ([../chain_support](../chain_support)). ISM stays held. On NNC it has the same TP/FP
+  by ≥ 3 long reads become `NOVEL_PROBABLE`: recall 0.75, 146 genuine gained, 0 false
+  ([../chain_support](../chain_support)). ISM carried end to end becomes `KNOWN_FRAGMENT`,
+  which is not a novel call. On NNC it has the same TP/FP
   counts as `allSJ3`.
 - **No short reads:** without the BAM PanIsoGuard makes no positive calls (everything is
   held `UNRESOLVED` unless `--caller-support` is given) and ranks below SQANTI3's default
-  rules. With the BAM it keeps 489 genuine / 4 false (recall 0.67 at precision 0.992) and
+  rules. With the BAM it keeps 546 genuine / 4 false (recall 0.75 at precision 0.993) and
   ranks above them; those calls rest on the caller's own reads, hence `NOVEL_PROBABLE`.
 - `SQ3ml` is not used for conclusions: its default training labels (FSM = TP, NNC = TN)
   are wrong for this simulation, where most NNC are genuine.
@@ -133,15 +134,17 @@ isoforms with no novel junction to test) is more precise than `UNCONFIRMED` at e
 | class | genuine | false | precision (no BAM) | genuine | false | precision (BAM) |
 |---|---:|---:|---:|---:|---:|---:|
 | NOVEL_CONFIRMED | 357 | 3 | 0.992 | 351 | 3 | 0.992 |
-| NOVEL_PROBABLE | 41 | 1 | 0.976 | 167 | 1 | 0.994 |
+| NOVEL_PROBABLE | 41 | 1 | 0.976 | 193 | 1 | 0.995 |
+| KNOWN_FRAGMENT | — | — | — | 153 | 11 | 0.933 |
 | UNRESOLVED | 152 | 7 | 0.956 | 0 | 6 | 0.000 |
-| UNCONFIRMED | 176 | 61 | 0.743 | 203 | 46 | 0.815 |
-| ARTIFACT | 4 | 68 | 0.056 | 9 | 84 | 0.097 |
+| UNCONFIRMED | 176 | 61 | 0.743 | 25 | 36 | 0.410 |
+| ARTIFACT | 4 | 68 | 0.056 | 8 | 83 | 0.088 |
 
 With the BAM (0.0.7), the genuine `UNRESOLVED` NIC isoforms move to `NOVEL_PROBABLE` through
-whole-chain read support (120 of the 167), and `UNRESOLVED` keeps the 6 false ones.
-`UNCONFIRMED` is two populations: ISM pass-through (154 genuine / 13 false, 0.92; the simulator
-does not model intra-priming, so this is an upper bound) and novel isoforms with weak support
-(no BAM: 22 / 48, 0.31; with BAM: 49 / 33, 0.60), below the 0.83 base rate. Numbers from the
-0.0.7 binary (ruleset `builtin-0.0.4`); `per_class_v006.txt` of `run.sh`'s work dir has every
-depth.
+whole-chain read support (146 of the 193), the ISM isoforms carried end to end move to
+`KNOWN_FRAGMENT` (153 of the 154 genuine and 11 of the 13 false: the simulator does not model
+intra-priming, so the 3' sign cannot separate them here), and `UNRESOLVED` keeps the 6 false
+ones. Without the BAM `UNCONFIRMED` is two populations: ISM pass-through (154 / 13, 0.92) and
+novel isoforms with weak support (22 / 48, 0.31); with the BAM what remains is the weak-support
+novel set (25 / 36, 0.41), below the 0.83 base rate. Numbers from the 0.0.7 binary (ruleset
+`builtin-0.0.5`); `per_class_v007.txt` of `run.sh`'s work dir has every depth.

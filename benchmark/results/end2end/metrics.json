@@ -1,12 +1,12 @@
 {
   "command": "GENOME=.../GRCh38.primary_assembly.genome.fa GTF=.../gencode.v49.annotation.gtf bash benchmark/end2end/run_e2e.sh e2e_work  (seeded: pbsim --seed 7); python score.py --emit-metrics ...",
   "data_provenance": "GENCODE v49 chr22: 150 transcripts (30 hidden) -> 6000 PBSIM3 reads (seed 7) -> minimap2 -> FLAIR3 -> SQANTI3 -> adjudicate (+ short-read SJ.tab + BAM mapping/whole-chain axes)",
-  "generated_utc": "2026-10-16T11:55:27Z",
+  "generated_utc": "2026-10-18T00:50:17Z",
   "metrics": {
-    "FN": 4,
+    "FN": 0,
     "FP": 0,
     "TN": 242,
-    "TP": 15,
+    "TP": 19,
     "class_by_truth": {
       "false": {
         "ARTIFACT": 166,
@@ -14,8 +14,7 @@
         "UNRESOLVED": 7
       },
       "genuine": {
-        "NOVEL_PROBABLE": 15,
-        "UNCONFIRMED": 4,
+        "NOVEL_PROBABLE": 19,
         "UNRESOLVED": 1
       }
     },
@@ -25,12 +24,12 @@
     "hidden_genuine_transcripts": 30,
     "n_sqanti_isoforms": 397,
     "precision_genuine": 1.0,
-    "recall_genuine_decisive": 0.789,
+    "recall_genuine_decisive": 1.0,
     "specificity_false": 1.0
   },
   "notes": "Full pipeline on real FLAIR/SQANTI3 output from simulated reads, re-run with the current binary. Positive = NOVEL_CONFIRMED/NOVEL_PROBABLE, negative = UNCONFIRMED/ARTIFACT, UNRESOLVED = abstain, on the SQANTI NIC/NNC set.",
   "protocol": "end2end",
-  "ruleset_version": "builtin-0.0.4",
+  "ruleset_version": "builtin-0.0.5",
   "scope": "gencode_v49_chr22",
   "source": null,
   "status": "tracked",

@@ -87,7 +87,9 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   unk.bam_n_junctions_gated = 1;
   unk.bam_n_spanning_total = 5;
   unk.bam_max_frac_low_mapq = 0.9;
-  CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kArtifact);
+  // 0.0.5: without short reads a mapping sign alone holds the call, it does not reject it
+  CHECK(eng.evaluate(unk).confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(eng.evaluate(unk).verdict_reason == "mapping_without_short_reads");
 }
 
 TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by default", "[rules]") {
@@ -171,13 +173,19 @@ TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel c
   mech.noncanonical = true;
   CHECK(eng.evaluate(mech).confidence == ConfidenceClass::kUnconfirmed);
 
-  // A strong mapping artifact still dominates consensus -> ARTIFACT.
+  // A strong mapping artifact still preempts consensus -> held UNCONFIRMED (0.0.5: was ARTIFACT).
   EvidenceVector mapping = consensus;
   mapping.bam_evaluable = true;
   mapping.bam_n_junctions_gated = 1;
   mapping.bam_n_spanning_total = 10;
   mapping.bam_max_frac_low_mapq = 0.9;
-  CHECK(eng.evaluate(mapping).confidence == ConfidenceClass::kArtifact);
+  CHECK(eng.evaluate(mapping).confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(eng.evaluate(mapping).verdict_reason == "mapping_without_short_reads");
+  // A weak sign (RT switch) does not demote a consensus-supported call.
+  EvidenceVector weak = consensus;
+  weak.rts_stage = true;
+  CHECK(eng.evaluate(weak).confidence == ConfidenceClass::kNovelProbable);
+  CHECK(eng.evaluate(weak).verdict_reason == "caller_consensus;rt_switch_sign");
 
   // Ablating the consensus axis reverts the promotion (AMBIGUOUS again).
   CHECK(eng.with_axis_disabled("consensus").evaluate(consensus).confidence ==
@@ -247,14 +255,56 @@ TEST_CASE("rules: whole-chain long-read support lifts UNKNOWN to PROBABLE, never
   ev.catalog_evaluable = false;
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnresolved);
   ev.catalog_evaluable = true;
-  // a mapping artifact still preempts it
+  // a mapping artifact still preempts it (held, not rejected, without short reads)
   ev.bam_evaluable = true; ev.bam_n_junctions_gated = 1; ev.bam_n_spanning_total = 10; ev.bam_max_frac_low_mapq = 0.9;
-  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kArtifact);
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
   ev.bam_max_frac_low_mapq = 0.0;
+  // the RT-switch sign keeps the lift; intra-priming and non-canonical hold it
+  ev.rts_stage = true;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kNovelProbable);
+  CHECK(eng.evaluate(ev).verdict_reason == "chain_support;rt_switch_sign");
+  ev.rts_stage = false;
+  ev.percA_evaluable = true; ev.perc_A_downstream_TTS = 80.0;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(eng.evaluate(ev).verdict_reason == "chain_support_with_degradation");
+  ev.perc_A_downstream_TTS = 0.0;
   // short-read evidence, when present, decides: UNSUPPORTED is not lifted by chain reads
   ev.sj_evaluable = true; ev.n_novel_junctions = 1; ev.n_novel_jx_sr_supported = 0;
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
   // ablation
   ev.sj_evaluable = false; ev.n_novel_junctions = 0;
   CHECK(eng.with_axis_disabled("chain").evaluate(ev).confidence == ConfidenceClass::kUnresolved);
+}
+
+TEST_CASE("rules: an ISM carried end to end by long reads is a KNOWN_FRAGMENT", "[rules][chain]") {
+  const RuleEngine eng;
+  EvidenceVector ev;
+  ev.structural_category = "incomplete-splice_match";
+  ev.chain_available = true;
+  ev.chain_evaluable = true;
+  ev.chain_n_full_reads = 5;
+  ev.percA_evaluable = true;
+  ev.perc_A_downstream_TTS = 10.0;
+  Verdict v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kKnownFragment);
+  CHECK(v.verdict == "known_fragment");
+  CHECK(v.verdict_reason == "ism_chain_support");
+  // an RT-switch sign is noted, not blocking
+  ev.rts_evaluable = true; ev.rts_stage = true;
+  CHECK(eng.evaluate(ev).verdict_reason == "ism_chain_support;rts_sign");
+  ev.rts_stage = false;
+  // the 3' intra-priming sign blocks it
+  ev.perc_A_downstream_TTS = 80.0;
+  v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(v.verdict_reason == "ism_intrapriming");
+  ev.perc_A_downstream_TTS = 10.0;
+  // too few whole-chain reads, or no BAM: the plain ISM pass-through
+  ev.chain_n_full_reads = 2;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
+  ev.chain_evaluable = false;
+  CHECK(eng.evaluate(ev).verdict_reason == "ism");
+  // ablating the chain axis removes it
+  ev.chain_evaluable = true; ev.chain_n_full_reads = 5;
+  CHECK(eng.with_axis_disabled("chain").evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
 }

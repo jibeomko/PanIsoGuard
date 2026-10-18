@@ -36,7 +36,7 @@ Two things this proves:
   rate makes "indel adjacent to junction" pervasive, so the 0.5 gate (genuine max **0.19**
   on clean HiFi — see [bam_axis](../bam_axis)) fires on **92 %** of ONT junctions and barely
   separates single-caller (mean **0.925**) from ≥ 2-caller (mean **0.732**) novels
-  (artifact rate **62 %** vs **58 %**). Meanwhile the *older* low-MAPQ / supplementary
+  (the mapping sign fires on 17 / 31 = 55 % of ≥ 2-caller vs 112 / 254 = 44 % of single-caller chains). Meanwhile the *older* low-MAPQ / supplementary
   signals barely fire (6 % / 2 %). **Takeaway:** the BAM mapping axis is **opt-in (`--bam`)**
   and its thresholds **must be re-calibrated per chemistry**; the shipped defaults are
   HiFi-tuned. (Making `indel_near` rate-normalized for noisy chemistries is future work.)
@@ -87,13 +87,15 @@ the single-caller ones (133 / 254, 52 %), the same direction as the consensus si
 What the two presets do with it (no short reads exist for this sample, so every call is
 `UNKNOWN` support):
 
-| preset | ARTIFACT | NOVEL_PROBABLE | UNRESOLVED |
+| preset | UNCONFIRMED (`mapping_without_short_reads`) | NOVEL_PROBABLE | UNRESOLVED |
 |---|---:|---:|---:|
 | `--platform hifi` (default; indel-near gate on) | 129 | 53 | 103 |
 | `--platform ont` (indel-near gate off) | 9 | **148** | 128 |
 
-Under the HiFi defaults the over-firing indel-near gate (section 1) turns most chain-supported
-isoforms into `ARTIFACT`; under the ONT preset they become `NOVEL_PROBABLE`. There is no truth
+Under the HiFi defaults the over-firing indel-near gate (section 1) holds most chain-supported
+isoforms `UNCONFIRMED` (before ruleset 0.0.5 they were `ARTIFACT`; this dataset is one reason
+a mapping sign alone no longer rejects a call); under the ONT preset they become
+`NOVEL_PROBABLE`. There is no truth
 for these chains, so this section is about whether the axis functions on ONT (it does), not
 about accuracy.
 

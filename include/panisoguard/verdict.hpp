@@ -26,6 +26,8 @@ enum class Mechanism {
 // verdict, not the evidence; the evidence is in Verdict::verdict_reason and rule_trace.
 enum class ConfidenceClass {
   kKnown,            // matches a known transcript (FSM); not adjudicated
+  kKnownFragment,    // a truncated known transcript (ISM) whose whole intron chain >= chain_min_full_reads
+                     // long reads carry, with no intra-priming sign at the 3' end (0.0.7)
   kNovelConfirmed,   // every novel junction corroborated, no artifact sign
   kNovelProbable,    // corroborated with one sign, or supported by caller agreement only
   kUnconfirmed,      // weak or partial evidence (also ISM: a truncated known transcript)
@@ -111,8 +113,8 @@ struct EvidenceVector {
 
 struct Verdict {
   ConfidenceClass confidence = ConfidenceClass::kUnresolved;
-  // The user's decision unit, one of: known, confirmed, reference_bias, unconfirmed,
-  // artifact, not_adjudicated; and the one rule that decided it (e.g. partial_support,
+  // The user's decision unit, one of: known, known_fragment, confirmed, reference_bias,
+  // unconfirmed, artifact, not_adjudicated; and the one rule that decided it (e.g. partial_support,
   // no_short_reads, firewall_held, ism_intrapriming). Both are stable short codes.
   std::string verdict = "unconfirmed";
   std::string verdict_reason;

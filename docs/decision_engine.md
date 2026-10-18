@@ -110,11 +110,16 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    - `UNSUPPORTED × none → UNCONFIRMED`
    - `UNSUPPORTED × mechanism → ARTIFACT`
    - `UNKNOWN` support → `UNRESOLVED`, except:
-     - `UNKNOWN × strong mapping artifact → ARTIFACT` (a decisive mapping signal
-       stands without short-read support); and
+     - `UNKNOWN × strong mapping artifact → UNCONFIRMED` (reason
+       `mapping_without_short_reads`): the mapping sign preempts consensus and whole-chain
+       support, but without short reads it holds the call instead of rejecting it. Before
+       ruleset 0.0.5 this cell was `ARTIFACT`; on SQANTI-SIM 11 of the 31 isoforms it
+       rejected were genuine, and on real ONT data the HiFi-calibrated gate fires on most
+       junctions; and
      - `UNKNOWN × caller-consensus (≥ consensus_min_callers, no mapping artifact) →
-       NOVEL_PROBABLE` (mechanism `none`) or `UNCONFIRMED` (any other
-       mechanism). Multi-caller agreement corroborates the chain methodologically
+       NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign, noted as
+       `caller_consensus;rt_switch_sign`) or `UNCONFIRMED` (`noncanonical` or
+       `degradation`, reason `consensus_with_<mechanism>`). Multi-caller agreement corroborates the chain methodologically
        when the short-read axis is silent; a strong mapping artifact still preempts
        it. It applies only to a chain that was examined: if the caller's chain did
        not join (`caller_chain_absent`) or no `--ref-gtf` was given, the count is
@@ -123,14 +128,21 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        writes since 0.0.6), not by native id, because two callers may reuse one name
        for different chains. Disable with `ablate --axes consensus`.
      - `UNKNOWN × whole-chain long-read support (≥ chain_min_full_reads, no mapping
-       artifact, no consensus) → NOVEL_PROBABLE` (mechanism `none`) or `UNCONFIRMED`
-       (any other mechanism), since 0.0.7. With `--bam`, the adjudicator counts the
+       artifact, no consensus) → NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign,
+       `chain_support;rt_switch_sign`) or `UNCONFIRMED` (`noncanonical` or `degradation`,
+       `chain_support_with_<mechanism>`), since 0.0.7. The RT-switch sign stopped demoting
+       methodological support in ruleset 0.0.5: on SQANTI-SIM every isoform it held was
+       genuine (26 / 0 with short reads, 57 / 0 without), and SQANTI3's `RTS_stage` is TRUE
+       on 12–18 % of LRGASP's experimentally validated isoforms. The intra-priming sign still
+       holds: the simulator does not model it (4 / 0 there says nothing), and on real Iso-Seq
+       it marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's filter also
+       rejects ([benchmark/refbias_3way](../benchmark/refbias_3way)). With `--bam`, the adjudicator counts the
        primary reads whose alignment carries the isoform's entire intron chain
        (`evidence.chain_n_full_reads`; `chain_n_partial_reads` are shorter reads
        consistent with it). These are the caller's own reads, so like consensus it is
        methodological support and never reaches `NOVEL_CONFIRMED`; it never overrides a
-       short-read verdict (`UNSUPPORTED`, `PARTIAL`). On SQANTI-SIM chr22 it keeps
-       151/151 genuine held NIC isoforms and 0/6 false ones (FLAIR), but the false
+       short-read verdict (`UNSUPPORTED`, `PARTIAL`). On SQANTI-SIM chr22 it lifts
+       146 genuine and 0 false FLAIR isoforms with 1 M short-read pairs (546 / 4 without), but the false
        chains of Bambu, ESPRESSO and TALON are read-supported too (alignment-level
        artifacts), so it separates caller-level from alignment-level false chains only
        ([benchmark/chain_support](../benchmark/chain_support)). Coordinates are exact: on
@@ -144,9 +156,12 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        Same chain+catalog
        requirement as consensus. Disable with `ablate --axes chain`.
 - Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
-  UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is reported
-  in the reason, `ism_intrapriming` / `ism_rts`, but does not change the class, because
-  the splice structure is known and only the 3' end is unreliable); non-targeted
+  KNOWN_FRAGMENT` (verdict `known_fragment`, reason `ism_chain_support`) when
+  ≥ `chain_min_full_reads` long reads carry its whole intron chain and the 3' end shows
+  no intra-priming sign (an RTS sign is noted, `;rts_sign`), since ruleset 0.0.5;
+  otherwise `UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is
+  reported in the reason, `ism_intrapriming` / `ism_rts`, but does not change the class,
+  because the splice structure is known and only the 3' end is unreliable); non-targeted
   categories (genic, antisense, fusion, intergenic, genic_intron) → `UNRESOLVED` with
   verdict `not_adjudicated`.
 
@@ -158,6 +173,7 @@ one rule that decided it:
 | `verdict` | classes | meaning |
 |---|---|---|
 | `known` | KNOWN | matches a known transcript |
+| `known_fragment` | KNOWN_FRAGMENT | a truncated known transcript whose whole intron chain the long reads carry (since ruleset 0.0.5); a known structure, not a novel isoform |
 | `confirmed` | NOVEL_CONFIRMED, NOVEL_PROBABLE | keep (PROBABLE via `caller_consensus` or `chain_support` is methodological, not experimental, support) |
 | `reference_bias` | REFERENCE_BIAS | the junction is real; it looked novel or non-canonical because of the reference |
 | `unconfirmed` | UNCONFIRMED, UNRESOLVED | review |
@@ -165,14 +181,16 @@ one rule that decided it:
 | `not_adjudicated` | UNRESOLVED | a SQANTI3 category PanIsoGuard does not judge |
 
 `verdict_reason` codes: `full_splice_match`, `ism`, `ism_intrapriming`, `ism_rts`,
+`ism_chain_support[;rts_sign]`,
 `category_<category>`, `pangenome_path`, `haplotype_variant` (either `;mapping_sign`),
 `firewall_held`, `haplotype_inconsistent`, `path_inconsistent`, `all_junctions_supported`
 (a `noncanonical` reason carries `;haplotype_disrupted` when the sign came from the
 haplotypes rather than SQANTI3),
 `supported_with_<mechanism>`,
 `partial_support[_with_<mechanism>]`, `unsupported_no_sign`, `unsupported_<mechanism>`,
-`mapping_without_short_reads`, `caller_consensus`, `consensus_with_<mechanism>`,
-`chain_support`, `chain_support_with_<mechanism>`, and the
+`mapping_without_short_reads`, `caller_consensus[;rt_switch_sign]`,
+`consensus_with_<mechanism>`, `chain_support[;rt_switch_sign]`,
+`chain_support_with_<mechanism>` (each `;independent_library` with `--validation-bam`), and the
 `UNKNOWN`-support reasons `no_short_reads`, `no_coverage`, `no_novel_junction`,
 `caller_chain_absent`. The classes are **not** an ordered scale: on SQANTI-SIM truth
 `UNRESOLVED` (mostly NIC with no novel junction to test) has precision 0.96 while
@@ -180,10 +198,13 @@ haplotypes rather than SQANTI3),
 [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h), `per_class.py`).
 
 **`ARTIFACT` semantics (read carefully).** `ARTIFACT` denotes *(UNSUPPORTED × any
-mechanism)* or *(UNKNOWN × strong mapping)* — i.e. a **combined confidence ×
-mechanism** signal, **not** a standalone claim that the call is spurious. A novel
-isoform with an unusual motif but no short-read backing lands here; users should
-cross-check `ARTIFACT` calls against the original reads before hard filtering.
+mechanism)* — short reads were checked at a covered locus, none supports the novel
+junction, and an artifact sign is present — i.e. a **combined confidence × mechanism**
+signal, **not** a standalone claim that the call is spurious. Since ruleset 0.0.5 no
+isoform is `ARTIFACT` without short reads (the mapping sign alone holds it
+`UNCONFIRMED`). A novel isoform with an unusual motif but no short-read backing lands
+here; users should cross-check `ARTIFACT` calls against the original reads before hard
+filtering.
 
 **NIC behaviour.** A `novel_in_catalog` isoform's novel junction is a *novel pairing
 of known splice sites*, i.e. a novel intron not present in the catalog, so it IS

@@ -54,7 +54,11 @@ struct RuleConfig {
   // known junctions; intra-priming needs no polyA motif; class names renamed.
   // 0.0.4 (0.0.7): whole-chain long-read support (>= chain_min_full_reads) lifts UNKNOWN to
   // PROBABLE; a variant-disrupted motif is a noncanonical sign.
-  std::string ruleset_version = "builtin-0.0.4";
+  // 0.0.5 (0.0.7): UNKNOWN x mapping is UNCONFIRMED, not ARTIFACT (35 % of those calls were
+  // genuine on SQANTI-SIM); an RT-switch or degradation sign no longer demotes a chain- or
+  // consensus-supported call (0 of 83 such calls were false); ISM with >= chain_min_full_reads
+  // whole-chain reads and no intra-priming sign is KNOWN_FRAGMENT.
+  std::string ruleset_version = "builtin-0.0.5";
 };
 
 class RuleEngine {

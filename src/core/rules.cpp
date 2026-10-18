@@ -101,6 +101,18 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
     // A truncated known transcript. 61 % of real ISM carry the intra-priming sign (HG03516),
     // so the sign is reported in the reason, but the class does not change: the splice
     // structure is known; only the 3' end is unreliable, and that is not a splicing artifact.
+    // Since 0.0.7, an ISM whose whole intron chain >= chain_min_full_reads long reads carry and
+    // whose 3' end shows no intra-priming sign is a KNOWN_FRAGMENT: a known structure seen
+    // end to end in the reads (92 % of ISM were genuine on SQANTI-SIM), kept apart from the
+    // novel classes because nothing novel was tested.
+    const bool chain_ok = cfg_.use_chain && ev.chain_evaluable && ev.chain_n_full_reads >= cfg_.chain_min_full_reads;
+    if (chain_ok && !intrapriming) {
+      trace("category=incomplete-splice_match, " + std::to_string(ev.chain_n_full_reads) +
+            " whole-chain read(s), no intra-priming sign -> KNOWN_FRAGMENT");
+      return finish(ConfidenceClass::kKnownFragment, "known_fragment",
+                    std::string("ism_chain_support") + (rts ? ";rts_sign" : "") +
+                    (ev.chain_independent ? ";independent_library" : ""));
+    }
     std::string reason = "ism";
     if (intrapriming) reason = "ism_intrapriming";
     else if (rts) reason = "ism_rts";
@@ -284,8 +296,17 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
     // >= consensus_min_callers independent callers recovering the same intron chain is
     // methodological (not experimental) support, so it promotes only to PROBABLE, never
     // CONFIRMED. With neither signal the call is held UNRESOLVED.
+    // The RT-switch sign does not demote methodological support: 0 of 83 chain- or
+    // consensus-supported calls carrying it were false on SQANTI-SIM, and SQANTI3 flags it on
+    // 12-18 % of LRGASP's experimentally validated isoforms. The intra-priming sign still
+    // holds (as for ISM above): the simulator does not model it, so there is no evidence
+    // either way, and on real Iso-Seq it marks thousands of chain-supported isoforms.
+    const bool weak_sign = mech == Mechanism::kRtSwitch;
+    const std::string sign_note = weak_sign ? ";" + mc + "_sign" : "";
     if (mech == Mechanism::kMapping) {
-      cls = ConfidenceClass::kArtifact; verdict = "artifact"; reason = "mapping_without_short_reads";
+      // Without short reads a mapping sign alone is not decisive: 11 of 31 such ARTIFACT
+      // calls were genuine on SQANTI-SIM (0.0.4-0.0.6), so the call is held UNCONFIRMED.
+      cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "mapping_without_short_reads";
     } else if (cfg_.use_consensus && ev.consensus_evaluable && ev.n_callers >= cfg_.consensus_min_callers &&
                !(ev.chain_available && ev.catalog_evaluable)) {
       // Caller agreement can only corroborate a chain we could examine: without the
@@ -298,7 +319,7 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
       trace("caller-consensus n_callers=" + std::to_string(ev.n_callers) + " >= " +
             std::to_string(cfg_.consensus_min_callers) +
             " corroborates the novel chain (no short-read axis) -> consensus-supported");
-      if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "caller_consensus"; }
+      if (mech == Mechanism::kNone || weak_sign) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "caller_consensus" + sign_note; }
       else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "consensus_with_" + mc; }
     } else if (cfg_.use_chain && ev.chain_evaluable && ev.chain_n_full_reads >= cfg_.chain_min_full_reads &&
                ev.chain_available && ev.catalog_evaluable) {
@@ -310,7 +331,7 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
             " read(s) carry the entire intron chain (>= " + std::to_string(cfg_.chain_min_full_reads) +
             (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
       const std::string src = ev.chain_independent ? ";independent_library" : "";
-      if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support" + src; }
+      if (mech == Mechanism::kNone || weak_sign) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support" + sign_note + src; }
       else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "chain_support_with_" + mc + src; }
     } else {
       cls = ConfidenceClass::kUnresolved; verdict = "unconfirmed"; reason = unknown_reason;

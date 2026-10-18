@@ -153,17 +153,18 @@ PanIsoGuard는 isoform을 새로 부르는 caller가 아니다. 이미 caller가
 2. **primary mechanism**: 믿기 어렵다면 어떤 artifact 기전이 의심되는지(`noncanonical`, `mapping_or_repeat` 등). 아무것도 걸리지 않으면 `none`이다.
 3. **rule_trace**: 판정까지 거친 규칙을 순서대로 적은 기록.
 
-등급은 일곱 가지다.
+등급은 여덟 가지다.
 
 | confidence class | 뜻 |
 |---|---|
 | `KNOWN` | 이미 알려진 isoform(FSM)이라 판정할 것이 없음 |
+| `KNOWN_FRAGMENT` | 알려진 isoform의 잘린 조각(ISM)인데, intron chain 전체를 한 번에 지나는 long read가 3개 이상이고 3′ 끝에 intra-priming 흔적이 없음 |
 | `NOVEL_CONFIRMED` | novel junction이 모두 독립 증거로 확인되고 artifact 흔적도 없음 |
 | `NOVEL_PROBABLE` | 확인은 되었지만 artifact 흔적이 하나 있거나, short read 대신 caller 여러 개의 합의로만 확인됨 |
-| `UNCONFIRMED` | novel junction 일부만 확인됨, 확인이 안 됐지만 artifact 흔적도 없음, 또는 ISM |
+| `UNCONFIRMED` | novel junction 일부만 확인됨, 확인이 안 됐지만 artifact 흔적도 없음, short read 없이 mapping 흔적만 있음, 또는 chain 전체를 지나는 read가 없는 ISM |
 | `REFERENCE_BIAS` | 새로워 보이는 이유가 참조 게놈과 개인 게놈의 차이(reference bias)로 설명됨 |
 | `UNRESOLVED` | 판정할 증거가 없음. reference bias로 설명되지만 그 근거의 출처가 불확실할 때도 여기로 보류함 |
-| `ARTIFACT` | 확인이 안 되고 artifact 흔적까지 있음 |
+| `ARTIFACT` | short read로 확인했는데 없고 artifact 흔적까지 있음 |
 
 반대로 PanIsoGuard가 하지 않는 일도 있다. SQANTI3의 QC 값(splice motif, RT switching, poly-A 등)을 다시 계산하지 않고 SQANTI3가 적어 준 값을 그대로 쓴다. 그리고 이 등급은 확률이 아니다. `HIGH`가 `MEDIUM`보다 믿을 만하다는 순서만 있는 서열 척도다([07](07_evaluation.md)).
 
@@ -191,8 +192,9 @@ opened BAM for mapping axis: data/long_reads.bam
 adjudicated 9 isoforms:
   ARTIFACT                     3
   KNOWN                        1
+  KNOWN_FRAGMENT               1
   NOVEL_CONFIRMED              2
-  UNCONFIRMED                  2
+  UNCONFIRMED                  1
   UNRESOLVED                   1
 wrote out/toy.{adjudicated.tsv,attribution.jsonl,junctions.tsv,provenance.log}
 isoform_id  structural_category      novelty_support  primary_mechanism  confidence_class  n_novel_junctions  n_novel_jx_sr_supported
@@ -203,7 +205,7 @@ iso_D       novel_in_catalog         UNKNOWN          none               UNRESOL
 iso_E       novel_in_catalog         SUPPORTED        none               NOVEL_CONFIRMED   1                  1
 iso_F       novel_not_in_catalog     UNSUPPORTED      noncanonical       ARTIFACT          1                  0
 iso_G       novel_not_in_catalog     UNSUPPORTED      mapping_or_repeat  ARTIFACT          1                  0
-iso_ism     incomplete-splice_match  UNKNOWN          none               UNCONFIRMED       0                  0
+iso_ism     incomplete-splice_match  UNKNOWN          none               KNOWN_FRAGMENT    0                  0
 iso_known   full-splice_match        SUPPORTED        none               KNOWN             0                  0
 ```
 
@@ -249,7 +251,7 @@ cat out/toy.provenance.log
 ```text
 # PanIsoGuard adjudicate provenance
 tool_version	0.0.6
-ruleset_version	builtin-0.0.4
+ruleset_version	builtin-0.0.5
 sqanti3_version_target	6.0
 config	<built-in defaults>
 thresholds	sj_min_uniq_reads=3 sj_require_canonical_motif=true consensus_min_callers=2 chain_min_full_reads=3 max_perc_A_downstream_TTS=60 platform=hifi min_mapq=20 min_spanning=3 softclip_min_bp=20 junction_window_bp=10 max_low_mapq_frac=0.5 max_supplementary_frac=0.5 max_indel_near_frac=0.5 max_softclip_frac=1.01 pangenome_min_haplotypes=1
@@ -278,14 +280,16 @@ axis.chain	on (same reads as the caller)
 # confidence-class counts
 class.ARTIFACT	3
 class.KNOWN	1
+class.KNOWN_FRAGMENT	1
 class.NOVEL_CONFIRMED	2
-class.UNCONFIRMED	2
+class.UNCONFIRMED	1
 class.UNRESOLVED	1
 # verdict counts
 verdict.artifact	3
 verdict.confirmed	2
 verdict.known	1
-verdict.unconfirmed	3
+verdict.known_fragment	1
+verdict.unconfirmed	2
 total	9
 ```
 
@@ -309,7 +313,7 @@ total	9
 
 - **step0의 `n_novel_junctions = 0`은 "novel junction이 없다"가 아니다.** 참조 GTF가 없으면 무엇이 새로운지 셀 수 없어서 아예 세지 않는다. 이때 PanIsoGuard는 stderr에 경고를 남긴다(연습문제 1).
 - **reference bias로 구제된 isoform의 `novelty_support`는 `UNKNOWN`이다.** step4와 step5에서는 `SJ.out.tab`을 넣었는데도 `UNKNOWN`으로 나온다. rescue 규칙이 지지 수준을 정하기 전에 판정을 끝내기 때문이다([04](04_projection.md)).
-- **FSM의 `SUPPORTED`와 ISM의 `UNKNOWN`은 증거가 아니다.** 두 범주는 규칙을 거치지 않고 바로 등급이 정해진다. FSM에만 `SUPPORTED`를 적어 두는 것은 코드의 표기 습관일 뿐, short read를 확인한 결과가 아니다.
+- **FSM의 `SUPPORTED`와 ISM의 `UNKNOWN`은 증거가 아니다.** 두 범주는 조합표를 거치지 않는다. FSM은 바로 `KNOWN`이고, ISM은 chain 전체를 지나는 long read 수만 보고 `KNOWN_FRAGMENT`나 `UNCONFIRMED`이 된다. FSM에만 `SUPPORTED`를 적어 두는 것은 코드의 표기 습관일 뿐, short read를 확인한 결과가 아니다.
 - **`ARTIFACT`는 "가짜라고 확정했다"가 아니다.** "확인되지 않았고, artifact 흔적까지 있다"는 조합이다. 1절 표에서 `iso_A`가 step2의 `ARTIFACT`에서 step5의 rescue로 바뀌는 것처럼, 입력이 늘면 뒤집힐 수 있다.
 
 ## 5. 이 판정은 얼마나 정확할까?
