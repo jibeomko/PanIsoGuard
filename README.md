@@ -440,7 +440,9 @@ Full tables, bootstrap confidence intervals and caveats are in
 - On real data with experimentally validated isoforms (LRGASP WTC11, PacBio and ONT), none
   of the validated isoforms the caller reconstructed is called an artifact, and without
   short reads the whole-chain reads keep all 17 (PacBio) and 16 (ONT) as
-  `NOVEL_PROBABLE` ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
+  `NOVEL_PROBABLE`; with the other platform's reads as an independent library
+  (`--validation-bam`) 13 of 17 and 14 of 16 are still carried by at least 3 reads
+  ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
 
 So use it for the reason behind each call, not for a better score.
 

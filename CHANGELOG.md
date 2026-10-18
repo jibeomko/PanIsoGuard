@@ -15,7 +15,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   the reason (`chain_support;rt_switch_sign`, `caller_consensus;rt_switch_sign`): every
   isoform it held on SQANTI-SIM was genuine (26 / 0 with short reads, 57 / 0 without), and
   SQANTI3's `RTS_stage` is TRUE on 12–18 % of LRGASP's experimentally validated isoforms.
-  `noncanonical` (5 genuine / 13 false) and the intra-priming sign still hold the lift
+  What this moves in every tracked run, and the limits of the evidence, is tabulated in
+  [benchmark/rts_sensitivity](benchmark/rts_sensitivity). `noncanonical` (5 genuine / 13 false)
+  and the intra-priming sign still hold the lift
   (`chain_support_with_<mechanism>`): the simulator does not model intra-priming, and on
   real Iso-Seq the sign marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's
   filter also rejects, so there is no evidence to lift them. Effect at 1 M pairs + BAM:
@@ -66,7 +68,14 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - **`--validation-bam PATH`**: a second, independent library from which the whole-chain
   reads are counted instead of the caller's own BAM (`evidence.chain_independent`, reason
   `chain_support;independent_library`; `provenance.log` records it). The class stays
-  `NOVEL_PROBABLE`: no tracked dataset has such a library to validate a stronger lift.
+  `NOVEL_PROBABLE`. Tested on LRGASP WTC11 with the other platform's library as the
+  independent one (`benchmark/lrgasp_wtc11/cross_library.py`): 13 / 17 (PacBio → ONT) and
+  14 / 16 (ONT → PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0–2
+  reads); genome-wide the novel lifts reproduce at 60–75 % of the expressed-FSM rate at
+  matched depth from PacBio to ONT and at about the FSM rate from ONT to PacBio; PacBio
+  lifts carrying SQANTI3's RT-switch sign reproduce at half the rate of the unflagged ones in
+  every depth bin, ONT's do not. A second library attests expression, not correct splicing,
+  so the lift is recorded, not promoted.
 - **`genomic_compatibility`** column (last in `adjudicated.tsv`, also in the JSON): the DNA
   side on its own, independent of the verdict: `haplotype` / `pangenome` (every novel
   junction explained, on one haplotype or path), `partial`, `none`, `NA`. A firewall-held

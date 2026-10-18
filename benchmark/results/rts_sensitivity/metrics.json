@@ -1,0 +1,104 @@
+{
+  "command": "benchmark/rts_sensitivity/rts_sensitivity.py --sqsim-work ... --h2h ... --e2e ... --lrgasp ... --threeway ... --gm12878 ... --emit-metrics",
+  "data_provenance": "the adjudicated.tsv files of the tracked runs (SQANTI-SIM h2h 1M/none + BAM, end2end, LRGASP WTC11 pb/ont sr/nosr, refbias_3way arm C wgs, gm12878 ONT preset)",
+  "generated_utc": "2026-10-18T02:57:16Z",
+  "metrics": {
+    "end2end": {
+      "false": 0,
+      "genuine": 4,
+      "known_fragment_rts_sign": 3,
+      "rt_lifts": 4
+    },
+    "gm12878_ont": {
+      "rt_lifts": 0
+    },
+    "lrgasp_ont_nosr": {
+      "known_fragment_rts_sign": 52,
+      "rt_lifts": 222,
+      "validated_targets_among_them": [
+        "CENPK+1",
+        "MTHFS+1",
+        "RND2+1",
+        "USF1+1"
+      ]
+    },
+    "lrgasp_ont_sr": {
+      "known_fragment_rts_sign": 52,
+      "rt_lifts": 121,
+      "validated_targets_among_them": [
+        "MTHFS+1",
+        "USF1+1"
+      ]
+    },
+    "lrgasp_pb_nosr": {
+      "known_fragment_rts_sign": 222,
+      "rt_lifts": 1321,
+      "validated_targets_among_them": [
+        "CENPK+1",
+        "MTHFS+1"
+      ]
+    },
+    "lrgasp_pb_sr": {
+      "known_fragment_rts_sign": 222,
+      "rt_lifts": 910,
+      "validated_targets_among_them": [
+        "MTHFS+1"
+      ]
+    },
+    "refbias_3way_hg02717": {
+      "known_fragment_rts_sign": 171,
+      "novel_probable_total": 8368,
+      "rt_lifts": 1357,
+      "sqanti3_filter": {
+        "Artifact": 1357
+      }
+    },
+    "refbias_3way_hg03516": {
+      "known_fragment_rts_sign": 311,
+      "novel_probable_total": 7081,
+      "rt_lifts": 1297,
+      "sqanti3_filter": {
+        "Artifact": 1297
+      }
+    },
+    "sqanti_sim_none_bam": {
+      "annotate": {
+        "auprc": 0.953,
+        "prec": 0.993,
+        "rec": 0.748
+      },
+      "false": 0,
+      "genuine": 57,
+      "hold": {
+        "auprc": 0.939,
+        "prec": 0.992,
+        "rec": 0.67
+      },
+      "known_fragment_rts_sign": 8,
+      "rt_lifts": 57
+    },
+    "sqanti_sim_sr_1000000_bam": {
+      "annotate": {
+        "auprc": 0.974,
+        "prec": 0.993,
+        "rec": 0.745
+      },
+      "false": 0,
+      "genuine": 26,
+      "hold": {
+        "auprc": 0.972,
+        "prec": 0.992,
+        "rec": 0.71
+      },
+      "known_fragment_rts_sign": 8,
+      "rt_lifts": 26
+    }
+  },
+  "notes": "Ruleset 0.0.5 lets a whole-chain / consensus lift stand when SQANTI3's RTS_stage is TRUE (reason ;rt_switch_sign). 'hold' is the 0.0.4 alternative (UNCONFIRMED). On SQANTI-SIM every such lift is genuine, but the simulator produces no RT switching, so this measures only the flag's false-sign side; the real-data columns show how many calls the choice moves (all of them SQANTI3-filter Artifacts) and which validated LRGASP isoforms it keeps.",
+  "protocol": "rts_sensitivity",
+  "ruleset_version": "builtin-0.0.5",
+  "scope": "all_tracked_runs",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.6"
+}

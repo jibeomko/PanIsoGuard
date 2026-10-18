@@ -133,7 +133,8 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        `chain_support_with_<mechanism>`), since 0.0.7. The RT-switch sign stopped demoting
        methodological support in ruleset 0.0.5: on SQANTI-SIM every isoform it held was
        genuine (26 / 0 with short reads, 57 / 0 without), and SQANTI3's `RTS_stage` is TRUE
-       on 12–18 % of LRGASP's experimentally validated isoforms. The intra-priming sign still
+       on 12–18 % of LRGASP's experimentally validated isoforms (what the choice moves per
+       dataset: [benchmark/rts_sensitivity](../benchmark/rts_sensitivity)). The intra-priming sign still
        holds: the simulator does not model it (4 / 0 there says nothing), and on real Iso-Seq
        it marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's filter also
        rejects ([benchmark/refbias_3way](../benchmark/refbias_3way)). With `--bam`, the adjudicator counts the
@@ -151,8 +152,13 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) § 4). With
        `--validation-bam` (a second library the caller did not see) the reads are counted
        there instead; the evidence is then independent (`evidence.chain_independent`,
-       reason `chain_support;independent_library`), but the class is still `PROBABLE`: the
-       tracked data have no such library, so the lift to `CONFIRMED` is not validated.
+       reason `chain_support;independent_library`), but the class is still `PROBABLE`. On
+       LRGASP WTC11, with the other platform's library as the independent one, 13 of 17
+       (PacBio → ONT) and 14 of 16 (ONT → PacBio) validated novel isoforms are carried by
+       ≥ 3 independent reads (the misses have 0–2), but genome-wide the novel lifts reproduce
+       below expressed known transcripts at matched depth (PacBio → ONT 60–75 % of the FSM
+       rate), and a second library attests expression, not correct splicing, so the evidence
+       is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
        Same chain+catalog requirement as consensus. Disable with `ablate --axes chain`.
        `panisoguard decoys` measures the lift's false-fire rate on a user's own BAM: it
        recombines each gene's annotated transcripts at a shared intron into

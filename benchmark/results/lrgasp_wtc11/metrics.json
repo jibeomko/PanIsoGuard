@@ -1,8 +1,978 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-10-18T01:05:55Z",
+  "generated_utc": "2026-10-18T03:09:21Z",
   "metrics": {
+    "cross_library": {
+      "ont_nosr": {
+        "by_same_library_count": {
+          "fsm": {
+            "11-20": {
+              "frac": 0.83,
+              "independent_ge3": 1875,
+              "n": 2259
+            },
+            "21-50": {
+              "frac": 0.928,
+              "independent_ge3": 2067,
+              "n": 2227
+            },
+            "3-5": {
+              "frac": 0.563,
+              "independent_ge3": 2316,
+              "n": 4111
+            },
+            "51-inf": {
+              "frac": 0.982,
+              "independent_ge3": 3656,
+              "n": 3722
+            },
+            "6-10": {
+              "frac": 0.699,
+              "independent_ge3": 1878,
+              "n": 2688
+            }
+          },
+          "lifts_plain": {
+            "11-20": {
+              "frac": 0.673,
+              "independent_ge3": 261,
+              "n": 388
+            },
+            "21-50": {
+              "frac": 0.876,
+              "independent_ge3": 211,
+              "n": 241
+            },
+            "3-5": {
+              "frac": 0.341,
+              "independent_ge3": 421,
+              "n": 1233
+            },
+            "51-inf": {
+              "frac": 0.92,
+              "independent_ge3": 115,
+              "n": 125
+            },
+            "6-10": {
+              "frac": 0.593,
+              "independent_ge3": 326,
+              "n": 550
+            }
+          },
+          "lifts_rt_switch_sign": {
+            "11-20": {
+              "frac": 0.864,
+              "independent_ge3": 19,
+              "n": 22
+            },
+            "21-50": {
+              "frac": 1.0,
+              "independent_ge3": 7,
+              "n": 7
+            },
+            "3-5": {
+              "frac": 0.548,
+              "independent_ge3": 69,
+              "n": 126
+            },
+            "51-inf": {
+              "frac": 0.889,
+              "independent_ge3": 8,
+              "n": 9
+            },
+            "6-10": {
+              "frac": 0.69,
+              "independent_ge3": 40,
+              "n": 58
+            }
+          }
+        },
+        "fsm_frac": 0.786,
+        "fsm_independent_ge3": 11792,
+        "fsm_same_ge3": 15007,
+        "independent_library": "pb",
+        "known_fragment": {
+          "frac": 0.924,
+          "independent_ge3": 729,
+          "n": 789
+        },
+        "lifts_kept_probable_with_independent_bam": 1477,
+        "lifts_plain": {
+          "frac": 0.526,
+          "independent_ge3": 1334,
+          "n": 2537
+        },
+        "lifts_rt_switch_sign": {
+          "frac": 0.644,
+          "independent_ge3": 143,
+          "n": 222
+        },
+        "lifts_with_independent_ge1": 1997,
+        "lifts_with_independent_ge3": 1477,
+        "novel_class_transitions": {
+          "NOVEL_PROBABLE->UNRESOLVED": 1282,
+          "UNCONFIRMED->UNRESOLVED": 173,
+          "UNRESOLVED->NOVEL_PROBABLE": 120,
+          "UNRESOLVED->UNCONFIRMED": 3
+        },
+        "novel_isoforms": 3568,
+        "same_library_chain_lifts": 2759,
+        "validated_targets": {
+          "classes_with_independent_bam": {
+            "NOVEL_PROBABLE": 14,
+            "UNRESOLVED": 2
+          },
+          "independent_ge1": 15,
+          "independent_ge3": 14,
+          "n": 16,
+          "per_target": {
+            "ANAPC16+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 46,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 152
+            },
+            "APMAP+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 49,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 10
+            },
+            "ASNSD1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 61,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 18
+            },
+            "CALB1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 30,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 9
+            },
+            "CCL26+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 32,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 135
+            },
+            "CENPK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 16,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 4
+            },
+            "DGUOK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 18,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 69
+            },
+            "MTHFS+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 57,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 49
+            },
+            "NODAL+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 99,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 45
+            },
+            "PIN4+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 36,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 245
+            },
+            "RND2+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 76,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 38
+            },
+            "RPL39L+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 58,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 388
+            },
+            "SAC3D1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 0,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 11
+            },
+            "USF1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 1,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 7
+            },
+            "WSB1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 89,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 17
+            },
+            "ZNF749+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 31,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 187
+            }
+          }
+        }
+      },
+      "ont_sr": {
+        "by_same_library_count": {
+          "fsm": {
+            "11-20": {
+              "frac": 0.83,
+              "independent_ge3": 1875,
+              "n": 2259
+            },
+            "21-50": {
+              "frac": 0.928,
+              "independent_ge3": 2067,
+              "n": 2227
+            },
+            "3-5": {
+              "frac": 0.563,
+              "independent_ge3": 2316,
+              "n": 4111
+            },
+            "51-inf": {
+              "frac": 0.982,
+              "independent_ge3": 3656,
+              "n": 3722
+            },
+            "6-10": {
+              "frac": 0.699,
+              "independent_ge3": 1878,
+              "n": 2688
+            }
+          },
+          "lifts_plain": {
+            "11-20": {
+              "frac": 0.878,
+              "independent_ge3": 130,
+              "n": 148
+            },
+            "21-50": {
+              "frac": 0.962,
+              "independent_ge3": 76,
+              "n": 79
+            },
+            "3-5": {
+              "frac": 0.607,
+              "independent_ge3": 229,
+              "n": 377
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 48,
+              "n": 48
+            },
+            "6-10": {
+              "frac": 0.851,
+              "independent_ge3": 188,
+              "n": 221
+            }
+          },
+          "lifts_rt_switch_sign": {
+            "11-20": {
+              "frac": 0.938,
+              "independent_ge3": 15,
+              "n": 16
+            },
+            "21-50": {
+              "frac": 1.0,
+              "independent_ge3": 1,
+              "n": 1
+            },
+            "3-5": {
+              "frac": 0.694,
+              "independent_ge3": 43,
+              "n": 62
+            },
+            "51-inf": {
+              "frac": 1.0,
+              "independent_ge3": 8,
+              "n": 8
+            },
+            "6-10": {
+              "frac": 0.912,
+              "independent_ge3": 31,
+              "n": 34
+            }
+          }
+        },
+        "fsm_frac": 0.786,
+        "fsm_independent_ge3": 11792,
+        "fsm_same_ge3": 15007,
+        "independent_library": "pb",
+        "known_fragment": {
+          "frac": 0.924,
+          "independent_ge3": 729,
+          "n": 789
+        },
+        "lifts_kept_probable_with_independent_bam": 769,
+        "lifts_plain": {
+          "frac": 0.769,
+          "independent_ge3": 671,
+          "n": 873
+        },
+        "lifts_rt_switch_sign": {
+          "frac": 0.81,
+          "independent_ge3": 98,
+          "n": 121
+        },
+        "lifts_with_independent_ge1": 900,
+        "lifts_with_independent_ge3": 769,
+        "novel_class_transitions": {
+          "NOVEL_PROBABLE->UNRESOLVED": 225,
+          "UNCONFIRMED->UNRESOLVED": 3,
+          "UNRESOLVED->NOVEL_PROBABLE": 70
+        },
+        "novel_isoforms": 3568,
+        "same_library_chain_lifts": 994,
+        "validated_targets": {
+          "classes_with_independent_bam": {
+            "NOVEL_CONFIRMED": 9,
+            "NOVEL_PROBABLE": 4,
+            "UNCONFIRMED": 2,
+            "UNRESOLVED": 1
+          },
+          "independent_ge1": 15,
+          "independent_ge3": 14,
+          "n": 16,
+          "per_target": {
+            "ANAPC16+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 46,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 152
+            },
+            "APMAP+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 49,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 10
+            },
+            "ASNSD1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 61,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 18
+            },
+            "CALB1+1": {
+              "independent_class": "UNCONFIRMED",
+              "independent_full": 30,
+              "independent_reason": "unsupported_no_sign",
+              "same_class": "UNCONFIRMED",
+              "same_full": 9
+            },
+            "CCL26+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 32,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 135
+            },
+            "CENPK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 16,
+              "independent_reason": "supported_with_rt_switch",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 4
+            },
+            "DGUOK+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 18,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 69
+            },
+            "MTHFS+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 57,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 49
+            },
+            "NODAL+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 99,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 45
+            },
+            "PIN4+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 36,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 245
+            },
+            "RND2+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 76,
+              "independent_reason": "supported_with_rt_switch",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 38
+            },
+            "RPL39L+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 58,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 388
+            },
+            "SAC3D1+1": {
+              "independent_class": "UNCONFIRMED",
+              "independent_full": 0,
+              "independent_reason": "unsupported_no_sign",
+              "same_class": "UNCONFIRMED",
+              "same_full": 11
+            },
+            "USF1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 1,
+              "independent_reason": "no_novel_junction",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 7
+            },
+            "WSB1+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 89,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 17
+            },
+            "ZNF749+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 31,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 187
+            }
+          }
+        }
+      },
+      "pb_nosr": {
+        "by_same_library_count": {
+          "fsm": {
+            "11-20": {
+              "frac": 0.361,
+              "independent_ge3": 1316,
+              "n": 3642
+            },
+            "21-50": {
+              "frac": 0.467,
+              "independent_ge3": 1812,
+              "n": 3881
+            },
+            "3-5": {
+              "frac": 0.164,
+              "independent_ge3": 1204,
+              "n": 7338
+            },
+            "51-inf": {
+              "frac": 0.693,
+              "independent_ge3": 6404,
+              "n": 9242
+            },
+            "6-10": {
+              "frac": 0.265,
+              "independent_ge3": 1183,
+              "n": 4471
+            }
+          },
+          "lifts_plain": {
+            "11-20": {
+              "frac": 0.267,
+              "independent_ge3": 324,
+              "n": 1212
+            },
+            "21-50": {
+              "frac": 0.401,
+              "independent_ge3": 329,
+              "n": 820
+            },
+            "3-5": {
+              "frac": 0.126,
+              "independent_ge3": 322,
+              "n": 2564
+            },
+            "51-inf": {
+              "frac": 0.511,
+              "independent_ge3": 301,
+              "n": 589
+            },
+            "6-10": {
+              "frac": 0.201,
+              "independent_ge3": 335,
+              "n": 1665
+            }
+          },
+          "lifts_rt_switch_sign": {
+            "11-20": {
+              "frac": 0.151,
+              "independent_ge3": 40,
+              "n": 265
+            },
+            "21-50": {
+              "frac": 0.266,
+              "independent_ge3": 47,
+              "n": 177
+            },
+            "3-5": {
+              "frac": 0.045,
+              "independent_ge3": 20,
+              "n": 448
+            },
+            "51-inf": {
+              "frac": 0.407,
+              "independent_ge3": 46,
+              "n": 113
+            },
+            "6-10": {
+              "frac": 0.079,
+              "independent_ge3": 25,
+              "n": 318
+            }
+          }
+        },
+        "fsm_frac": 0.417,
+        "fsm_independent_ge3": 11919,
+        "fsm_same_ge3": 28574,
+        "independent_library": "ont",
+        "known_fragment": {
+          "frac": 0.433,
+          "independent_ge3": 924,
+          "n": 2133
+        },
+        "lifts_kept_probable_with_independent_bam": 1789,
+        "lifts_plain": {
+          "frac": 0.235,
+          "independent_ge3": 1611,
+          "n": 6850
+        },
+        "lifts_rt_switch_sign": {
+          "frac": 0.135,
+          "independent_ge3": 178,
+          "n": 1321
+        },
+        "lifts_with_independent_ge1": 3143,
+        "lifts_with_independent_ge3": 1789,
+        "novel_class_transitions": {
+          "NOVEL_PROBABLE->UNRESOLVED": 6382,
+          "UNCONFIRMED->UNRESOLVED": 361,
+          "UNRESOLVED->NOVEL_PROBABLE": 113,
+          "UNRESOLVED->UNCONFIRMED": 5
+        },
+        "novel_isoforms": 12449,
+        "same_library_chain_lifts": 8171,
+        "validated_targets": {
+          "classes_with_independent_bam": {
+            "NOVEL_PROBABLE": 13,
+            "UNRESOLVED": 4
+          },
+          "independent_ge1": 15,
+          "independent_ge3": 13,
+          "n": 17,
+          "per_target": {
+            "ANAPC16+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 152,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 46
+            },
+            "APMAP+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 10,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 49
+            },
+            "ASNSD1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 18,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 61
+            },
+            "CALB1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 9,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 30
+            },
+            "CCL26+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 135,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 32
+            },
+            "CENPK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 4,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 16
+            },
+            "CNN1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 2,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 14
+            },
+            "DGUOK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 69,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 18
+            },
+            "FBXL16+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 0,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 56
+            },
+            "MTHFS+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 49,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 57
+            },
+            "PIN4+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 245,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 36
+            },
+            "RPL37+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 89,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 54
+            },
+            "RPL39L+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 388,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 58
+            },
+            "RPSA+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 109,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 161
+            },
+            "SPRING1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 1,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 28
+            },
+            "XPO7+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 0,
+              "independent_reason": "no_short_reads",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 40
+            },
+            "ZNF749+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 187,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 31
+            }
+          }
+        }
+      },
+      "pb_sr": {
+        "by_same_library_count": {
+          "fsm": {
+            "11-20": {
+              "frac": 0.361,
+              "independent_ge3": 1316,
+              "n": 3642
+            },
+            "21-50": {
+              "frac": 0.467,
+              "independent_ge3": 1812,
+              "n": 3881
+            },
+            "3-5": {
+              "frac": 0.164,
+              "independent_ge3": 1204,
+              "n": 7338
+            },
+            "51-inf": {
+              "frac": 0.693,
+              "independent_ge3": 6404,
+              "n": 9242
+            },
+            "6-10": {
+              "frac": 0.265,
+              "independent_ge3": 1183,
+              "n": 4471
+            }
+          },
+          "lifts_plain": {
+            "11-20": {
+              "frac": 0.224,
+              "independent_ge3": 171,
+              "n": 763
+            },
+            "21-50": {
+              "frac": 0.357,
+              "independent_ge3": 205,
+              "n": 575
+            },
+            "3-5": {
+              "frac": 0.098,
+              "independent_ge3": 115,
+              "n": 1172
+            },
+            "51-inf": {
+              "frac": 0.487,
+              "independent_ge3": 235,
+              "n": 483
+            },
+            "6-10": {
+              "frac": 0.167,
+              "independent_ge3": 156,
+              "n": 932
+            }
+          },
+          "lifts_rt_switch_sign": {
+            "11-20": {
+              "frac": 0.152,
+              "independent_ge3": 30,
+              "n": 197
+            },
+            "21-50": {
+              "frac": 0.282,
+              "independent_ge3": 42,
+              "n": 149
+            },
+            "3-5": {
+              "frac": 0.042,
+              "independent_ge3": 11,
+              "n": 260
+            },
+            "51-inf": {
+              "frac": 0.406,
+              "independent_ge3": 39,
+              "n": 96
+            },
+            "6-10": {
+              "frac": 0.082,
+              "independent_ge3": 17,
+              "n": 208
+            }
+          }
+        },
+        "fsm_frac": 0.417,
+        "fsm_independent_ge3": 11919,
+        "fsm_same_ge3": 28574,
+        "independent_library": "ont",
+        "known_fragment": {
+          "frac": 0.433,
+          "independent_ge3": 924,
+          "n": 2133
+        },
+        "lifts_kept_probable_with_independent_bam": 1021,
+        "lifts_plain": {
+          "frac": 0.225,
+          "independent_ge3": 882,
+          "n": 3925
+        },
+        "lifts_rt_switch_sign": {
+          "frac": 0.153,
+          "independent_ge3": 139,
+          "n": 910
+        },
+        "lifts_with_independent_ge1": 1815,
+        "lifts_with_independent_ge3": 1021,
+        "novel_class_transitions": {
+          "NOVEL_PROBABLE->UNRESOLVED": 3814,
+          "UNCONFIRMED->UNRESOLVED": 42,
+          "UNRESOLVED->NOVEL_PROBABLE": 33
+        },
+        "novel_isoforms": 12449,
+        "same_library_chain_lifts": 4835,
+        "validated_targets": {
+          "classes_with_independent_bam": {
+            "NOVEL_CONFIRMED": 10,
+            "NOVEL_PROBABLE": 4,
+            "UNCONFIRMED": 1,
+            "UNRESOLVED": 2
+          },
+          "independent_ge1": 15,
+          "independent_ge3": 13,
+          "n": 17,
+          "per_target": {
+            "ANAPC16+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 152,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 46
+            },
+            "APMAP+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 10,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 49
+            },
+            "ASNSD1+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 18,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 61
+            },
+            "CALB1+1": {
+              "independent_class": "UNCONFIRMED",
+              "independent_full": 9,
+              "independent_reason": "unsupported_no_sign",
+              "same_class": "UNCONFIRMED",
+              "same_full": 30
+            },
+            "CCL26+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 135,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 32
+            },
+            "CENPK+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 4,
+              "independent_reason": "supported_with_rt_switch",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 16
+            },
+            "CNN1+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 2,
+              "independent_reason": "no_novel_junction",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 14
+            },
+            "DGUOK+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 69,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 18
+            },
+            "FBXL16+1": {
+              "independent_class": "UNRESOLVED",
+              "independent_full": 0,
+              "independent_reason": "no_novel_junction",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 56
+            },
+            "MTHFS+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 49,
+              "independent_reason": "chain_support;rt_switch_sign;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 57
+            },
+            "PIN4+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 245,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 36
+            },
+            "RPL37+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 89,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 54
+            },
+            "RPL39L+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 388,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 58
+            },
+            "RPSA+1": {
+              "independent_class": "NOVEL_PROBABLE",
+              "independent_full": 109,
+              "independent_reason": "chain_support;independent_library",
+              "same_class": "NOVEL_PROBABLE",
+              "same_full": 161
+            },
+            "SPRING1+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 1,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 28
+            },
+            "XPO7+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 0,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 40
+            },
+            "ZNF749+1": {
+              "independent_class": "NOVEL_CONFIRMED",
+              "independent_full": 187,
+              "independent_reason": "all_junctions_supported",
+              "same_class": "NOVEL_CONFIRMED",
+              "same_full": 31
+            }
+          }
+        }
+      }
+    },
     "gencode_ont_nosr": {
       "likely": {
         "artifact": 0,
@@ -600,7 +1570,7 @@
       }
     }
   },
-  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence.",
+  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
   "protocol": "lrgasp_wtc11",
   "ruleset_version": "builtin-0.0.5",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",
