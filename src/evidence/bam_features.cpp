@@ -123,19 +123,6 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom,
   return f;
 }
 
-namespace {
-// true if `sub` occurs as a contiguous run inside `full`
-bool contiguous_in(const std::vector<Junction>& sub, const std::vector<Junction>& full) {
-  if (sub.empty() || sub.size() > full.size()) return false;
-  for (std::size_t i = 0; i + sub.size() <= full.size(); ++i) {
-    bool ok = true;
-    for (std::size_t k = 0; k < sub.size() && ok; ++k) ok = full[i + k] == sub[k];
-    if (ok) return true;
-  }
-  return false;
-}
-}  // namespace
-
 ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
   ChainBamSupport s;
   if (chain.monoexonic()) return s;
@@ -164,8 +151,8 @@ ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
       else if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF || op == BAM_CDEL) rpos += len;
     }
     if (introns.empty()) continue;
-    if (contiguous_in(chain.introns, introns)) ++s.n_full;
-    else if (contiguous_in(introns, chain.introns)) ++s.n_partial;
+    if (contiguous_subchain(chain.introns, introns)) ++s.n_full;
+    else if (contiguous_subchain(introns, chain.introns)) ++s.n_partial;
   }
   bam_destroy1(b);
   hts_itr_destroy(itr);

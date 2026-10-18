@@ -348,6 +348,10 @@ def projected_class(support, mech, lifted=False):
 # ---------------------------------------------------------------------------
 class Ctx:
     def __init__(self, records, prov):
+        for r in records:  # attribution files written before 0.0.6 use the old class names
+            c = r.get("confidence_class") if isinstance(r, dict) else None
+            if c in LEGACY_CLASS:
+                r["confidence_class"] = LEGACY_CLASS[c]
         self.records = records
         self.prov = prov
         self.novel = [r for r in records
@@ -380,10 +384,10 @@ def page1(pdf, ctx, prefix):
     nov = ctx.novel
     def cc_in(rs, names):
         return sum(1 for r in rs if D.get_path(r, "confidence_class") in names)
-    trust = cc_in(nov, {"HIGH_CONF_NOVEL", "MEDIUM_CONF_NOVEL"})
-    look = cc_in(nov, {"LOW_CONF_PARTIAL", "AMBIGUOUS"})
+    trust = cc_in(nov, {"NOVEL_CONFIRMED", "NOVEL_PROBABLE"})
+    look = cc_in(nov, {"UNCONFIRMED", "UNRESOLVED"})
     art = cc_in(nov, {"ARTIFACT"})
-    resc = cc_in(nov, {"PAN_REF_RESCUED_FALSE_NOVEL"})
+    resc = cc_in(nov, {"REFERENCE_BIAS"})
 
     # headline ribbon (top, full width feel)
     ax = fig.add_subplot(gs[0, :])

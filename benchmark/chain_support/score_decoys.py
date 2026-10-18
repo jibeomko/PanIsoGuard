@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--emit-metrics")
     a = ap.parse_args()
     truths = dict(t.split("=", 1) for t in a.truth)
-    res = {}
+    res, rows_by_label = {}, {}
     print(f"{'dataset':<14}{'decoys':>8}{'lifted':>8}{'rate':>8} | {'both parents>=N':>16}{'lifted':>8}{'rate':>8} | {'parents':>8}{'lifted':>8}{'rate':>8}")
     for spec in a.run:
         label, prefix = spec.split("=", 1)
@@ -61,11 +61,11 @@ def main():
             print(f"  truth: genuine decoys {g['lifted']}/{g['n']} lifted, false decoys {f['lifted']}/{f['n']} lifted (false-lift rate {f['rate']});"
                   f" both parents >= N: genuine {g2['lifted']}/{g2['n']}, false {f2['lifted']}/{f2['n']} ({f2['rate']})")
         res[label] = entry
-        entry["_rows"] = rows
+        rows_by_label[label] = rows
     for spec in a.cross:
         la, lb = spec.split(",")
-        A = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in res[la]["_rows"]}
-        B = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in res[lb]["_rows"]}
+        A = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in rows_by_label[la]}
+        B = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in rows_by_label[lb]}
         if set(A) != set(B):
             print(f"cross {la},{lb}: decoy sets differ (different annotation or seed), skipped", file=sys.stderr); continue
         n = res[la]["min_full_reads"]
@@ -88,8 +88,6 @@ def main():
               f"({c['also_lifted_in_b'] / max(1, c['lifted_decoys_in_a']):.2f}); lifted parents {c['lifted_parents_in_a']} -> "
               f"{c['parents_also_lifted_in_b']} ({c['parents_also_lifted_in_b'] / max(1, c['lifted_parents_in_a']):.2f}); "
               f"both parents expressed in both: {c['of_those_also_lifted_in_b']} / {c['lifted_decoys_both_parents_expressed_in_both']}")
-    for v in res.values():
-        if isinstance(v, dict): v.pop("_rows", None)
     if a.emit_metrics:
         env = json.load(open(a.emit_metrics))
         env["metrics"]["decoys"] = res

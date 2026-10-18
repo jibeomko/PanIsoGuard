@@ -22,8 +22,6 @@ from sklearn.metrics import average_precision_score
 
 RANK = {"NOVEL_CONFIRMED": 1.0, "NOVEL_PROBABLE": 0.75, "UNRESOLVED": 0.5, "UNCONFIRMED": 0.25,
         "KNOWN": 0.1, "KNOWN_FRAGMENT": 0.1, "ARTIFACT": 0.0, "REFERENCE_BIAS": 0.0}
-RANK.update({"HIGH_CONF_NOVEL": 1.0, "MEDIUM_CONF_NOVEL": 0.75, "AMBIGUOUS": 0.5, "LOW_CONF_PARTIAL": 0.25,
-             "HIGH_CONF_KNOWN": 0.1, "PAN_REF_RESCUED_FALSE_NOVEL": 0.0})   # names before 0.0.6
 
 
 def table(path):

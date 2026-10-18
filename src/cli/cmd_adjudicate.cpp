@@ -9,8 +9,6 @@
 #include <string>
 #include <unordered_set>
 
-#include "panisoguard/result_writer.hpp"
-#include "panisoguard/version.hpp"
 #include "run_common.hpp"
 
 namespace {
@@ -44,6 +42,20 @@ void usage() {
       "\n"
       "For a visual PDF summary of the output:\n"
       "  pip install ./python && panisoguard-report --prefix PREFIX   (-> PREFIX.report.pdf)\n");
+}
+
+// Comma-separated verdict names -> set; returns the first unknown name, or "" when all are valid.
+std::string parse_verdict_list(const std::string& list, std::set<std::string>& out) {
+  static const std::set<std::string> known = {"known", "known_fragment", "confirmed", "reference_bias",
+                                              "unconfirmed", "artifact", "not_adjudicated"};
+  std::stringstream ss(list);
+  std::string tok;
+  while (std::getline(ss, tok, ',')) {
+    if (tok.empty()) continue;
+    if (known.count(tok) == 0) return tok;
+    out.insert(tok);
+  }
+  return "";
 }
 
 }  // namespace
@@ -80,19 +92,9 @@ int cmd_adjudicate(int argc, char** argv) {
   }
 
   std::set<std::string> keep;
-  {
-    static const std::set<std::string> known_verdicts = {"known", "known_fragment", "confirmed", "reference_bias",
-                                                         "unconfirmed", "artifact", "not_adjudicated"};
-    std::stringstream ss(keep_verdicts);
-    std::string tok;
-    while (std::getline(ss, tok, ',')) {
-      if (tok.empty()) continue;
-      if (known_verdicts.count(tok) == 0) {
-        std::fprintf(stderr, "adjudicate: --keep-verdicts: unknown verdict '%s'\n", tok.c_str());
-        return 1;
-      }
-      keep.insert(tok);
-    }
+  if (const std::string bad = parse_verdict_list(keep_verdicts, keep); !bad.empty()) {
+    std::fprintf(stderr, "adjudicate: --keep-verdicts: unknown verdict '%s'\n", bad.c_str());
+    return 1;
   }
 
   std::string err;
@@ -104,48 +106,10 @@ int cmd_adjudicate(int argc, char** argv) {
 
   try {
     const LoadedRun run = load_and_adjudicate(common);
-
-    RunProvenance prov;
-    prov.tool_version = kVersion;
-    prov.ruleset_version = run.engine.config().ruleset_version;
-    prov.sqanti3_version_target = run.engine.config().sqanti3_version_target;
-    prov.classification_path = common.classification;
-    prov.isoforms_path = common.isoforms_bed.empty() ? common.isoforms_gtf : common.isoforms_bed;
-    prov.ref_gtf_path = common.ref_gtf;
-    prov.sj_tab_path = common.sj_tab;
-    prov.bam_path = common.bam_path;
-    prov.validation_bam_path = common.validation_bam;
-    prov.caller_support_path = common.caller_support;
-    prov.reference_path = common.reference;
-    prov.reference_haplotype_paths = common.reference_haplotypes;
-    prov.pangenome_path = common.pangenome_junctions;
+    RunProvenance prov = provenance_for(common, run);
+    prov.hash_inputs = hash_inputs;
     prov.kept_path = write_kept;
     prov.kept_verdicts = keep_verdicts;
-    prov.hash_inputs = hash_inputs;
-    prov.variant_axis_on = !common.reference_haplotypes.empty();
-    prov.variant_circular = haplotype_provenance_is_circular(common.haplotype_provenance);
-    prov.pangenome_axis_on = !common.pangenome_junctions.empty();
-    prov.pangenome_circular = pangenome_provenance_is_circular(common.pangenome_provenance);
-    prov.consensus_axis_on = !common.caller_support.empty();
-    prov.config_path = common.config;
-    const RuleConfig& c = run.engine.config();
-    auto num = [](double x) { std::ostringstream o; o << x; return o.str(); };  // 0.5, not 0.500000
-    prov.thresholds =
-        "sj_min_uniq_reads=" + std::to_string(c.sj_min_uniq_reads) +
-        " sj_require_canonical_motif=" + (c.sj_require_canonical_motif ? "true" : "false") +
-        " consensus_min_callers=" + std::to_string(c.consensus_min_callers) +
-        " chain_min_full_reads=" + std::to_string(c.chain_min_full_reads) +
-        " max_perc_A_downstream_TTS=" + num(c.perc_A_degradation_threshold) +
-        " platform=" + c.platform +
-        " min_mapq=" + std::to_string(c.bam_min_mapq) +
-        " min_spanning=" + std::to_string(c.bam_min_spanning) +
-        " softclip_min_bp=" + std::to_string(c.bam_softclip_min_bp) +
-        " junction_window_bp=" + std::to_string(c.bam_junction_window_bp) +
-        " max_low_mapq_frac=" + num(c.bam_max_low_mapq_frac) +
-        " max_supplementary_frac=" + num(c.bam_max_supplementary_frac) +
-        " max_indel_near_frac=" + num(c.bam_max_indel_near_frac) +
-        " max_softclip_frac=" + num(c.bam_max_softclip_frac) +
-        " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
     write_adjudication_outputs(out_prefix, run.results, prov);
     write_junctions_tsv(out_prefix + ".junctions.tsv", run.junctions);
     if (!write_kept.empty()) {

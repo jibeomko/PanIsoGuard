@@ -11,10 +11,7 @@ import argparse, collections, csv, datetime, json, sys
 MIN = 3
 
 
-gene_of = {}
-
-
-def load(prefix):
+def load(prefix, gene_of):
     out = {}
     for ln in open(prefix + ".attribution.jsonl"):
         d = json.loads(ln)
@@ -37,10 +34,8 @@ def main():
     res = {}
     for p, other in (("pb", "ont"), ("ont", "pb")):
         for s in ("sr", "nosr"):
-            gene_of.clear()
-            gene_of.update({r["isoform"]: r["associated_gene"] for r in csv.DictReader(open(f"{a.work}/{p}/sq/iq_classification.txt"), delimiter="\t")})
-            same, ind = load(f"{a.work}/{p}/adj_{s}"), load(f"{a.work}/{p}/adjx_{s}")
-            assert all(v["indep"] for v in ind.values() if v["full"] or v["cls"] != "UNRESOLVED") or True
+            gene_of = {r["isoform"]: r["associated_gene"] for r in csv.DictReader(open(f"{a.work}/{p}/sq/iq_classification.txt"), delimiter="\t")}
+            same, ind = load(f"{a.work}/{p}/adj_{s}", gene_of), load(f"{a.work}/{p}/adjx_{s}", gene_of)
             r = {"independent_library": other}
             # genome-wide, novel isoforms (NIC/NNC)
             nov = [i for i, v in same.items() if v["cat"] in ("novel_in_catalog", "novel_not_in_catalog")]

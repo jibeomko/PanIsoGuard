@@ -39,9 +39,9 @@ TEST_CASE("pangenome junction reader parses + exact strand-aware lookup", "[pang
 
 TEST_CASE("pangenome duplicate junction rows keep strongest haplotype support", "[pangenome]") {
   PangenomeJunctions pj;
-  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 2});
-  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 5});
-  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 3});
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 2, {}});
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 5, {}});
+  pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 3, {}});
 
   REQUIRE(pj.size() == 1);
   REQUIRE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 5));

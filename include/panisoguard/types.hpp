@@ -56,6 +56,18 @@ struct IntronChain {
   void sort_introns() { std::sort(introns.begin(), introns.end()); }
 };
 
+// true if `sub` occurs as a contiguous run inside `full`: the test behind whole-chain read
+// support (a read's introns contain the isoform's chain) and the decoy generator.
+inline bool contiguous_subchain(const std::vector<Junction>& sub, const std::vector<Junction>& full) {
+  if (sub.empty() || sub.size() > full.size()) return false;
+  for (std::size_t i = 0; i + sub.size() <= full.size(); ++i) {
+    bool ok = true;
+    for (std::size_t k = 0; k < sub.size() && ok; ++k) ok = full[i + k] == sub[k];
+    if (ok) return true;
+  }
+  return false;
+}
+
 // 64-bit intron-chain fingerprint (see fingerprint.hpp).
 using Fingerprint = uint64_t;
 

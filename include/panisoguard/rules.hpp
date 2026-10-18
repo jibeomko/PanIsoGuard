@@ -70,6 +70,10 @@ class RuleEngine {
 
   const RuleConfig& config() const { return cfg_; }
 
+  // The effective thresholds as "key=value ..." (one line of provenance.log), so a run stays
+  // reproducible even if the config file changes later.
+  std::string thresholds_summary() const;
+
   // Sequencing-platform preset applied after the config: "hifi" keeps the defaults, "ont"
   // disables the indel-near mapping gate (HiFi-calibrated; fires on ~90 % of ONT junctions).
   void apply_platform_preset(const std::string& platform);

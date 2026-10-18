@@ -9,19 +9,6 @@
 
 namespace panisoguard {
 
-namespace {
-// true if `sub` occurs as a contiguous run inside `full` (same test as the BAM chain support)
-bool contiguous_in(const std::vector<Junction>& sub, const std::vector<Junction>& full) {
-  if (sub.empty() || sub.size() > full.size()) return false;
-  for (std::size_t i = 0; i + sub.size() <= full.size(); ++i) {
-    bool ok = true;
-    for (std::size_t k = 0; k < sub.size() && ok; ++k) ok = full[i + k] == sub[k];
-    if (ok) return true;
-  }
-  return false;
-}
-}  // namespace
-
 std::vector<Decoy> make_decoys(const std::vector<Transcript>& transcripts, int max_per_gene,
                                unsigned seed) {
   // std::map keeps gene order deterministic across runs.
@@ -57,7 +44,7 @@ std::vector<Decoy> make_decoys(const std::vector<Transcript>& transcripts, int m
             if (seen.count(fp)) continue;
             bool piece_of_known = false;   // annotated, or a contiguous part of an annotated chain
             for (const Transcript* t : g) {
-              if (contiguous_in(d.chain.introns, t->chain.introns)) { piece_of_known = true; break; }
+              if (contiguous_subchain(d.chain.introns, t->chain.introns)) { piece_of_known = true; break; }
             }
             if (piece_of_known) continue;
             seen.insert(fp);

@@ -82,7 +82,7 @@ int cmd_ablate(int argc, char** argv) {
     std::fprintf(stderr, "ablation over %zu isoforms:\n", run.results.size());
     for (const auto& axis : axes) {
       const AxisAblation ab = compute_ablation(run.results, run.engine, axis);
-      const double frac = ab.n_total ? static_cast<double>(ab.n_changed) / ab.n_total : 0.0;
+      const double frac = ab.n_total ? static_cast<double>(ab.n_changed) / static_cast<double>(ab.n_total) : 0.0;
       summary << ab.axis << '\t' << ab.n_changed << '\t' << ab.n_total << '\t' << frac << '\n';
       for (const auto& kv : ab.transitions) trans << ab.axis << '\t' << kv.first << '\t' << kv.second << '\n';
       std::fprintf(stderr, "  %-14s %8ld / %ld changed (%.3f%%)\n", ab.axis.c_str(), ab.n_changed,

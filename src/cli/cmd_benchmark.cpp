@@ -22,6 +22,8 @@ void usage() {
 
 int cmd_benchmark(int argc, char** argv) {
   using namespace panisoguard;
+  std::fprintf(stderr, "WARNING: `panisoguard benchmark` is deprecated since 0.0.7 and will be removed in a later "
+                       "release; the comparison with the SQANTI3 filter lives in benchmark/sqanti3_filter_h2h.\n");
   CommonArgs common;
   std::string out_prefix;
 

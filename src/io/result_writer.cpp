@@ -183,43 +183,6 @@ std::string file_identity(const std::string& path, bool hash) {
   return id;
 }
 
-}  // namespace
-
-std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const std::string& out_path,
-                                const std::unordered_set<std::string>& keep) {
-  std::ifstream in(in_path);
-  if (!in) throw std::runtime_error("cannot open " + in_path);
-  std::ofstream out(out_path);
-  if (!out) throw std::runtime_error("cannot write " + out_path);
-  std::unordered_set<std::string> written;
-  std::string line;
-  while (std::getline(in, line)) {
-    if (!line.empty() && line.back() == '\r') line.pop_back();
-    if (line.empty()) continue;
-    if (line[0] == '#' || (is_bed && (line.rfind("track", 0) == 0 || line.rfind("browser", 0) == 0))) {
-      if (!is_bed) out << line << '\n';
-      continue;
-    }
-    std::string id;
-    if (is_bed) {
-      std::size_t a = 0;
-      for (int col = 0; col < 3; ++col) { a = line.find('\t', a); if (a == std::string::npos) break; ++a; }
-      if (a == std::string::npos) continue;
-      id = line.substr(a, line.find('\t', a) - a);
-    } else {
-      const std::size_t tab = line.rfind('\t');
-      if (tab == std::string::npos) continue;
-      id = extract_gtf_attr(line.substr(tab + 1), "transcript_id");
-    }
-    if (id.empty() || keep.count(id) == 0) continue;
-    out << line << '\n';
-    written.insert(id);
-  }
-  return written.size();
-}
-
-namespace {
-
 void write_provenance(const std::string& path, const std::vector<AdjudicationResult>& results,
                       const RunProvenance& prov) {
   std::ofstream out(path);
@@ -326,6 +289,39 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
     }
     out << '\t' << (rb.empty() ? "-" : rb) << '\n';
   }
+}
+
+std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const std::string& out_path,
+                                const std::unordered_set<std::string>& keep) {
+  std::ifstream in(in_path);
+  if (!in) throw std::runtime_error("cannot open " + in_path);
+  std::ofstream out(out_path);
+  if (!out) throw std::runtime_error("cannot write " + out_path);
+  std::unordered_set<std::string> written;
+  std::string line;
+  while (std::getline(in, line)) {
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (line.empty()) continue;
+    if (line[0] == '#' || (is_bed && (line.rfind("track", 0) == 0 || line.rfind("browser", 0) == 0))) {
+      if (!is_bed) out << line << '\n';
+      continue;
+    }
+    std::string id;
+    if (is_bed) {
+      std::size_t a = 0;
+      for (int col = 0; col < 3; ++col) { a = line.find('\t', a); if (a == std::string::npos) break; ++a; }
+      if (a == std::string::npos) continue;
+      id = line.substr(a, line.find('\t', a) - a);
+    } else {
+      const std::size_t tab = line.rfind('\t');
+      if (tab == std::string::npos) continue;
+      id = extract_gtf_attr(line.substr(tab + 1), "transcript_id");
+    }
+    if (id.empty() || keep.count(id) == 0) continue;
+    out << line << '\n';
+    written.insert(id);
+  }
+  return written.size();
 }
 
 void write_adjudication_outputs(const std::string& out_prefix,

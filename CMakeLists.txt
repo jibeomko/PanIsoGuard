@@ -74,11 +74,13 @@ add_library(panisoguard_core OBJECT
   src/io/sqanti_reader.cpp
   src/io/result_writer.cpp
 )
-target_include_directories(panisoguard_core PUBLIC
-  "${CMAKE_SOURCE_DIR}/include"
-  "${CMAKE_SOURCE_DIR}/thirdparty"   # vendored: cgranges/IITree.h
-)
+target_include_directories(panisoguard_core PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(panisoguard_core SYSTEM PUBLIC "${CMAKE_SOURCE_DIR}/thirdparty")  # vendored: cgranges, toml++
 target_link_libraries(panisoguard_core PUBLIC HTSlib::hts)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(PANISOGUARD_WARNINGS -Wall -Wextra -Wshadow)
+endif()
+target_compile_options(panisoguard_core PRIVATE ${PANISOGUARD_WARNINGS})
 
 # --- CLI ---------------------------------------------------------------------
 add_executable(panisoguard
@@ -92,6 +94,7 @@ add_executable(panisoguard
   src/cli/cmd_decoys.cpp
 )
 target_link_libraries(panisoguard PRIVATE panisoguard_core)
+target_compile_options(panisoguard PRIVATE ${PANISOGUARD_WARNINGS})
 target_compile_definitions(panisoguard PRIVATE PANISOGUARD_VERSION="${PROJECT_VERSION}")
 # `panisoguard example` looks for the bundled examples next to the installed binary
 # (<prefix>/share/panisoguard) and falls back to the source checkout for a build-tree binary.
@@ -132,7 +135,8 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/decoys_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
-  target_include_directories(panisoguard_tests PRIVATE
+  target_compile_options(panisoguard_tests PRIVATE ${PANISOGUARD_WARNINGS})
+  target_include_directories(panisoguard_tests SYSTEM PRIVATE
     "${CMAKE_SOURCE_DIR}/thirdparty")  # vendored: catch2/catch.hpp
   target_compile_definitions(panisoguard_tests PRIVATE
     PANISOGUARD_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/tests/data/tiny")

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "panisoguard/adjudicator.hpp"
+#include "panisoguard/result_writer.hpp"
 #include "panisoguard/rules.hpp"
 #include "panisoguard/sqanti.hpp"
 
@@ -58,5 +59,9 @@ struct LoadedRun {
 // Read every supplied input and run adjudication. Throws std::exception on I/O
 // errors. Prints brief progress to stderr.
 LoadedRun load_and_adjudicate(const CommonArgs& c);
+
+// The provenance block of a run (<prefix>.provenance.log): versions, inputs, which axes
+// were on and whether their provenance is circular-risk, and the effective thresholds.
+RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run);
 
 }  // namespace panisoguard

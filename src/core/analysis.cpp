@@ -42,7 +42,7 @@ NonRedundancy compute_nonredundancy(const std::vector<AdjudicationResult>& resul
   }
 
   const long union_flag = nr.both_flag + nr.pig_only_flag + nr.sqanti_only_flag;
-  nr.jaccard = union_flag > 0 ? static_cast<double>(nr.both_flag) / union_flag : 0.0;
+  nr.jaccard = union_flag > 0 ? static_cast<double>(nr.both_flag) / static_cast<double>(union_flag) : 0.0;
 
   // McNemar with continuity correction on the discordant cells (b, c), 1 df.
   const long b = nr.pig_only_flag, c = nr.sqanti_only_flag;

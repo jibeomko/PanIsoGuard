@@ -13,6 +13,7 @@
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/sj_tab.hpp"
 #include "panisoguard/variant_motif.hpp"
+#include "panisoguard/version.hpp"
 
 namespace panisoguard {
 
@@ -190,6 +191,31 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.caller_support = caller_support_ptr;
   run.results = adjudicate(in, run.engine, &run.junctions);
   return run;
+}
+
+RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
+  RunProvenance prov;
+  prov.tool_version = kVersion;
+  prov.ruleset_version = run.engine.config().ruleset_version;
+  prov.sqanti3_version_target = run.engine.config().sqanti3_version_target;
+  prov.classification_path = c.classification;
+  prov.isoforms_path = c.isoforms_bed.empty() ? c.isoforms_gtf : c.isoforms_bed;
+  prov.ref_gtf_path = c.ref_gtf;
+  prov.sj_tab_path = c.sj_tab;
+  prov.bam_path = c.bam_path;
+  prov.validation_bam_path = c.validation_bam;
+  prov.caller_support_path = c.caller_support;
+  prov.reference_path = c.reference;
+  prov.reference_haplotype_paths = c.reference_haplotypes;
+  prov.pangenome_path = c.pangenome_junctions;
+  prov.variant_axis_on = !c.reference_haplotypes.empty();
+  prov.variant_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
+  prov.pangenome_axis_on = !c.pangenome_junctions.empty();
+  prov.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);
+  prov.consensus_axis_on = !c.caller_support.empty();
+  prov.config_path = c.config;
+  prov.thresholds = run.engine.thresholds_summary();
+  return prov;
 }
 
 }  // namespace panisoguard

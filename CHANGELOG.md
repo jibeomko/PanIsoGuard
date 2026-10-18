@@ -26,6 +26,19 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   end2end 19 of 20 genuine novels `NOVEL_PROBABLE`, 0 false. `panisoguard-report`'s rulebook
   and `notes/check_notes.py` follow.
 
+- Code: `RuleEngine::evaluate()` is five named steps (pass-through, reference bias, support
+  axis, mechanism axis, projection) with the same traces and verdicts (byte-identical outputs
+  on the toy locus and SQANTI-SIM); `contiguous_subchain` is shared by the chain axis and the
+  decoy generator; the thresholds line and the provenance block are assembled in the engine
+  and `run_common`, not in the CLI; the build is `-Wall -Wextra -Wshadow` clean with the
+  vendored headers as system includes. README opens with the three inputs, the seven verdicts
+  and the next step; the classes and reasons follow as explanation.
+
+### Deprecated
+- `panisoguard benchmark` (the 2×2 / Jaccard / McNemar comparison with the SQANTI3 filter)
+  prints a deprecation warning and will be removed in a later release; the comparison lives
+  in [benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h).
+
 ### Added
 - **`adjudicate --write-kept PATH [--keep-verdicts LIST]`**: copies the input isoform GTF /
   BED12 keeping only the isoforms whose verdict is in the list (default `known,
@@ -140,6 +153,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   depended on it, the cost row did.
 
 ### Fixed
+- `panisoguard-report` page 1 counted the pre-0.0.6 class names in its headline ribbon, so on
+  current output the trustworthy / needs-a-look / reference-bias boxes were always 0; it now
+  counts the current names and maps old files to them once.
 - `panisoguard example` no longer uses `std::filesystem`, which bioconda's osx-64 build
   (macOS 10.9 deployment target, libc++ filesystem needs 10.15) cannot compile; the 0.0.6
   autobump PR failed on osx-64 for this reason. POSIX calls do the same job.

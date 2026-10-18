@@ -41,7 +41,7 @@ void print_usage() {
       "\n"
       "Subcommands:\n"
       "  adjudicate        Classify novel isoforms into confidence classes + mechanistic attribution\n"
-      "  benchmark         Non-redundancy vs SQANTI3 (McNemar / 2x2 / Jaccard)\n"
+      "  benchmark         (deprecated) Non-redundancy vs SQANTI3 (McNemar / 2x2 / Jaccard)\n"
       "  ablate            Per-evidence-axis ablation (confidence-class changes)\n"
       "  combine           Integrate multiple callers' isoforms by intron-chain fingerprint\n"
       "  decoys            Per-dataset false-lift check of the whole-chain read support (recombined known chains)\n"

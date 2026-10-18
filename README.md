@@ -11,12 +11,14 @@ isoforms, and not all of them are real. Some come from alignment errors or libra
 others only look new because the sample's genome differs from the reference genome.
 PanIsoGuard runs after the caller and [SQANTI3](https://github.com/ConesaLab/SQANTI3). For each
 novel isoform it checks the evidence you give it (short-read splice junctions, the long-read
-alignments, SQANTI3's QC, agreement between callers, the sample's own genome) and gives it one
-of eight confidence classes. Each verdict comes with the likely cause when an isoform looks
-like an artifact, the rules that decided it, and a log of the inputs that were used.
+alignments, SQANTI3's QC, agreement between callers, the sample's own genome) and gives it a
+verdict: keep, review, discard, or reference bias. Each verdict comes with its confidence
+class, the likely cause when an isoform looks like an artifact, the rules that decided it, and
+a log of the inputs that were used.
 
 > **Status: alpha.** All the evidence types and commands below work and are tested. The
-> default thresholds have been checked on one simulated data set so far.
+> default thresholds were set on one simulated data set and checked on real PacBio and ONT
+> data ([Validation](#validation)).
 >
 > **What it is, and what it is not.** PanIsoGuard gives **verdicts you can trace**. It is
 > **not a more accurate filter.** On simulated data with known answers, it ranks isoforms about
@@ -24,9 +26,38 @@ like an artifact, the rules that decided it, and a log of the inputs that were u
 > By default it prefers precision to recall, and without short reads it does worse than the
 > SQANTI3 rules filter. See [How it compares](#how-it-compares).
 
+## In one screen
+
+**You need three files** from the step before: the SQANTI3 classification, the caller's
+isoforms (GTF or BED12), and the annotation you gave SQANTI3. Short-read junctions and the
+long-read BAM are optional and make the verdicts stronger.
+
+```bash
+panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf \
+    --sj-tab SJ.out.tab --bam aligned.bam --out-prefix out/sample      # the last two are optional
+```
+
+**You get one decision per isoform**, the `verdict` column of `out/sample.adjudicated.tsv`:
+
+| `verdict` | meaning | what to do |
+|---|---|---|
+| `known` | matches an annotated transcript | keep |
+| `known_fragment` | a truncated annotated transcript that the long reads carry end to end | keep as known, not as novel |
+| `confirmed` | novel, and the evidence supports it: short reads at every novel junction, or long reads / caller agreement across the whole chain | keep |
+| `reference_bias` | looks novel only because the sample's genome differs from the reference | keep; it is real |
+| `unconfirmed` | the evidence is weak, missing, or conflicting | review |
+| `artifact` | short reads were checked, none supports it, and an artifact sign is present | discard |
+| `not_adjudicated` | a SQANTI3 category PanIsoGuard does not judge (genic, antisense, fusion, intergenic) | your call |
+
+**Next:** `--write-kept kept.gtf` writes the annotation filtered to the kept verdicts;
+`panisoguard-report --prefix out/sample` draws a PDF; `verdict_reason` and `rule_trace` say
+why each isoform landed where it did. Every column beyond `verdict` (the confidence class, the
+mechanism, the reasons) is explanation, not a second decision; see
+[Confidence classes](#confidence-classes).
+
 ## Contents
 
-- [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
+- [In one screen](#in-one-screen) · [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
 - [Study notes](#study-notes) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
 - [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout) · [Architecture map](#architecture-map)
 
@@ -312,7 +343,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 | Command | What it does |
 |---------|---------|
 | `adjudicate` | gives each isoform a confidence class, the likely artifact cause, and the reasons (3 output files) |
-| `benchmark`  | compares PanIsoGuard's calls on novel isoforms with the SQANTI3 filter (2×2 table, Jaccard index, McNemar test) |
+| `benchmark`  | deprecated since 0.0.7 (2×2 table against the SQANTI3 filter); the comparison lives in [benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h) |
 | `ablate`     | turns off one kind of evidence at a time and shows which calls change |
 | `combine`    | matches several callers' isoforms by intron chain and writes which callers found each one |
 | `decoys`     | measures, on your own BAM, how often the whole-chain read support would lift a chain the annotation does not know (recombined known transcripts), as an upper bound on its false-lift rate |
@@ -321,12 +352,9 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 Run `panisoguard <command> --help` for all options. Input file formats:
 [docs/input_formats.md](docs/input_formats.md).
 
-#### Benchmarking and ablation
+#### Ablation and decoys
 
 ```bash
-# compare with the SQANTI3 filter on novel isoforms (2x2 table, Jaccard, McNemar)
-panisoguard benchmark [adjudicate options] --out bench/
-
 # which calls change when one kind of evidence is turned off
 panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
 

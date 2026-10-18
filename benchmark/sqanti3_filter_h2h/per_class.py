@@ -8,8 +8,6 @@ Usage: per_class.py <work> <h2h_dir>   (work has flair.isoforms.gtf, truth.truth
 import collections, os, sys
 
 work, h2h = sys.argv[1:3]
-LEGACY = {"HIGH_CONF_KNOWN": "KNOWN", "HIGH_CONF_NOVEL": "NOVEL_CONFIRMED", "MEDIUM_CONF_NOVEL": "NOVEL_PROBABLE",
-          "LOW_CONF_PARTIAL": "UNCONFIRMED", "AMBIGUOUS": "UNRESOLVED", "PAN_REF_RESCUED_FALSE_NOVEL": "REFERENCE_BIAS"}
 ex, strand, chrom = collections.defaultdict(list), {}, {}
 for line in open(f"{work}/flair.isoforms.gtf"):
     f = line.rstrip("\n").split("\t")
@@ -32,7 +30,7 @@ for setting in ["none", "oracle", "sr_250000", "sr_1000000", "sr_4000000"]:
         p = f"{h2h}/{setting}/{run}.adjudicated.tsv"
         if not os.path.exists(p): continue
         it = (l.rstrip("\n").split("\t") for l in open(p)); hdr = next(it)
-        cls = {r[0]: LEGACY.get(r[hdr.index("confidence_class")], r[hdr.index("confidence_class")]) for r in it}
+        cls = {r[0]: r[hdr.index("confidence_class")] for r in it}
         c = collections.Counter((cls[t], label[t]) for t in label if t in cls)
         print(f"\n=== {setting} / {run}")
         print(f"{'class':<20}{'genuine':>8}{'false':>7}{'precision':>11}")

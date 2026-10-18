@@ -99,7 +99,7 @@ TEST_CASE("adjudicator: pangenome graph-supported novel junction -> REFERENCE_BI
 
   // The pangenome carries that novel junction on a graph haplotype path.
   PangenomeJunctions pan;
-  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2, {}});
 
   AdjudicateInputs in;
   in.sqanti = &sqanti;
@@ -136,7 +136,7 @@ TEST_CASE("adjudicator: pangenome partial support does NOT rescue (all-or-nothin
 
   // The pangenome carries only ONE of the two novel junctions.
   PangenomeJunctions pan;
-  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2, {}});
 
   AdjudicateInputs in;
   in.sqanti = &sqanti;
@@ -163,7 +163,7 @@ TEST_CASE("adjudicator: sample-derived pangenome provenance is held (circularity
   chains["isoPan"] = chain({{200, 350}, {400, 500}});  // single novel jx {200,350}
 
   PangenomeJunctions pan;
-  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2});
+  pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 2, {}});
 
   AdjudicateInputs in;
   in.sqanti = &sqanti;
