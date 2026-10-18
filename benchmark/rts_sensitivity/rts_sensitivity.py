@@ -105,8 +105,10 @@ def main():
         res["gm12878_ont"] = {"rt_lifts": sum(RT_LIFT(r) for r in rows)}
         print(f"{'gm12878 ONT':<22}{res['gm12878_ont']['rt_lifts']:>9}")
     if a.emit_metrics:
+        prov = dict(l.rstrip("\n").split("\t", 1) for l in open(f"{a.h2h}/sr_1000000/pigbam.provenance.log")
+                    if "\t" in l and not l.startswith("#"))
         env = {"protocol": "rts_sensitivity", "scope": "all_tracked_runs", "status": "tracked",
-               "tool_version": "0.0.6", "ruleset_version": "builtin-0.0.5",
+               "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
                "data_provenance": "the adjudicated.tsv files of the tracked runs (SQANTI-SIM h2h 1M/none + BAM, end2end, LRGASP WTC11 pb/ont sr/nosr, refbias_3way arm C wgs, gm12878 ONT preset)",
                "command": "benchmark/rts_sensitivity/rts_sensitivity.py --sqsim-work ... --h2h ... --e2e ... --lrgasp ... --threeway ... --gm12878 ... --emit-metrics",

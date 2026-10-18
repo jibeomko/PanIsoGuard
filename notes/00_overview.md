@@ -250,7 +250,7 @@ cat out/toy.provenance.log
 
 ```text
 # PanIsoGuard adjudicate provenance
-tool_version	0.0.6
+tool_version	0.0.7
 ruleset_version	builtin-0.0.5
 sqanti3_version_target	6.0
 config	<built-in defaults>

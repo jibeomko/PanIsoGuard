@@ -3,7 +3,7 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
-## [Unreleased]
+## [0.0.7] - 2026-10-18
 
 ### Changed
 - **Ruleset `builtin-0.0.5`: artifact signs without short reads.** `UNKNOWN × mapping` is
