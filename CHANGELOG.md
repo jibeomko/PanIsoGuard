@@ -39,7 +39,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   (`benchmark/chain_support/score_decoys.py`): wrong combinations reach 3 reads 0–0.1 % of the
   time, the genuine ones 100 % (31 / 31). On real PacBio / Kinnex data 33–46 % of the
   recombinants of two expressed isoforms are carried by ≥ 3 reads, with as many reads as
-  their parents (unannotated combinatorial isoforms rather than chimeras), so the rate is an
+  their parents and recur in an independent library (PacBio → ONT, one Kinnex individual →
+  the other) at 75–93 % when both parents are expressed in both, like the annotated
+  transcripts (unannotated combinatorial isoforms rather than chimeras), so the rate is an
   upper bound on the false lift and a measure of annotation incompleteness
   ([benchmark/chain_support](benchmark/chain_support)).
 - **`KNOWN_FRAGMENT` class / `known_fragment` verdict (ruleset `builtin-0.0.5`).** An ISM

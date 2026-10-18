@@ -37,6 +37,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="append", required=True, help="LABEL=PREFIX")
     ap.add_argument("--truth", action="append", default=[], help="LABEL=truth.truth.tsv (SQANTI-SIM)")
+    ap.add_argument("--cross", action="append", default=[], help="LABEL_A,LABEL_B: are the decoys lifted in A "
+                    "also carried in B (same annotation + seed -> identical decoy sets), next to A's lifted parents")
     ap.add_argument("--emit-metrics")
     a = ap.parse_args()
     truths = dict(t.split("=", 1) for t in a.truth)
@@ -59,6 +61,35 @@ def main():
             print(f"  truth: genuine decoys {g['lifted']}/{g['n']} lifted, false decoys {f['lifted']}/{f['n']} lifted (false-lift rate {f['rate']});"
                   f" both parents >= N: genuine {g2['lifted']}/{g2['n']}, false {f2['lifted']}/{f2['n']} ({f2['rate']})")
         res[label] = entry
+        entry["_rows"] = rows
+    for spec in a.cross:
+        la, lb = spec.split(",")
+        A = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in res[la]["_rows"]}
+        B = {f"{r['chrom']}|{r['strand']}|{r['introns_1based']}": r for r in res[lb]["_rows"]}
+        if set(A) != set(B):
+            print(f"cross {la},{lb}: decoy sets differ (different annotation or seed), skipped", file=sys.stderr); continue
+        n = res[la]["min_full_reads"]
+        full = lambda r: int(r["n_full_reads"])
+        pmin = lambda r: min(int(r["parent_a_full_reads"]), int(r["parent_b_full_reads"]))
+        lifted = [k for k, r in A.items() if full(r) >= n]
+        pa = {}
+        for r in A.values(): pa[r["parent_a"]] = int(r["parent_a_full_reads"]); pa[r["parent_b"]] = int(r["parent_b_full_reads"])
+        pb = {}
+        for r in B.values(): pb[r["parent_a"]] = int(r["parent_a_full_reads"]); pb[r["parent_b"]] = int(r["parent_b_full_reads"])
+        lp = [t for t, c in pa.items() if c >= n]
+        cond = [k for k in lifted if pmin(A[k]) >= n and pmin(B[k]) >= n]
+        c = {"lifted_decoys_in_a": len(lifted), "also_lifted_in_b": sum(full(B[k]) >= n for k in lifted),
+             "also_ge1_in_b": sum(full(B[k]) >= 1 for k in lifted),
+             "lifted_parents_in_a": len(lp), "parents_also_lifted_in_b": sum(pb.get(t, 0) >= n for t in lp),
+             "lifted_decoys_both_parents_expressed_in_both": len(cond),
+             "of_those_also_lifted_in_b": sum(full(B[k]) >= n for k in cond)}
+        res.setdefault("cross_library", {})[f"{la}->{lb}"] = c
+        print(f"cross {la}->{lb}: lifted decoys {c['lifted_decoys_in_a']} -> >= {n} in {lb}: {c['also_lifted_in_b']} "
+              f"({c['also_lifted_in_b'] / max(1, c['lifted_decoys_in_a']):.2f}); lifted parents {c['lifted_parents_in_a']} -> "
+              f"{c['parents_also_lifted_in_b']} ({c['parents_also_lifted_in_b'] / max(1, c['lifted_parents_in_a']):.2f}); "
+              f"both parents expressed in both: {c['of_those_also_lifted_in_b']} / {c['lifted_decoys_both_parents_expressed_in_both']}")
+    for v in res.values():
+        if isinstance(v, dict): v.pop("_rows", None)
     if a.emit_metrics:
         env = json.load(open(a.emit_metrics))
         env["metrics"]["decoys"] = res

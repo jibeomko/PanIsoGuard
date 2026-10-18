@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
-  "generated_utc": "2026-10-18T02:27:42Z",
+  "generated_utc": "2026-10-18T02:45:31Z",
   "metrics": {
     "bambu": {
       "n_genuine": 409,
@@ -79,6 +79,44 @@
       }
     },
     "decoys": {
+      "cross_library": {
+        "hg02717_kinnex->hg03516_kinnex": {
+          "also_ge1_in_b": 2784,
+          "also_lifted_in_b": 1708,
+          "lifted_decoys_both_parents_expressed_in_both": 1131,
+          "lifted_decoys_in_a": 4043,
+          "lifted_parents_in_a": 22729,
+          "of_those_also_lifted_in_b": 829,
+          "parents_also_lifted_in_b": 11763
+        },
+        "hg03516_kinnex->hg02717_kinnex": {
+          "also_ge1_in_b": 1886,
+          "also_lifted_in_b": 1708,
+          "lifted_decoys_both_parents_expressed_in_both": 889,
+          "lifted_decoys_in_a": 1996,
+          "lifted_parents_in_a": 12825,
+          "of_those_also_lifted_in_b": 829,
+          "parents_also_lifted_in_b": 11763
+        },
+        "lrgasp_ont->lrgasp_pacbio": {
+          "also_ge1_in_b": 749,
+          "also_lifted_in_b": 620,
+          "lifted_decoys_both_parents_expressed_in_both": 301,
+          "lifted_decoys_in_a": 848,
+          "lifted_parents_in_a": 8205,
+          "of_those_also_lifted_in_b": 269,
+          "parents_also_lifted_in_b": 6481
+        },
+        "lrgasp_pacbio->lrgasp_ont": {
+          "also_ge1_in_b": 1248,
+          "also_lifted_in_b": 620,
+          "lifted_decoys_both_parents_expressed_in_both": 357,
+          "lifted_decoys_in_a": 3415,
+          "lifted_parents_in_a": 21638,
+          "of_those_also_lifted_in_b": 269,
+          "parents_also_lifted_in_b": 6481
+        }
+      },
       "gm12878_ont_drna": {
         "decoys": {
           "lifted": 7,
@@ -710,7 +748,7 @@
       }
     }
   },
-  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them).",
+  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them). [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them).",
   "protocol": "chain_support",
   "ruleset_version": "default-0.0.5",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",

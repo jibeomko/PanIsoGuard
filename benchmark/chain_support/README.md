@@ -114,6 +114,16 @@ where nothing expressed is unannotated, 0 / 3,198.
   list, in weakly expressed genes where 3 reads is most of the evidence there is. On real data
   the decoy rate is therefore an upper bound that mostly measures annotation incompleteness;
   the simulation, which has no unannotated isoforms, gives the lower bound.
+- **They reproduce in an independent library like the annotated transcripts do.** The same
+  annotation and seed give the same 139,003 decoys on every dataset, so a decoy lifted in one
+  library can be looked up in another (`score_decoys.py --cross`). Of the decoys lifted in
+  LRGASP PacBio, 18 % also have ≥ 3 reads in the ONT cDNA library of the same cells, against
+  30 % of the annotated parents lifted in PacBio (the ONT library is shallower); from ONT to
+  PacBio 73 % against 79 %; between the two Kinnex individuals 86 % / 92 % and 42 % / 52 %.
+  Restricted to decoys whose two parents are expressed in both libraries, 75–93 % of the
+  lifted ones are lifted in the other library too. A chimera made during one library's
+  reverse transcription would not recur in another platform or another person at the rate
+  of the real transcripts.
 - **Scope.** A decoy is a wrong *combination* of right junctions. Chains with a wrong junction
   (the shifted-coordinate, alignment-level false chains that cost Bambu and TALON precision
   above) are outside its reach by construction.
@@ -143,6 +153,7 @@ score_sirv_chain.py --work /path/to/pig_sirv/work --mc /path/to/pig_sirv_mc --ou
 # decoy chains (any dataset; the truth split needs the SQANTI-SIM truth table):
 panisoguard decoys --ref-gtf /path/to/chr22_modified.gtf --bam /path/to/aln.bam --out /tmp/decoys/sqsim
 score_decoys.py --run sqsim=/tmp/decoys/sqsim --truth sqsim=/path/to/truth.truth.tsv \
+  --run pb=/tmp/decoys/lrgasp_pb --run ont=/tmp/decoys/lrgasp_ont --cross pb,ont \
   --emit-metrics ../results/chain_support/metrics.json
 ```
 
