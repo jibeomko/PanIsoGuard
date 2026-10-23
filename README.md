@@ -62,8 +62,8 @@ mechanism, the reasons) is explanation, not a second decision; see
 ## Contents
 
 - [In one screen](#in-one-screen) · [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
-- [A worked locus](#a-worked-locus) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
-- [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout) · [Architecture map](#architecture-map)
+- [A worked locus](#a-worked-locus) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Validation](#validation)
+- [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout)
 
 ## At a glance
 
@@ -484,30 +484,6 @@ Full tables, bootstrap confidence intervals and caveats are in
 
 So use it for the reason behind each call, not for a better score.
 
-## Design notes
-
-PanIsoGuard takes SQANTI3's QC values as they are and combines them with other, independent
-evidence: caller agreement, short-read junctions, long-read alignments, the sample's
-haplotypes, and pangenome junctions. It does not recompute TSS/TTS, ORF/NMD, polyA or reference
-splice motifs, and it is not a SQANTI3-style QC filter (see
-[docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)). What it adds is the
-**decision logic**: fixed, readable rules that turn the evidence into a verdict. The thresholds
-are in [`config/rules.default.toml`](config/rules.default.toml) and can be changed without
-rebuilding, and every verdict records its `rule_trace` (see
-[docs/decision_engine.md](docs/decision_engine.md)).
-
-> PanIsoGuard is an **independent project**; the SQANTI3 authors have not made or endorsed it.
-> It only reads SQANTI3's output files. No SQANTI3 code is included or linked, so SQANTI3's
-> GPL-3.0 license does not extend to PanIsoGuard's MIT code. If you use SQANTI3 in your
-> pipeline, please cite it; see
-> [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md#attribution-licensing--citation).
-
-You can also picture each isoform as a **path through its gene's splice graph**: a novel
-junction is an edge that the reference graph does not have. This is only another way to
-describe the same rules; there is no graph model or new algorithm. Each verdict also carries a
-`graph_trace` in these terms (the number of novel edges, how many of them are supported, and
-the distance from a known path). See [docs/method_graph.md](docs/method_graph.md).
-
 ## Validation
 
 [docs/validation.md](docs/validation.md) lists what has been checked and what is planned
@@ -560,6 +536,7 @@ not part of the core tool.
 | Doc | Contents |
 |-----|----------|
 | [docs/architecture.md](docs/architecture.md) | How the code is organized: command line → file readers → data model → evidence → decision. |
+| [docs/design_notes.md](docs/design_notes.md) | What PanIsoGuard adds to SQANTI3's output and what it does not recompute; the independence and licensing note; the splice-graph reading of the rules. |
 | [docs/algorithm.md](docs/algorithm.md) | How one isoform is judged, step by step. |
 | [docs/function_io.md](docs/function_io.md) | What each module takes and returns, and the main data types. |
 | [docs/decision_engine.md](docs/decision_engine.md) | The decision grid, which check comes first, and the guard against circular evidence. |
@@ -603,48 +580,6 @@ PanIsoGuard/
 |-- thirdparty/                      # bundled header-only libraries and their licenses
 |-- LICENSE
 `-- THIRDPARTY.txt
-```
-
-## Architecture map
-
-```mermaid
-%%{init: {"theme": "base", "themeCSS": "svg { background: #ffffff; }", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
-flowchart LR
-  CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
-  Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
-  Context["<b>Evidence context</b><br/>reference GTF | SJ.tab<br/>BAM/CRAM | FASTA | graph TSV"]
-  Rules["<b>Rule gates</b><br/>rules.default.toml"]
-
-  Normalize["<b>1. Normalize</b><br/>src/io readers<br/>typed transcript + junction models"]
-  Consensus["<b>2. Merge callers</b><br/>intron-chain fingerprints<br/>caller support matrix"]
-  Evidence["<b>3. Build evidence</b><br/>SQANTI3 QC<br/>short‑read SJ<br/>Long Read BAM mapping<br/>Variant/Haplotype<br/>Pangenome"]
-  Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
-  Outputs["<b>Outputs</b><br/>*.adjudicated.tsv | *.junctions.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
-
-  CLI --> Normalize
-  Iso --> Normalize
-  Normalize --> Consensus
-  Consensus --> Evidence
-  Evidence --> Decide
-  Decide --> Outputs
-  Context --> Evidence
-  Rules --> Decide
-  Consensus -.-> Outputs
-
-  classDef command fill:#fff7e6,stroke:#b7791f,stroke-width:1.8px,color:#3a2500,font-size:17px;
-  classDef input fill:#edf6ff,stroke:#2f6fa8,stroke-width:1.8px,color:#0f2438,font-size:17px;
-  classDef process fill:#eefaf1,stroke:#2f855a,stroke-width:1.8px,color:#102a16,font-size:17px;
-  classDef evidence fill:#f5f0ff,stroke:#6b46c1,stroke-width:2px,color:#241447,font-size:17px;
-  classDef decision fill:#fff1f1,stroke:#c53030,stroke-width:2.2px,color:#3b0d0d,font-size:17px;
-  classDef output fill:#edfafa,stroke:#2c7a7b,stroke-width:1.8px,color:#0f2f2f,font-size:17px;
-
-  class CLI command;
-  class Iso,Context,Rules input;
-  class Normalize,Consensus process;
-  class Evidence evidence;
-  class Decide decision;
-  class Outputs output;
-  linkStyle default stroke:#334155,stroke-width:3.5px;
 ```
 
 ## Citation
