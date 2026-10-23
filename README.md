@@ -26,8 +26,9 @@ a log of the inputs that were used.
 > **What it is, and what it is not.** PanIsoGuard gives **verdicts you can trace**. It is
 > **not a more accurate filter.** On simulated data with known answers, it ranks isoforms about
 > as well as a one-line rule ("keep an isoform if every junction has at least 3 short reads").
-> By default it prefers precision to recall, and without short reads it does worse than the
-> SQANTI3 rules filter. See [How it compares](#how-it-compares).
+> By default it prefers precision to recall. Without short reads it confirms nothing unless you
+> give it the long-read BAM; with the BAM it ranks above the SQANTI3 rules filter, on the
+> chromosome the thresholds were set on and on two it never saw. See [How it compares](#how-it-compares).
 
 ## In one screen
 
@@ -455,6 +456,10 @@ Full tables, bootstrap confidence intervals and caveats are in
   With the BAM it keeps 546 of the 730 real isoforms at precision 0.993 and ranks above
   SQANTI3's rules filter (0.953 vs 0.909); the long reads are the caller's own, so these
   calls are `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`.
+- The same thresholds on two chromosomes they never saw (chr20, chr19) give the same picture:
+  without short reads AUPRC 0.962 and 0.957 against 0.946 and 0.928 for SQANTI3's rules filter,
+  both bootstrap intervals above zero; with 1 M pairs a tie with the one-line rule
+  ([benchmark/sqanti_sim_heldout](benchmark/sqanti_sim_heldout)).
 - On the other callers' output (IsoQuant, Bambu, ESPRESSO, TALON, same alignment, no short
   reads) it raises precision every time, by 0.01–0.02 where the caller is already strict and by
   0.32 on TALON, where SQANTI3's rules filter adds nothing; it is not a substitute for a caller's
@@ -470,6 +475,12 @@ Full tables, bootstrap confidence intervals and caveats are in
   RT-switch flag; with the other platform's reads as an independent library
   (`--validation-bam`) 13 of 17 and 14 of 16 are still carried by at least 3 reads
   ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
+- Real-data negatives point the same way. The 26 amplicon-unsupported LRGASP chains, adjudicated
+  as would-be isoforms with no caller in the loop, are confirmed 0 times on PacBio and 3 times on
+  ONT, where 8–60 reads carry them end to end; SQANTI3's rules filter keeps 18 of the 26
+  ([benchmark/lrgasp_targets](benchmark/lrgasp_targets)). Of the 13 novel isoforms IsoQuant
+  reports in TUSCO's 46 single-isoform genes, PanIsoGuard confirms 3 and SQANTI3's filter keeps 8
+  ([benchmark/tusco_negatives](benchmark/tusco_negatives)).
 
 So use it for the reason behind each call, not for a better score.
 
@@ -504,8 +515,10 @@ the distance from a known path). See [docs/method_graph.md](docs/method_graph.md
 
 **Thresholds.** On SQANTI-SIM (GENCODE v49 chr22), trying a grid of threshold values changes
 AUPRC very little (0.970–0.971), and the default is within 0.0001 of the best
-([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)). Other data
-sets have not been tried yet.
+([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)); the
+whole-chain read threshold is flat from 2 to 10 ([benchmark/chain_support](benchmark/chain_support)).
+The same thresholds, untouched, hold on chr20 and chr19
+([benchmark/sqanti_sim_heldout](benchmark/sqanti_sim_heldout)).
 
 **Pangenome.** The pangenome reference-bias check was tested on the real HPRC v1.1 chr22 graph
 (GATE-1): no false rescues on real FLAIR novel junctions, correct rescues on real population
