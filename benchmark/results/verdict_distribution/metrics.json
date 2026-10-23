@@ -1,0 +1,228 @@
+{
+  "command": "benchmark/verdict_distribution/score_distribution.py --run LABEL=x.adjudicated.tsv ... --emit-metrics benchmark/results/verdict_distribution/metrics.json",
+  "data_provenance": "REAL public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, no short reads). No private data.",
+  "generated_utc": "2026-10-19T13:33:11Z",
+  "metrics": {
+    "hg02717_kinnex": {
+      "all": {
+        "ARTIFACT": 0,
+        "KNOWN": 44288,
+        "KNOWN_FRAGMENT": 1854,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 8368,
+        "REFERENCE_BIAS": 28,
+        "UNCONFIRMED": 5729,
+        "UNRESOLVED": 8961
+      },
+      "n_isoforms": 69228,
+      "novel": {
+        "ARTIFACT": 0,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 8368,
+        "REFERENCE_BIAS": 28,
+        "UNCONFIRMED": 3331,
+        "UNRESOLVED": 5542
+      },
+      "novel_nic_nnc": 17269,
+      "novel_probable_with_rts_sign": 1357,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 1979,
+        "chain_support_with_noncanonical": 747,
+        "mapping_without_short_reads": 605
+      },
+      "novel_unresolved_reasons": {
+        "no_short_reads": 5541,
+        "no_short_reads;haplotype_disrupted": 1
+      }
+    },
+    "hg03516_kinnex": {
+      "all": {
+        "ARTIFACT": 0,
+        "KNOWN": 30452,
+        "KNOWN_FRAGMENT": 3925,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 7081,
+        "REFERENCE_BIAS": 18,
+        "UNCONFIRMED": 11137,
+        "UNRESOLVED": 15398
+      },
+      "n_isoforms": 68011,
+      "novel": {
+        "ARTIFACT": 0,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 7081,
+        "REFERENCE_BIAS": 18,
+        "UNCONFIRMED": 4263,
+        "UNRESOLVED": 7777
+      },
+      "novel_nic_nnc": 19139,
+      "novel_probable_with_rts_sign": 1297,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 2891,
+        "chain_support_with_noncanonical": 630,
+        "chain_support_with_noncanonical;haplotype_disrupted": 1,
+        "mapping_without_short_reads": 741
+      },
+      "novel_unresolved_reasons": {
+        "no_short_reads": 7770,
+        "no_short_reads;haplotype_disrupted": 7
+      }
+    },
+    "lrgasp_ont_nosr": {
+      "all": {
+        "ARTIFACT": 0,
+        "KNOWN": 34828,
+        "KNOWN_FRAGMENT": 789,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 2759,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 278,
+        "UNRESOLVED": 888
+      },
+      "n_isoforms": 39542,
+      "novel": {
+        "ARTIFACT": 0,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 2759,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 251,
+        "UNRESOLVED": 558
+      },
+      "novel_nic_nnc": 3568,
+      "novel_probable_with_rts_sign": 222,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 9,
+        "chain_support_with_noncanonical": 200,
+        "mapping_without_short_reads": 42
+      },
+      "novel_unresolved_reasons": {
+        "no_short_reads": 558
+      }
+    },
+    "lrgasp_ont_sr": {
+      "all": {
+        "ARTIFACT": 453,
+        "KNOWN": 34828,
+        "KNOWN_FRAGMENT": 789,
+        "NOVEL_CONFIRMED": 693,
+        "NOVEL_PROBABLE": 1049,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 1290,
+        "UNRESOLVED": 440
+      },
+      "n_isoforms": 39542,
+      "novel": {
+        "ARTIFACT": 453,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 693,
+        "NOVEL_PROBABLE": 1049,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 1263,
+        "UNRESOLVED": 110
+      },
+      "novel_nic_nnc": 3568,
+      "novel_probable_with_rts_sign": 121,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 4,
+        "chain_support_with_noncanonical": 3,
+        "mapping_without_short_reads": 8,
+        "partial_support": 69,
+        "partial_support_with_mapping_or_repeat": 6,
+        "partial_support_with_noncanonical": 11,
+        "partial_support_with_rt_switch": 3,
+        "unsupported_no_sign": 1159
+      },
+      "novel_unresolved_reasons": {
+        "no_coverage": 6,
+        "no_novel_junction": 104
+      }
+    },
+    "lrgasp_pb_nosr": {
+      "all": {
+        "ARTIFACT": 0,
+        "KNOWN": 59704,
+        "KNOWN_FRAGMENT": 2133,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 8171,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 910,
+        "UNRESOLVED": 7338
+      },
+      "n_isoforms": 78256,
+      "novel": {
+        "ARTIFACT": 0,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 0,
+        "NOVEL_PROBABLE": 8171,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 660,
+        "UNRESOLVED": 3618
+      },
+      "novel_nic_nnc": 12449,
+      "novel_probable_with_rts_sign": 1321,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 46,
+        "chain_support_with_noncanonical": 346,
+        "mapping_without_short_reads": 268
+      },
+      "novel_unresolved_reasons": {
+        "no_short_reads": 3618
+      }
+    },
+    "lrgasp_pb_sr": {
+      "all": {
+        "ARTIFACT": 1219,
+        "KNOWN": 59704,
+        "KNOWN_FRAGMENT": 2133,
+        "NOVEL_CONFIRMED": 1387,
+        "NOVEL_PROBABLE": 5057,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 3216,
+        "UNRESOLVED": 5540
+      },
+      "n_isoforms": 78256,
+      "novel": {
+        "ARTIFACT": 1219,
+        "KNOWN": 0,
+        "KNOWN_FRAGMENT": 0,
+        "NOVEL_CONFIRMED": 1387,
+        "NOVEL_PROBABLE": 5057,
+        "REFERENCE_BIAS": 0,
+        "UNCONFIRMED": 2966,
+        "UNRESOLVED": 1820
+      },
+      "novel_nic_nnc": 12449,
+      "novel_probable_with_rts_sign": 910,
+      "novel_unconfirmed_reasons": {
+        "chain_support_with_degradation": 29,
+        "chain_support_with_noncanonical": 18,
+        "mapping_without_short_reads": 15,
+        "partial_support": 210,
+        "partial_support_with_degradation": 1,
+        "partial_support_with_mapping_or_repeat": 21,
+        "partial_support_with_noncanonical": 24,
+        "partial_support_with_rt_switch": 30,
+        "unsupported_no_sign": 2618
+      },
+      "novel_unresolved_reasons": {
+        "no_coverage": 113,
+        "no_novel_junction": 1707
+      }
+    }
+  },
+  "notes": "Per run: confidence_class counts over all isoforms and over SQANTI3 NIC + NNC isoforms; how many NOVEL_PROBABLE calls carry the rt_switch_sign annotation; the verdict_reason behind UNCONFIRMED (held on a sign) and UNRESOLVED (undecided) novel calls. Descriptive: what a user sees after one run, not an accuracy claim.",
+  "protocol": "verdict_distribution",
+  "ruleset_version": "builtin-0.0.5",
+  "scope": "real_data_verdict_distribution_lrgasp_wtc11_hprc_kinnex",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.6"
+}

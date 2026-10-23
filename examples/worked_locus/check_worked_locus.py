@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Recompute the study notes' toy verdicts without PanIsoGuard and compare with the binary.
+"""Recompute every verdict of the worked locus without PanIsoGuard and compare with the binary.
 
-The explanations are in notes/*.md (Korean). This script rebuilds every verdict of the toy
-locus (notes/data/) from the raw input files with the Python standard library only, runs
-`panisoguard adjudicate` / `combine` on the same inputs, and stops with an error if any
-isoform differs in novelty support, mechanism, confidence class or junction counts. It
-also checks the headline numbers the notes quote.
+This script rebuilds the verdicts of the toy locus (data/) from the raw input files with the
+Python standard library only (readers, junction classification, short-read support, BAM
+features, splice motifs, fingerprints, the rules), runs `panisoguard adjudicate` / `combine`
+on the same inputs under nine input combinations, and stops with an error if any isoform
+differs in novelty support, mechanism, confidence class or junction counts. It also checks
+the headline numbers quoted in README.md. CTest runs it as `integration_worked_locus`.
 
-    python3 notes/check_notes.py [path/to/panisoguard]      # default: build/panisoguard
+    python3 check_worked_locus.py [path/to/panisoguard]      # default: ../../build/panisoguard
 """
 import os
 import re
@@ -18,7 +19,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
-PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "build", "panisoguard")
+PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "..", "build", "panisoguard")
 D = lambda name: os.path.join(DATA, name)
 
 NOVEL = ("novel_in_catalog", "novel_not_in_catalog")
@@ -283,7 +284,7 @@ def main():
         subprocess.run([PIG, "combine", "--gtf", "caller1:" + D("caller1.gtf"), "--gtf", "caller2:" + D("caller2.gtf"),
                         "--ref-gtf", D("reference.gtf"), "--out", matrix], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # An isoform id that does not join must be reported, not silently held AMBIGUOUS (01, 06).
+        # An isoform id that does not join must be reported, not silently held.
         renamed = os.path.join(tmp, "renamed.gtf")
         open(renamed, "w").write(open(D("caller1.gtf")).read().replace('"iso_A"', '"FLAIR_iso_A"'))
         err = subprocess.run([PIG, "adjudicate", *base[:2], "--isoforms-gtf", renamed,
@@ -301,17 +302,17 @@ def main():
                     print(f"MISMATCH {name} {iso}: PanIsoGuard {got[iso]} vs by hand {want}")
             print(f"{name:14s} {len(cls)} isoforms, iso_A -> {got['iso_A'][2]}")
 
-    # The headline numbers quoted in the notes.
+    # The headline numbers quoted in README.md.
     step = [results[f"step{i}"]["iso_A"][2] for i in range(6)]
     expect = ["UNRESOLVED", "UNRESOLVED", "ARTIFACT", "ARTIFACT", "UNRESOLVED", "REFERENCE_BIAS"]
     checks = [
-        ("iso_A across the six steps (00)", step == expect),
-        ("iso_C is PARTIAL -> UNCONFIRMED (02)", results["step2"]["iso_C"][:3] == ("PARTIAL", "none", "UNCONFIRMED")),
-        ("iso_G is a mapping artifact (03)", results["step3"]["iso_G"][1:3] == ("mapping_or_repeat", "ARTIFACT")),
-        ("iso_A novel junction absent from SJ.out.tab (02)", ("chrT", "+", (500, 730)) not in sj),
-        ("fingerprint of iso_known (06)", fingerprint("chrT", "+", chains["iso_known"][2]) == 4486241254994410266),
-        ("unjoined isoform id is warned about (01)", warned),
-        ("consensus lifts iso_G, BAM drops it (06)",
+        ("iso_A across the six steps", step == expect),
+        ("iso_C is PARTIAL -> UNCONFIRMED", results["step2"]["iso_C"][:3] == ("PARTIAL", "none", "UNCONFIRMED")),
+        ("iso_G is a mapping artifact", results["step3"]["iso_G"][1:3] == ("mapping_or_repeat", "ARTIFACT")),
+        ("iso_A novel junction absent from SJ.out.tab", ("chrT", "+", (500, 730)) not in sj),
+        ("fingerprint of iso_known", fingerprint("chrT", "+", chains["iso_known"][2]) == 4486241254994410266),
+        ("unjoined isoform id is warned about", warned),
+        ("consensus lifts iso_G, BAM drops it",
          results["consensus"]["iso_G"][2] == "NOVEL_PROBABLE" and results["consensus_bam"]["iso_G"][2] == "UNCONFIRMED"),
     ]
     counts = {1.0: (385, 4), 0.75: (45, 1), 0.5: (146, 6), 0.25: (154, 61), 0.1: (0, 8), 0.0: (0, 68)}
@@ -321,7 +322,7 @@ def main():
         g, f = counts[score]
         tp, fp = tp + g, fp + f
         ap += g / pos * tp / (tp + fp)
-    checks.append(("AUPRC 0.9712 from the SQANTI-SIM confusion table (07)", round(ap, 4) == 0.9712))
+    checks.append(("AUPRC 0.9712 from the SQANTI-SIM confusion table", round(ap, 4) == 0.9712))
     for name, ok in checks:
         print(f"{'ok  ' if ok else 'FAIL'} {name}")
         failures += not ok

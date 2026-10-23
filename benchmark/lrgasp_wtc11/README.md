@@ -35,7 +35,11 @@ v49:
 | `ARTIFACT` | **0** | **0** | **0** | **0** |
 
 - **No experimentally supported isoform is called an artifact**, on either platform, with
-  or without short reads.
+  or without short reads. SQANTI3's default rules filter on the same classifications (`sq_rules/`,
+  no coverage column, so its perc_A and RTS rules) discards 2 of the 17 (PacBio: CENPK, MTHFS)
+  and 4 of the 16 (ONT: CENPK, MTHFS, RND2, USF1) validated novel isoforms, every one for the
+  `RTS_stage` flag; 3 / 41 and 4 / 40 of all validated isoforms it reconstructed. PanIsoGuard
+  keeps them as `NOVEL_PROBABLE` with the sign in the reason.
 - With short reads, 16 of 17 (PacBio) and 14 of 16 (ONT) are confident. The `UNCONFIRMED`
   ones are CALB1 (NNC) and, on ONT, SAC3D1 (NIC): their novel junction has no short-read
   support in this one Illumina replicate (`unsupported_no_sign`), never `ARTIFACT`. Four

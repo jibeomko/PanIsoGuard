@@ -54,13 +54,11 @@ benchmark/**/data/
 !tests/data/tiny/*.fa
 !tests/data/tiny/*.fai
 
-# ...and the study notes' toy data (tiny; rebuilt by notes/data/build_toy.sh)
-!notes/data/*.fa
-!notes/data/*.fai
-!notes/data/*.bam
-!notes/data/*.bai
-# scratch output of the notes' code blocks
-notes/out/
+# ...and the worked locus' toy data (tiny; rebuilt by examples/worked_locus/data/build_toy.sh)
+!examples/worked_locus/data/*.fa
+!examples/worked_locus/data/*.fai
+!examples/worked_locus/data/*.bam
+!examples/worked_locus/data/*.bai
 
 # ...and DO track the curated benchmark result artifacts (small metrics/tables only;
 # bulky regenerated intermediates stay ignored via benchmark/results/.gitignore +

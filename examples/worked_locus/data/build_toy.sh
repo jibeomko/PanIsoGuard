@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Rebuild every file in notes/data/ from make_toy.py. The outputs are committed, so the
-# notes run without STAR or SQANTI3; this script only shows where they came from.
+# Rebuild every file in data/ from make_toy.py. The outputs are committed, so the checks run
+# without STAR or SQANTI3; this script only shows where they came from.
 #
 # Needs python3, samtools, STAR and SQANTI3 on PATH (I used the conda env that SQANTI3
 # 6.0.1 installs: Python 3.11, samtools 1.23.1, STAR 2.7.11b).
 #
-#     cd notes/data && bash build_toy.sh
+#     cd examples/worked_locus/data && bash build_toy.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 

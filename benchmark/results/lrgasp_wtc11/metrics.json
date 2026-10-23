@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-10-18T03:15:18Z",
+  "generated_utc": "2026-10-19T11:49:48Z",
   "metrics": {
     "cross_library": {
       "ont_nosr": {
@@ -1645,6 +1645,14 @@
         "n": 11,
         "rts_stage_true": 1
       },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 0,
+        "n": 11,
+        "novel_discarded": 0,
+        "novel_discarded_targets": [],
+        "novel_n": 0,
+        "panisoguard_artifact_on_the_same": 0
+      },
       "supported": {
         "artifact": 0,
         "by_type": {
@@ -1713,6 +1721,14 @@
       "rts_sign_on_validated_called": {
         "n": 11,
         "rts_stage_true": 1
+      },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 0,
+        "n": 11,
+        "novel_discarded": 0,
+        "novel_discarded_targets": [],
+        "novel_n": 0,
+        "panisoguard_artifact_on_the_same": 0
       },
       "supported": {
         "artifact": 0,
@@ -1784,6 +1800,14 @@
       "rts_sign_on_validated_called": {
         "n": 16,
         "rts_stage_true": 1
+      },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 0,
+        "n": 16,
+        "novel_discarded": 0,
+        "novel_discarded_targets": [],
+        "novel_n": 2,
+        "panisoguard_artifact_on_the_same": 0
       },
       "supported": {
         "artifact": 0,
@@ -1859,6 +1883,14 @@
       "rts_sign_on_validated_called": {
         "n": 16,
         "rts_stage_true": 1
+      },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 0,
+        "n": 16,
+        "novel_discarded": 0,
+        "novel_discarded_targets": [],
+        "novel_n": 2,
+        "panisoguard_artifact_on_the_same": 0
       },
       "supported": {
         "artifact": 0,
@@ -1937,6 +1969,19 @@
         "n": 40,
         "rts_stage_true": 7
       },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 4,
+        "n": 40,
+        "novel_discarded": 4,
+        "novel_discarded_targets": [
+          "CENPK+1",
+          "MTHFS+1",
+          "RND2+1",
+          "USF1+1"
+        ],
+        "novel_n": 16,
+        "panisoguard_artifact_on_the_same": 0
+      },
       "supported": {
         "artifact": 0,
         "by_type": {
@@ -2008,6 +2053,19 @@
       "rts_sign_on_validated_called": {
         "n": 40,
         "rts_stage_true": 7
+      },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 4,
+        "n": 40,
+        "novel_discarded": 4,
+        "novel_discarded_targets": [
+          "CENPK+1",
+          "MTHFS+1",
+          "RND2+1",
+          "USF1+1"
+        ],
+        "novel_n": 16,
+        "panisoguard_artifact_on_the_same": 0
       },
       "supported": {
         "artifact": 0,
@@ -2088,6 +2146,17 @@
         "n": 41,
         "rts_stage_true": 5
       },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 3,
+        "n": 41,
+        "novel_discarded": 2,
+        "novel_discarded_targets": [
+          "CENPK+1",
+          "MTHFS+1"
+        ],
+        "novel_n": 17,
+        "panisoguard_artifact_on_the_same": 0
+      },
       "supported": {
         "artifact": 0,
         "by_type": {
@@ -2164,6 +2233,17 @@
         "n": 41,
         "rts_stage_true": 5
       },
+      "sqanti3_rules_filter_on_validated_called": {
+        "discarded": 3,
+        "n": 41,
+        "novel_discarded": 2,
+        "novel_discarded_targets": [
+          "CENPK+1",
+          "MTHFS+1"
+        ],
+        "novel_n": 17,
+        "panisoguard_artifact_on_the_same": 0
+      },
       "supported": {
         "artifact": 0,
         "by_type": {
@@ -2218,7 +2298,7 @@
       }
     }
   },
-  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
+  "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
   "protocol": "lrgasp_wtc11",
   "ruleset_version": "builtin-0.0.5",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",

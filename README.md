@@ -5,6 +5,9 @@
 [![CI](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/jibeomko/PanIsoGuard/actions/workflows/ci.yml)
 [![License: MIT AND BSL-1.0](https://img.shields.io/badge/license-MIT%20AND%20BSL--1.0-blue.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23131084.svg)](https://doi.org/10.5281/zenodo.23131084)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://anaconda.org/bioconda/panisoguard)
+[![bioconda version](https://img.shields.io/conda/vn/bioconda/panisoguard.svg)](https://anaconda.org/bioconda/panisoguard)
+[![platforms](https://img.shields.io/conda/pn/bioconda/panisoguard.svg)](https://anaconda.org/bioconda/panisoguard/files)
 
 Long-read isoform callers (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON, …) report many *novel*
 isoforms, and not all of them are real. Some come from alignment errors or library artifacts;
@@ -58,15 +61,15 @@ mechanism, the reasons) is explanation, not a second decision; see
 ## Contents
 
 - [In one screen](#in-one-screen) · [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
-- [Study notes](#study-notes) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
+- [A worked locus](#a-worked-locus) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Design notes](#design-notes) · [Validation](#validation)
 - [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout) · [Architecture map](#architecture-map)
 
 ## At a glance
 
 ![How PanIsoGuard judges a novel isoform, in five steps, followed for one example isoform, iso_B. 1, read inputs: the SQANTI3 classification, the caller's isoforms and the reference annotation are needed; short-read junctions (SJ.tab), a long-read BAM, genome haplotypes and a caller-support matrix are optional. 2, find novel junctions: iso_B has one junction that is not in the reference. 3, gather evidence: short reads support it; long reads and SQANTI3 QC find no artifact signal; callers and genome were not given, so they are not evaluated. 4, apply fixed rules: reference bias is checked first (not evaluated here); then short-read support times artifact signal gives the class, and iso_B lands on supported with no artifact signal. 5, report the verdict: confirmed novel (the other outcomes are reference bias, unconfirmed and artifact), written to a verdict table, the reasons and a run log.](docs/figures/overview.png)
 
-To see these steps worked through on a small example gene, one note per step, read the
-[study notes](notes/README.md) (in Korean).
+To see these steps worked through on a small example gene, read the
+[worked locus](examples/worked_locus/README.md).
 
 ## Quick start
 
@@ -96,7 +99,7 @@ conda-forge and bioconda, whatever your own conda settings are. The program is n
 `build/panisoguard`, and it runs without activating the environment. To call it as just
 `panisoguard`, as in [Usage](#usage), run `export PATH="$PWD/build:$PATH"`.
 
-**No conda? Use Docker** (from the same `PanIsoGuard` folder):
+**No conda? Use Docker.** Bioconda publishes a ready-made image on BioContainers, `docker pull quay.io/biocontainers/panisoguard:0.0.7--h8471819_0` (tags on [quay.io](https://quay.io/repository/biocontainers/panisoguard?tab=tags)); or build one with the optional report tool included (from the same `PanIsoGuard` folder):
 
 ```bash
 docker build -t panisoguard .
@@ -111,7 +114,7 @@ includes the optional PDF report tool. Without Docker, install that with `pip in
 and run `panisoguard-report --prefix <out-prefix>` (see [python/](python/)).
 
 For a step-by-step walk-through of one toy gene, from input files to verdicts, see the
-[study notes](#study-notes) (in Korean).
+[worked locus](#a-worked-locus).
 
 ## Install
 
@@ -123,7 +126,7 @@ panisoguard example tiny && tiny/run.sh     # a bundled example, copied to ./tin
 ```
 
 The examples ship with the package: `panisoguard example` lists them (`tiny`, `multi_caller`,
-and `notes-data`, the study notes' toy gene), and `panisoguard example <name> [DIR]` copies one
+and `worked_locus`, one toy gene followed through every rule), and `panisoguard example <name> [DIR]` copies one
 into a folder you can write to. PanIsoGuard is on the [bioconda channel](https://anaconda.org/bioconda/panisoguard); the
 [files page](https://anaconda.org/bioconda/panisoguard/files) lists the platforms each version
 is built for. The recipe is in [`recipes/bioconda/`](recipes/bioconda/). The optional PDF report tool is not part of this
@@ -373,26 +376,17 @@ their parents, which is what unannotated combinatorial isoforms look like rather
 ([benchmark/chain_support](benchmark/chain_support)). The number is an upper bound on the
 false-lift rate and a measure of how much of your transcriptome the annotation misses.
 
-## Study notes
+## A worked locus
 
-The [study notes](notes/README.md) (in Korean) explain how PanIsoGuard reaches its verdicts by
-following one small example through every step: a gene on a 1,700 bp toy chromosome, with three
-reference transcripts and nine isoforms from a caller. Each note starts from one question and
-shows the example before the rule. Every code block was run and shows its real output, and the
-CTest `integration_study_notes` checks that the notes still match the program. Read them in
-order if you are new:
-
-| # | Question | What it covers |
-|---|---|---|
-| 00 | [What does PanIsoGuard ask about a novel isoform?](notes/00_overview.md) | what is judged, and the steps from input files to verdict |
-| 01 | [What exactly is new in a novel isoform?](notes/01_intron_chain_and_novelty.md) | intron chains, each file's coordinate convention, counting novel junctions |
-| 02 | [How do we know short reads saw a novel junction?](notes/02_short_read_support.md) | `SJ.out.tab`, the four support levels, the `PARTIAL` rule change |
-| 03 | [What traces do artifacts leave?](notes/03_artifact_mechanisms.md) | SQANTI3's QC values, the four long-read BAM signs, which sign wins |
-| 04 | [How do support and artifact signs become one class?](notes/04_projection.md) | the support × artifact grid, the checks before it, `ablate`, all rules re-implemented in Python |
-| 05 | [What changes when the reference differs from the person's genome?](notes/05_reference_bias.md) | reference bias from haplotypes and a pangenome, the circularity firewall, the limits of its validation |
-| 06 | [If several callers find the same isoform, can we trust it?](notes/06_multi_caller_consensus.md) | intron-chain fingerprints, `combine`, strengths and weaknesses of caller agreement |
-| 07 | [How do we measure whether the verdicts are right?](notes/07_evaluation.md) | simulated truth, precision, recall and AUPRC, the comparison with a one-line rule |
-| 08 | [How does one isoform become one class?](notes/08_one_isoform_end_to_end.md) | working out one isoform by hand, from input files to class, and checking it against PanIsoGuard |
+[examples/worked_locus](examples/worked_locus/README.md) follows one toy gene, from input files to
+verdicts: a gene on a 1,700 bp chromosome with three reference transcripts and nine caller
+isoforms, with every input a run can take. Adding the inputs one at a time changes the verdict of
+`iso_A`, the isoform with one novel junction, from `UNRESOLVED` (nothing to test it with) to
+`ARTIFACT` (short reads do not support its non-canonical junction) to `REFERENCE_BIAS` (the
+junction is canonical on the sample's haplotype, with independent provenance). Two scripts keep the
+example honest and run in CI: `check_worked_locus.py` recomputes every verdict with the Python
+standard library and compares it with the binary, and `rules_replay.py` is the whole rulebook of
+`RuleEngine::evaluate()` in 42 lines of Python, replayed against the binary's `attribution.jsonl`.
 
 ## When to use PanIsoGuard
 
@@ -461,6 +455,10 @@ Full tables, bootstrap confidence intervals and caveats are in
   With the BAM it keeps 546 of the 730 real isoforms at precision 0.993 and ranks above
   SQANTI3's rules filter (0.953 vs 0.909); the long reads are the caller's own, so these
   calls are `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`.
+- On the other callers' output (IsoQuant, Bambu, ESPRESSO, TALON, same alignment, no short
+  reads) it raises precision every time, by 0.01–0.02 where the caller is already strict and by
+  0.32 on TALON, where SQANTI3's rules filter adds nothing; it is not a substitute for a caller's
+  own read-count filter but stacks on it ([benchmark/caller_filters](benchmark/caller_filters)).
 - It decides fewer isoforms and is wrong less often on those it decides: at 1 M pairs with
   the BAM it gives a decisive class to 73 % of the isoforms and 1.9 % of those are wrong;
   the one-line rule decides all of them and 6.6 % are wrong
@@ -468,7 +466,8 @@ Full tables, bootstrap confidence intervals and caveats are in
 - On real data with experimentally validated isoforms (LRGASP WTC11, PacBio and ONT), none
   of the validated isoforms the caller reconstructed is called an artifact, and without
   short reads the whole-chain reads keep all 17 (PacBio) and 16 (ONT) as
-  `NOVEL_PROBABLE`; with the other platform's reads as an independent library
+  `NOVEL_PROBABLE`, where SQANTI3's default rules filter discards 2 and 4 of them for its
+  RT-switch flag; with the other platform's reads as an independent library
   (`--validation-bam`) 13 of 17 and 14 of 16 are still carried by at least 3 reads
   ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
 
@@ -521,16 +520,21 @@ genuine while `UNCONFIRMED` novel isoforms are 31 % genuine (per-class table und
 
 ## Runtime & memory
 
-One thread, a whole-genome isoform set (GRCh38 + GENCODE v49):
+One thread, one `adjudicate` run with the long-read BAM, measured with `/usr/bin/time`
+(GENCODE v49 unless noted):
 
-| Step | Time | Peak RAM |
-|------|------|----------|
-| build the reference catalog (GENCODE v49) | ~3 s | ~0.34 GB |
-| `adjudicate` (SQANTI3 + short-read junctions) | ~5 s | ~0.55 GB |
-| + haplotype check (reads splice motifs with faidx) | ~40 s | ~0.6 GB |
-| + long-read BAM check | ~1.6 min | ~0.6 GB |
+| Data set | Isoforms | BAM | Other inputs | Wall time | Peak RAM |
+|---|---:|---:|---|---:|---:|
+| SQANTI-SIM chr22, FLAIR | 1,579 | 14 MB | SJ.tab | 0.5 s | 18 MB |
+| GM12878 ONT direct RNA, 285 novel chains | 285 | 0.27 GB | | 4 s | 0.41 GB |
+| LRGASP WTC11 PacBio, IsoQuant | 78,256 | 3.5 GB | SJ.tab | 2.2 min | 0.59 GB |
+| LRGASP WTC11 ONT, IsoQuant | 39,542 | 12.4 GB | SJ.tab | 5.9 min | 0.44 GB |
+| HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | two haplotype FASTAs | 3.3 min | 0.47 GB |
+| `decoys` on the same BAMs | 139,003 decoys | | | 1–12 min | 0.41 GB |
 
-The callers and the alignment take most of the total time; PanIsoGuard itself is fast.
+Building the GENCODE v49 catalog takes about 3 s of that; the rest is reading the BAM at each
+junction and chain. The callers and the alignment take most of the total time of a study;
+PanIsoGuard itself is fast and needs no more memory than a laptop has.
 
 ## Orchestration (optional)
 
@@ -552,7 +556,7 @@ not part of the core tool.
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What has been checked and what is planned. |
 | [CHANGELOG.md](CHANGELOG.md) · [docs/releasing.md](docs/releasing.md) | What changed in each version; how releases and Bioconda updates are made. |
-| [notes/](notes/README.md) | Study notes (in Korean): one toy gene from input files to verdict, one step per note. Every code block was run and shows its real output; `notes/check_notes.py` (CTest `integration_study_notes`) checks that the notes still match the program. |
+| [examples/worked_locus/](examples/worked_locus/README.md) | One toy gene from input files to verdict, with a stdlib recomputation of every verdict and a 42-line replay of the rules, both checked in CI. |
 
 ## Repository layout
 
@@ -570,7 +574,7 @@ PanIsoGuard/
 |   |-- gtf.hpp, bed12.hpp, sqanti.hpp, sj_tab.hpp, pangenome.hpp
 |   `-- bam_features.hpp, variant_motif.hpp, result_writer.hpp
 |-- src/
-|   |-- cli/                         # commands: adjudicate, combine, benchmark, ablate
+|   |-- cli/                         # commands: adjudicate, combine, ablate, decoys, example (benchmark: deprecated)
 |   |-- io/                          # SQANTI/GTF/BED12/SJ/pangenome readers + result writer
 |   |-- evidence/                    # BAM and FASTA evidence (via htslib)
 |   `-- core/                        # caller matching, reference catalog, rules, verdicts
@@ -579,10 +583,9 @@ PanIsoGuard/
 |   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA test files
 |-- docs/                            # architecture, algorithm, input formats, validation plan
 |-- docs/figures/                    # README figures (SVG sources + rendered PNGs)
-|-- notes/                           # study notes (Korean): a toy gene followed through every step
 |-- workflow/                        # optional Snakemake pipeline around PanIsoGuard
 |-- benchmark/                       # benchmarks on simulated and real data, with results
-|-- examples/                        # tiny and multi_caller (with expected outputs), report (PDF)
+|-- examples/                        # tiny, multi_caller (with expected outputs), worked_locus, report (PDF)
 |-- recipes/bioconda/                # Bioconda meta.yaml and build.sh
 |-- thirdparty/                      # bundled header-only libraries and their licenses
 |-- LICENSE

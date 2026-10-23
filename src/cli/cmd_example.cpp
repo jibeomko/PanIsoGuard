@@ -39,8 +39,8 @@ const Example kExamples[] = {
      "one caller: a known, a short-read-supported novel, and an artifact isoform", "run.sh"},
     {"multi_caller", "examples/multi_caller",
      "three callers: combine -> consensus verdict", "run.sh"},
-    {"notes-data", "notes/data",
-     "the study notes' toy gene (notes/ on GitHub walks through it)", nullptr},
+    {"worked_locus", "examples/worked_locus",
+     "one toy gene followed through every rule, with a stdlib recomputation and a 42-line rule replay", "README.md"},
 };
 
 bool is_dir(const std::string& p) {

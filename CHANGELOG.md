@@ -3,6 +3,42 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
+## [Unreleased]
+
+### Changed
+- **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
+  Korean study notes are gone from the repository; what they verified stays: the toy data, the
+  stdlib recomputation of every verdict (`check_worked_locus.py`, CTest `integration_worked_locus`)
+  and, new as a file of its own, the 42-line Python replay of the rulebook (`rules_replay.py`,
+  CTest `integration_rules_replay`). `panisoguard example worked_locus` replaces `notes-data`.
+
+### Benchmarks
+- **New: [benchmark/tusco_negatives](benchmark/tusco_negatives).** The first real-data negatives:
+  novel isoforms IsoQuant reports in the 46 TUSCO universal single-isoform genes (presumed false
+  by TUSCO's own scoring) on LRGASP WTC11 and the two HPRC Kinnex samples. 13 in total;
+  PanIsoGuard confirms 3 (HG02717, whole-chain reads at 3–5), SQANTI3's rules filter keeps 8;
+  with short reads 0 / 4 confirmed and 3 `ARTIFACT`.
+- [benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11): SQANTI3's default rules filter run on the
+  same classifications (`run.sh sqanti_filter`, envelope
+  `sqanti3_rules_filter_on_validated_called`): it discards 2 / 17 (PacBio) and 4 / 16 (ONT) of
+  the experimentally validated novel isoforms, all for the `RTS_stage` flag; PanIsoGuard
+  discards none.
+- [benchmark/chain_support](benchmark/chain_support): `sweep_min_full_reads.py`, the whole-chain
+  read threshold from 2 to 10 (no genuine lift lost in simulation, false lifts 6 → 3; the share of
+  real-data recombinant decoys accepted 46 % → 17 %). [benchmark/caller_filters](benchmark/caller_filters):
+  SQANTI3's ML filter trained on the simulated truth (2-fold CV; only TALON has the ≥ 250 false
+  isoforms it requires) P 0.740 / R 0.518 / AUPRC 0.737 against PanIsoGuard 0.716 / 0.709 /
+  0.629, the supervised ceiling of SQANTI3's features on a permissive caller.
+- **New: [benchmark/caller_filters](benchmark/caller_filters).** Three post-caller filters on the
+  same output (none / SQANTI3 rules / PanIsoGuard + BAM), five callers, no short reads: SQANTI3's
+  rules filter adds no precision to four of the five callers and costs 10–13 % of their genuine
+  isoforms; PanIsoGuard raises precision on every caller (FLAIR 0.839 → 0.993 at recall 0.75,
+  TALON 0.396 → 0.716 at 0.71, strict callers +0.01–0.02). Each caller's own knob against it:
+  Bambu's NDR buys precision faster at a steep recall price (0.82 at 0.58 vs PanIsoGuard 0.76 at
+  0.95 on NDR 0.5); on TALON's unfiltered output PanIsoGuard (0.353) is below TALON's own filter
+  (0.396) and stacks on it (0.716). A measured runtime table replaces the README estimates
+  (0.5 s to 5.9 min per genome-wide run, ≤ 0.6 GB).
+
 ## [0.0.7] - 2026-10-18
 
 ### Changed

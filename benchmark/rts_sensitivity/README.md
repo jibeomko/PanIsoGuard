@@ -28,7 +28,9 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   the junction, so in a simulation every flag is a false sign). LRGASP adds the one real-data
   measurement: `RTS_stage` is TRUE on 12–18 % of the experimentally validated isoforms IsoQuant
   called, and the four validated novel isoforms that carry it (MTHFS, CENPK, USF1, RND2) are the
-  ones the policy keeps, and all four are carried by ≥ 3 reads in the other platform's
+  ones the policy keeps (SQANTI3's own default rules filter discards them: 2 / 17 PacBio and
+  4 / 16 ONT validated novel isoforms, [../lrgasp_wtc11](../lrgasp_wtc11)), and all four are
+  carried by ≥ 3 reads in the other platform's
   library too (CENPK 4 / 16, MTHFS 49 / 57, RND2 38 / 76, USF1 7 / 1 PacBio / ONT reads; USF1
   is the one with a single PacBio read).
 - **The artifact side is still unmeasured.** [../lrgasp_wtc11](../lrgasp_wtc11)
@@ -54,7 +56,7 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   confident set keeps the flagged lifts (about one `NOVEL_PROBABLE` in six on real Iso-Seq);
   under "hold" they go to review and the validated flagged isoforms go with them. Whichever
   policy is the default, the information is not lost: the reason string keeps the sign, so the
-  other policy is one filter on `;rt_switch_sign` away, and a paper table can report both. The
+  other policy is one filter on `;rt_switch_sign` away, and a results table can report both. The
   intra-priming sign still holds (no real-data measurement either way, and thousands of
   chain-supported isoforms per sample).
 

@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
-  "generated_utc": "2026-10-18T02:45:31Z",
+  "generated_utc": "2026-10-19T12:17:41Z",
   "metrics": {
     "bambu": {
       "n_genuine": 409,
@@ -574,6 +574,332 @@
           "genuine_novel:UNRESOLVED->UNCONFIRMED": 4
         }
       }
+    },
+    "min_full_reads_sweep": {
+      "callers": {
+        "flair": {
+          "nosr": {
+            "10": {
+              "FP": 3,
+              "TP": 546,
+              "auprc": 0.954,
+              "coverage": 0.631,
+              "prec": 0.995,
+              "rec": 0.748,
+              "selective_risk": 0.005
+            },
+            "2": {
+              "FP": 6,
+              "TP": 546,
+              "auprc": 0.95,
+              "coverage": 0.634,
+              "prec": 0.989,
+              "rec": 0.748,
+              "selective_risk": 0.011
+            },
+            "3": {
+              "FP": 4,
+              "TP": 546,
+              "auprc": 0.953,
+              "coverage": 0.632,
+              "prec": 0.993,
+              "rec": 0.748,
+              "selective_risk": 0.007
+            },
+            "5": {
+              "FP": 3,
+              "TP": 546,
+              "auprc": 0.954,
+              "coverage": 0.631,
+              "prec": 0.995,
+              "rec": 0.748,
+              "selective_risk": 0.005
+            }
+          },
+          "sr1M": {
+            "10": {
+              "FP": 4,
+              "TP": 544,
+              "auprc": 0.974,
+              "coverage": 0.734,
+              "prec": 0.993,
+              "rec": 0.745,
+              "selective_risk": 0.019
+            },
+            "2": {
+              "FP": 5,
+              "TP": 544,
+              "auprc": 0.974,
+              "coverage": 0.736,
+              "prec": 0.991,
+              "rec": 0.745,
+              "selective_risk": 0.02
+            },
+            "3": {
+              "FP": 4,
+              "TP": 544,
+              "auprc": 0.974,
+              "coverage": 0.734,
+              "prec": 0.993,
+              "rec": 0.745,
+              "selective_risk": 0.019
+            },
+            "5": {
+              "FP": 4,
+              "TP": 544,
+              "auprc": 0.974,
+              "coverage": 0.734,
+              "prec": 0.993,
+              "rec": 0.745,
+              "selective_risk": 0.019
+            }
+          }
+        },
+        "isoquant": {
+          "nosr": {
+            "10": {
+              "FP": 3,
+              "TP": 430,
+              "auprc": 0.99,
+              "coverage": 0.701,
+              "prec": 0.993,
+              "rec": 0.708,
+              "selective_risk": 0.007
+            },
+            "2": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.988,
+              "coverage": 0.702,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.009
+            },
+            "3": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.988,
+              "coverage": 0.702,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.009
+            },
+            "5": {
+              "FP": 3,
+              "TP": 430,
+              "auprc": 0.99,
+              "coverage": 0.701,
+              "prec": 0.993,
+              "rec": 0.708,
+              "selective_risk": 0.007
+            }
+          },
+          "sr1M": {
+            "10": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.987,
+              "coverage": 0.71,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.014
+            },
+            "2": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.987,
+              "coverage": 0.71,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.014
+            },
+            "3": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.987,
+              "coverage": 0.71,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.014
+            },
+            "5": {
+              "FP": 4,
+              "TP": 430,
+              "auprc": 0.987,
+              "coverage": 0.71,
+              "prec": 0.991,
+              "rec": 0.708,
+              "selective_risk": 0.014
+            }
+          }
+        }
+      },
+      "decoys": {
+        "hg03516_kinnex": {
+          "10": {
+            "all": {
+              "lifted": 677,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 361,
+              "n": 2106
+            }
+          },
+          "2": {
+            "all": {
+              "lifted": 2829,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 1154,
+              "n": 2106
+            }
+          },
+          "3": {
+            "all": {
+              "lifted": 1996,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 976,
+              "n": 2106
+            }
+          },
+          "5": {
+            "all": {
+              "lifted": 1303,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 668,
+              "n": 2106
+            }
+          }
+        },
+        "lrgasp_pacbio": {
+          "10": {
+            "all": {
+              "lifted": 1255,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 724,
+              "n": 4323
+            }
+          },
+          "2": {
+            "all": {
+              "lifted": 4569,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 2158,
+              "n": 4323
+            }
+          },
+          "3": {
+            "all": {
+              "lifted": 3415,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 1872,
+              "n": 4323
+            }
+          },
+          "5": {
+            "all": {
+              "lifted": 2343,
+              "n": 139003
+            },
+            "both_parents_ge3": {
+              "lifted": 1335,
+              "n": 4323
+            }
+          }
+        },
+        "sqsim_reduced": {
+          "10": {
+            "all": {
+              "lifted": 35,
+              "n": 3045
+            },
+            "both_parents_ge3": {
+              "lifted": 3,
+              "n": 29
+            },
+            "false": {
+              "lifted": 4,
+              "n": 3014
+            },
+            "genuine": {
+              "lifted": 31,
+              "n": 31
+            }
+          },
+          "2": {
+            "all": {
+              "lifted": 35,
+              "n": 3045
+            },
+            "both_parents_ge3": {
+              "lifted": 3,
+              "n": 29
+            },
+            "false": {
+              "lifted": 4,
+              "n": 3014
+            },
+            "genuine": {
+              "lifted": 31,
+              "n": 31
+            }
+          },
+          "3": {
+            "all": {
+              "lifted": 35,
+              "n": 3045
+            },
+            "both_parents_ge3": {
+              "lifted": 3,
+              "n": 29
+            },
+            "false": {
+              "lifted": 4,
+              "n": 3014
+            },
+            "genuine": {
+              "lifted": 31,
+              "n": 31
+            }
+          },
+          "5": {
+            "all": {
+              "lifted": 35,
+              "n": 3045
+            },
+            "both_parents_ge3": {
+              "lifted": 3,
+              "n": 29
+            },
+            "false": {
+              "lifted": 4,
+              "n": 3014
+            },
+            "genuine": {
+              "lifted": 31,
+              "n": 31
+            }
+          }
+        }
+      },
+      "thresholds": [
+        2,
+        3,
+        5,
+        10
+      ]
     },
     "sirv_set4": {
       "engine_flair": {

@@ -1,0 +1,164 @@
+{
+  "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/pig_lrgasp --emit-metrics ...",
+  "data_provenance": "REAL public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF (benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, with and without the Illumina SJ.tab. No private data.",
+  "generated_utc": "2026-10-22T13:07:26Z",
+  "metrics": {
+    "ont_nosr": {
+      "likely": {
+        "class_counts": {
+          "UNRESOLVED": 4
+        },
+        "novel_targets": 4,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 0,
+        "sqanti3_rules_keeps": 2,
+        "whole_chain_reads_ge3": 0
+      },
+      "supported": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 25,
+          "UNCONFIRMED": 1,
+          "UNRESOLVED": 38
+        },
+        "novel_targets": 64,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 25,
+        "sqanti3_rules_keeps": 48,
+        "whole_chain_reads_ge3": 26
+      },
+      "unsupported": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 3,
+          "UNRESOLVED": 23
+        },
+        "novel_targets": 26,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 3,
+        "sqanti3_rules_keeps": 18,
+        "whole_chain_reads_ge3": 3
+      }
+    },
+    "ont_sr": {
+      "likely": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 1,
+          "UNCONFIRMED": 2,
+          "UNRESOLVED": 1
+        },
+        "novel_targets": 4,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 1,
+        "sqanti3_rules_keeps": 2,
+        "whole_chain_reads_ge3": 0
+      },
+      "supported": {
+        "class_counts": {
+          "ARTIFACT": 6,
+          "NOVEL_CONFIRMED": 13,
+          "NOVEL_PROBABLE": 10,
+          "UNCONFIRMED": 18,
+          "UNRESOLVED": 17
+        },
+        "novel_targets": 64,
+        "panisoguard_artifact": 6,
+        "panisoguard_confident": 23,
+        "sqanti3_rules_keeps": 48,
+        "whole_chain_reads_ge3": 26
+      },
+      "unsupported": {
+        "class_counts": {
+          "ARTIFACT": 7,
+          "UNCONFIRMED": 9,
+          "UNRESOLVED": 10
+        },
+        "novel_targets": 26,
+        "panisoguard_artifact": 7,
+        "panisoguard_confident": 0,
+        "sqanti3_rules_keeps": 18,
+        "whole_chain_reads_ge3": 3
+      }
+    },
+    "pb_nosr": {
+      "likely": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 1,
+          "UNRESOLVED": 3
+        },
+        "novel_targets": 4,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 1,
+        "sqanti3_rules_keeps": 2,
+        "whole_chain_reads_ge3": 1
+      },
+      "supported": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 27,
+          "UNCONFIRMED": 1,
+          "UNRESOLVED": 36
+        },
+        "novel_targets": 64,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 27,
+        "sqanti3_rules_keeps": 48,
+        "whole_chain_reads_ge3": 28
+      },
+      "unsupported": {
+        "class_counts": {
+          "UNRESOLVED": 26
+        },
+        "novel_targets": 26,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 0,
+        "sqanti3_rules_keeps": 18,
+        "whole_chain_reads_ge3": 0
+      }
+    },
+    "pb_sr": {
+      "likely": {
+        "class_counts": {
+          "NOVEL_PROBABLE": 1,
+          "UNCONFIRMED": 2,
+          "UNRESOLVED": 1
+        },
+        "novel_targets": 4,
+        "panisoguard_artifact": 0,
+        "panisoguard_confident": 1,
+        "sqanti3_rules_keeps": 2,
+        "whole_chain_reads_ge3": 1
+      },
+      "supported": {
+        "class_counts": {
+          "ARTIFACT": 7,
+          "NOVEL_CONFIRMED": 13,
+          "NOVEL_PROBABLE": 11,
+          "UNCONFIRMED": 17,
+          "UNRESOLVED": 16
+        },
+        "novel_targets": 64,
+        "panisoguard_artifact": 7,
+        "panisoguard_confident": 24,
+        "sqanti3_rules_keeps": 48,
+        "whole_chain_reads_ge3": 28
+      },
+      "unsupported": {
+        "class_counts": {
+          "ARTIFACT": 7,
+          "UNCONFIRMED": 9,
+          "UNRESOLVED": 10
+        },
+        "novel_targets": 26,
+        "panisoguard_artifact": 7,
+        "panisoguard_confident": 0,
+        "sqanti3_rules_keeps": 18,
+        "whole_chain_reads_ge3": 0
+      }
+    }
+  },
+  "notes": "Targets novel against GENCODE v49 (SQANTI3 NIC/NNC, not KNOWN) by amplicon validation: supported (positives), unsupported (negatives), likely. Independent of any caller's reconstruction: the chains are adjudicated as would-be isoforms, so the negatives test whether whole-chain reads or short reads would make PanIsoGuard confirm a chain the amplicons did not support.",
+  "protocol": "lrgasp_targets",
+  "ruleset_version": "builtin-0.0.5",
+  "scope": "lrgasp_wtc11_validation_targets_as_would_be_isoforms",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.7"
+}
