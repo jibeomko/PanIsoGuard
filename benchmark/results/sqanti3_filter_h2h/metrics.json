@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/sqanti3_filter_h2h/run.sh (after benchmark/sqanti_sim/run.sh); benchmark/sqanti3_filter_h2h/emit_metrics.py <work> <h2h> --emit-metrics ...; bootstrap CIs: 2000 resamples of the non-FSM isoforms, seed 1",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 truth set of benchmark/sqanti_sim (FLAIR + SQANTI3 6.0.1); non-FSM multi-exon isoforms, 730 genuine / 140 false. Short reads: none, the oracle truth SJ.tab, or wgsim 2x100 pairs (250k/1M/4M) from the simulated transcripts weighted by long-read counts -> STAR 2.7.4a 2-pass. Public/simulated.",
-  "generated_utc": "2026-10-18T00:49:49Z",
+  "generated_utc": "2026-10-19T12:17:43Z",
   "metrics": {
     "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
       "PIG": [

@@ -20,7 +20,7 @@ STAR="${STAR:-$CONDA/star274/bin/STAR}"   # must be the STAR version that built 
 ISOQUANT="${ISOQUANT:-$CONDA/isoquant/bin/isoquant}"
 SQ3BIN="${SQ3BIN:-$CONDA/sqanti3/bin}"
 export PATH="$SQ3BIN:$PATH"
-ALL="targets align_pb align_ont star isoquant_pb isoquant_ont sqanti_pb sqanti_ont adjudicate score"
+ALL="targets align_pb align_ont star isoquant_pb isoquant_ont sqanti_pb sqanti_ont sqanti_filter adjudicate score"
 mkdir -p "$WORK"/{pb,ont,star,targets}; cd "$WORK"
 log() { echo "[$(date '+%F %T')] $*"; }
 
@@ -68,6 +68,11 @@ sqanti() {  # <isoforms.gtf> <outdir>
 }
 sqanti_pb()  { sqanti pb/isoquant/iq/iq.transcript_models.gtf pb/sq; }
 sqanti_ont() { sqanti ont/isoquant/iq/iq.transcript_models.gtf ont/sq; }
+sqanti_filter() {  # SQANTI3's default rules filter on the same classifications, for the comparison in score_lrgasp.py
+  for p in pb ont; do
+    [ -s $p/sq_rules/rules_RulesFilter_classification.txt ] || sqanti3_filter.py rules --sqanti_class $p/sq/iq_classification.txt -o rules -d $p/sq_rules --skip_report > $p/sq_rules.log 2>&1
+  done
+}
 adjudicate() {
   for p in pb ont; do
     preset=$([ $p = pb ] && echo hifi || echo ont)

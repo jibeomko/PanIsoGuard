@@ -7,7 +7,7 @@
 #  * Caller rules are independent, so `snakemake --cores N` schedules flair /
 #    isoquant / bambu (and across samples) concurrently.
 #  * Each tool runs in its own conda env (envs/*.yaml) via --use-conda, matching
-#    the manuscript pipeline's pattern; no tool needs to be on the base PATH.
+#    the benchmark pipeline's pattern; no tool needs to be on the base PATH.
 #
 # Caller invocations are version-sensitive: treat the flair/isoquant/bambu/sqanti3
 # rules as templates and adjust flags to your installed versions. The align,

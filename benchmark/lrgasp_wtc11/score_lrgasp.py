@@ -58,6 +58,9 @@ def main():
                 for iso, k in ours.items(): by_cs[(k[0], k[1])].append((iso, k[2]))
                 ours_cache[p] = by_cs
             by_cs = ours_cache[p]
+            # SQANTI3's default rules filter on the same classification (run.sh stage sqanti_filter), if present
+            rules_path = f"{W}/{p}/sq_rules/rules_RulesFilter_classification.txt"
+            sq_rules = {r["isoform"]: r["filter_result"] for r in csv.DictReader(open(rules_path), delimiter="\t")} if os.path.exists(rules_path) else None
             exact = {}; contain = {}
             for t in targets:
                 chrom, strand, chain = t["_key"]; n = len(chain); ex_l = []; co_l = []
@@ -82,10 +85,11 @@ def main():
                     else:
                         r = adj[isos[0]]; status = "called"; cls = r["confidence_class"]; reason = r["verdict_reason"]
                         cat = r["structural_category"]; rs = rts.get(isos[0])
+                    sqf = (sq_rules.get(isos[0], "") if (sq_rules and isos) else "")
                     detail.append({"set": setname, "platform": p, "short_reads": setting, "target": tg, "transcript": t["transcript"],
                                    "lrgasp_type": t["type"], "validation": t["category"], "detail": t.get("detail", ""), "status": status,
                                    "isoforms": isos[:3], "n_containing": len(contain[tg]), "sqanti3_category": cat, "class": cls,
-                                   "reason": reason, "rts_stage": rs, "pbPlatformCount": t.get("pbPlatformCount", ""),
+                                   "reason": reason, "rts_stage": rs, "sqanti3_rules_filter": sqf, "pbPlatformCount": t.get("pbPlatformCount", ""),
                                    "ontPlatformCount": t.get("ontPlatformCount", ""), "mediaCpm": t.get("mediaCpm", "")})
                 rows += detail
                 summ = {}
@@ -100,11 +104,20 @@ def main():
                                              for ty in sorted({d["lrgasp_type"] for d in sel})}}
                 called_sup = [d for d in detail if d["validation"] == "supported" and d["status"] == "called"]
                 summ["rts_sign_on_validated_called"] = {"n": len(called_sup), "rts_stage_true": sum(d["rts_stage"] is True for d in called_sup)}
+                if sq_rules:
+                    # the same validated isoforms through SQANTI3's default rules filter (no coverage column: perc_A + RTS rules)
+                    novel_sup = [d for d in called_sup if d["sqanti3_category"] in ("novel_in_catalog", "novel_not_in_catalog") and d["class"] != "KNOWN"]
+                    summ["sqanti3_rules_filter_on_validated_called"] = {
+                        "n": len(called_sup), "discarded": sum(d["sqanti3_rules_filter"] == "Artifact" for d in called_sup),
+                        "novel_n": len(novel_sup), "novel_discarded": sum(d["sqanti3_rules_filter"] == "Artifact" for d in novel_sup),
+                        "novel_discarded_targets": sorted(d["target"] for d in novel_sup if d["sqanti3_rules_filter"] == "Artifact"),
+                        "panisoguard_artifact_on_the_same": sum(d["class"] == "ARTIFACT" for d in called_sup)}
                 res[f"{setname}_{p}_{setting}"] = summ
                 print(f"== {setname} {p} {setting}: " + "; ".join(
                     f"{v}: {s['called_exact']}/{s['n']} called, confident {s['confident']}, artifact {s['artifact']}, {s['class_counts']}"
                     for v, s in summ.items() if v in ("supported", "likely", "unsupported")) +
-                    f"; RTS on validated called {summ['rts_sign_on_validated_called']['rts_stage_true']}/{summ['rts_sign_on_validated_called']['n']}")
+                    f"; RTS on validated called {summ['rts_sign_on_validated_called']['rts_stage_true']}/{summ['rts_sign_on_validated_called']['n']}"
+                    + (f"; SQANTI3 rules discards {summ['sqanti3_rules_filter_on_validated_called']['novel_discarded']}/{summ['sqanti3_rules_filter_on_validated_called']['novel_n']} validated novel ({', '.join(summ['sqanti3_rules_filter_on_validated_called']['novel_discarded_targets'])})" if "sqanti3_rules_filter_on_validated_called" in summ else ""))
     with open(f"{W}/targets/per_target_verdicts.tsv", "w") as o:
         w = csv.DictWriter(o, delimiter="\t", fieldnames=list(rows[0].keys())); w.writeheader()
         for d in rows: d["isoforms"] = ",".join(d["isoforms"]); w.writerow(d)

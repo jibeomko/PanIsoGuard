@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Write the toy locus used by every study note (notes/*.md).
+"""Write the toy locus of examples/worked_locus (README.md there).
 
 One gene (GENE_T, + strand) on a 1,700 bp contig `chrT`. All coordinates below are
 1-based inclusive, like GTF. The script writes the hand-designed inputs; build_toy.sh
 then runs STAR, SQANTI3 and samtools on them to produce the rest.
 
-    python3 make_toy.py          # run from notes/data/
+    python3 make_toy.py          # run from examples/worked_locus/data/
 """
 import random
 

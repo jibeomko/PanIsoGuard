@@ -1,0 +1,255 @@
+{
+  "command": "benchmark/tusco_negatives/score_tusco.py --tusco data/tusco_human.tsv --run LABEL=CLS,ADJ,RULES ... --emit-metrics",
+  "data_provenance": "TUSCO human universal single-isoform genes (46; Pardo-Palacios et al. 2026, list from ConesaLab/SQANTI3) applied to IsoQuant isoforms on LRGASP WTC11 PacBio / ONT cDNA (ENCODE) and HPRC R2 HG03516 / HG02717 Kinnex Iso-Seq; PanIsoGuard runs of benchmark/lrgasp_wtc11 (adj_sr / adj_nosr) and benchmark/refbias_3way (arm C, wgs); SQANTI3 6.0.1 rules filter on the same classifications. Public data.",
+  "generated_utc": "2026-10-19T12:15:55Z",
+  "metrics": {
+    "n_tusco_genes": 46,
+    "runs": {
+      "hg02717_kinnex": {
+        "by_category": {
+          "antisense": 1,
+          "full-splice_match": 19,
+          "fusion": 6,
+          "genic": 3,
+          "incomplete-splice_match": 1,
+          "novel_in_catalog": 1,
+          "novel_not_in_catalog": 6
+        },
+        "isoforms_in_tusco_genes": 37,
+        "novel": 7,
+        "panisoguard_artifact": 0,
+        "panisoguard_classes": {
+          "NOVEL_PROBABLE": 3,
+          "UNCONFIRMED": 1,
+          "UNRESOLVED": 3
+        },
+        "panisoguard_confident": 3,
+        "per_isoform": [
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000170385.10",
+            "isoform": "transcript37948.chr1.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "NOVEL_PROBABLE",
+            "gene": "ENSG00000135045.7",
+            "isoform": "transcript5492.chr9.nnic",
+            "reason": "chain_support",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000136897.8",
+            "isoform": "transcript8190.chr9.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "NOVEL_PROBABLE",
+            "gene": "ENSG00000136897.8",
+            "isoform": "transcript8196.chr9.nnic",
+            "reason": "chain_support",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript10202.chr11.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNCONFIRMED",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript10203.chr11.nnic",
+            "reason": "chain_support_with_noncanonical",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_in_catalog",
+            "class": "NOVEL_PROBABLE",
+            "gene": "ENSG00000105617.4",
+            "isoform": "transcript25317.chr19.nic",
+            "reason": "chain_support",
+            "sqanti3_rules": "Isoform"
+          }
+        ],
+        "sqanti3_rules_keeps": 5
+      },
+      "hg03516_kinnex": {
+        "by_category": {
+          "full-splice_match": 17,
+          "fusion": 1,
+          "genic": 6,
+          "novel_not_in_catalog": 2
+        },
+        "isoforms_in_tusco_genes": 26,
+        "novel": 2,
+        "panisoguard_artifact": 0,
+        "panisoguard_classes": {
+          "UNCONFIRMED": 1,
+          "UNRESOLVED": 1
+        },
+        "panisoguard_confident": 0,
+        "per_isoform": [
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000135045.7",
+            "isoform": "transcript4605.chr9.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNCONFIRMED",
+            "gene": "ENSG00000182154.8",
+            "isoform": "transcript11844.chr9.nnic",
+            "reason": "mapping_without_short_reads",
+            "sqanti3_rules": "Isoform"
+          }
+        ],
+        "sqanti3_rules_keeps": 2
+      },
+      "lrgasp_ont_sr": {
+        "by_category": {
+          "full-splice_match": 24,
+          "genic": 1
+        },
+        "isoforms_in_tusco_genes": 25,
+        "novel": 0,
+        "panisoguard_artifact": 0,
+        "panisoguard_classes": {},
+        "panisoguard_confident": 0,
+        "per_isoform": [],
+        "sqanti3_rules_keeps": 0
+      },
+      "lrgasp_pb_nosr": {
+        "by_category": {
+          "full-splice_match": 40,
+          "fusion": 2,
+          "genic": 2,
+          "novel_in_catalog": 1,
+          "novel_not_in_catalog": 3
+        },
+        "isoforms_in_tusco_genes": 48,
+        "novel": 4,
+        "panisoguard_artifact": 0,
+        "panisoguard_classes": {
+          "UNCONFIRMED": 2,
+          "UNRESOLVED": 2
+        },
+        "panisoguard_confident": 0,
+        "per_isoform": [
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000155858.6",
+            "isoform": "transcript14829.chr5.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000135045.7",
+            "isoform": "transcript4657.chr9.nnic",
+            "reason": "no_short_reads",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNCONFIRMED",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript9141.chr11.nnic",
+            "reason": "chain_support_with_noncanonical",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "UNCONFIRMED",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript9142.chr11.nnic",
+            "reason": "chain_support_with_noncanonical",
+            "sqanti3_rules": "Artifact"
+          }
+        ],
+        "sqanti3_rules_keeps": 1
+      },
+      "lrgasp_pb_sr": {
+        "by_category": {
+          "full-splice_match": 40,
+          "fusion": 2,
+          "genic": 2,
+          "novel_in_catalog": 1,
+          "novel_not_in_catalog": 3
+        },
+        "isoforms_in_tusco_genes": 48,
+        "novel": 4,
+        "panisoguard_artifact": 3,
+        "panisoguard_classes": {
+          "ARTIFACT": 3,
+          "UNRESOLVED": 1
+        },
+        "panisoguard_confident": 0,
+        "per_isoform": [
+          {
+            "category": "novel_not_in_catalog",
+            "class": "ARTIFACT",
+            "gene": "ENSG00000155858.6",
+            "isoform": "transcript14829.chr5.nnic",
+            "reason": "unsupported_noncanonical",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_in_catalog",
+            "class": "UNRESOLVED",
+            "gene": "ENSG00000135045.7",
+            "isoform": "transcript4657.chr9.nnic",
+            "reason": "no_novel_junction",
+            "sqanti3_rules": "Isoform"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "ARTIFACT",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript9141.chr11.nnic",
+            "reason": "unsupported_noncanonical",
+            "sqanti3_rules": "Artifact"
+          },
+          {
+            "category": "novel_not_in_catalog",
+            "class": "ARTIFACT",
+            "gene": "ENSG00000185085.2",
+            "isoform": "transcript9142.chr11.nnic",
+            "reason": "unsupported_noncanonical",
+            "sqanti3_rules": "Artifact"
+          }
+        ],
+        "sqanti3_rules_keeps": 1
+      }
+    },
+    "total_without_short_reads": {
+      "novel": 13,
+      "panisoguard_artifact": 0,
+      "panisoguard_confident": 3,
+      "sqanti3_rules_keeps": 8,
+      "sqanti3_rules_n": 13
+    }
+  },
+  "notes": "A novel isoform in a TUSCO gene is a presumed false positive (TUSCO's own FP definition), so this is the only real-data precision check available; the set is small (46 genes), and a TUSCO gene can still express an unannotated isoform, so a confident call here is suspicious, not proven wrong.",
+  "protocol": "tusco_negatives",
+  "ruleset_version": "builtin-0.0.5",
+  "scope": "tusco_human_universal_46_genes_real_data",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.7"
+}

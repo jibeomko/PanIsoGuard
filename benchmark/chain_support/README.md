@@ -77,6 +77,27 @@ mapping or non-canonical signs from the simulated reads. So on SIRV the rule lif
 either way (recorded as `sirv_set4` in the envelope); the evidence it rests on is the
 read-level table above.
 
+## Why three reads
+
+`sweep_min_full_reads.py` re-runs FLAIR and IsoQuant with `chain_min_full_reads` = 2, 3, 5, 10 and
+re-reads the decoy tables at the same thresholds (envelope `min_full_reads_sweep`):
+
+| threshold | FLAIR, no short reads: TP / FP (precision) | IsoQuant, no short reads: TP / FP | decoys accepted, HG03516 (both parents ≥ 3) | LRGASP PacBio |
+|---:|---:|---:|---:|---:|
+| 2 | 546 / 6 (0.989) | 430 / 4 (0.991) | 1,154 / 2,106 (55 %) | 2,158 / 4,323 (50 %) |
+| 3 | 546 / 4 (0.993) | 430 / 4 (0.991) | 976 (46 %) | 1,872 (43 %) |
+| 5 | 546 / 3 (0.995) | 430 / 3 (0.993) | 668 (32 %) | 1,335 (31 %) |
+| 10 | 546 / 3 (0.995) | 430 / 3 (0.995) | 361 (17 %) | 724 (17 %) |
+
+On the simulated set the threshold is almost irrelevant between 2 and 10: no genuine lift is
+lost (the genuine chains carry a median of 44 reads) and the false ones fall from 6 to 3. The
+SQANTI-SIM decoys do not move either (the 4 wrong combinations that reach 2 reads also reach
+10). On real data the share of recombinant chains the lift would accept halves from 3 to 5
+reads and halves again at 10, but the cross-library analysis shows those chains behave like
+real, unannotated isoforms, so a higher threshold buys cleanliness against a combinatorial
+space the annotation does not describe, at a recall cost the simulation cannot price. The
+default stays 3; `[axis_chain] min_full_reads` is the knob.
+
 ## Decoy chains: how often does the lift fire on a chain the annotation does not know?
 
 `panisoguard decoys` recombines each gene's annotated transcripts: the 5′ introns of one joined

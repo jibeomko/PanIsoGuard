@@ -1,0 +1,296 @@
+{
+  "command": "bash benchmark/sqanti_sim_heldout/run.sh <chrom>; benchmark/sqanti_sim_heldout/emit_heldout.py CHROM=ROOT ... --emit-metrics ...",
+  "data_provenance": "SQANTI-SIM on GENCODE v49, one chromosome at a time (chr20, chr19), the chr22 protocol of benchmark/sqanti_sim + benchmark/sqanti3_filter_h2h repeated unchanged (design equal -nt 1500, NIC 300, NNC 300, ISM 200, 100,000 PBSIM3 reads, seed 1; FLAIR; SQANTI3 6.0.1; short reads none or 1 M wgsim pairs -> STAR 2-pass). Public/simulated.",
+  "generated_utc": "2026-10-22T12:44:16Z",
+  "metrics": {
+    "chr19": {
+      "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
+        "PIG": [
+          -0.097,
+          -0.059
+        ],
+        "PIG+bam": [
+          0.015,
+          0.043
+        ]
+      },
+      "bootstrap_auprc_diff_vs_allSJ3_95ci": {
+        "sr_1000000": {
+          "PIG": [
+            -0.012,
+            0.005
+          ],
+          "PIG+bam": [
+            -0.008,
+            0.007
+          ]
+        }
+      },
+      "n_false": 119,
+      "n_genuine": 770,
+      "n_non_fsm": 889,
+      "none": {
+        "PIG": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.85,
+          "coverage": 0.0,
+          "f1": null,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": null,
+          "spec": 1.0
+        },
+        "PIG+bam": {
+          "FP": 8,
+          "TP": 582,
+          "auprc": 0.957,
+          "coverage": 0.664,
+          "f1": 0.856,
+          "prec": 0.986,
+          "rec": 0.756,
+          "selective_risk": 0.014,
+          "spec": 0.933
+        },
+        "SQ3ml": {
+          "FP": 11,
+          "TP": 184,
+          "auprc": 0.913,
+          "coverage": 1.0,
+          "f1": 0.381,
+          "prec": 0.944,
+          "rec": 0.239,
+          "selective_risk": 0.672,
+          "spec": 0.908
+        },
+        "SQ3rules": {
+          "FP": 44,
+          "TP": 665,
+          "auprc": 0.928,
+          "coverage": 1.0,
+          "f1": 0.899,
+          "prec": 0.938,
+          "rec": 0.864,
+          "selective_risk": 0.168,
+          "spec": 0.63
+        }
+      },
+      "sr_1000000": {
+        "PIG": {
+          "FP": 6,
+          "TP": 382,
+          "auprc": 0.974,
+          "coverage": 0.507,
+          "f1": 0.66,
+          "prec": 0.985,
+          "rec": 0.496,
+          "selective_risk": 0.016,
+          "spec": 0.95
+        },
+        "PIG+bam": {
+          "FP": 7,
+          "TP": 574,
+          "auprc": 0.976,
+          "coverage": 0.729,
+          "f1": 0.85,
+          "prec": 0.988,
+          "rec": 0.745,
+          "selective_risk": 0.012,
+          "spec": 0.941
+        },
+        "SQ3ml": {
+          "FP": 3,
+          "TP": 226,
+          "auprc": 0.977,
+          "coverage": 1.0,
+          "f1": 0.452,
+          "prec": 0.987,
+          "rec": 0.294,
+          "selective_risk": 0.615,
+          "spec": 0.975
+        },
+        "SQ3rules": {
+          "FP": 44,
+          "TP": 667,
+          "auprc": 0.928,
+          "coverage": 1.0,
+          "f1": 0.901,
+          "prec": 0.938,
+          "rec": 0.866,
+          "selective_risk": 0.165,
+          "spec": 0.63
+        },
+        "SQ3strict": {
+          "FP": 13,
+          "TP": 648,
+          "auprc": 0.962,
+          "coverage": 1.0,
+          "f1": 0.906,
+          "prec": 0.98,
+          "rec": 0.842,
+          "selective_risk": 0.152,
+          "spec": 0.891
+        },
+        "allSJ3": {
+          "FP": 15,
+          "TP": 747,
+          "auprc": 0.977,
+          "coverage": 1.0,
+          "f1": 0.975,
+          "prec": 0.98,
+          "rec": 0.97,
+          "selective_risk": 0.043,
+          "spec": 0.874
+        }
+      }
+    },
+    "chr20": {
+      "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
+        "PIG": [
+          -0.108,
+          -0.069
+        ],
+        "PIG+bam": [
+          0.003,
+          0.03
+        ]
+      },
+      "bootstrap_auprc_diff_vs_allSJ3_95ci": {
+        "sr_1000000": {
+          "PIG": [
+            -0.004,
+            0.012
+          ],
+          "PIG+bam": [
+            -0.003,
+            0.012
+          ]
+        }
+      },
+      "n_false": 108,
+      "n_genuine": 734,
+      "n_non_fsm": 842,
+      "none": {
+        "PIG": {
+          "FP": 0,
+          "TP": 0,
+          "auprc": 0.858,
+          "coverage": 0.0,
+          "f1": null,
+          "prec": null,
+          "rec": 0.0,
+          "selective_risk": null,
+          "spec": 1.0
+        },
+        "PIG+bam": {
+          "FP": 9,
+          "TP": 587,
+          "auprc": 0.962,
+          "coverage": 0.708,
+          "f1": 0.883,
+          "prec": 0.985,
+          "rec": 0.8,
+          "selective_risk": 0.015,
+          "spec": 0.917
+        },
+        "SQ3ml": {
+          "FP": 20,
+          "TP": 226,
+          "auprc": 0.887,
+          "coverage": 1.0,
+          "f1": 0.461,
+          "prec": 0.919,
+          "rec": 0.308,
+          "selective_risk": 0.627,
+          "spec": 0.815
+        },
+        "SQ3rules": {
+          "FP": 31,
+          "TP": 653,
+          "auprc": 0.946,
+          "coverage": 1.0,
+          "f1": 0.921,
+          "prec": 0.955,
+          "rec": 0.89,
+          "selective_risk": 0.133,
+          "spec": 0.713
+        }
+      },
+      "sr_1000000": {
+        "PIG": {
+          "FP": 4,
+          "TP": 387,
+          "auprc": 0.978,
+          "coverage": 0.536,
+          "f1": 0.688,
+          "prec": 0.99,
+          "rec": 0.527,
+          "selective_risk": 0.009,
+          "spec": 0.963
+        },
+        "PIG+bam": {
+          "FP": 8,
+          "TP": 568,
+          "auprc": 0.978,
+          "coverage": 0.759,
+          "f1": 0.867,
+          "prec": 0.986,
+          "rec": 0.774,
+          "selective_risk": 0.013,
+          "spec": 0.926
+        },
+        "SQ3ml": {
+          "FP": 6,
+          "TP": 232,
+          "auprc": 0.962,
+          "coverage": 1.0,
+          "f1": 0.477,
+          "prec": 0.975,
+          "rec": 0.316,
+          "selective_risk": 0.603,
+          "spec": 0.944
+        },
+        "SQ3rules": {
+          "FP": 31,
+          "TP": 653,
+          "auprc": 0.946,
+          "coverage": 1.0,
+          "f1": 0.921,
+          "prec": 0.955,
+          "rec": 0.89,
+          "selective_risk": 0.133,
+          "spec": 0.713
+        },
+        "SQ3strict": {
+          "FP": 10,
+          "TP": 621,
+          "auprc": 0.967,
+          "coverage": 1.0,
+          "f1": 0.91,
+          "prec": 0.984,
+          "rec": 0.846,
+          "selective_risk": 0.146,
+          "spec": 0.907
+        },
+        "allSJ3": {
+          "FP": 15,
+          "TP": 701,
+          "auprc": 0.974,
+          "coverage": 1.0,
+          "f1": 0.967,
+          "prec": 0.979,
+          "rec": 0.955,
+          "selective_risk": 0.057,
+          "spec": 0.861
+        }
+      }
+    }
+  },
+  "notes": "Held-out test of the thresholds set on chr22 (chain_min_full_reads 3, mapping gates, support axis): nothing was re-tuned. Per chromosome and short-read setting, non-FSM genuine-vs-false metrics per method as in sqanti3_filter_h2h, with the same bootstrap CIs.",
+  "protocol": "sqanti_sim_heldout",
+  "ruleset_version": "builtin-0.0.5",
+  "scope": "gencode_v49_heldout_chromosomes_sqanti_sim",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.7"
+}

@@ -106,9 +106,8 @@ endif()
 install(TARGETS panisoguard RUNTIME DESTINATION bin)
 # The bundled examples ship with the binary (so the bioconda package and the Docker image
 # carry them); `panisoguard example <name>` copies one into a working folder.
-install(DIRECTORY examples/tiny examples/multi_caller DESTINATION share/panisoguard/examples
+install(DIRECTORY examples/tiny examples/multi_caller examples/worked_locus DESTINATION share/panisoguard/examples
         USE_SOURCE_PERMISSIONS PATTERN "output" EXCLUDE)
-install(DIRECTORY notes/data DESTINATION share/panisoguard/notes USE_SOURCE_PERMISSIONS)
 
 # --- Tests -------------------------------------------------------------------
 if(PANISOGUARD_BUILD_TESTS)
@@ -185,11 +184,16 @@ if(PANISOGUARD_BUILD_TESTS)
       COMMAND ${Python3_EXECUTABLE}
               "${CMAKE_SOURCE_DIR}/benchmark/config_equivalence/ci_check.py"
               $<TARGET_FILE:panisoguard>)
-    # The study notes (notes/, Korean) quote verdicts on a toy locus; recompute them with the
-    # Python stdlib and compare, so a rule change cannot silently outdate the notes.
-    add_test(NAME integration_study_notes
+    # The worked locus (examples/worked_locus): every verdict recomputed with the Python stdlib
+    # and compared with the binary, and the 42-line rule replay against attribution.jsonl, so a
+    # rule change cannot silently outdate the example or the replay.
+    add_test(NAME integration_worked_locus
       COMMAND ${Python3_EXECUTABLE}
-              "${CMAKE_SOURCE_DIR}/notes/check_notes.py"
+              "${CMAKE_SOURCE_DIR}/examples/worked_locus/check_worked_locus.py"
+              $<TARGET_FILE:panisoguard>)
+    add_test(NAME integration_rules_replay
+      COMMAND ${Python3_EXECUTABLE}
+              "${CMAKE_SOURCE_DIR}/examples/worked_locus/rules_replay.py"
               $<TARGET_FILE:panisoguard>)
   else()
     message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")

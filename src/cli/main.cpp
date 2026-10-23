@@ -45,7 +45,7 @@ void print_usage() {
       "  ablate            Per-evidence-axis ablation (confidence-class changes)\n"
       "  combine           Integrate multiple callers' isoforms by intron-chain fingerprint\n"
       "  decoys            Per-dataset false-lift check of the whole-chain read support (recombined known chains)\n"
-      "  example           Copy a bundled example (tiny, multi_caller, notes-data) into a folder\n"
+      "  example           Copy a bundled example (tiny, multi_caller, worked_locus) into a folder\n"
       "  version           Print version, linked htslib, and compiled-in capabilities\n"
       "\n"
       "Options:\n"

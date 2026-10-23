@@ -35,7 +35,7 @@ snakemake --use-conda --cores 16 results/adjudicate/sample1.adjudicated.tsv   # 
 ```
 
 Each tool runs in its own conda env (`envs/*.yaml`) via `--use-conda`, so nothing
-needs to be on the base PATH (mirrors the manuscript pipeline's pattern).
+needs to be on the base PATH (mirrors the benchmark pipeline's pattern).
 
 ## Outputs (per sample)
 
