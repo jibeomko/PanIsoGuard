@@ -340,7 +340,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 
 | Command | What it does |
 |---------|---------|
-| `adjudicate` | gives each isoform a confidence class, the likely artifact cause, and the reasons (3 output files) |
+| `adjudicate` | gives each isoform a confidence class, the likely artifact cause, and the reasons (4 output files) |
 | `combine`    | matches several callers' isoforms by intron chain and writes which callers found each one |
 | `decoys`     | measures, on your own BAM, how often the whole-chain read support would lift a chain the annotation does not know (recombined known transcripts), as an upper bound on its false-lift rate |
 | `version`    | shows the version and the linked htslib |

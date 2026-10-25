@@ -58,7 +58,7 @@ User-facing subcommands, dispatched samtools-style from
 
 | Command | Source | Purpose |
 |---------|--------|---------|
-| `adjudicate` | [`cmd_adjudicate.cpp`](../src/cli/cmd_adjudicate.cpp) | classify novel isoforms → 3 output files |
+| `adjudicate` | [`cmd_adjudicate.cpp`](../src/cli/cmd_adjudicate.cpp) | classify novel isoforms → 4 output files |
 | `combine`    | [`cmd_combine.cpp`](../src/cli/cmd_combine.cpp) | integrate multiple callers by intron-chain fingerprint |
 | `decoys`     | [`cmd_decoys.cpp`](../src/cli/cmd_decoys.cpp) | per-dataset false-lift bound of the whole-chain read support |
 | `example`    | [`cmd_example.cpp`](../src/cli/cmd_example.cpp) | copy a bundled example into a working folder |
