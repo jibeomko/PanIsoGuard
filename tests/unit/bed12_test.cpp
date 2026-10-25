@@ -7,12 +7,12 @@
 
 using namespace panisoguard;
 
-TEST_CASE("BED12 decodes intron chain and FLAIR sample prefix", "[bed12]") {
+TEST_CASE("BED12 decodes the intron chain", "[bed12]") {
   const auto recs = read_bed12(tiny("mini.bed"));
   REQUIRE(recs.size() == 1);
 
   const Bed12Record& r = recs[0];
-  CHECK(r.id_prefix == "1-1");  // FLAIR running id, not a biological sample
+  CHECK(r.name == "1-1_ENST_T1_ENSG_G1");
   CHECK(r.chain.strand == Strand::kPlus);
   CHECK(r.chain.chrom == "chr1");
   REQUIRE(r.chain.introns == std::vector<Junction>{{200, 300}, {400, 500}});

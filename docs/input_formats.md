@@ -12,10 +12,9 @@ is what makes fingerprint matching and short-read corroboration exact:
 
 Tab-separated, with a header. The only mandatory column is `isoform`; everything
 else is read by **name** (tolerant of column reordering and appended columns).
-Consumed as priors (never recomputed): `chrom`, `strand`, `structural_category`,
-`associated_gene/transcript`, `subcategory`, `RTS_stage`, `all_canonical`,
-`perc_A_downstream_TTS`, `n_indels_junc`, `dist_to_CAGE_peak`, `dist_to_polyA_site`,
-and the filter column (`filter_result` or `filter`). Category strings are the
+Read (as priors, never recomputed): `chrom`, `strand`, `structural_category`, `RTS_stage`,
+`all_canonical`, `perc_A_downstream_TTS` and, when present, `polyA_motif_found`. Every
+other column is ignored. Category strings are the
 SQANTI3 spelling (`full-splice_match`, `incomplete-splice_match`,
 `novel_in_catalog`, `novel_not_in_catalog`, …).
 

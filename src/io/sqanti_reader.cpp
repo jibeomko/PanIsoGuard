@@ -45,19 +45,6 @@ double parse_double_or_na(const std::string& s, const char* what, std::size_t li
   }
 }
 
-int parse_int_or_na(const std::string& s, const char* what, std::size_t lineno, int& warnings) {
-  if (sqanti_is_na_token(s)) return SqantiRecord::kIntNA;
-  try {
-    std::size_t pos = 0;
-    const long v = std::stol(s, &pos);
-    if (pos != s.size()) throw std::invalid_argument("trailing characters");
-    return static_cast<int>(v);
-  } catch (...) {
-    warn_unparseable(what, lineno, s, warnings);
-    return SqantiRecord::kIntNA;
-  }
-}
-
 }  // namespace
 
 SqantiTable read_sqanti_classification(const std::string& path) {
@@ -75,8 +62,7 @@ SqantiTable read_sqanti_classification(const std::string& path) {
     throw std::runtime_error("SQANTI3 classification missing mandatory 'isoform' column");
   }
 
-  // Resolve column indices once. Absent expected columns are recorded so the
-  // engine can mark the corresponding evidence not_evaluable rather than crash.
+  // Resolve column indices once; an absent column (-1) reads as NA / not_evaluable.
   SqantiTable table;
   table.n_columns = header.ncol();
 
@@ -84,22 +70,10 @@ SqantiTable read_sqanti_classification(const std::string& path) {
   const int c_chrom = header.col("chrom");
   const int c_strand = header.col("strand");
   const int c_cat = header.col("structural_category");
-  const int c_subcat = header.col("subcategory");
-  const int c_gene = header.col("associated_gene");
-  const int c_tx = header.col("associated_transcript");
   const int c_rts = header.col("RTS_stage");
   const int c_canon = header.col("all_canonical");
   const int c_percA = header.col("perc_A_downstream_TTS");
-  const int c_indels_junc = header.col("n_indels_junc");
   const int c_polya_motif = header.col("polyA_motif_found");
-  // SQANTI3 filter column has varied names across versions.
-  int c_filter = header.col("filter_result");
-  if (c_filter < 0) c_filter = header.col("filter");
-
-  for (const char* name : {"chrom", "structural_category", "RTS_stage", "all_canonical",
-                           "perc_A_downstream_TTS", "n_indels_junc"}) {
-    if (!header.has(name)) table.missing_columns.emplace_back(name);
-  }
 
   std::string line;
   std::size_t lineno = 1;  // header was line 1
@@ -116,17 +90,10 @@ SqantiTable read_sqanti_classification(const std::string& path) {
     const std::string& strand_s = field_at(f, c_strand);
     r.strand = parse_strand(strand_s.empty() ? '.' : strand_s[0]);
     r.structural_category = field_at(f, c_cat);
-    r.subcategory = field_at(f, c_subcat);
-    r.associated_gene = field_at(f, c_gene);
-    r.associated_transcript = field_at(f, c_tx);
     r.RTS_stage = field_at(f, c_rts);
     r.all_canonical = field_at(f, c_canon);
     r.perc_A_downstream_TTS = parse_double_or_na(field_at(f, c_percA), "perc_A_downstream_TTS", lineno, warnings);
-    r.n_indels_junc = parse_int_or_na(field_at(f, c_indels_junc), "n_indels_junc", lineno, warnings);
     r.polyA_motif_found = field_at(f, c_polya_motif);
-    r.filter_result = field_at(f, c_filter);
-
-    ++table.category_counts[r.structural_category];
     table.records.push_back(std::move(r));
   }
   return table;

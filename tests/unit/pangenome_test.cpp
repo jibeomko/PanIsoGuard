@@ -14,6 +14,15 @@
 using namespace panisoguard;
 
 namespace {
+// What the adjudicator asks of the junction set: present at these exact coordinates on
+// at least `min_haplotypes` haplotypes.
+bool supports(const PangenomeJunctions& pj, const char* chrom, Strand strand, Junction intron, int min_haplotypes) {
+  const PangenomeJunctionRecord* r = pj.find_exact(chrom, strand, intron);
+  return r != nullptr && r->n_haplotypes >= min_haplotypes;
+}
+}  // namespace
+
+namespace {
 // Write a tiny pangenome-junction file to a temp path and return it.
 std::string write_tmp(const std::string& name, const std::string& body) {
   const std::string p = scratch(name);
@@ -44,23 +53,23 @@ TEST_CASE("pangenome duplicate junction rows keep strongest haplotype support", 
   pj.add(PangenomeJunctionRecord{"chr1", Junction{100, 200}, Strand::kPlus, 3, {}});
 
   REQUIRE(pj.size() == 1);
-  REQUIRE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 5));
-  REQUIRE_FALSE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 6));
+  REQUIRE(supports(pj, "chr1", Strand::kPlus, Junction{100, 200}, 5));
+  REQUIRE_FALSE(supports(pj, "chr1", Strand::kPlus, Junction{100, 200}, 6));
 }
 
-TEST_CASE("pangenome supports() honours the haplotype-count threshold", "[pangenome]") {
+TEST_CASE("pangenome junction lookup honours the haplotype-count threshold", "[pangenome]") {
   const std::string path = std::string(PANISOGUARD_TEST_DATA_DIR) + "/mini.pangenome.tsv";
   const PangenomeJunctions pj = read_pangenome_junctions(path);
 
   // chr1 + [100,200] has n_haplotypes = 3.
-  REQUIRE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 1));
-  REQUIRE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 3));
-  REQUIRE_FALSE(pj.supports("chr1", Strand::kPlus, Junction{100, 200}, 4));
+  REQUIRE(supports(pj, "chr1", Strand::kPlus, Junction{100, 200}, 1));
+  REQUIRE(supports(pj, "chr1", Strand::kPlus, Junction{100, 200}, 3));
+  REQUIRE_FALSE(supports(pj, "chr1", Strand::kPlus, Junction{100, 200}, 4));
   // chr1 - [300,400] has default n_haplotypes = 1.
-  REQUIRE(pj.supports("chr1", Strand::kMinus, Junction{300, 400}, 1));
-  REQUIRE_FALSE(pj.supports("chr1", Strand::kMinus, Junction{300, 400}, 2));
+  REQUIRE(supports(pj, "chr1", Strand::kMinus, Junction{300, 400}, 1));
+  REQUIRE_FALSE(supports(pj, "chr1", Strand::kMinus, Junction{300, 400}, 2));
   // Absent junction is never supported.
-  REQUIRE_FALSE(pj.supports("chr2", Strand::kMinus, Junction{50, 150}, 1));
+  REQUIRE_FALSE(supports(pj, "chr2", Strand::kMinus, Junction{50, 150}, 1));
 }
 
 TEST_CASE("pangenome rescue: graph-supported novel junction -> REFERENCE_BIAS", "[pangenome]") {

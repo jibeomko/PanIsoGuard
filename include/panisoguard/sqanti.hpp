@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -8,28 +7,22 @@
 
 namespace panisoguard {
 
-// A SQANTI3 classification row. QC columns are consumed as PRIORS and never
-// recomputed. Numeric priors are NaN / INT-sentinel when the source value is
-// "NA" or the column is absent (evaluable flags expose which).
+// A SQANTI3 classification row: the columns the verdict reads. The QC columns are
+// consumed as PRIORS and never recomputed; an absent column or an "NA" value is the
+// sentinel below, which the adjudicator turns into a not_evaluable flag.
 struct SqantiRecord {
   std::string isoform;
   std::string chrom;
   Strand strand = Strand::kUnknown;
   std::string structural_category;
-  std::string subcategory;
-  std::string associated_gene;
-  std::string associated_transcript;
 
   // QC priors
   std::string RTS_stage;       // "TRUE"/"FALSE"/...
   std::string all_canonical;   // "canonical"/"non_canonical"
   double perc_A_downstream_TTS = kNaN;
-  int n_indels_junc = kIntNA;
   std::string polyA_motif_found;  // SQANTI3 intra-priming polyA-motif flag, if present
-  std::string filter_result;   // appended SQANTI3 filter column ("Isoform"/"Artifact"), if present
 
-  static constexpr double kNaN = -1e300;  // sentinel; use is_na()
-  static constexpr int kIntNA = -2147483647;
+  static constexpr double kNaN = -1e300;  // sentinel; use sqanti_is_na()
 
   bool is_novel() const {
     return structural_category == "novel_in_catalog" ||
@@ -43,17 +36,10 @@ inline bool sqanti_is_na_token(const std::string& s) {
   return s.empty() || s == "NA" || s == "NaN" || s == "nan" || s == ".";
 }
 
-// Result of reading a classification file, including schema diagnostics.
+// Result of reading a classification file.
 struct SqantiTable {
   std::vector<SqantiRecord> records;
-  std::map<std::string, std::size_t> category_counts;  // structural_category -> n
-  std::vector<std::string> missing_columns;            // expected-but-absent (not_evaluable)
   std::size_t n_columns = 0;
-
-  std::size_t count(const std::string& category) const {
-    auto it = category_counts.find(category);
-    return it == category_counts.end() ? 0 : it->second;
-  }
 };
 
 // Parse a SQANTI3 *_classification.txt (header + tab-separated rows), tolerant of

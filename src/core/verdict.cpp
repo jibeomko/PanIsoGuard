@@ -21,7 +21,6 @@ const char* to_string(Mechanism m) {
     case Mechanism::kMapping:        return "mapping_or_repeat";
     case Mechanism::kVariant:        return "variant_created";
     case Mechanism::kPopulationKnown:return "population_known";
-    case Mechanism::kUnknown:        return "unknown";
   }
   return "unknown";
 }

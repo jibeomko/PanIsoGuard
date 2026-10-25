@@ -1,22 +1,14 @@
 #include "panisoguard/adjudicator.hpp"
-#include "panisoguard/fingerprint.hpp"
 
 #include <algorithm>
-
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 
+#include "panisoguard/fingerprint.hpp"
+
 namespace panisoguard {
 namespace {
-
-std::string jx_key(const std::string& chrom, Strand strand, const Junction& j) {
-  // Strand-aware to match SjTable::key / Catalog: two opposite-strand isoforms
-  // sharing identical intron coordinates (antisense/overlapping loci) must not
-  // collide in the BAM-feature cache.
-  return chrom + '|' + strand_char(strand) + ':' + std::to_string(j.start) + '-' +
-         std::to_string(j.end);
-}
 
 // Assemble the evidence for one SQANTI record. `bam_cache` memoizes per-junction
 // BAM features across isoforms that share a junction.
@@ -108,7 +100,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       return ok;
     };
     for (const auto& intron : chain.introns) {
-      const std::string key = jx_key(chain.chrom, chain.strand, intron);
+      const std::string key = junction_key(chain.chrom, chain.strand, intron);
       JunctionRow* jr = nullptr;
       if (jrows != nullptr) {
         jr = &(*jrows)[key];

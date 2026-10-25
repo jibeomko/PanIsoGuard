@@ -20,9 +20,6 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   if (auto ns = tbl["axis_novelty_support"].as_table()) {
     c.sj_min_uniq_reads = static_cast<int>((*ns)["sj_min_uniq_reads"].value_or<int64_t>(c.sj_min_uniq_reads));
     c.sj_require_canonical_motif = (*ns)["sj_require_canonical_motif"].value_or(c.sj_require_canonical_motif);
-    // Multi-caller agreement gate: a novel chain recovered by >= this many callers is
-    // consensus-supported (consumed by evaluate() when --caller-support populates
-    // consensus_evaluable/n_callers; inert otherwise).
     c.consensus_min_callers = static_cast<int>((*ns)["consensus_min_callers"].value_or<int64_t>(c.consensus_min_callers));
   }
   if (auto art = tbl["axis_artifact"].as_table()) {
@@ -325,73 +322,90 @@ Mechanism mechanism_axis(const RuleConfig& cfg, const EvidenceVector& ev, const 
 }
 
 // --- 4. Projection: (support x mechanism) -> class, verdict, reason.
-void project(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& s, NoveltySupport sup, Mechanism mech,
-             const std::string& unknown_reason, Verdict& v) {
-  const std::string mc = to_string(mech);
+struct Call {
   ConfidenceClass cls;
   const char* verdict;
   std::string reason;
-  if (sup == NoveltySupport::kUnknown) {
-    // Short-read support is not evaluable. A mapping sign holds the call; otherwise caller
-    // consensus or whole-chain long-read support, both methodological (not experimental)
-    // corroboration, lift it to PROBABLE, never CONFIRMED; with neither it is held UNRESOLVED.
-    // The RT-switch sign does not demote methodological support (benchmark/rts_sensitivity);
-    // the intra-priming sign still holds, as for ISM above.
-    const bool weak_sign = mech == Mechanism::kRtSwitch;
-    const std::string sign_note = weak_sign ? ";" + mc + "_sign" : "";
-    const bool consensus = ev.consensus_evaluable && ev.n_callers >= cfg.consensus_min_callers;
-    const bool examined = ev.chain_available && ev.catalog_evaluable;
-    if (mech == Mechanism::kMapping) {
-      // Without short reads a mapping sign alone is not decisive (a third of such calls were
-      // genuine on SQANTI-SIM before 0.0.7), so the call is held UNCONFIRMED.
-      cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "mapping_without_short_reads";
-    } else if (consensus && !examined) {
-      // Caller agreement can only corroborate a chain we could examine: without the
-      // caller's chain or a reference catalog nothing about the isoform was verified, so
-      // the consensus count is reported but does not promote.
-      trace(v, "caller-consensus n_callers=" + std::to_string(ev.n_callers) + " ignored: " +
-                   (ev.chain_available ? "no reference catalog" : "caller chain absent") + " -> UNRESOLVED");
-      cls = ConfidenceClass::kUnresolved; verdict = "unconfirmed"; reason = unknown_reason;
-    } else if (consensus) {
-      trace(v, "caller-consensus n_callers=" + std::to_string(ev.n_callers) + " >= " +
-                   std::to_string(cfg.consensus_min_callers) +
-                   " corroborates the novel chain (no short-read axis) -> consensus-supported");
-      if (mech == Mechanism::kNone || weak_sign) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "caller_consensus" + sign_note; }
-      else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "consensus_with_" + mc; }
-    } else if (ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads && examined) {
-      // Whole-chain long-read support: reads that carry every intron of the chain in one
-      // alignment. They are the caller's own reads, not independent evidence, and they separate
-      // caller-level false chains, not alignment-level ones (benchmark/chain_support), so
-      // PROBABLE, never CONFIRMED.
-      trace(v, "whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
-                   " read(s) carry the entire intron chain (>= " + std::to_string(cfg.chain_min_full_reads) +
-                   (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
-      const std::string src = ev.chain_independent ? ";independent_library" : "";
-      if (mech == Mechanism::kNone || weak_sign) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "chain_support" + sign_note + src; }
-      else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "chain_support_with_" + mc + src; }
-    } else {
-      cls = ConfidenceClass::kUnresolved; verdict = "unconfirmed"; reason = unknown_reason;
-    }
-  } else if (sup == NoveltySupport::kSupported) {
-    if (mech == Mechanism::kNone) { cls = ConfidenceClass::kNovelConfirmed; verdict = "confirmed"; reason = "all_junctions_supported"; }
-    else { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "supported_with_" + mc; }
-  } else if (sup == NoveltySupport::kPartial) {
-    // An uncorroborated novel junction leaves the chain unconfirmed, so PARTIAL never
-    // promotes to a confident novel call (it did, and those were the extra false
-    // positives in benchmark/sqanti3_filter_h2h).
-    cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed";
-    reason = (mech == Mechanism::kNone) ? "partial_support" : "partial_support_with_" + mc;
-  } else {  // UNSUPPORTED
-    if (mech == Mechanism::kNone) { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "unsupported_no_sign"; }
-    else { cls = ConfidenceClass::kArtifact; verdict = "artifact"; reason = "unsupported_" + mc; }
+};
+
+// Short-read support is not evaluable. A mapping sign holds the call; otherwise caller
+// consensus or whole-chain long-read support, both methodological (not experimental)
+// corroboration, lift it to PROBABLE, never CONFIRMED; with neither it is held UNRESOLVED.
+// The RT-switch sign does not demote methodological support (benchmark/rts_sensitivity);
+// the intra-priming sign still holds, as for ISM above.
+Call project_unknown(const RuleConfig& cfg, const EvidenceVector& ev, Mechanism mech,
+                     const std::string& unknown_reason, Verdict& v) {
+  const std::string mc = to_string(mech);
+  const bool weak_sign = mech == Mechanism::kRtSwitch;
+  const std::string sign_note = weak_sign ? ";" + mc + "_sign" : "";
+  const bool consensus = ev.consensus_evaluable && ev.n_callers >= cfg.consensus_min_callers;
+  const bool chain_reads = ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads;
+  const bool examined = ev.chain_available && ev.catalog_evaluable;
+  if (mech == Mechanism::kMapping) {
+    // Without short reads a mapping sign alone is not decisive (a third of such calls were
+    // genuine on SQANTI-SIM), so the call is held UNCONFIRMED.
+    return {ConfidenceClass::kUnconfirmed, "unconfirmed", "mapping_without_short_reads"};
   }
-  trace(v, std::string("project(") + to_string(sup) + "," + to_string(mech) + ") -> " + to_string(cls));
+  if (consensus && !examined) {
+    // Caller agreement can only corroborate a chain we could examine: without the caller's
+    // chain or a reference catalog nothing about the isoform was verified, so the consensus
+    // count is reported but does not promote.
+    trace(v, "caller-consensus n_callers=" + std::to_string(ev.n_callers) + " ignored: " +
+                 (ev.chain_available ? "no reference catalog" : "caller chain absent") + " -> UNRESOLVED");
+    return {ConfidenceClass::kUnresolved, "unconfirmed", unknown_reason};
+  }
+  if (consensus) {
+    trace(v, "caller-consensus n_callers=" + std::to_string(ev.n_callers) + " >= " +
+                 std::to_string(cfg.consensus_min_callers) +
+                 " corroborates the novel chain (no short-read axis) -> consensus-supported");
+    if (mech == Mechanism::kNone || weak_sign) return {ConfidenceClass::kNovelProbable, "confirmed", "caller_consensus" + sign_note};
+    return {ConfidenceClass::kUnconfirmed, "unconfirmed", "consensus_with_" + mc};
+  }
+  if (chain_reads && examined) {
+    // Whole-chain long-read support: reads that carry every intron of the chain in one
+    // alignment. They are the caller's own reads, not independent evidence, and they separate
+    // caller-level false chains, not alignment-level ones (benchmark/chain_support), so
+    // PROBABLE, never CONFIRMED.
+    trace(v, "whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
+                 " read(s) carry the entire intron chain (>= " + std::to_string(cfg.chain_min_full_reads) +
+                 (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
+    const std::string src = ev.chain_independent ? ";independent_library" : "";
+    if (mech == Mechanism::kNone || weak_sign) return {ConfidenceClass::kNovelProbable, "confirmed", "chain_support" + sign_note + src};
+    return {ConfidenceClass::kUnconfirmed, "unconfirmed", "chain_support_with_" + mc + src};
+  }
+  return {ConfidenceClass::kUnresolved, "unconfirmed", unknown_reason};
+}
+
+// Short-read support was evaluated: the grid of docs/decision_engine.md.
+Call project_grid(NoveltySupport sup, Mechanism mech) {
+  const std::string mc = to_string(mech);
+  const bool clean = mech == Mechanism::kNone;
+  switch (sup) {
+    case NoveltySupport::kSupported:
+      return clean ? Call{ConfidenceClass::kNovelConfirmed, "confirmed", "all_junctions_supported"}
+                   : Call{ConfidenceClass::kNovelProbable, "confirmed", "supported_with_" + mc};
+    case NoveltySupport::kPartial:
+      // An uncorroborated novel junction leaves the chain unconfirmed, so PARTIAL never
+      // promotes to a confident novel call (it did, and those were the extra false
+      // positives in benchmark/sqanti3_filter_h2h).
+      return {ConfidenceClass::kUnconfirmed, "unconfirmed", clean ? "partial_support" : "partial_support_with_" + mc};
+    default:  // UNSUPPORTED
+      return clean ? Call{ConfidenceClass::kUnconfirmed, "unconfirmed", "unsupported_no_sign"}
+                   : Call{ConfidenceClass::kArtifact, "artifact", "unsupported_" + mc};
+  }
+}
+
+void project(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& s, NoveltySupport sup, Mechanism mech,
+             const std::string& unknown_reason, Verdict& v) {
+  Call c = sup == NoveltySupport::kUnknown ? project_unknown(cfg, ev, mech, unknown_reason, v)
+                                           : project_grid(sup, mech);
+  trace(v, std::string("project(") + to_string(sup) + "," + to_string(mech) + ") -> " + to_string(c.cls));
   // Reaching the grid means no reference-bias rescue fired, so this verdict never rests on
   // RNA-derived variants.
   v.circularity_flag = false;
   if (s.disrupted_sign && mech == Mechanism::kNoncanonical && !(ev.canon_evaluable && ev.noncanonical))
-    reason += ";haplotype_disrupted";  // the sign came from the sample's haplotypes, not from SQANTI3
-  finish(v, cls, verdict, reason);
+    c.reason += ";haplotype_disrupted";  // the sign came from the sample's haplotypes, not from SQANTI3
+  finish(v, c.cls, c.verdict, std::move(c.reason));
 }
 
 }  // namespace

@@ -13,14 +13,8 @@ namespace {
 // (file + line + field) instead of a bare std::stoll "stoll" terminate.
 std::vector<int64_t> parse_int_list(const std::string& s, const char* what, std::size_t lineno) {
   std::vector<int64_t> out;
-  std::size_t start = 0;
-  while (start < s.size()) {
-    std::size_t comma = s.find(',', start);
-    const std::string tok = s.substr(start, (comma == std::string::npos ? s.size() : comma) - start);
+  for (const std::string& tok : split(s, ','))
     if (!tok.empty()) out.push_back(parse_int_field(tok, what, "BED12", lineno));
-    if (comma == std::string::npos) break;
-    start = comma + 1;
-  }
   return out;
 }
 
@@ -48,8 +42,6 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
     const std::string chrom = f[0];
     const int64_t chrom_start = parse_int_field(f[1], "chromStart", "BED12", lineno);  // 0-based
     rec.name = f[3];
-    rec.id_prefix = flair_id_prefix(rec.name);
-    rec.score = f[4] == "." ? 0 : static_cast<int>(parse_int_field(f[4], "score", "BED12", lineno));
 
     rec.chain.chrom = chrom;
     rec.chain.strand = parse_strand(f[5].empty() ? '.' : f[5][0]);

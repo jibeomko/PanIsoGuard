@@ -26,8 +26,7 @@ struct SjRecord {
   bool canonical() const { return motif >= 1; }
 };
 
-// Short-read junction evidence with O(1) exact lookup by intron coordinates,
-// matching the design's "exact donor-acceptor coordinate join".
+// Short-read junction evidence with O(1) exact lookup by intron coordinates.
 class SjTable {
  public:
   void add(SjRecord rec);
@@ -38,11 +37,8 @@ class SjTable {
   const SjRecord* find_exact(const std::string& chrom, Strand strand, const Junction& intron) const;
 
   std::size_t size() const { return records_.size(); }
-  const std::vector<SjRecord>& records() const { return records_; }
 
  private:
-  static std::string key(const std::string& chrom, Strand strand, const Junction& j);
-
   std::vector<SjRecord> records_;
   std::unordered_map<std::string, std::size_t> by_coord_;
 };

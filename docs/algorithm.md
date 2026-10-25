@@ -19,8 +19,8 @@ for each SQANTI3 isoform record r:
         - short-read SJ.tab support     (SjTable::find_exact + read/motif thresholds)
         - long-read BAM mapping features (BamReader::features_at_junction)
         - SQANTI3 priors                (RTS_stage / all_canonical / perc_A_downstream_TTS)
-        - haplotype splice-motif change (HaplotypeProvider::classify)
-        - pangenome junction support    (PangenomeJunctions::supports)
+        - haplotype splice-motif change (HaplotypeProvider::motifs)
+        - pangenome junction support    (PangenomeJunctions::find_exact)
     6. Store all signals in one EvidenceVector
        (counts of novel vs supported junctions, worst-case BAM fractions, rescue
         flags + their circularity-risk state).

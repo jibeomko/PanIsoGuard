@@ -56,6 +56,13 @@ struct IntronChain {
   void sort_introns() { std::sort(introns.begin(), introns.end()); }
 };
 
+// "chrom|strand:start-end": the lookup key of every exact-coordinate index (reference
+// catalog, SJ.tab, pangenome junctions, the BAM-feature cache). Strand-aware, so two
+// opposite-strand junctions at the same coordinates never collide.
+inline std::string junction_key(const std::string& chrom, Strand strand, const Junction& j) {
+  return chrom + '|' + strand_char(strand) + ':' + std::to_string(j.start) + '-' + std::to_string(j.end);
+}
+
 // true if `sub` occurs as a contiguous run inside `full`: the test behind whole-chain read
 // support (a read's introns contain the isoform's chain) and the decoy generator.
 inline bool contiguous_subchain(const std::vector<Junction>& sub, const std::vector<Junction>& full) {

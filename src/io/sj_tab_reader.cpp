@@ -8,21 +8,8 @@
 
 namespace panisoguard {
 
-std::string SjTable::key(const std::string& chrom, Strand strand, const Junction& j) {
-  std::string k;
-  k.reserve(chrom.size() + 26);
-  k += chrom;
-  k += '|';
-  k += strand_char(strand);
-  k += ':';
-  k += std::to_string(j.start);
-  k += '-';
-  k += std::to_string(j.end);
-  return k;
-}
-
 void SjTable::add(SjRecord rec) {
-  const std::string k = key(rec.chrom, rec.strand, rec.intron);
+  const std::string k = junction_key(rec.chrom, rec.strand, rec.intron);
   auto it = by_coord_.find(k);
   if (it != by_coord_.end()) {
     SjRecord& cur = records_[it->second];
@@ -42,7 +29,7 @@ void SjTable::add(SjRecord rec) {
 
 const SjRecord* SjTable::find_exact(const std::string& chrom, Strand strand,
                                     const Junction& intron) const {
-  auto it = by_coord_.find(key(chrom, strand, intron));
+  auto it = by_coord_.find(junction_key(chrom, strand, intron));
   if (it == by_coord_.end()) return nullptr;
   return &records_[it->second];
 }

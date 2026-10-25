@@ -34,15 +34,12 @@ TEST_CASE("GTF transcripts derive correct intron chains", "[gtf]") {
   REQUIRE(t2->chain.introns == std::vector<Junction>{{200, 500}});
 }
 
-TEST_CASE("Catalog records known chains, introns, and splice sites", "[gtf][catalog]") {
+TEST_CASE("Catalog records known chains and introns", "[gtf][catalog]") {
   const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
-  REQUIRE(cat.n_chains() == 2);
+  for (const auto& t : read_gtf_transcripts(tiny("mini.gtf"))) CHECK(cat.has_chain(fingerprint_intron_chain(t.chain)));
 
   CHECK(cat.has_intron("chr1", Strand::kPlus, Junction{200, 300}));
   CHECK(cat.has_intron("chr1", Strand::kPlus, Junction{200, 500}));
   CHECK_FALSE(cat.has_intron("chr1", Strand::kPlus, Junction{200, 400}));  // novel combination
-
-  CHECK(cat.has_site("chr1", Strand::kPlus, 200));
-  CHECK(cat.has_site("chr1", Strand::kPlus, 500));
-  CHECK_FALSE(cat.has_site("chr1", Strand::kPlus, 250));
+  CHECK_FALSE(cat.has_intron("chr1", Strand::kMinus, Junction{200, 300}));  // strand-aware
 }

@@ -102,8 +102,8 @@ for/against):
 | Short-read SJ | `SjTable::find_exact` | the junction is corroborated by STAR `SJ.tab` |
 | Long-read BAM | `BamReader::features_at_junction` | read-level spanning / MAPQ / supplementary / indel features |
 | SQANTI priors | (read from the classification) | RTS_stage, all_canonical, perc_A_downstream_TTS |
-| Variant motif | `HaplotypeProvider::classify` | a splice motif created/destroyed on a personalized haplotype |
-| Pangenome | `PangenomeJunctions::supports` | the junction is realizable on a pangenome graph path |
+| Variant motif | `HaplotypeProvider::motifs` | a splice motif created/destroyed on a personalized haplotype |
+| Pangenome | `PangenomeJunctions::find_exact` | the junction is realizable on a pangenome graph path |
 
 All signals are assembled into one `EvidenceVector`
 ([`verdict.hpp`](../include/panisoguard/verdict.hpp)) per isoform by the adjudicator

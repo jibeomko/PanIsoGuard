@@ -1,6 +1,7 @@
 #include "run_common.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <memory>
 #include <stdexcept>

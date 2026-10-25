@@ -5,6 +5,7 @@
 // threshold next to the same fraction for the annotated parents.
 
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <map>
 #include <stdexcept>
@@ -62,15 +63,25 @@ int cmd_decoys(int argc, char** argv) {
     if (i + 1 >= argc) { std::fprintf(stderr, "decoys: %s requires an argument\n", name); std::exit(1); }
     return argv[++i];
   };
+  auto int_arg = [&](int& i, const char* name) -> long {
+    const std::string s = next(i, name);
+    char* end = nullptr;
+    const long v = std::strtol(s.c_str(), &end, 10);
+    if (s.empty() || *end != '\0') {
+      std::fprintf(stderr, "decoys: %s expects an integer, got '%s'\n", name, s.c_str());
+      std::exit(1);
+    }
+    return v;
+  };
   for (int i = 2; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--ref-gtf") ref_gtf = next(i, "--ref-gtf");
     else if (a == "--bam") bam_path = next(i, "--bam");
     else if (a == "--reference") reference = next(i, "--reference");
     else if (a == "--out") out_prefix = next(i, "--out");
-    else if (a == "--min-full-reads") min_full = std::stoi(next(i, "--min-full-reads"));
-    else if (a == "--max-per-gene") max_per_gene = std::stoi(next(i, "--max-per-gene"));
-    else if (a == "--seed") seed = static_cast<unsigned>(std::stoul(next(i, "--seed")));
+    else if (a == "--min-full-reads") min_full = static_cast<int>(int_arg(i, "--min-full-reads"));
+    else if (a == "--max-per-gene") max_per_gene = static_cast<int>(int_arg(i, "--max-per-gene"));
+    else if (a == "--seed") seed = static_cast<unsigned>(int_arg(i, "--seed"));
     else if (a == "-h" || a == "--help") { usage(); return 0; }
     else { std::fprintf(stderr, "decoys: unknown option '%s'\n", a.c_str()); usage(); return 1; }
   }

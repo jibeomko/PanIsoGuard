@@ -8,21 +8,8 @@
 
 namespace panisoguard {
 
-std::string PangenomeJunctions::key(const std::string& chrom, Strand strand, const Junction& j) {
-  std::string k;
-  k.reserve(chrom.size() + 26);
-  k += chrom;
-  k += '|';
-  k += strand_char(strand);
-  k += ':';
-  k += std::to_string(j.start);
-  k += '-';
-  k += std::to_string(j.end);
-  return k;
-}
-
 void PangenomeJunctions::add(PangenomeJunctionRecord rec) {
-  const std::string k = key(rec.chrom, rec.strand, rec.intron);
+  const std::string k = junction_key(rec.chrom, rec.strand, rec.intron);
   auto it = by_coord_.find(k);
   if (it != by_coord_.end()) {
     // Duplicate graph-junction rows should not create unreachable shadow records.
@@ -43,15 +30,9 @@ void PangenomeJunctions::add(PangenomeJunctionRecord rec) {
 
 const PangenomeJunctionRecord* PangenomeJunctions::find_exact(const std::string& chrom, Strand strand,
                                                               const Junction& intron) const {
-  auto it = by_coord_.find(key(chrom, strand, intron));
+  auto it = by_coord_.find(junction_key(chrom, strand, intron));
   if (it == by_coord_.end()) return nullptr;
   return &records_[it->second];
-}
-
-bool PangenomeJunctions::supports(const std::string& chrom, Strand strand, const Junction& intron,
-                                  int min_haplotypes) const {
-  const PangenomeJunctionRecord* r = find_exact(chrom, strand, intron);
-  return r != nullptr && r->n_haplotypes >= min_haplotypes;
 }
 
 namespace {
@@ -107,14 +88,8 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
       }
     }
     if (f.size() >= 6 && !f[5].empty() && f[5] != "NA" && f[5] != ".") {
-      std::size_t start = 0;
-      while (start <= f[5].size()) {
-        const std::size_t comma = f[5].find(',', start);
-        const std::string id = f[5].substr(start, comma == std::string::npos ? std::string::npos : comma - start);
+      for (const std::string& id : split(f[5], ','))
         if (!id.empty()) rec.haplotype_ids.push_back(id);
-        if (comma == std::string::npos) break;
-        start = comma + 1;
-      }
       rec.n_haplotypes = std::max(rec.n_haplotypes, static_cast<int>(rec.haplotype_ids.size()));
     }
     table.add(std::move(rec));
