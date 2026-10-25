@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score the BAM mapping axis' indel-near / soft-clip signals against SQANTI-SIM truth.
+"""Score the BAM mapping axis' indel-near signal against SQANTI-SIM truth.
 
 Two questions, both on the chr22 SQANTI-SIM truth set with the shared minimap2 BAM:
 
@@ -10,8 +10,8 @@ Two questions, both on the chr22 SQANTI-SIM truth set with the shared minimap2 B
      specificity move, and at what cost to genuine sensitivity?
 
 Reproducible head-to-head: adjudicate the SAME FLAIR + SQANTI3 + BAM inputs twice with
-the current binary -- ON (default config) vs OFF (a config that sets the indel/softclip
-thresholds above 1.0 so they can never fire) -- and compare.
+the current binary -- ON (default config) vs OFF (a config that sets the indel threshold
+above 1.0 so it can never fire) -- and compare.
 
 Usage:
   score_bam_axis.py --flair FLAIR.gtf --truth truth.truth.tsv \
@@ -58,9 +58,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--flair", required=True)
     ap.add_argument("--truth", required=True)
-    ap.add_argument("--off", required=True, help="attribution.jsonl with indel/softclip triggers disabled")
+    ap.add_argument("--off", required=True, help="attribution.jsonl with the indel trigger disabled")
     ap.add_argument("--on", required=True, help="attribution.jsonl with the default (wired) config")
-    ap.add_argument("--threshold", type=float, default=0.5, help="default mapping indel/softclip fraction gate")
+    ap.add_argument("--threshold", type=float, default=0.5, help="default mapping indel fraction gate")
     ap.add_argument("--emit-metrics")
     a = ap.parse_args()
 
@@ -180,7 +180,7 @@ def main():
             "ruleset_version": prov.get("ruleset_version"),
             "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (simulated PBSIM3 HiFi, one shared "
                                "minimap2 splice:hq alignment); FLAIR collapse + SQANTI3. Public/simulated, "
-                               "no private data. OFF = current binary with mapping indel/softclip thresholds "
+                               "no private data. OFF = current binary with the mapping indel threshold "
                                "set > 1.0 (never fire); ON = shipped default config.",
             "command": "panisoguard adjudicate --classification flair_classification.txt --isoforms-gtf "
                        "flair.isoforms.gtf --ref-gtf chr22_modified.gtf --sj-tab truth.SJ.tab --bam aln.bam "

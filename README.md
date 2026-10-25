@@ -54,8 +54,7 @@ panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf
 | `not_adjudicated` | a SQANTI3 category PanIsoGuard does not judge (genic, antisense, fusion, intergenic) | your call |
 
 **Next:** `--write-kept kept.gtf` writes the annotation filtered to the kept verdicts;
-`panisoguard-report --prefix out/sample` draws a PDF; `verdict_reason` and `rule_trace` say
-why each isoform landed where it did. Every column beyond `verdict` (the confidence class, the
+`verdict_reason` and `rule_trace` say why each isoform landed where it did. Every column beyond `verdict` (the confidence class, the
 mechanism, the reasons) is explanation, not a second decision; see
 [Confidence classes](#confidence-classes).
 
@@ -100,7 +99,7 @@ conda-forge and bioconda, whatever your own conda settings are. The program is n
 `build/panisoguard`, and it runs without activating the environment. To call it as just
 `panisoguard`, as in [Usage](#usage), run `export PATH="$PWD/build:$PATH"`.
 
-**No conda? Use Docker.** Bioconda publishes a ready-made image on BioContainers, `docker pull quay.io/biocontainers/panisoguard:0.0.7--h8471819_0` (tags on [quay.io](https://quay.io/repository/biocontainers/panisoguard?tab=tags)); or build one with the optional report tool included (from the same `PanIsoGuard` folder):
+**No conda? Use Docker.** Bioconda publishes a ready-made image on BioContainers, `docker pull quay.io/biocontainers/panisoguard:0.0.7--h8471819_0` (tags on [quay.io](https://quay.io/repository/biocontainers/panisoguard?tab=tags)); or build one yourself (from the same `PanIsoGuard` folder):
 
 ```bash
 docker build -t panisoguard .
@@ -110,9 +109,7 @@ docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work panisoguard \
     bash -c "panisoguard example multi_caller && multi_caller/run.sh"
 ```
 
-`-u` runs the container as your user, so it can write results into your folder. The image also
-includes the optional PDF report tool. Without Docker, install that with `pip install ./python`
-and run `panisoguard-report --prefix <out-prefix>` (see [python/](python/)).
+`-u` runs the container as your user, so it can write results into your folder.
 
 For a step-by-step walk-through of one toy gene, from input files to verdicts, see the
 [worked locus](#a-worked-locus).
@@ -130,20 +127,17 @@ The examples ship with the package: `panisoguard example` lists them (`tiny`, `m
 and `worked_locus`, one toy gene followed through every rule), and `panisoguard example <name> [DIR]` copies one
 into a folder you can write to. PanIsoGuard is on the [bioconda channel](https://anaconda.org/bioconda/panisoguard); the
 [files page](https://anaconda.org/bioconda/panisoguard/files) lists the platforms each version
-is built for. The recipe is in [`recipes/bioconda/`](recipes/bioconda/). The optional PDF report tool is not part of this
-package; see [python/](python/).
+is built for. The recipe is in [`recipes/bioconda/`](recipes/bioconda/).
 
 ### Container
 
 Build the image once with `docker build -t panisoguard .` (see [Quick start](#quick-start)).
 Then mount your data folder and give the command after the image name; it must start with
-`panisoguard` (or `panisoguard-report`):
+`panisoguard`:
 
 ```bash
 docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
     panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
-docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
-    panisoguard-report --prefix run
 ```
 
 ### From source
@@ -265,12 +259,12 @@ panisoguard combine \
 
 ### Outputs
 
-`adjudicate` writes three files whose names start with your `--out-prefix`:
+`adjudicate` writes four files whose names start with your `--out-prefix`:
 
 | File | What is in it |
 |------|----------|
 | `<prefix>.adjudicated.tsv`   | one row per isoform: the confidence class, the `verdict` (known / known_fragment / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), novel-junction counts, and `genomic_compatibility` (the DNA side on its own: `haplotype` / `pangenome` / `partial` / `none` / `NA`, whatever the verdict) |
-| `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used, the `rule_trace` (the rules that decided the verdict, in order), a `graph_trace` (the same result seen as a splice graph; see [docs/method_graph.md](docs/method_graph.md)), and `bio_flags` (SQANTI3 QC values copied through for reference; they do not change the verdict; see [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md)) |
+| `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used and the `rule_trace` (the rules that decided the verdict, in order) |
 | `<prefix>.junctions.tsv`     | one row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
@@ -336,7 +330,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 |---|---|---|---|
 | SQANTI3 QC | `--classification` | required | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end |
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
-| Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). Soft-clipping is measured but not used by default. The defaults suit PacBio HiFi; ONT reads need different thresholds. |
+| Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). The defaults suit PacBio HiFi; ONT reads need different thresholds. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
 | Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | with the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
 | Sample's genome | `--reference` and `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |
@@ -347,21 +341,16 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 | Command | What it does |
 |---------|---------|
 | `adjudicate` | gives each isoform a confidence class, the likely artifact cause, and the reasons (3 output files) |
-| `benchmark`  | deprecated since 0.0.7 (2×2 table against the SQANTI3 filter); the comparison lives in [benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h) |
-| `ablate`     | turns off one kind of evidence at a time and shows which calls change |
 | `combine`    | matches several callers' isoforms by intron chain and writes which callers found each one |
 | `decoys`     | measures, on your own BAM, how often the whole-chain read support would lift a chain the annotation does not know (recombined known transcripts), as an upper bound on its false-lift rate |
-| `version`    | shows the version, the linked htslib, and the built-in features |
+| `version`    | shows the version and the linked htslib |
 
 Run `panisoguard <command> --help` for all options. Input file formats:
 [docs/input_formats.md](docs/input_formats.md).
 
-#### Ablation and decoys
+#### Decoys
 
 ```bash
-# which calls change when one kind of evidence is turned off
-panisoguard ablate    [adjudicate options] --axes short_read,mapping,variant --out abl/
-
 # how often >= 3 whole-chain reads carry a chain the annotation does not know, in this BAM
 panisoguard decoys    --ref-gtf ref.gtf --bam aln.bam --out decoys/sample
 ```
@@ -402,8 +391,7 @@ junctions all have short-read support) is just as accurate and simpler; see
   caller are mostly artifacts; agreement between callers is a strong sign that an isoform is
   real, whichever matching rule is used ([benchmark/multicaller](benchmark/multicaller)).
 - **You want a clear class and reason for each novel isoform**, not just a filtered GTF. Each
-  isoform gets one of 8 classes and a `rule_trace` that scripts can read (plus an optional
-  [PDF report](python/README.md)). You can keep `NOVEL_CONFIRMED` and `NOVEL_PROBABLE` and
+  isoform gets one of 8 classes and a `rule_trace` that scripts can read. You can keep `NOVEL_CONFIRMED` and `NOVEL_PROBABLE` and
   review the rest, instead of looking at reads one by one.
 - **You have the sample's haplotypes or a pangenome** and want to find *reference-bias*
   junctions: junctions that look non-canonical on the reference genome but are canonical in the
@@ -525,12 +513,6 @@ Building the GENCODE v49 catalog takes about 3 s of that; the rest is reading th
 junction and chain. The callers and the alignment take most of the total time of a study;
 PanIsoGuard itself is fast and needs no more memory than a laptop has.
 
-## Orchestration (optional)
-
-[`workflow/`](workflow/) has a Snakemake pipeline that runs several callers on one shared
-alignment and then runs PanIsoGuard (`combine` + `adjudicate`). It is a convenience wrapper,
-not part of the core tool.
-
 ## Documentation
 
 | Doc | Contents |
@@ -540,8 +522,7 @@ not part of the core tool.
 | [docs/algorithm.md](docs/algorithm.md) | How one isoform is judged, step by step. |
 | [docs/function_io.md](docs/function_io.md) | What each module takes and returns, and the main data types. |
 | [docs/decision_engine.md](docs/decision_engine.md) | The decision grid, which check comes first, and the guard against circular evidence. |
-| [docs/method_graph.md](docs/method_graph.md) | The splice-graph view: an isoform is a path, a novel junction is a new edge, and the `graph_trace`. |
-| [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md) | What PanIsoGuard takes from SQANTI3 and what it does not recompute; the `bio_flags` pass-through. |
+| [docs/relationship_to_sqanti3.md](docs/relationship_to_sqanti3.md) | What PanIsoGuard takes from SQANTI3 and what it does not recompute. |
 | [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md) | How `combine` relates to gffcompare, TAMA and Bambu-NDR, and what is actually new in PanIsoGuard. |
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What has been checked and what is planned. |
@@ -560,11 +541,11 @@ PanIsoGuard/
 |   |-- types.hpp                    # Junction, IntronChain, Transcript, Evidence primitives
 |   |-- adjudicator.hpp              # per-isoform evidence collection and decision API
 |   |-- rules.hpp, verdict.hpp       # rule configuration, classes, mechanisms, rule traces
-|   |-- consensus.hpp, fingerprint.hpp, interval_index.hpp
+|   |-- consensus.hpp, fingerprint.hpp
 |   |-- gtf.hpp, bed12.hpp, sqanti.hpp, sj_tab.hpp, pangenome.hpp
 |   `-- bam_features.hpp, variant_motif.hpp, result_writer.hpp
 |-- src/
-|   |-- cli/                         # commands: adjudicate, combine, ablate, decoys, example (benchmark: deprecated)
+|   |-- cli/                         # commands: adjudicate, combine, decoys, example
 |   |-- io/                          # SQANTI/GTF/BED12/SJ/pangenome readers + result writer
 |   |-- evidence/                    # BAM and FASTA evidence (via htslib)
 |   `-- core/                        # caller matching, reference catalog, rules, verdicts
@@ -573,9 +554,8 @@ PanIsoGuard/
 |   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA test files
 |-- docs/                            # architecture, algorithm, input formats, validation plan
 |-- docs/figures/                    # README figures (SVG sources + rendered PNGs)
-|-- workflow/                        # optional Snakemake pipeline around PanIsoGuard
 |-- benchmark/                       # benchmarks on simulated and real data, with results
-|-- examples/                        # tiny, multi_caller (with expected outputs), worked_locus, report (PDF)
+|-- examples/                        # tiny, multi_caller (with expected outputs), worked_locus
 |-- recipes/bioconda/                # Bioconda meta.yaml and build.sh
 |-- thirdparty/                      # bundled header-only libraries and their licenses
 |-- LICENSE
@@ -593,8 +573,8 @@ repository" button gives the same record from [`CITATION.cff`](CITATION.cff).
 
 PanIsoGuard is MIT-licensed; see [LICENSE](LICENSE).
 
-It includes three small third-party header libraries in `thirdparty/`, with their license
-texts: **cgranges** (`IITree.h`, MIT), **toml++** (MIT), and **Catch2** (Boost Software License
+It includes two small third-party header libraries in `thirdparty/`, with their license
+texts: **toml++** (MIT) and **Catch2** (Boost Software License
 1.0, used only for tests). See [THIRDPARTY.txt](THIRDPARTY.txt). Taken together, the source as
 distributed is under **MIT AND BSL-1.0**. htslib is linked as a separate dependency, not
 included.

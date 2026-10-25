@@ -1,12 +1,11 @@
-# PanIsoGuard container: the C++ adjudicator (built from source) + panisoguard-report.
+# PanIsoGuard container: the C++ adjudicator, built from source against conda htslib.
 # Build:  docker build -t panisoguard .
 # Use:    docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
 #             panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
 #         docker run --rm panisoguard panisoguard --version
-#         docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard panisoguard-report --prefix run
 # (-u runs as you so outputs can be written to the mounted folder; the image user cannot.)
 # (Pass the command through the default entrypoint — do NOT use --entrypoint, which would
-#  bypass the conda-env activation that puts htslib/matplotlib on the path.)
+#  bypass the conda-env activation that puts htslib on the path.)
 #
 # --- stage 1: build the C++ binary against conda htslib ----------------------
 FROM mambaorg/micromamba:1.5-jammy AS build
@@ -26,19 +25,15 @@ RUN micromamba run -n base bash -lc '\
 # --- stage 2: slim runtime (no compiler) -------------------------------------
 FROM mambaorg/micromamba:1.5-jammy AS runtime
 LABEL org.opencontainers.image.title="PanIsoGuard" \
-      org.opencontainers.image.description="Caller-agnostic adjudication of long-read novel isoforms + PDF report" \
+      org.opencontainers.image.description="Caller-agnostic adjudication of long-read novel isoforms" \
       org.opencontainers.image.source="https://github.com/jibeomko/PanIsoGuard" \
       org.opencontainers.image.licenses="MIT"
 USER root
-RUN micromamba install -y -n base -c conda-forge -c bioconda \
-        'htslib>=1.18' zlib 'python>=3.9' 'matplotlib>=3.4' \
+RUN micromamba install -y -n base -c conda-forge -c bioconda 'htslib>=1.18' zlib \
     && micromamba clean -ay
 COPY --from=build /opt/pig/bin/panisoguard /opt/conda/bin/panisoguard
 COPY --from=build /opt/pig/share/panisoguard /opt/conda/share/panisoguard
-COPY --from=build /src/python /opt/panisoguard-python
-RUN micromamba run -n base pip install --no-cache-dir /opt/panisoguard-python \
-    && micromamba run -n base panisoguard --version \
-    && micromamba run -n base panisoguard-report --help >/dev/null
+RUN micromamba run -n base panisoguard --version
 USER $MAMBA_USER
-# micromamba's entrypoint activates the base env (so htslib/matplotlib are on the path).
+# micromamba's entrypoint activates the base env (so htslib is on the path).
 CMD ["panisoguard", "--help"]

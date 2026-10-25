@@ -12,8 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 D = lambda name: os.path.join(HERE, "data", name)
 PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "..", "build", "panisoguard")
 NOVEL = ("novel_in_catalog", "novel_not_in_catalog")
-MAP_GATES = {"bam_frac_low_mapq": 0.5, "bam_frac_supplementary": 0.5,
-             "bam_frac_indel_near": 0.5, "bam_frac_softclip": 1.01}
+MAP_GATES = {"bam_frac_low_mapq": 0.5, "bam_frac_supplementary": 0.5, "bam_frac_indel_near": 0.5}
 
 
 def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):

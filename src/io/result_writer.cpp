@@ -10,8 +10,6 @@
 #include <type_traits>
 #include <sys/stat.h>
 
-#include <htslib/hts.h>
-
 namespace panisoguard {
 namespace {
 
@@ -99,7 +97,6 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"bam_n_junctions_gated\":" << e.bam_n_junctions_gated << ","
         << "\"bam_frac_low_mapq\":" << e.bam_max_frac_low_mapq << ","
         << "\"bam_frac_supplementary\":" << e.bam_max_frac_supplementary << ","
-        << "\"bam_frac_softclip\":" << e.bam_max_frac_softclip << ","
         << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near << ","
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
@@ -119,33 +116,6 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"chain_n_full_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_full_reads) : "null") << ","
         << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null")
         << "},";
-    // graph_trace: the same evidence re-expressed under the splice-graph framing
-    // (docs/method_graph.md) -- a candidate isoform is a path through the gene-local
-    // splice graph; novel junctions are edges absent from the known (reference) graph.
-    // No new computation: this is a view of the EvidenceVector above.
-    const char* site_type = "none";
-    if (r.structural_category == "novel_in_catalog") site_type = "known_site_recombination";
-    else if (r.structural_category == "novel_not_in_catalog") site_type = "novel_splice_site";
-    out << "\"graph_trace\":{"
-        << "\"novel_edges\":" << e.n_novel_junctions << ","
-        << "\"path_distance_to_reference\":" << e.n_novel_junctions << ","
-        << "\"edges_sr_supported\":" << e.n_novel_jx_sr_supported << ","
-        << "\"novel_site_type\":\"" << site_type << "\","
-        << "\"pangenome_edge_support\":" << (e.pangenome_rescue ? "true" : "false") << ","
-        << "\"variant_canonicalized_edge\":" << (e.variant_rescue ? "true" : "false")
-        << "},";
-    // bio_flags: SQANTI3 QC descriptors passed through verbatim (consumed as priors,
-    // NEVER recomputed) -- biological-plausibility annotations that do NOT affect the
-    // verdict. PanIsoGuard does not reimplement SQANTI3's TSS/TTS/ORF/NMD/polyA QC; it
-    // surfaces it alongside the independent path-level verdict (docs/relationship_to_sqanti3.md).
-    // polyA_motif_found is in `evidence` (it refines the intra-priming sign since 0.0.6).
-    out << "\"bio_flags\":{\"dist_to_CAGE_peak\":";
-    if (sqanti_is_na(r.bio_dist_to_CAGE_peak)) out << "null"; else out << r.bio_dist_to_CAGE_peak;
-    out << ",\"dist_to_polyA_site\":";
-    if (sqanti_is_na(r.bio_dist_to_polyA_site)) out << "null"; else out << r.bio_dist_to_polyA_site;
-    out << ",\"predicted_NMD\":"
-        << (r.bio_predicted_NMD.empty() ? "null" : "\"" + json_escape(r.bio_predicted_NMD) + "\"")
-        << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
       if (i) out << ',';
@@ -155,32 +125,15 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
   }
 }
 
-// "size=<bytes>\tmtime=<UTC>" (+ "\tmd5=<hex>" when hashing) for one input file, so a
-// re-run can tell whether it saw the same bytes. Hashing reads the whole file (a BAM can
-// be large), hence opt-in.
-std::string file_identity(const std::string& path, bool hash) {
+// "size=<bytes>\tmtime=<UTC>" for one input file, so a re-run can tell whether it saw the
+// same file.
+std::string file_identity(const std::string& path) {
   struct stat st;
   if (stat(path.c_str(), &st) != 0) return "size=NA\tmtime=NA";
   char when[32] = "NA";
   struct tm tmv;
   if (gmtime_r(&st.st_mtime, &tmv) != nullptr) std::strftime(when, sizeof(when), "%Y-%m-%dT%H:%M:%SZ", &tmv);
-  std::string id = "size=" + std::to_string(static_cast<long long>(st.st_size)) + "\tmtime=" + when;
-  if (hash) {
-    std::FILE* f = std::fopen(path.c_str(), "rb");
-    if (f == nullptr) return id + "\tmd5=NA";
-    hts_md5_context* ctx = hts_md5_init();
-    unsigned char buf[1 << 16];
-    std::size_t n;
-    while ((n = std::fread(buf, 1, sizeof(buf), f)) > 0) hts_md5_update(ctx, buf, static_cast<unsigned long>(n));
-    std::fclose(f);
-    unsigned char digest[16];
-    char hex[33];
-    hts_md5_final(digest, ctx);
-    hts_md5_hex(hex, digest);
-    hts_md5_destroy(ctx);
-    id += std::string("\tmd5=") + hex;
-  }
-  return id;
+  return "size=" + std::to_string(static_cast<long long>(st.st_size)) + "\tmtime=" + when;
 }
 
 void write_provenance(const std::string& path, const std::vector<AdjudicationResult>& results,
@@ -208,11 +161,11 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
     out << "kept_isoforms\t" << prov.kept_path << '\n';
     out << "kept_verdicts\t" << prov.kept_verdicts << '\n';
   }
-  // Input identity (size, mtime, optional md5): the paths above say what was named, these
-  // say what was read. Lines start with "input." so an expected-output diff can skip them.
-  out << "# inputs" << (prov.hash_inputs ? " (md5 via --hash-inputs)" : "") << '\n';
+  // Input identity (size, mtime): the paths above say what was named, these say what was
+  // read. Lines start with "input." so an expected-output diff can skip them.
+  out << "# inputs\n";
   auto ident = [&](const char* name, const std::string& p) {
-    if (!p.empty()) out << "input." << name << '\t' << p << '\t' << file_identity(p, prov.hash_inputs) << '\n';
+    if (!p.empty()) out << "input." << name << '\t' << p << '\t' << file_identity(p) << '\n';
   };
   ident("classification", prov.classification_path);
   ident("isoforms", prov.isoforms_path);
@@ -269,7 +222,7 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
   auto yn = [](bool evaluable, bool v) { return evaluable ? (v ? "true" : "false") : "NA"; };
   out << "chrom\tstart\tend\tstrand\tn_isoforms\tisoforms\tknown\tsr_n_uniq\tsr_supported\tref_motif\thap_motifs\t"
          "variant\tcanonical_on_haplotypes\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
-         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_softclip\tbam_frac_indel_near\treference_bias\n";
+         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\treference_bias\n";
   for (const auto& j : rows) {
     std::string rb;
     if (j.variant == "created") rb += "haplotype_variant";
@@ -283,9 +236,9 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
         << (j.pangenome_evaluable ? join(j.pangenome_paths) : "NA") << '\t' << yn(j.pangenome_evaluable, j.pangenome_supported) << '\t';
     if (j.bam_evaluable) {
       out << j.bam.n_spanning << '\t' << j.bam.frac_low_mapq() << '\t' << j.bam.frac_supplementary() << '\t'
-          << j.bam.frac_softclip() << '\t' << j.bam.frac_indel_near();
+          << j.bam.frac_indel_near();
     } else {
-      out << "NA\tNA\tNA\tNA\tNA";
+      out << "NA\tNA\tNA\tNA";
     }
     out << '\t' << (rb.empty() ? "-" : rb) << '\n';
   }

@@ -1,4 +1,4 @@
-chrom	start	end	strand	n_isoforms	isoforms	known	sr_n_uniq	sr_supported	ref_motif	hap_motifs	variant	canonical_on_haplotypes	pangenome_n_haplotypes	pangenome_paths	pangenome_supported	bam_n_spanning	bam_frac_low_mapq	bam_frac_supplementary	bam_frac_softclip	bam_frac_indel_near	reference_bias
-chr1	201	300	+	1	iso_known	true	10	true	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-
-chr1	201	500	+	1	iso_novel_supported	false	12	true	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-
-chr1	201	700	+	1	iso_novel_artifact	false	0	false	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-
+chrom	start	end	strand	n_isoforms	isoforms	known	sr_n_uniq	sr_supported	ref_motif	hap_motifs	variant	canonical_on_haplotypes	pangenome_n_haplotypes	pangenome_paths	pangenome_supported	bam_n_spanning	bam_frac_low_mapq	bam_frac_supplementary	bam_frac_indel_near	reference_bias
+chr1	201	300	+	1	iso_known	true	10	true	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-
+chr1	201	500	+	1	iso_novel_supported	false	12	true	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-
+chr1	201	700	+	1	iso_novel_artifact	false	0	false	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-

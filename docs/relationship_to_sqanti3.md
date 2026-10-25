@@ -15,9 +15,9 @@ deliberately **does not** recompute any of SQANTI3's descriptors.
 
 | Feature | Already in SQANTI3 | PanIsoGuard's stance |
 |---------|--------------------|----------------------|
-| TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | **consume, don't recompute** — surfaced verbatim as `bio_flags` |
+| TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | **not used**; it stays in the classification file |
 | polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | **consume** — `perc_A_downstream_TTS ≥ 60` **and** `polyA_motif_found ≠ TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
-| ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | **consume** — `predicted_NMD` surfaced as a `bio_flags` annotation |
+| ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | **not used** |
 | splice-site motif / junction QC (`splice_site`, `RTS_junction`, `indel_near_junct`, `junction_category`) | yes (junctions file) | **consume** — `all_canonical` / `RTS_stage` are mechanism priors |
 | SQANTI-prior artifact rules | yes | already consumed: `RTS_stage`, `all_canonical`, `perc_A_downstream_TTS` |
 | short-read splice-junction support | partial | PanIsoGuard adds **per-edge** `SJ.tab` corroboration of *novel* junctions |
@@ -34,14 +34,13 @@ RT-switching, CAGE/Quant-seq, and short-read support.
 
 ## Where the line is drawn
 
-PanIsoGuard's contribution is the **adjudication of an evidence-annotated path through
-a gene-local splice graph** (see [method_graph.md](method_graph.md)) — integrating
-orthogonal, largely SQANTI-independent evidence:
+PanIsoGuard's contribution is the **adjudication of an evidence-annotated intron chain**,
+integrating orthogonal, largely SQANTI-independent evidence:
 
 - **caller consensus** — the same intron-chain path supported by multiple callers
   (`combine`); SQANTI3 is single-caller.
 - **short-read edge support** — per-novel-junction `SJ.tab` corroboration.
-- **long-read mapping** — read-level MAPQ / supplementary / soft-clip / indel features
+- **long-read mapping** — read-level MAPQ / supplementary / indel features
   on the reads that traverse a junction.
 - **personalized haplotype** — a novel junction that is non-canonical on the reference
   but canonical on the sample's haplotype (reference bias, not new splicing).
@@ -60,29 +59,14 @@ makes no SQANTI3-style ML/rule QC filter — those would duplicate SQANTI3.
 > bias, gated by a circularity firewall. Same word, opposite direction; they do not
 > compete. (See also [relationship_to_merge_tools.md](relationship_to_merge_tools.md).)
 
-## `bio_flags` (consume, not recompute)
+## What enters the verdict
 
-To make the "consume, don't recompute" stance concrete, each
-`<prefix>.attribution.jsonl` row carries a `bio_flags` object that **passes through**
-the relevant SQANTI3 descriptors verbatim (`null` when the column is absent or `NA`):
-
-```json
-"bio_flags": {
-  "dist_to_CAGE_peak": 5,
-  "dist_to_polyA_site": 8,
-  "predicted_NMD": null
-}
-```
-
-(`polyA_motif_found` sat here until 0.0.5; it is now in `evidence`, because it refines the
-intra-priming sign: an A-rich stretch after the 3' end only counts as internal priming when
-no polyA motif precedes it.)
-
-These are **biological-plausibility annotations only** — read from the SQANTI3
-classification, never computed by PanIsoGuard, and they do **not** enter the rule engine
-or change the verdict (which remains the deterministic path-level projection in
-[decision_engine.md](decision_engine.md)). They let a downstream user weigh SQANTI3's QC
-context alongside PanIsoGuard's independent verdict without PanIsoGuard re-deriving it.
+Of SQANTI3's columns, four reach the rule engine: `structural_category`, `RTS_stage`,
+`all_canonical` and `perc_A_downstream_TTS`, plus `polyA_motif_found` when present (it refines
+the intra-priming sign: an A-rich stretch after the 3' end only counts as internal priming
+when no polyA motif precedes it). SQANTI3's other descriptors (CAGE / polyA-site distances,
+ORF / NMD) are neither recomputed nor copied into the output; they stay in the classification
+file, next to PanIsoGuard's verdict.
 
 ## Attribution, licensing & citation
 

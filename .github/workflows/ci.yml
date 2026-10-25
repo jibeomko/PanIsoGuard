@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Check version sync (CMake == pyproject == bioconda recipe)
+      - name: Check version sync (CMake == bioconda recipe)
         run: python3 scripts/check_version_sync.py
 
       - name: Set up toolchain + htslib (micromamba)
@@ -137,25 +137,3 @@ jobs:
               bash -c "panisoguard example $ex ex_$ex && ex_$ex/run.sh"
           done
 
-  report-tool:
-    name: report tool (matplotlib smoke)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install panisoguard-report
-        run: pip install ./python
-
-      - name: Smoke — render the committed showcase fixture to a PDF
-        run: |
-          set -euo pipefail
-          panisoguard-report --help >/dev/null
-          python -m panisoguard.report --prefix examples/report/showcase --out /tmp/showcase.report.pdf
-          test -s /tmp/showcase.report.pdf
-          python -c "d=open('/tmp/showcase.report.pdf','rb').read(); assert d[:4]==b'%PDF', 'not a PDF'; print('PDF ok:', len(d), 'bytes')"

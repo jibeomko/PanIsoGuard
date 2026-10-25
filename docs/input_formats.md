@@ -62,9 +62,8 @@ rescue) vs `{rna_derived|unknown}` (held under the circularity firewall).
 
 A tab-separated file (no header; `#` comment lines allowed) of splice junctions that
 are present on at least one haplotype path of a pangenome graph (e.g. HPRC),
-pre-extracted with `vg`/`rpvg`. PanIsoGuard does not traverse the graph itself — it
-adjudicates using this junction set (the in-process GBZ tier stays behind
-`-DWITH_PANGENOME_LIB`). Columns:
+pre-extracted with `vg`/`rpvg`. PanIsoGuard does not traverse the graph itself; it
+adjudicates using this junction set. Columns:
 
 ```text
 chrom   intron_start   intron_end   strand   [n_haplotypes]   [haplotype_ids]

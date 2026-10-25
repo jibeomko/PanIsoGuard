@@ -13,8 +13,7 @@ namespace panisoguard {
 // pangenome graph (e.g. HPRC), produced externally by vg/rpvg and supplied to
 // PanIsoGuard as a coordinate file. This is the file/subprocess form of the
 // pangenome tier: PanIsoGuard does not traverse the graph itself, it adjudicates
-// using the graph's pre-extracted junction set (in-process gbwtgraph/GBZ remains
-// behind -DWITH_PANGENOME_LIB).
+// using the graph's pre-extracted junction set.
 //
 // Used by the pangenome (reference-bias) rescue axis: a junction that is novel
 // relative to the LINEAR reference but realizable on a pangenome haplotype path is

@@ -1,12 +1,11 @@
 # Releasing PanIsoGuard
 
 How to cut a release and ship it to bioconda. The version string is the single source of
-truth in **three** files, kept in lockstep by CI (`scripts/check_version_sync.py`):
+truth in **two** files, kept in lockstep by CI (`scripts/check_version_sync.py`):
 
 | file | field |
 |------|-------|
 | `CMakeLists.txt` | `project(panisoguard VERSION X.Y.Z ...)` |
-| `python/pyproject.toml` | `version = "X.Y.Z"` |
 | `recipes/bioconda/meta.yaml` | `{% set version = "X.Y.Z" %}` + `sha256:` |
 
 ## GitHub releases do not wait for bioconda
@@ -17,7 +16,7 @@ merged on 2026-09-30 after four months in review. A GitHub release is cut whenev
 ready; the bioconda package follows through a version-bump PR (see below).
 
 Two things went wrong with the first submission. Watch for them with any bioconda PR, and with
-the first submission of any new package (for example `panisoguard-report`):
+the first submission of any new package:
 
 - **A push after approval takes the PR out of the merge queue.** Mergify drops a queued PR
   when its branch is "manually updated", and only a maintainer can requeue it. #65953 was
@@ -42,12 +41,11 @@ V=0.0.4
 # 1) finalize the changelog: rename "[Unreleased]" to "[X.Y.Z] - <date>" (edit CHANGELOG.md);
 #    step 3's workflow copies this section into the release notes
 
-# 2) bump the version in all THREE sources (sha256 is fixed in step 4)
+# 2) bump the version in BOTH sources (sha256 is fixed in step 4)
 sed -i -E "s/(project\(panisoguard VERSION )[0-9.]+/\1$V/" CMakeLists.txt
-sed -i -E "s/^version = \"[0-9.]+\"/version = \"$V\"/" python/pyproject.toml
 sed -i -E "s/(set version = \")[0-9.]+/\1$V/" recipes/bioconda/meta.yaml
 python3 scripts/check_version_sync.py        # must print OK (checks the version string, not the sha)
-git add CMakeLists.txt python/pyproject.toml recipes/bioconda/meta.yaml CHANGELOG.md
+git add CMakeLists.txt recipes/bioconda/meta.yaml CHANGELOG.md
 git commit -m "release: v$V"
 git push origin main
 
@@ -74,25 +72,12 @@ git commit -am "recipe: pin v$V source sha256" && git push origin main
   (version + sha256 to match step 4, and `build: number` back to 0), open a PR, and add the
   `please review & merge` label via the bot.
 
-## Optional: publish `panisoguard-report` to PyPI
-
-The C++ binary on bioconda does **not** include the Python report tool. To distribute it:
-
-```bash
-python -m build python/                 # sdist + wheel -> python/dist/
-python -m twine upload python/dist/*    # needs a PyPI account/token
-```
-
-A bioconda recipe for `panisoguard-report` (noarch python, `matplotlib` dep) can follow once
-it is on PyPI; keep its version in lockstep with the C++ package.
-
 ## Checklist
 
 - [ ] CHANGELOG section finalized with a date
-- [ ] version bumped in all three files; `check_version_sync.py` OK
+- [ ] version bumped in both files; `check_version_sync.py` OK
 - [ ] `ctest --test-dir build` green (incl. `integration_config_equivalence`)
 - [ ] tag pushed + GitHub Release created
 - [ ] recipe `sha256` updated to the release tarball
 - [ ] bioconda: autobump/manual PR opened & labelled; after the merge, the new version is on
       <https://anaconda.org/bioconda/panisoguard/files> for every platform
-- [ ] (optional) report tool published to PyPI

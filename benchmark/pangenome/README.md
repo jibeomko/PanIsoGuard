@@ -92,5 +92,5 @@ Validated for **specificity** at chr22 (constructed sensitivity/firewall) and
 **whole-genome** scale (two real public samples, GM12878 + K562) on real HPRC v1.1. The
 derivation uses graph
 **deletions** (the dominant reference-bias mechanism); insertion/inversion-based
-junctions and an **in-process** graph traversal (`-DWITH_PANGENOME_LIB`, gbwtgraph/GBZ)
+junctions and an **in-process** graph traversal
 remain future work — today the axis consumes the pre-extracted junction file.

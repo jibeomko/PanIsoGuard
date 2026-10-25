@@ -75,7 +75,6 @@ struct EvidenceVector {
   int bam_n_junctions_gated = 0;
   double bam_max_frac_low_mapq = 0.0;
   double bam_max_frac_supplementary = 0.0;
-  double bam_max_frac_softclip = 0.0;
   double bam_max_frac_indel_near = 0.0;
 
   // variant (reference-bias) axis: a novel junction that is non-canonical on the

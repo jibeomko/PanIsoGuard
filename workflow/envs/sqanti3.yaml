@@ -1,3 +1,0 @@
-channels: [bioconda, conda-forge]
-dependencies:
-  - sqanti3 >=5.2

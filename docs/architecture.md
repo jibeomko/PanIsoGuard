@@ -14,7 +14,7 @@ boundary inward:
 ```mermaid
 %%{init: {"theme": "base", "themeCSS": "svg { background: #ffffff; }", "themeVariables": {"background": "#ffffff", "mainBkg": "#ffffff", "fontSize": "17px", "fontFamily": "Arial, sans-serif", "primaryTextColor": "#111827", "lineColor": "#334155", "arrowheadColor": "#334155"}, "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart LR
-  CLI["<b>CLI</b><br/>adjudicate | combine<br/>benchmark | ablate"]
+  CLI["<b>CLI</b><br/>adjudicate | combine<br/>decoys | example"]
   Iso["<b>Isoform inputs</b><br/>GTF/BED12<br/>SQANTI3 classification"]
   Context["<b>Evidence context</b><br/>reference GTF | SJ.tab<br/>BAM/CRAM | FASTA | graph TSV"]
   Rules["<b>Rule gates</b><br/>rules.default.toml"]
@@ -59,13 +59,12 @@ User-facing subcommands, dispatched samtools-style from
 | Command | Source | Purpose |
 |---------|--------|---------|
 | `adjudicate` | [`cmd_adjudicate.cpp`](../src/cli/cmd_adjudicate.cpp) | classify novel isoforms → 3 output files |
-| `benchmark`  | [`cmd_benchmark.cpp`](../src/cli/cmd_benchmark.cpp) | non-redundancy vs the SQANTI3 filter |
-| `ablate`     | [`cmd_ablate.cpp`](../src/cli/cmd_ablate.cpp) | per-evidence-axis contribution |
 | `combine`    | [`cmd_combine.cpp`](../src/cli/cmd_combine.cpp) | integrate multiple callers by intron-chain fingerprint |
+| `decoys`     | [`cmd_decoys.cpp`](../src/cli/cmd_decoys.cpp) | per-dataset false-lift bound of the whole-chain read support |
+| `example`    | [`cmd_example.cpp`](../src/cli/cmd_example.cpp) | copy a bundled example into a working folder |
 
 Argument parsing and the shared load-and-run path live in
-[`run_common.cpp`](../src/cli/run_common.cpp) so `adjudicate`/`benchmark`/`ablate`
-take an identical input set.
+[`run_common.cpp`](../src/cli/run_common.cpp).
 
 ## 2. Input reader layer
 
@@ -86,15 +85,11 @@ In-house parsers (no external parsing deps) under [`src/io/`](../src/io/):
 Every transcript structure is normalized into a **0-based half-open intron chain**
 ([`include/panisoguard/types.hpp`](../include/panisoguard/types.hpp): `Junction`,
 `IntronChain`, `Strand`). This single convention lets `SJ.tab`, GTF, BED12, and
-pangenome coordinates be compared by exact equality. Equivalently, the intron chain is
-a **path through a gene-local splice graph** and the reference catalog is the **known
-graph**; that framing is in [method_graph.md](method_graph.md). Two derived structures:
+pangenome coordinates be compared by exact equality. One derived structure:
 
 - **Intron-chain fingerprint** (`src/core/fingerprint.cpp`) — an FNV-1a hash over
   `chrom + strand + sorted introns`; used by `combine` to merge isoforms across
   callers that use different running-ID schemes.
-- **Interval index** (`src/core/interval_index.cpp`) — RAII wrapper over a vendored
-  cgranges interval tree for fast overlap queries.
 
 ## 4. Evidence layer
 
@@ -105,7 +100,7 @@ for/against):
 | Axis | Module | Signal |
 |------|--------|--------|
 | Short-read SJ | `SjTable::find_exact` | the junction is corroborated by STAR `SJ.tab` |
-| Long-read BAM | `BamReader::features_at_junction` | read-level spanning / MAPQ / soft-clip / indel features |
+| Long-read BAM | `BamReader::features_at_junction` | read-level spanning / MAPQ / supplementary / indel features |
 | SQANTI priors | (read from the classification) | RTS_stage, all_canonical, perc_A_downstream_TTS |
 | Variant motif | `HaplotypeProvider::classify` | a splice motif created/destroyed on a personalized haplotype |
 | Pangenome | `PangenomeJunctions::supports` | the junction is realizable on a pangenome graph path |
@@ -135,16 +130,16 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
                     EvidenceVector ─► [RuleEngine.evaluate] ─► Verdict
                               │
                               ▼
-              .adjudicated.tsv / .junctions.tsv / .attribution.jsonl (rule_trace + graph_trace) / .provenance.log
+              .adjudicated.tsv / .junctions.tsv / .attribution.jsonl (rule_trace) / .provenance.log
 ```
 
 ## Design properties
 
 - **Deterministic + auditable** — every verdict carries a `rule_trace` listing the
   rules that fired; no randomness in the decision path.
-- **Orthogonal axes** — each evidence axis is optional and can be masked individually
-  (`ablate`), so a run with only SQANTI priors still produces honest verdicts.
+- **Orthogonal axes** — each evidence axis is optional, so a run with only SQANTI priors
+  still produces honest verdicts.
 - **Circularity firewall** — a rescue that would rest on the sample's own RNA-derived
   data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
-- **htslib-only** — the sole non-vendored dependency; cgranges / toml++ / Catch2 are
-  vendored single-header components.
+- **htslib-only** — the sole non-vendored dependency; toml++ and Catch2 are vendored
+  single-header components.

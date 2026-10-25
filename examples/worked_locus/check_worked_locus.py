@@ -23,8 +23,8 @@ PIG = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "..", "buil
 D = lambda name: os.path.join(DATA, name)
 
 NOVEL = ("novel_in_catalog", "novel_not_in_catalog")
-CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_chain=3, min_mapq=20, min_spanning=3, clip_bp=20, window=10,
-           gates={"low_mapq": 0.5, "supplementary": 0.5, "indel_near": 0.5, "softclip": 1.01})
+CFG = dict(min_uniq=3, need_canonical=True, min_callers=2, min_chain=3, min_mapq=20, min_spanning=3, window=10,
+           gates={"low_mapq": 0.5, "supplementary": 0.5, "indel_near": 0.5})
 
 
 # ---------------------------------------------------------------- readers (all -> 0-based half-open)
@@ -74,17 +74,15 @@ def read_classification(path):
 
 # ---------------------------------------------------------------- evidence
 def bam_features(reads, jx):
-    n = low = supp = clip = indel = 0
+    n = low = supp = indel = 0
     near = lambda p: abs(p - jx[0]) <= CFG["window"] or abs(p - jx[1]) <= CFG["window"]
     for flag, pos, mapq, cig in reads:
         if flag & 4:
             continue
-        span = c = d = False
-        for i, (ln, op) in enumerate(cig):
+        span = d = False
+        for ln, op in cig:
             ln = int(ln)
-            if op == "S" and ln >= CFG["clip_bp"] and i in (0, len(cig) - 1):
-                c = True
-            elif op == "N":
+            if op == "N":
                 span |= (pos, pos + ln) == jx
                 pos += ln
             elif op == "D":
@@ -98,9 +96,8 @@ def bam_features(reads, jx):
             n += 1
             low += mapq < CFG["min_mapq"]
             supp += bool(flag & (256 | 2048))
-            clip += c
             indel += d
-    return n, {"low_mapq": low, "supplementary": supp, "softclip": clip, "indel_near": indel}
+    return n, {"low_mapq": low, "supplementary": supp, "indel_near": indel}
 
 
 def chain_full_reads(reads, introns):

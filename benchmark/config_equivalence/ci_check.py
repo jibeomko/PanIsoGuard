@@ -36,10 +36,20 @@ ISO_GTF = (
 REF_GTF = (
     'chr1\tt\texon\t100\t200\t.\t+\t.\tgene_id "REF"; transcript_id "REF";\n'
     'chr1\tt\texon\t250\t350\t.\t+\t.\tgene_id "REF"; transcript_id "REF";\n')
-# combine-style caller-support matrix: isoX recovered by 3 callers
-SUPPORT = (
-    "pig_id\tchrom\tstrand\tn_introns\tn_callers\tn_isoforms\tcallers\tnovelty\tnative_ids\n"
-    "PIG.1\tchr1\t+\t1\t3\t3\tflair,isoquant,bambu\tnovel\tflair=isoX;isoquant=x2;bambu=x3\n")
+# caller-support matrix: isoX's chain recovered by 3 callers (`combine` writes it, so the
+# fingerprint column matches the binary's)
+CALLERS = {"flair": "isoX", "isoquant": "x2", "bambu": "x3"}
+
+
+def combine(workdir):
+    cmd = [PIG, "combine", "--ref-gtf", str(workdir / "ref.gtf"), "--out", str(workdir / "support.tsv")]
+    for caller, tid in CALLERS.items():
+        (workdir / f"{caller}.gtf").write_text(ISO_GTF.replace("isoX", tid))
+        cmd += ["--gtf", f"{caller}:{workdir / caller}.gtf"]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.stderr.write(f"combine failed:\n{r.stderr}\n")
+        sys.exit(1)
 
 
 def adjudicate(workdir, prefix, config=None):
@@ -74,7 +84,7 @@ def main():
         (w / "cls.tsv").write_text(CLS)
         (w / "iso.gtf").write_text(ISO_GTF)
         (w / "ref.gtf").write_text(REF_GTF)
-        (w / "support.tsv").write_text(SUPPORT)
+        combine(w)
 
         builtin = adjudicate(w, "builtin")            # built-in defaults
         shipped = adjudicate(w, "shipped", DEFAULT_CONFIG)  # config/rules.default.toml

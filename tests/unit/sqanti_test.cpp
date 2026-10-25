@@ -32,9 +32,8 @@ TEST_CASE("SQANTI3 novelty and QC priors", "[sqanti]") {
   CHECK_FALSE(sqanti_is_na(iso1.perc_A_downstream_TTS));
   CHECK(iso1.filter_result == "Isoform");
 
-  const SqantiRecord& iso2 = t.records[1];  // NIC with NA CAGE/polyA distances
+  const SqantiRecord& iso2 = t.records[1];  // NIC
   CHECK(iso2.is_novel());
-  CHECK(sqanti_is_na(iso2.dist_to_CAGE_peak));
 
   const SqantiRecord& iso3 = t.records[2];  // NNC artifact
   CHECK(iso3.structural_category == "novel_not_in_catalog");
