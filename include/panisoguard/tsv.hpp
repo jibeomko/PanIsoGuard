@@ -24,22 +24,25 @@ inline long long parse_int_field(const std::string& s, const char* what,
   }
 }
 
-// Split an (already newline-stripped) line on tab. Bioinformatics TSVs are
-// unquoted, so no quote handling is needed.
-inline std::vector<std::string> split_tsv(const std::string& line) {
+// Split on one separator character; empty fields are kept ("a,,b" -> three fields, "" ->
+// one empty field).
+inline std::vector<std::string> split(const std::string& s, char sep) {
   std::vector<std::string> out;
   std::size_t start = 0;
   while (true) {
-    const std::size_t tab = line.find('\t', start);
-    if (tab == std::string::npos) {
-      out.emplace_back(line.substr(start));
-      break;
+    const std::size_t pos = s.find(sep, start);
+    if (pos == std::string::npos) {
+      out.emplace_back(s.substr(start));
+      return out;
     }
-    out.emplace_back(line.substr(start, tab - start));
-    start = tab + 1;
+    out.emplace_back(s.substr(start, pos - start));
+    start = pos + 1;
   }
-  return out;
 }
+
+// Split an (already newline-stripped) line on tab. Bioinformatics TSVs are
+// unquoted, so no quote handling is needed.
+inline std::vector<std::string> split_tsv(const std::string& line) { return split(line, '\t'); }
 
 // Strip a trailing CR and/or LF (CRLF-safe line handling).
 inline void chomp(std::string& s) {

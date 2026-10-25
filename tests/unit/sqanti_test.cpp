@@ -10,12 +10,8 @@ TEST_CASE("SQANTI3 classification parses with name-indexed columns", "[sqanti]")
 
   REQUIRE(t.records.size() == 4);
   CHECK(t.n_columns == 14);
-  CHECK(t.missing_columns.empty());
-
-  CHECK(t.count("full-splice_match") == 1);
-  CHECK(t.count("novel_in_catalog") == 1);
-  CHECK(t.count("novel_not_in_catalog") == 1);
-  CHECK(t.count("incomplete-splice_match") == 1);
+  CHECK(t.records[0].structural_category == "full-splice_match");
+  CHECK(t.records[3].structural_category == "incomplete-splice_match");
 }
 
 TEST_CASE("SQANTI3 novelty and QC priors", "[sqanti]") {
@@ -30,7 +26,6 @@ TEST_CASE("SQANTI3 novelty and QC priors", "[sqanti]") {
   CHECK(iso1.isoform == "iso1");
   CHECK(iso1.perc_A_downstream_TTS == Approx(12.5));
   CHECK_FALSE(sqanti_is_na(iso1.perc_A_downstream_TTS));
-  CHECK(iso1.filter_result == "Isoform");
 
   const SqantiRecord& iso2 = t.records[1];  // NIC
   CHECK(iso2.is_novel());
@@ -38,7 +33,6 @@ TEST_CASE("SQANTI3 novelty and QC priors", "[sqanti]") {
   const SqantiRecord& iso3 = t.records[2];  // NNC artifact
   CHECK(iso3.structural_category == "novel_not_in_catalog");
   CHECK(iso3.all_canonical == "non_canonical");
-  CHECK(iso3.filter_result == "Artifact");
 
   CHECK(t.records[3].strand == Strand::kMinus);
 }

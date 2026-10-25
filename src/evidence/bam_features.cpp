@@ -14,11 +14,9 @@ struct BamReader::Impl {
   htsFile* fp = nullptr;
   sam_hdr_t* hdr = nullptr;
   hts_idx_t* idx = nullptr;
-  std::string path;
 };
 
 BamReader::BamReader(const std::string& path, const std::string& reference) : impl_(new Impl) {
-  impl_->path = path;
   impl_->fp = sam_open(path.c_str(), "r");
   if (impl_->fp == nullptr) {
     delete impl_;

@@ -1,14 +1,14 @@
-// `panisoguard adjudicate` -- Tier-0+ end-to-end: consume a SQANTI3 classification
-// + caller isoform chains (+ optional reference GTF, STAR SJ.tab, and BAM), assign
-// a confidence class with mechanistic attribution, and write three outputs.
+// `panisoguard adjudicate` -- read a SQANTI3 classification and the caller's isoform
+// chains (plus whatever evidence files are given), assign each isoform a confidence class
+// with its mechanism and reasons, and write the four output files.
 
 #include <cstdio>
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 
+#include "panisoguard/tsv.hpp"
 #include "run_common.hpp"
 
 namespace {
@@ -44,9 +44,7 @@ void usage() {
 std::string parse_verdict_list(const std::string& list, std::set<std::string>& out) {
   static const std::set<std::string> known = {"known", "known_fragment", "confirmed", "reference_bias",
                                               "unconfirmed", "artifact", "not_adjudicated"};
-  std::stringstream ss(list);
-  std::string tok;
-  while (std::getline(ss, tok, ',')) {
+  for (const std::string& tok : panisoguard::split(list, ',')) {
     if (tok.empty()) continue;
     if (known.count(tok) == 0) return tok;
     out.insert(tok);

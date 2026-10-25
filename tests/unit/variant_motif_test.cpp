@@ -36,18 +36,18 @@ TEST_CASE("HaplotypeProvider classifies variant-created vs disrupted", "[variant
 
   // reference non-canonical, haplotype canonical -> created (reference bias)
   HaplotypeProvider created(ref, {hap});
-  CHECK(created.classify("chrT", intron, Strand::kPlus) == VariantVerdict::kCreated);
+  CHECK(created.motifs("chrT", intron, Strand::kPlus).verdict == VariantVerdict::kCreated);
 
   // swap roles: "reference" canonical, "haplotype" non-canonical -> disrupted
   HaplotypeProvider disrupted(hap, {ref});
-  CHECK(disrupted.classify("chrT", intron, Strand::kPlus) == VariantVerdict::kDisrupted);
+  CHECK(disrupted.motifs("chrT", intron, Strand::kPlus).verdict == VariantVerdict::kDisrupted);
 
   // both canonical -> none
   HaplotypeProvider none(hap, {hap});
-  CHECK(none.classify("chrT", intron, Strand::kPlus) == VariantVerdict::kNone);
+  CHECK(none.motifs("chrT", intron, Strand::kPlus).verdict == VariantVerdict::kNone);
 
   // unknown contig -> not evaluable
-  CHECK(created.classify("chrZ", intron, Strand::kPlus) == VariantVerdict::kNotEvaluable);
+  CHECK(created.motifs("chrZ", intron, Strand::kPlus).verdict == VariantVerdict::kNotEvaluable);
 }
 
 TEST_CASE("rules: variant rescue -> REFERENCE_BIAS, circular-risk held", "[variant][rules]") {

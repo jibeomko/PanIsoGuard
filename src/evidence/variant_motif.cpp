@@ -120,14 +120,4 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
   return m;
 }
 
-VariantVerdict HaplotypeProvider::classify(const std::string& chrom, const Junction& intron,
-                                           Strand strand, std::vector<bool>* canonical_on) const {
-  const JunctionMotifs m = motifs(chrom, intron, strand);
-  if (canonical_on != nullptr) {
-    canonical_on->assign(haps_.size(), false);
-    for (std::size_t i = 0; i < m.haps.size(); ++i) (*canonical_on)[i] = m.haps[i].evaluable && m.haps[i].canonical;
-  }
-  return m.verdict;
-}
-
 }  // namespace panisoguard

@@ -18,6 +18,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   class, reason and junction count is unchanged (byte-identical `adjudicated.tsv` on the worked
   locus and on SQANTI-SIM chr22 with short reads, BAM and reference); the only change inside
   `rule_trace` is that the mapping-artifact line no longer prints the soft-clip fraction.
+- Reader fields nothing read (SQANTI3 `subcategory`, `associated_*`, `n_indels_junc`,
+  `filter_result`; the BED12 score and FLAIR id prefix; the catalog's splice-site set) and
+  test-only accessors. Code: one `junction_key` and one `split` helper replace four copies
+  each; the projection step returns one struct; a malformed `fingerprint` column or decoys
+  option fails with a message instead of a bare exception.
 
 ### Changed
 - **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine

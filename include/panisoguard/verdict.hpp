@@ -8,9 +8,10 @@ namespace panisoguard {
 // Axis A: how well the isoform's novel junctions are independently supported.
 enum class NoveltySupport { kUnknown, kUnsupported, kPartial, kSupported };
 
-// Axis B: the dominant artifact mechanism attributed to a novel call. Tier-0
-// (SQANTI priors + short-read corroboration) can reach none/noncanonical/
-// rt_switch/degradation; mapping/variant/population require later evidence tiers.
+// Axis B: the dominant artifact mechanism of a novel call, or the reference-bias
+// explanation that rescued it. noncanonical / rt_switch / degradation come from SQANTI3's
+// priors, mapping from the BAM, variant and population_known from the haplotype and
+// pangenome axes.
 enum class Mechanism {
   kNone,
   kNoncanonical,
@@ -19,7 +20,6 @@ enum class Mechanism {
   kMapping,
   kVariant,
   kPopulationKnown,
-  kUnknown,
 };
 
 // Final per-isoform confidence class (the projection of the 2-axis grid). Names say the
@@ -27,7 +27,7 @@ enum class Mechanism {
 enum class ConfidenceClass {
   kKnown,            // matches a known transcript (FSM); not adjudicated
   kKnownFragment,    // a truncated known transcript (ISM) whose whole intron chain >= chain_min_full_reads
-                     // long reads carry, with no intra-priming sign at the 3' end (0.0.7)
+                     // long reads carry, with no intra-priming sign at the 3' end
   kNovelConfirmed,   // every novel junction corroborated, no artifact sign
   kNovelProbable,    // corroborated with one sign, or supported by caller agreement only
   kUnconfirmed,      // weak or partial evidence (also ISM: a truncated known transcript)

@@ -11,9 +11,9 @@ namespace panisoguard {
 // end-ignoring and making two isoforms with the same splice chain but different
 // TSS/TES collapse to the same fingerprint.
 //
-// NOTE: a monoexonic chain (no introns) hashes only on chrom+strand and is
-// therefore NOT uniquely identified; monoexonic consensus/collapse must use
-// locus, handled at a later milestone.
+// A monoexonic chain (no introns) hashes to chrom+strand only, so it is not a usable
+// identity: ConsensusBuilder keeps every monoexonic isoform in its own group and the
+// caller-support matrix writes NA for its fingerprint.
 Fingerprint fingerprint_intron_chain(const IntronChain& chain);
 
 }  // namespace panisoguard

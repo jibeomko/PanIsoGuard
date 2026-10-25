@@ -3,6 +3,7 @@
 // caller-support matrix (optionally annotated known/novel vs a reference GTF).
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
 

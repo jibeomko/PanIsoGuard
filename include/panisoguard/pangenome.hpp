@@ -11,9 +11,8 @@ namespace panisoguard {
 
 // A set of splice junctions that are present on at least one haplotype PATH of a
 // pangenome graph (e.g. HPRC), produced externally by vg/rpvg and supplied to
-// PanIsoGuard as a coordinate file. This is the file/subprocess form of the
-// pangenome tier: PanIsoGuard does not traverse the graph itself, it adjudicates
-// using the graph's pre-extracted junction set.
+// PanIsoGuard as a coordinate file. PanIsoGuard does not traverse the graph itself; it
+// adjudicates using this pre-extracted junction set.
 //
 // Used by the pangenome (reference-bias) rescue axis: a junction that is novel
 // relative to the LINEAR reference but realizable on a pangenome haplotype path is
@@ -41,15 +40,9 @@ class PangenomeJunctions {
   const PangenomeJunctionRecord* find_exact(const std::string& chrom, Strand strand,
                                             const Junction& intron) const;
 
-  // True if the junction is present on >= min_haplotypes graph haplotypes.
-  bool supports(const std::string& chrom, Strand strand, const Junction& intron,
-                int min_haplotypes) const;
-
   std::size_t size() const { return records_.size(); }
 
  private:
-  static std::string key(const std::string& chrom, Strand strand, const Junction& j);
-
   std::vector<PangenomeJunctionRecord> records_;
   std::unordered_map<std::string, std::size_t> by_coord_;
 };

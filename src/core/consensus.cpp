@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <stdexcept>
 
@@ -176,7 +177,7 @@ CallerSupport read_caller_support(const std::string& path) {
       if (col_callers < 0 || col_native < 0 || col_fp < 0) {
         throw std::runtime_error("caller-support matrix " + path +
                                  ": missing required column(s) n_callers/native_ids/fingerprint "
-                                 "(is this a `panisoguard combine` matrix, 0.0.6 or later?)");
+                                 "(is this a `panisoguard combine` matrix?)");
       }
       continue;
     }
@@ -184,34 +185,24 @@ CallerSupport read_caller_support(const std::string& path) {
     const int n_callers =
         static_cast<int>(parse_int_field(f[col_callers], "n_callers", "caller-support matrix", lineno));
     if (col_fp < static_cast<int>(f.size()) && f[col_fp] != "NA" && !f[col_fp].empty()) {
-      support.by_chain[std::stoull(f[col_fp])] = n_callers;
+      char* end = nullptr;
+      const unsigned long long fp = std::strtoull(f[col_fp].c_str(), &end, 10);
+      if (*end != '\0') {
+        throw std::runtime_error("caller-support matrix line " + std::to_string(lineno) +
+                                 ": fingerprint is not an integer: \"" + f[col_fp] + "\"");
+      }
+      support.by_chain[fp] = n_callers;
     }
     // native_ids column is "caller1=id1|id2;caller2=id3" -- explode it so every native
     // running id maps to the per-chain caller count.
-    const std::string& native = f[col_native];
-    std::size_t gstart = 0;
-    while (gstart <= native.size()) {
-      const std::size_t semi = native.find(';', gstart);
-      const std::string group =
-          native.substr(gstart, semi == std::string::npos ? std::string::npos : semi - gstart);
+    for (const std::string& group : split(f[col_native], ';')) {
       const std::size_t eq = group.find('=');
-      if (eq != std::string::npos) {
-        const std::string ids = group.substr(eq + 1);
-        std::size_t istart = 0;
-        while (istart <= ids.size()) {
-          const std::size_t bar = ids.find('|', istart);
-          const std::string id =
-              ids.substr(istart, bar == std::string::npos ? std::string::npos : bar - istart);
-          if (!id.empty()) {
-            int& n = support.by_native_id[id];  // a name reused for another chain keeps the larger count
-            n = std::max(n, n_callers);
-          }
-          if (bar == std::string::npos) break;
-          istart = bar + 1;
-        }
+      if (eq == std::string::npos) continue;
+      for (const std::string& id : split(group.substr(eq + 1), '|')) {
+        if (id.empty()) continue;
+        int& n = support.by_native_id[id];  // a name reused for another chain keeps the larger count
+        n = std::max(n, n_callers);
       }
-      if (semi == std::string::npos) break;
-      gstart = semi + 1;
     }
   }
   return support;

@@ -105,24 +105,10 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
   return out;
 }
 
-std::string Catalog::intron_key(const std::string& chrom, Strand strand, const Junction& j) {
-  return chrom + '|' + strand_char(strand) + '|' + std::to_string(j.start) + '-' +
-         std::to_string(j.end);
-}
-
-std::string Catalog::site_key(const std::string& chrom, Strand strand, int64_t pos) {
-  return chrom + '|' + strand_char(strand) + '|' + std::to_string(pos);
-}
-
 void Catalog::add_transcript(const Transcript& t) {
-  if (!t.chain.introns.empty()) {
-    chains_.insert(fingerprint_intron_chain(t.chain));
-  }
-  for (const auto& j : t.chain.introns) {
-    introns_.insert(intron_key(t.chain.chrom, t.chain.strand, j));
-    sites_.insert(site_key(t.chain.chrom, t.chain.strand, j.start));
-    sites_.insert(site_key(t.chain.chrom, t.chain.strand, j.end));
-  }
+  if (t.chain.monoexonic()) return;
+  chains_.insert(fingerprint_intron_chain(t.chain));
+  for (const auto& j : t.chain.introns) introns_.insert(junction_key(t.chain.chrom, t.chain.strand, j));
 }
 
 Catalog build_catalog_from_gtf(const std::string& path) {
