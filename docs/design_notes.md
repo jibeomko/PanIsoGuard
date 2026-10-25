@@ -20,6 +20,4 @@ rebuilding, and every verdict records its `rule_trace` (see
 
 You can also picture each isoform as a **path through its gene's splice graph**: a novel
 junction is an edge that the reference graph does not have. This is only another way to
-describe the same rules; there is no graph model or new algorithm. Each verdict also carries a
-`graph_trace` in these terms (the number of novel edges, how many of them are supported, and
-the distance from a known path). See [docs/method_graph.md](method_graph.md).
+describe the same rules; there is no graph model or new algorithm.

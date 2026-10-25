@@ -3,21 +3,20 @@
 PanIsoGuard is an adjudication layer, so "validation" means two distinct things,
 kept separate on purpose:
 
-- **What the `benchmark` / `ablate` subcommands report** — *non-redundancy* vs the
-  SQANTI3 filter and *per-axis contribution*. These run on real data with **no truth
-  labels**, so by construction they show disagreement and which axis drives which
-  call — **not correctness**.
+- **What a run on real data shows** — how PanIsoGuard's verdicts differ from the SQANTI3
+  filter's and which evidence axis drives which call. Without truth labels that is
+  disagreement, **not correctness**.
 - **Ground-truth validation** — whether a reclassification is *right*. This needs
   labelled truth and is done by the dedicated protocols under
   [`../benchmark/`](../benchmark/), summarized below.
 
 ## Unit suite
 
-`ctest` (htslib-only build): intron-chain fingerprint, interval index, all readers
+`ctest` (htslib-only build): intron-chain fingerprint, all readers
 on controlled fixtures (incl. SJ.tab strand discrimination), cross-reader coordinate
 convergence, the full 2-axis rule projection (mapping override + variant/pangenome
 circularity firewall), BAM read-level features, the splice-motif core, the pangenome
-rescue (all-or-nothing + provenance firewall), and the non-redundancy/ablation math.
+rescue (all-or-nothing + provenance firewall), and the decoy generator.
 
 ## Ground-truth validation (completed)
 
@@ -116,7 +115,7 @@ under [`../benchmark/results/`](../benchmark/results/) as a schema-checked
 
 | Item | Status | Why |
 |------|--------|-----|
-| **Pangenome real-graph rescue (GATE-1)** | **done (chr22)** | Validated on the real HPRC v1.1 Minigraph-Cactus chr22 graph (`vg deconstruct` → population-deletion junctions → `--pangenome-junctions`); see [pangenome](../benchmark/pangenome). Remaining: genome-wide scale, insertion/inversion-based junctions, and the in-process GBZ traversal (`-DWITH_PANGENOME_LIB`). |
+| **Pangenome real-graph rescue (GATE-1)** | **done (chr22)** | Validated on the real HPRC v1.1 Minigraph-Cactus chr22 graph (`vg deconstruct` → population-deletion junctions → `--pangenome-junctions`); see [pangenome](../benchmark/pangenome). Remaining: genome-wide scale, insertion/inversion-based junctions, and an in-process graph traversal. |
 | **LRGASP real data** ([lrgasp/](../benchmark/lrgasp)) | blocked | The LRGASP pre-run caller GTFs are **Synapse-gated**. The multi-caller capability is already validated on genuine **five-caller** output (FLAIR + IsoQuant + Bambu + ESPRESSO + TALON), truth-scored (see `multicaller`). |
 | **HG002 long-read RNA** | blocked | No clean public HG002/GM24385 long-read RNA-seq dataset was found (ENCODE/ENA empty). The variant axis is instead validated on real HG002 *variants* + the full pipeline on `end2end`/`sirv`. |
 

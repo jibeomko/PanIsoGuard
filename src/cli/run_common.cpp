@@ -163,14 +163,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     caller_support = read_caller_support(c.caller_support);
     caller_support_ptr = &caller_support;
     std::fprintf(stderr, "read caller-support for %zu chain(s) / %zu native isoform id(s) (consensus axis, "
-                 "joined by %s)\n", caller_support.by_chain.size(), caller_support.by_native_id.size(),
-                 caller_support.has_fingerprints() ? "chain fingerprint" : "native id: matrix predates 0.0.6");
-    if (caller_support.n_native_id_collisions > 0) {
-      std::fprintf(stderr, "warning: %d native id(s) appear under more than one chain in the matrix "
-                   "(two callers reusing a name); %s\n", caller_support.n_native_id_collisions,
-                   caller_support.has_fingerprints() ? "harmless, the join is by chain fingerprint"
-                                                     : "re-run `panisoguard combine` so the join can use chain fingerprints");
-    }
+                 "joined by chain fingerprint)\n", caller_support.by_chain.size(), caller_support.by_native_id.size());
     warn_unjoined(run.sqanti, caller_support.by_native_id, /*novel_only=*/true, "the --caller-support matrix");
   }
 

@@ -33,15 +33,11 @@ void usage() {
       "  --pangenome-junctions PATH   graph-supported splice junctions (pangenome reference-bias axis; optional)\n"
       "  --pangenome-provenance X     population|external|sample_derived|unknown (default unknown=circular-risk)\n"
       "  --caller-support PATH        `panisoguard combine` matrix for the multi-caller consensus axis (optional)\n"
-      "  --hash-inputs                also record an MD5 per input file in provenance.log (reads every input once)\n"
       "  --write-kept PATH            also write the input isoform GTF/BED12 filtered to the kept verdicts\n"
       "  --keep-verdicts LIST         verdicts --write-kept keeps (comma-separated; default\n"
       "                               known,known_fragment,confirmed,reference_bias)\n"
       "  --config PATH           rules TOML (optional; built-in defaults otherwise)\n"
-      "  --out-prefix PREFIX     writes .adjudicated.tsv / .attribution.jsonl / .provenance.log\n"
-      "\n"
-      "For a visual PDF summary of the output:\n"
-      "  pip install ./python && panisoguard-report --prefix PREFIX   (-> PREFIX.report.pdf)\n");
+      "  --out-prefix PREFIX     writes .adjudicated.tsv / .junctions.tsv / .attribution.jsonl / .provenance.log\n");
 }
 
 // Comma-separated verdict names -> set; returns the first unknown name, or "" when all are valid.
@@ -65,7 +61,6 @@ int cmd_adjudicate(int argc, char** argv) {
   CommonArgs common;
   std::string out_prefix, write_kept;
   std::string keep_verdicts = "known,known_fragment,confirmed,reference_bias";
-  bool hash_inputs = false;
 
   for (int i = 2; i < argc; ++i) {
     const std::string a = argv[i];
@@ -73,8 +68,6 @@ int cmd_adjudicate(int argc, char** argv) {
     if (a == "--out-prefix") {
       if (i + 1 >= argc) { std::fprintf(stderr, "adjudicate: --out-prefix requires an argument\n"); return 1; }
       out_prefix = argv[++i];
-    } else if (a == "--hash-inputs") {
-      hash_inputs = true;
     } else if (a == "--write-kept") {
       if (i + 1 >= argc) { std::fprintf(stderr, "adjudicate: --write-kept requires an argument\n"); return 1; }
       write_kept = argv[++i];
@@ -107,7 +100,6 @@ int cmd_adjudicate(int argc, char** argv) {
   try {
     const LoadedRun run = load_and_adjudicate(common);
     RunProvenance prov = provenance_for(common, run);
-    prov.hash_inputs = hash_inputs;
     prov.kept_path = write_kept;
     prov.kept_verdicts = keep_verdicts;
     write_adjudication_outputs(out_prefix, run.results, prov);

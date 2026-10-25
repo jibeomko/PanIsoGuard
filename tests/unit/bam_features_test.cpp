@@ -7,7 +7,7 @@ using namespace panisoguard;
 
 TEST_CASE("BAM features at a junction count spanning reads and artifact signatures", "[bam]") {
   BamReader r(tiny("mini.bam"));
-  BamFeatureParams p;  // min_mapq=20, softclip_min_bp=20, window=10
+  BamFeatureParams p;  // min_mapq=20, window=10
 
   // The fixture has 5 reads with an N op exactly at 0-based [2000,3000):
   // r1 clean, r2 MAPQ 5, r3 supplementary, r4 30bp soft-clip, r5 indel near 3' boundary.
@@ -16,7 +16,6 @@ TEST_CASE("BAM features at a junction count spanning reads and artifact signatur
   CHECK(f.n_spanning == 5);
   CHECK(f.n_low_mapq == 1);
   CHECK(f.n_supplementary == 1);
-  CHECK(f.n_softclip == 1);
   CHECK(f.n_indel_near == 1);
   CHECK(f.frac_low_mapq() == Approx(0.2));
 

@@ -81,15 +81,12 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom,
     const uint32_t* cig = bam_get_cigar(b);
     const int ncig = b->core.n_cigar;
     int64_t rpos = b->core.pos;  // 0-based leftmost reference coordinate
-    bool spanning = false, softclip = false, indel_near = false;
+    bool spanning = false, indel_near = false;
 
     for (int i = 0; i < ncig; ++i) {
       const int op = bam_cigar_op(cig[i]);
       const int len = bam_cigar_oplen(cig[i]);
       switch (op) {
-        case BAM_CSOFT_CLIP:
-          if (len >= p.softclip_min_bp && (i == 0 || i == ncig - 1)) softclip = true;
-          break;
         case BAM_CREF_SKIP:  // N: an intron
           if (rpos == intron.start && rpos + len == intron.end) spanning = true;
           rpos += len;
@@ -106,7 +103,7 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom,
         case BAM_CDIFF:
           rpos += len;
           break;
-        default:  // hard clip / pad consume neither here
+        default:  // soft/hard clip and pad consume no reference
           break;
       }
     }
@@ -115,7 +112,6 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom,
     ++f.n_spanning;
     if (b->core.qual < p.min_mapq) ++f.n_low_mapq;
     if (b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) ++f.n_supplementary;
-    if (softclip) ++f.n_softclip;
     if (indel_near) ++f.n_indel_near;
   }
   bam_destroy1(b);

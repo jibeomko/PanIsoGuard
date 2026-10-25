@@ -51,12 +51,11 @@ EvidenceVector build_evidence(const SqantiRecord& r,
   ev.catalog_evaluable = ev.chain_available && catalog != nullptr;
 
   // Multi-caller consensus axis: how many independent callers recovered this isoform's
-  // intron chain (from a `combine` matrix). Joined by the chain fingerprint when the
-  // matrix carries one (two callers may reuse a native id for different chains); the
-  // native id is the fallback for older matrices and monoexonic isoforms.
+  // intron chain (from a `combine` matrix). Joined by the chain fingerprint (two callers may
+  // reuse a native id for different chains); monoexonic isoforms have no chain, so by native id.
   if (caller_support != nullptr) {
     const int* n = nullptr;
-    if (caller_support->has_fingerprints() && ev.chain_available && !it->second.monoexonic()) {
+    if (ev.chain_available && !it->second.monoexonic()) {
       auto cs = caller_support->by_chain.find(fingerprint_intron_chain(it->second));
       if (cs != caller_support->by_chain.end()) n = &cs->second;
     } else {
@@ -86,7 +85,6 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     const IntronChain& chain = it->second;
     BamFeatureParams bp;
     bp.min_mapq = cfg.bam_min_mapq;
-    bp.softclip_min_bp = cfg.bam_softclip_min_bp;
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
     int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0;
@@ -196,9 +194,6 @@ EvidenceVector build_evidence(const SqantiRecord& r,
             ++n_bam_gated;
             if (f.frac_low_mapq() > ev.bam_max_frac_low_mapq) ev.bam_max_frac_low_mapq = f.frac_low_mapq();
             if (f.frac_supplementary() > ev.bam_max_frac_supplementary) ev.bam_max_frac_supplementary = f.frac_supplementary();
-            // All four fractions feed RuleEngine::evaluate's mapping_flag (the softclip gate
-            // is disabled by default via its threshold) and are emitted to attribution.jsonl.
-            if (f.frac_softclip() > ev.bam_max_frac_softclip) ev.bam_max_frac_softclip = f.frac_softclip();
             if (f.frac_indel_near() > ev.bam_max_frac_indel_near) ev.bam_max_frac_indel_near = f.frac_indel_near();
           }
         }
@@ -258,11 +253,6 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.chrom = r.chrom;
     res.strand = r.strand;
     res.structural_category = r.structural_category;
-    // Pass-through SQANTI3 descriptors for bio_flags (not used in the verdict).
-    res.bio_dist_to_CAGE_peak = r.dist_to_CAGE_peak;
-    res.bio_dist_to_polyA_site = r.dist_to_polyA_site;
-    res.bio_predicted_NMD = r.predicted_NMD;
-    res.bio_polyA_motif_found = r.polyA_motif_found;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.validation_bam, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
                                   in.caller_support, engine.config(), bam_cache,

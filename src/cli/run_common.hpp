@@ -10,7 +10,7 @@
 
 namespace panisoguard {
 
-// Inputs shared by the adjudicate / benchmark / ablate subcommands.
+// Inputs of `adjudicate` (parsed here so the loader and the provenance share one struct).
 struct CommonArgs {
   std::string classification;
   std::string isoforms_bed;
@@ -47,8 +47,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
 // Validate the minimum required inputs; on failure sets `err` and returns false.
 bool common_args_ok(const CommonArgs& c, std::string& err);
 
-// One adjudication run plus the SQANTI table (needed for benchmark) and the
-// engine (needed for ablation).
+// One adjudication run plus the SQANTI table and the engine it used.
 struct LoadedRun {
   SqantiTable sqanti;
   std::vector<AdjudicationResult> results;

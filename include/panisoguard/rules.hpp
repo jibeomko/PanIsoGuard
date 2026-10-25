@@ -20,44 +20,19 @@ struct RuleConfig {
   int bam_min_spanning = 3;                 // a novel junction's read fractions count only with >= this many
                                             // spanning reads; below it the mapping axis is not evaluated there
   std::string platform = "hifi";            // "hifi" (defaults) or "ont" (indel-near gate off; see apply_platform_preset)
-  int bam_softclip_min_bp = 20;
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
   double bam_max_indel_near_frac = 0.5;     // > this fraction of spanning reads with an indel adjacent to the
                                             // junction -> mapping artifact (an alignment-ambiguous indel, not a real
                                             // intron). Junction-proximal (bam_junction_window_bp); validated on chr22.
-  double bam_max_softclip_frac = 1.01;      // DISABLED by default (> 1.0 can never fire, since a fraction is <= 1.0).
-                                            // The soft-clip feature is a TERMINAL soft-clip anywhere on the read, NOT
-                                            // junction-proximal -- on real long reads it also fires on adapter / poly-A
-                                            // ends of legitimate junction-spanning reads, so a default-on gate would
-                                            // risk demoting genuine novels. Unvalidated on noisy data; enable (set <= 1.0)
-                                            // only with your own per-chemistry validation. See benchmark/bam_axis.
   // Pangenome (reference-bias) axis
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
   // Whole-chain long-read support (--bam): reads carrying the isoform's entire intron chain
   int chain_min_full_reads = 3;             // >= this many -> UNKNOWN support becomes PROBABLE (never CONFIRMED)
-  // Per-axis enable switches (used by `ablate` to mask one axis at a time).
-  bool use_short_read = true;
-  bool use_mapping = true;
-  bool use_noncanonical = true;
-  bool use_rts = true;
-  bool use_degradation = true;
-  bool use_variant = true;
-  bool use_pangenome = true;
-  bool use_consensus = true;
-  bool use_chain = true;
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
-  // the projection in RuleEngine::evaluate() changes. 0.0.2: PARTIAL no longer promotes (0.0.4).
-  // 0.0.3 (0.0.6): mapping needs >= bam_min_spanning reads; UNSUPPORTED needs coverage at the
-  // known junctions; intra-priming needs no polyA motif; class names renamed.
-  // 0.0.4 (0.0.7): whole-chain long-read support (>= chain_min_full_reads) lifts UNKNOWN to
-  // PROBABLE; a variant-disrupted motif is a noncanonical sign.
-  // 0.0.5 (0.0.7): UNKNOWN x mapping is UNCONFIRMED, not ARTIFACT (35 % of those calls were
-  // genuine on SQANTI-SIM); an RT-switch or degradation sign no longer demotes a chain- or
-  // consensus-supported call (0 of 83 such calls were false); ISM with >= chain_min_full_reads
-  // whole-chain reads and no intra-priming sign is KNOWN_FRAGMENT.
+  // the projection in RuleEngine::evaluate() changes; the history is in CHANGELOG.md.
   std::string ruleset_version = "builtin-0.0.5";
 };
 
@@ -80,11 +55,6 @@ class RuleEngine {
 
   // Map an assembled EvidenceVector to a Verdict (2-axis evaluation + projection).
   Verdict evaluate(const EvidenceVector& ev) const;
-
-  // A copy of this engine with one evidence axis disabled, for ablation. Axis is
-  // one of: short_read, mapping, noncanonical, rt_switch, degradation, variant,
-  // pangenome, consensus.
-  RuleEngine with_axis_disabled(const std::string& axis) const;
 
  private:
   RuleConfig cfg_;

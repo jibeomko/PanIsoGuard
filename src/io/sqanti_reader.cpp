@@ -91,9 +91,6 @@ SqantiTable read_sqanti_classification(const std::string& path) {
   const int c_canon = header.col("all_canonical");
   const int c_percA = header.col("perc_A_downstream_TTS");
   const int c_indels_junc = header.col("n_indels_junc");
-  const int c_cage = header.col("dist_to_CAGE_peak");
-  const int c_polya = header.col("dist_to_polyA_site");
-  const int c_nmd = header.col("predicted_NMD");
   const int c_polya_motif = header.col("polyA_motif_found");
   // SQANTI3 filter column has varied names across versions.
   int c_filter = header.col("filter_result");
@@ -126,9 +123,6 @@ SqantiTable read_sqanti_classification(const std::string& path) {
     r.all_canonical = field_at(f, c_canon);
     r.perc_A_downstream_TTS = parse_double_or_na(field_at(f, c_percA), "perc_A_downstream_TTS", lineno, warnings);
     r.n_indels_junc = parse_int_or_na(field_at(f, c_indels_junc), "n_indels_junc", lineno, warnings);
-    r.dist_to_CAGE_peak = parse_double_or_na(field_at(f, c_cage), "dist_to_CAGE_peak", lineno, warnings);
-    r.dist_to_polyA_site = parse_double_or_na(field_at(f, c_polya), "dist_to_polyA_site", lineno, warnings);
-    r.predicted_NMD = field_at(f, c_nmd);
     r.polyA_motif_found = field_at(f, c_polya_motif);
     r.filter_result = field_at(f, c_filter);
 

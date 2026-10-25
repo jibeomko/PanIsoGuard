@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Assert the project version is identical across CMakeLists.txt, python/pyproject.toml,
-and recipes/bioconda/meta.yaml.
+"""Assert the project version is identical across CMakeLists.txt and recipes/bioconda/meta.yaml.
 
-A version bump must move all three together — otherwise the binary, the PyPI package, and
-the bioconda recipe drift apart (and a stale recipe ships the wrong source). Wired into
-CI as a fast lint. Exit non-zero on mismatch / unparseable version.
+A version bump must move both together — otherwise the binary and the bioconda recipe drift
+apart (and a stale recipe ships the wrong source). Wired into CI as a fast lint. Exit non-zero
+on mismatch / unparseable version.
 """
 import pathlib
 import re
@@ -13,7 +12,6 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SOURCES = {
     "CMakeLists.txt": r"project\([^)]*VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)",
-    "python/pyproject.toml": r'(?m)^\s*version\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"',
     "recipes/bioconda/meta.yaml": r'set\s+version\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"',
 }
 

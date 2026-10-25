@@ -25,7 +25,6 @@ struct RunProvenance {
   std::string pangenome_path;       // "" if none
   std::string kept_path;            // "" if none (--write-kept: the isoform file filtered to kept verdicts)
   std::string kept_verdicts;        // the --keep-verdicts list that selected them
-  bool hash_inputs = false;         // also write an MD5 per input (--hash-inputs; reads every file once)
   bool variant_axis_on = false;     // a haplotype FASTA was supplied
   bool variant_circular = false;    // haplotype provenance is circular-risk
   bool pangenome_axis_on = false;   // a pangenome junction file was supplied

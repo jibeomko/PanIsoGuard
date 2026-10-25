@@ -29,7 +29,6 @@ corroboration). `run.sh` diffs its output against [expected/](expected/).
 ```
 combine  --gtf flair:… --gtf isoquant:… --gtf bambu:… --ref-gtf … --out matrix.tsv
 adjudicate --classification <sqanti> --isoforms-gtf <caller> --ref-gtf … --caller-support matrix.tsv --out-prefix sample
-panisoguard-report --prefix sample            # optional SQANTI3-style PDF
 ```
 
 For the full real-data, truth-scored version (5 callers, gffcompare/TAMA head-to-head) see

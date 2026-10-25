@@ -36,8 +36,8 @@ R = []
 for line in open(attr):
     d = json.loads(line); ev = d["evidence"]
     R.append((nc.get(d["isoform"], 1), ev["bam_evaluable"], ev["bam_n_spanning"],
-              ev["bam_frac_indel_near"], ev["bam_frac_softclip"], ev["bam_frac_low_mapq"],
-              ev["bam_frac_supplementary"], d["primary_mechanism"]))
+              ev["bam_frac_indel_near"], ev["bam_frac_low_mapq"], ev["bam_frac_supplementary"],
+              d["primary_mechanism"]))
 sp = [r for r in R if r[1] and r[2] > 0]
 def cnt(idx, thr): return sum(1 for r in sp if r[idx] > thr)
 def mean(idx, pred): 
@@ -47,10 +47,9 @@ metrics = {
     "n_novel_chains": len(R),
     "n_bam_spanning_evaluable": len(sp),
     "bam_signal_fire_rate_on_real_ONT": {
-        "softclip_gt_0.5":      [cnt(4, 0.5), len(sp)],
         "indel_near_gt_0.5":    [cnt(3, 0.5), len(sp)],
-        "low_mapq_gt_0.5":      [cnt(5, 0.5), len(sp)],
-        "supplementary_gt_0.5": [cnt(6, 0.5), len(sp)],
+        "low_mapq_gt_0.5":      [cnt(4, 0.5), len(sp)],
+        "supplementary_gt_0.5": [cnt(5, 0.5), len(sp)],
     },
     "indel_near_mean_by_consensus": {
         "single_caller": mean(3, lambda n: n == 1),
@@ -59,8 +58,8 @@ metrics = {
     # the mapping sign under the HiFi defaults (UNKNOWN support here, so the sign alone decides the
     # class: ARTIFACT before ruleset 0.0.5, UNCONFIRMED / mapping_without_short_reads since)
     "mapping_sign_rate_by_consensus": {
-        "single_caller": [sum(1 for r in R if r[0] == 1 and r[7] == "mapping_or_repeat"), sum(1 for r in R if r[0] == 1)],
-        "ge2_caller":    [sum(1 for r in R if r[0] >= 2 and r[7] == "mapping_or_repeat"), sum(1 for r in R if r[0] >= 2)],
+        "single_caller": [sum(1 for r in R if r[0] == 1 and r[6] == "mapping_or_repeat"), sum(1 for r in R if r[0] == 1)],
+        "ge2_caller":    [sum(1 for r in R if r[0] >= 2 and r[6] == "mapping_or_repeat"), sum(1 for r in R if r[0] >= 2)],
     },
     "reference_bias_rescue": {"created_reference_bias": created, "novel_junctions_scanned": scanned},
     "classes_hifi_preset": class_counts(attr),
@@ -86,9 +85,9 @@ if emit:
         "command": "see run.sh: build novel GTF + minimal classification; adjudicate --bam <ONT bam>; "
                    "scan_variant_axis.py over the novel junctions vs the HG001 haplotype; analyze.py",
         "metrics": metrics,
-        "notes": "Real-data robustness of the optional BAM mapping axis. (1) Soft-clip default-OFF is EMPIRICALLY "
-                 "VINDICATED: on real ONT dRNA terminal soft-clips fire on 187/191 (98%) of junctions (adapter/poly-A "
-                 "read ends), so a default-on gate would demote nearly everything. (2) The HiFi-calibrated 0.5 gates are "
+        "notes": "Real-data robustness of the optional BAM mapping axis. (1) The terminal soft-clip fraction, "
+                 "measured until 0.0.7 and never a default gate, fired on 187/191 (98%) of junctions on real ONT dRNA "
+                 "(adapter/poly-A read ends); it is no longer computed. (2) The HiFi-calibrated 0.5 gates are "
                  "CHEMISTRY-DEPENDENT: ONT's intrinsic indel error makes indel_near fire on 175/191 (92%) and barely "
                  "discriminates single (0.925) vs >=2-caller (0.732); the older low_mapq/supplementary signals barely "
                  "fire (11/191, 4/191). The mapping axis is opt-in (--bam) and its thresholds MUST be re-calibrated per "

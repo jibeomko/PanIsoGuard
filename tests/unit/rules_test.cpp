@@ -92,8 +92,8 @@ TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   CHECK(eng.evaluate(unk).verdict_reason == "mapping_without_short_reads");
 }
 
-TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by default", "[rules]") {
-  const RuleEngine eng;  // defaults: indel_near gate 0.5 (ON), softclip gate 1.01 (DISABLED)
+TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
+  const RuleEngine eng;  // default indel_near gate 0.5
 
   // An indel adjacent to the junction on most spanning reads (an alignment-ambiguous
   // indel mis-rendered as an intron) flags the mapping mechanism even when MAPQ and
@@ -119,16 +119,6 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by 
   CHECK(vsup.primary_mechanism == Mechanism::kMapping);
   CHECK(vsup.confidence == ConfidenceClass::kNovelProbable);
 
-  // Soft-clip is DISABLED by default (gate 1.01): a terminal soft-clip is not
-  // junction-proximal and fires on adapter/poly-A read ends, so even an extreme
-  // softclip fraction must NOT flag the mapping mechanism under the shipped defaults.
-  EvidenceVector clip = novel_ev(1, 0);
-  clip.bam_evaluable = true;
-  clip.bam_n_junctions_gated = 1;
-  clip.bam_n_spanning_total = 20;
-  clip.bam_max_frac_softclip = 0.99;  // would fire at 0.5, but default gate is 1.01 (off)
-  CHECK(eng.evaluate(clip).primary_mechanism == Mechanism::kNone);
-
   // Below threshold (the genuine-junction regime, chr22 genuine indel_near max ~0.19):
   // no mapping flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
   EvidenceVector ok = novel_ev(1, 1);
@@ -136,7 +126,6 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger; soft-clip is off by 
   ok.bam_n_junctions_gated = 1;
   ok.bam_n_spanning_total = 20;
   ok.bam_max_frac_indel_near = 0.19;
-  ok.bam_max_frac_softclip = 0.99;  // soft-clip off by default -> ignored
   Verdict vo = eng.evaluate(ok);
   CHECK(vo.primary_mechanism == Mechanism::kNone);
   CHECK(vo.confidence == ConfidenceClass::kNovelConfirmed);
@@ -186,10 +175,6 @@ TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel c
   weak.rts_stage = true;
   CHECK(eng.evaluate(weak).confidence == ConfidenceClass::kNovelProbable);
   CHECK(eng.evaluate(weak).verdict_reason == "caller_consensus;rt_switch_sign");
-
-  // Ablating the consensus axis reverts the promotion (AMBIGUOUS again).
-  CHECK(eng.with_axis_disabled("consensus").evaluate(consensus).confidence ==
-        ConfidenceClass::kUnresolved);
 }
 
 TEST_CASE("rules: consensus cannot promote an isoform whose chain or catalog is missing", "[rules]") {
@@ -213,11 +198,6 @@ TEST_CASE("rules: consensus cannot promote an isoform whose chain or catalog is 
   // Both present: the consensus promotion applies.
   ev.catalog_evaluable = true;
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kNovelProbable);
-}
-
-TEST_CASE("rules: an unknown ablation axis is an error, not a silent no-op", "[rules][ablate]") {
-  REQUIRE_THROWS_AS(RuleEngine().with_axis_disabled("short_reads"), std::invalid_argument);
-  REQUIRE_NOTHROW(RuleEngine().with_axis_disabled("short_read"));
 }
 
 TEST_CASE("rules: known/partial categories pass through", "[rules]") {
@@ -271,9 +251,6 @@ TEST_CASE("rules: whole-chain long-read support lifts UNKNOWN to PROBABLE, never
   // short-read evidence, when present, decides: UNSUPPORTED is not lifted by chain reads
   ev.sj_evaluable = true; ev.n_novel_junctions = 1; ev.n_novel_jx_sr_supported = 0;
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
-  // ablation
-  ev.sj_evaluable = false; ev.n_novel_junctions = 0;
-  CHECK(eng.with_axis_disabled("chain").evaluate(ev).confidence == ConfidenceClass::kUnresolved);
 }
 
 TEST_CASE("rules: an ISM carried end to end by long reads is a KNOWN_FRAGMENT", "[rules][chain]") {
@@ -304,7 +281,4 @@ TEST_CASE("rules: an ISM carried end to end by long reads is a KNOWN_FRAGMENT", 
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
   ev.chain_evaluable = false;
   CHECK(eng.evaluate(ev).verdict_reason == "ism");
-  // ablating the chain axis removes it
-  ev.chain_evaluable = true; ev.chain_n_full_reads = 5;
-  CHECK(eng.with_axis_disabled("chain").evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
 }

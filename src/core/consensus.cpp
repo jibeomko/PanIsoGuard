@@ -172,18 +172,18 @@ CallerSupport read_caller_support(const std::string& path) {
       TsvHeader h(f);
       col_callers = h.col("n_callers");
       col_native = h.col("native_ids");
-      col_fp = h.col("fingerprint");  // absent in matrices written before 0.0.6
-      if (col_callers < 0 || col_native < 0) {
+      col_fp = h.col("fingerprint");
+      if (col_callers < 0 || col_native < 0 || col_fp < 0) {
         throw std::runtime_error("caller-support matrix " + path +
-                                 ": missing required column(s) n_callers/native_ids "
-                                 "(is this a `panisoguard combine` matrix?)");
+                                 ": missing required column(s) n_callers/native_ids/fingerprint "
+                                 "(is this a `panisoguard combine` matrix, 0.0.6 or later?)");
       }
       continue;
     }
     if (static_cast<int>(f.size()) <= std::max(col_callers, col_native)) continue;
     const int n_callers =
         static_cast<int>(parse_int_field(f[col_callers], "n_callers", "caller-support matrix", lineno));
-    if (col_fp >= 0 && col_fp < static_cast<int>(f.size()) && f[col_fp] != "NA" && !f[col_fp].empty()) {
+    if (col_fp < static_cast<int>(f.size()) && f[col_fp] != "NA" && !f[col_fp].empty()) {
       support.by_chain[std::stoull(f[col_fp])] = n_callers;
     }
     // native_ids column is "caller1=id1|id2;caller2=id3" -- explode it so every native
@@ -203,11 +203,8 @@ CallerSupport read_caller_support(const std::string& path) {
           const std::string id =
               ids.substr(istart, bar == std::string::npos ? std::string::npos : bar - istart);
           if (!id.empty()) {
-            auto ins = support.by_native_id.emplace(id, n_callers);
-            if (!ins.second) {  // the same native id under another chain (two callers, one name)
-              ++support.n_native_id_collisions;
-              if (n_callers > ins.first->second) ins.first->second = n_callers;
-            }
+            int& n = support.by_native_id[id];  // a name reused for another chain keeps the larger count
+            n = std::max(n, n_callers);
           }
           if (bar == std::string::npos) break;
           istart = bar + 1;

@@ -51,7 +51,6 @@ about:
   license_file:
     - LICENSE
     - THIRDPARTY.txt
-    - thirdparty/cgranges/LICENSE.txt
     - thirdparty/catch2/LICENSE.txt
     - thirdparty/tomlplusplus/LICENSE
   summary: Caller-agnostic adjudication of long-read RNA-seq novel isoforms

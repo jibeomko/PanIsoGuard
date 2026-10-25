@@ -8,11 +8,10 @@ and the engine emits a per-isoform `rule_trace`.
 ## Framing constraints (non-negotiable)
 
 - PanIsoGuard reports **orthogonal attribution + confidence + provenance**.
-- It **never** claims to beat the SQANTI3 random-forest filter or FLAIR2. The
-  `benchmark` module reports *non-redundancy* (McNemar / 2×2 / Jaccard), not
-  superiority.
+- It **never** claims to beat the SQANTI3 random-forest filter or FLAIR2; the
+  head-to-head is in [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h).
 - It **does not recompute SQANTI3 QC descriptors** (TSS/TTS, ORF/NMD, polyA/splice
-  motif): those are consumed as priors and surfaced verbatim as `bio_flags`, while the
+  motif): those are consumed as priors, while the
   verdict rests on independent path-level evidence
   ([relationship_to_sqanti3.md](relationship_to_sqanti3.md)).
 - Validation uses **public + simulated** data (SQANTI-SIM; HG002/HPRC; LRGASP). A
@@ -44,8 +43,8 @@ on two axes; the binned pair is projected to one confidence class.
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The soft-clip fraction is computed and reported but its gate is disabled by default (`max_softclip_frac = 1.01`). `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions) | `--bam` |
-| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on **every** haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance, off with `ablate --axes variant`) | always (from classification); the haplotype form with `--reference-haplotype` |
+| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions). | `--bam` |
+| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on **every** haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
 | degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` **and** no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
@@ -126,7 +125,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        reported in `evidence.n_callers` but the call stays `UNRESOLVED`. The matrix
        is joined by intron-chain fingerprint (the `fingerprint` column `combine`
        writes since 0.0.6), not by native id, because two callers may reuse one name
-       for different chains. Disable with `ablate --axes consensus`.
+       for different chains.
      - `UNKNOWN × whole-chain long-read support (≥ chain_min_full_reads, no mapping
        artifact, no consensus) → NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign,
        `chain_support;rt_switch_sign`) or `UNCONFIRMED` (`noncanonical` or `degradation`,
@@ -158,7 +157,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        ≥ 3 independent reads (the misses have 0–2), and within genes the other library
        covers the novel lifts reproduce like known transcripts; but a second library attests
        expression, not correct splicing, so the evidence is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
-       Same chain+catalog requirement as consensus. Disable with `ablate --axes chain`.
+       Same chain+catalog requirement as consensus.
        `panisoguard decoys` measures the lift's false-fire rate on a user's own BAM: it
        recombines each gene's annotated transcripts at a shared intron into
        novel-in-catalog chains and reports the fraction that ≥ `chain_min_full_reads` reads
@@ -245,12 +244,9 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
 
 ## Future work
 
-- **In-process pangenome tier** (gbwtgraph/GBZ, `-DWITH_PANGENOME_LIB`): the
-  file-based pangenome axis (`--pangenome-junctions`, graph-supported junctions
-  pre-extracted with vg/rpvg) is implemented and emits
-  `REFERENCE_BIAS` (mechanism `population_known`). Loading and
-  traversing a GBZ graph in-process (instead of consuming a pre-extracted junction
-  file) remains behind the experimental build flag.
+- **In-process pangenome tier**: the pangenome axis consumes graph-supported junctions
+  pre-extracted with vg/rpvg (`--pangenome-junctions`) and emits `REFERENCE_BIAS`
+  (mechanism `population_known`); traversing a GBZ graph in-process is not implemented.
 - **Table-driven projection**: move the (Axis A × Axis B) grid fully into the TOML.
 - **SQANTI RF concordance**: optionally annotate `rule_trace` with agreement vs the
   SQANTI3 `filter_result`, reinforcing the orthogonal-attribution framing.

@@ -1,7 +1,6 @@
 #include "panisoguard/rules.hpp"
 
 #include <sstream>
-#include <stdexcept>
 #include <string>
 
 #include "tomlplusplus/toml.hpp"
@@ -34,12 +33,10 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
     if (auto map = (*art)["mapping"].as_table()) {
       c.bam_min_mapq = static_cast<int>((*map)["min_mapq"].value_or<int64_t>(c.bam_min_mapq));
       c.bam_min_spanning = static_cast<int>((*map)["min_spanning"].value_or<int64_t>(c.bam_min_spanning));
-      c.bam_softclip_min_bp = static_cast<int>((*map)["softclip_min_bp"].value_or<int64_t>(c.bam_softclip_min_bp));
       c.bam_junction_window_bp = static_cast<int>((*map)["junction_window_bp"].value_or<int64_t>(c.bam_junction_window_bp));
       c.bam_max_low_mapq_frac = (*map)["max_low_mapq_frac"].value_or(c.bam_max_low_mapq_frac);
       c.bam_max_supplementary_frac = (*map)["max_supplementary_frac"].value_or(c.bam_max_supplementary_frac);
       c.bam_max_indel_near_frac = (*map)["max_indel_near_frac"].value_or(c.bam_max_indel_near_frac);
-      c.bam_max_softclip_frac = (*map)["max_softclip_frac"].value_or(c.bam_max_softclip_frac);
     }
   }
   if (auto ch = tbl["axis_chain"].as_table()) {
@@ -75,12 +72,10 @@ std::string RuleEngine::thresholds_summary() const {
          " platform=" + c.platform +
          " min_mapq=" + std::to_string(c.bam_min_mapq) +
          " min_spanning=" + std::to_string(c.bam_min_spanning) +
-         " softclip_min_bp=" + std::to_string(c.bam_softclip_min_bp) +
          " junction_window_bp=" + std::to_string(c.bam_junction_window_bp) +
          " max_low_mapq_frac=" + num(c.bam_max_low_mapq_frac) +
          " max_supplementary_frac=" + num(c.bam_max_supplementary_frac) +
          " max_indel_near_frac=" + num(c.bam_max_indel_near_frac) +
-         " max_softclip_frac=" + num(c.bam_max_softclip_frac) +
          " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
 }
 
@@ -101,15 +96,12 @@ void finish(Verdict& v, ConfidenceClass c, const char* verdict, std::string reas
 }
 
 // The signs, as booleans: SQANTI3's QC priors and the BAM mapping sign. Intra-priming needs
-// BOTH an A-rich stretch after the 3' end (perc_A) AND no polyA motif upstream of it: on real
-// data, 20-30 % of perc_A-flagged ends carry a polyA signal and are genuine terminations
-// (benchmark/refbias_3way, HG03516). When SQANTI3 was run without a motif list the column is
-// absent and perc_A alone decides. The mapping fractions are taken only over novel junctions
-// with >= bam_min_spanning reads: with one or two reads a single indel makes the fraction 1.0
-// and would decide the verdict alone (45 % of HG03516's mapping-artifact calls rested on < 3
-// reads before this gate). A motif that is canonical on the reference only (non-canonical on
-// every haplotype of the sample) counts as a non-canonical sign, under the same firewall as
-// the rescue.
+// BOTH an A-rich stretch after the 3' end (perc_A) AND no polyA motif upstream of it (many
+// perc_A-flagged ends carry a motif and are genuine terminations; benchmark/refbias_3way).
+// Without a motif column perc_A alone decides. The mapping fractions are taken only over novel
+// junctions with >= bam_min_spanning reads (with one or two reads a single indel is a fraction
+// of 1.0). A motif that is canonical on the reference only, non-canonical on every haplotype
+// of the sample, is a non-canonical sign, under the same firewall as the rescue.
 struct Signs {
   bool percA_high = false;
   bool motif_known = false;
@@ -121,17 +113,16 @@ struct Signs {
 
 Signs read_signs(const RuleConfig& cfg, const EvidenceVector& ev) {
   Signs s;
-  s.percA_high = cfg.use_degradation && ev.percA_evaluable &&
+  s.percA_high = ev.percA_evaluable &&
                  ev.perc_A_downstream_TTS >= cfg.perc_A_degradation_threshold;
   s.motif_known = ev.polyA_motif_evaluable;
   s.intrapriming = s.percA_high && !(s.motif_known && ev.polyA_motif_found);
-  s.rts = cfg.use_rts && ev.rts_evaluable && ev.rts_stage;
-  const bool mapping_gated = cfg.use_mapping && ev.bam_evaluable && ev.bam_n_junctions_gated > 0;
+  s.rts = ev.rts_evaluable && ev.rts_stage;
+  const bool mapping_gated = ev.bam_evaluable && ev.bam_n_junctions_gated > 0;
   s.mapping_sign = mapping_gated && (ev.bam_max_frac_low_mapq > cfg.bam_max_low_mapq_frac ||
                                      ev.bam_max_frac_supplementary > cfg.bam_max_supplementary_frac ||
-                                     ev.bam_max_frac_indel_near > cfg.bam_max_indel_near_frac ||
-                                     ev.bam_max_frac_softclip > cfg.bam_max_softclip_frac);
-  s.disrupted_sign = cfg.use_noncanonical && cfg.use_variant && ev.variant_evaluable &&
+                                     ev.bam_max_frac_indel_near > cfg.bam_max_indel_near_frac);
+  s.disrupted_sign = ev.variant_evaluable &&
                      ev.n_novel_jx_variant_disrupted > 0 && !ev.variant_circular;
   return s;
 }
@@ -139,11 +130,11 @@ Signs read_signs(const RuleConfig& cfg, const EvidenceVector& ev) {
 // Signs that were seen but could not be used; said once, after the pass-through (which does
 // not read them).
 void trace_unused_signs(const RuleConfig& cfg, const EvidenceVector& ev, Verdict& v) {
-  if (cfg.use_mapping && ev.bam_evaluable && ev.bam_n_junctions_gated == 0) {
+  if (ev.bam_evaluable && ev.bam_n_junctions_gated == 0) {
     trace(v, "mapping axis not evaluated: fewer than " + std::to_string(cfg.bam_min_spanning) +
                  " spanning reads at every novel junction (" + std::to_string(ev.bam_n_spanning_total) + " in total)");
   }
-  if (cfg.use_variant && ev.variant_evaluable && ev.n_novel_jx_variant_disrupted > 0 && ev.variant_circular) {
+  if (ev.variant_evaluable && ev.n_novel_jx_variant_disrupted > 0 && ev.variant_circular) {
     trace(v, std::to_string(ev.n_novel_jx_variant_disrupted) +
                  " novel junction(s) variant-disrupted on the haplotypes, but provenance is circular-risk -> sign ignored");
   }
@@ -158,14 +149,12 @@ bool pass_through(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& 
     return true;
   }
   if (ev.structural_category == "incomplete-splice_match") {
-    // A truncated known transcript. 61 % of real ISM carry the intra-priming sign (HG03516),
-    // so the sign is reported in the reason, but the class does not change: the splice
-    // structure is known; only the 3' end is unreliable, and that is not a splicing artifact.
-    // Since 0.0.7, an ISM whose whole intron chain >= chain_min_full_reads long reads carry and
-    // whose 3' end shows no intra-priming sign is a KNOWN_FRAGMENT: a known structure seen
-    // end to end in the reads (92 % of ISM were genuine on SQANTI-SIM), kept apart from the
-    // novel classes because nothing novel was tested.
-    const bool chain_ok = cfg.use_chain && ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads;
+    // A truncated known transcript: the splice structure is known, only the 3' end is
+    // unreliable, so the intra-priming sign goes into the reason, not the class. An ISM whose
+    // whole intron chain >= chain_min_full_reads long reads carry, with no intra-priming sign,
+    // is a KNOWN_FRAGMENT: a known structure seen end to end, kept apart from the novel classes
+    // because nothing novel was tested.
+    const bool chain_ok = ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads;
     if (chain_ok && !s.intrapriming) {
       trace(v, "category=incomplete-splice_match, " + std::to_string(ev.chain_n_full_reads) +
                    " whole-chain read(s), no intra-priming sign -> KNOWN_FRAGMENT");
@@ -197,11 +186,11 @@ bool pass_through(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& 
 // even when the haplotype provenance is circular-risk. A rescue is not blocked by a mapping
 // sign (that blocked a correct rescue in refbias_phasing), but the sign is carried in the
 // reason so the call can be reviewed.
-bool reference_bias(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& s, Verdict& v) {
+bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
   const std::string mapping_note = s.mapping_sign ? ";mapping_sign" : "";
   const bool all_pan = ev.n_novel_junctions > 0 && ev.n_novel_jx_pangenome == ev.n_novel_junctions;
   const bool all_created = ev.n_novel_junctions > 0 && ev.n_novel_jx_variant_created == ev.n_novel_junctions;
-  if (cfg.use_pangenome && ev.pangenome_evaluable && ev.pangenome_rescue) {
+  if (ev.pangenome_evaluable && ev.pangenome_rescue) {
     v.primary_mechanism = Mechanism::kPopulationKnown;
     const std::string frac = std::to_string(ev.n_novel_jx_pangenome) + "/" + std::to_string(ev.n_novel_junctions);
     if (ev.pangenome_circular) {
@@ -216,7 +205,7 @@ bool reference_bias(const RuleConfig& cfg, const EvidenceVector& ev, const Signs
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "pangenome_path" + mapping_note);
     return true;
   }
-  if (cfg.use_variant && ev.variant_evaluable && ev.variant_rescue) {
+  if (ev.variant_evaluable && ev.variant_rescue) {
     v.primary_mechanism = Mechanism::kVariant;
     if (ev.variant_circular) {
       v.circularity_flag = true;
@@ -233,14 +222,14 @@ bool reference_bias(const RuleConfig& cfg, const EvidenceVector& ev, const Signs
   // Every novel junction is explained individually, but by different haplotypes / graph
   // paths: no single haplotype carries the chain, so the isoform is not reference bias of
   // one allele. The evidence conflicts -> held, not rescued and not called an artifact.
-  if (cfg.use_pangenome && ev.pangenome_evaluable && all_pan && ev.pangenome_path_evaluable &&
+  if (ev.pangenome_evaluable && all_pan && ev.pangenome_path_evaluable &&
       !ev.pangenome_path_consistent) {
     v.primary_mechanism = Mechanism::kPopulationKnown;
     trace(v, "all novel junctions are on pangenome paths, but no single path carries them all -> held UNRESOLVED");
     finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "path_inconsistent");
     return true;
   }
-  if (cfg.use_variant && ev.variant_evaluable && all_created && !ev.haplotype_consistent) {
+  if (ev.variant_evaluable && all_created && !ev.haplotype_consistent) {
     v.primary_mechanism = Mechanism::kVariant;
     trace(v, "every novel junction is variant-created, but on different haplotypes (no haplotype "
              "carries the whole chain) -> held UNRESOLVED");
@@ -252,9 +241,8 @@ bool reference_bias(const RuleConfig& cfg, const EvidenceVector& ev, const Signs
 
 // --- 2. Axis A: novelty support from short-read corroboration. `unknown_reason` names why
 // the axis is UNKNOWN when it is.
-NoveltySupport support_axis(const RuleConfig& cfg, const EvidenceVector& ev, Verdict& v, std::string& unknown_reason) {
-  const bool sj_ok = ev.sj_evaluable && cfg.use_short_read;
-  if (!sj_ok || !ev.chain_available || ev.n_novel_junctions == 0) {
+NoveltySupport support_axis(const EvidenceVector& ev, Verdict& v, std::string& unknown_reason) {
+  if (!ev.sj_evaluable || !ev.chain_available || ev.n_novel_junctions == 0) {
     if (!ev.chain_available) {
       unknown_reason = "caller_chain_absent";
       trace(v, "novelty-support UNKNOWN reason=caller_chain_absent");
@@ -301,12 +289,11 @@ Mechanism mechanism_axis(const RuleConfig& cfg, const EvidenceVector& ev, const 
     trace(v, "bam mapping artifact (low_mapq_frac=" + std::to_string(ev.bam_max_frac_low_mapq) +
                  ", supplementary_frac=" + std::to_string(ev.bam_max_frac_supplementary) +
                  ", indel_near_frac=" + std::to_string(ev.bam_max_frac_indel_near) +
-                 ", softclip_frac=" + std::to_string(ev.bam_max_frac_softclip) +
                  ", over " + std::to_string(ev.bam_n_junctions_gated) + " junction(s) with >= " +
                  std::to_string(cfg.bam_min_spanning) + " reads) -> mechanism=mapping_or_repeat");
     return Mechanism::kMapping;
   }
-  if (cfg.use_noncanonical && ev.canon_evaluable && ev.noncanonical) {
+  if (ev.canon_evaluable && ev.noncanonical) {
     trace(v, "all_canonical=non_canonical -> mechanism=noncanonical");
     return Mechanism::kNoncanonical;
   }
@@ -348,18 +335,15 @@ void project(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& s, No
     // Short-read support is not evaluable. A mapping sign holds the call; otherwise caller
     // consensus or whole-chain long-read support, both methodological (not experimental)
     // corroboration, lift it to PROBABLE, never CONFIRMED; with neither it is held UNRESOLVED.
-    // The RT-switch sign does not demote methodological support: 0 of 83 chain- or
-    // consensus-supported calls carrying it were false on SQANTI-SIM, and SQANTI3 flags it on
-    // 12-18 % of LRGASP's experimentally validated isoforms. The intra-priming sign still
-    // holds (as for ISM above): the simulator does not model it, so there is no evidence
-    // either way, and on real Iso-Seq it marks thousands of chain-supported isoforms.
+    // The RT-switch sign does not demote methodological support (benchmark/rts_sensitivity);
+    // the intra-priming sign still holds, as for ISM above.
     const bool weak_sign = mech == Mechanism::kRtSwitch;
     const std::string sign_note = weak_sign ? ";" + mc + "_sign" : "";
-    const bool consensus = cfg.use_consensus && ev.consensus_evaluable && ev.n_callers >= cfg.consensus_min_callers;
+    const bool consensus = ev.consensus_evaluable && ev.n_callers >= cfg.consensus_min_callers;
     const bool examined = ev.chain_available && ev.catalog_evaluable;
     if (mech == Mechanism::kMapping) {
-      // Without short reads a mapping sign alone is not decisive: 11 of 31 such ARTIFACT
-      // calls were genuine on SQANTI-SIM (0.0.4-0.0.6), so the call is held UNCONFIRMED.
+      // Without short reads a mapping sign alone is not decisive (a third of such calls were
+      // genuine on SQANTI-SIM before 0.0.7), so the call is held UNCONFIRMED.
       cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "mapping_without_short_reads";
     } else if (consensus && !examined) {
       // Caller agreement can only corroborate a chain we could examine: without the
@@ -374,11 +358,11 @@ void project(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& s, No
                    " corroborates the novel chain (no short-read axis) -> consensus-supported");
       if (mech == Mechanism::kNone || weak_sign) { cls = ConfidenceClass::kNovelProbable; verdict = "confirmed"; reason = "caller_consensus" + sign_note; }
       else { cls = ConfidenceClass::kUnconfirmed; verdict = "unconfirmed"; reason = "consensus_with_" + mc; }
-    } else if (cfg.use_chain && ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads && examined) {
+    } else if (ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads && examined) {
       // Whole-chain long-read support: reads that carry every intron of the chain in one
-      // alignment. They are the caller's own reads (not independent evidence), and on
-      // SQANTI-SIM they separate caller-level false chains (FLAIR/IsoQuant), not
-      // alignment-level ones (benchmark/chain_support), so PROBABLE, never CONFIRMED.
+      // alignment. They are the caller's own reads, not independent evidence, and they separate
+      // caller-level false chains, not alignment-level ones (benchmark/chain_support), so
+      // PROBABLE, never CONFIRMED.
       trace(v, "whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
                    " read(s) carry the entire intron chain (>= " + std::to_string(cfg.chain_min_full_reads) +
                    (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
@@ -417,28 +401,12 @@ Verdict RuleEngine::evaluate(const EvidenceVector& ev) const {
   const Signs s = read_signs(cfg_, ev);
   if (pass_through(cfg_, ev, s, v)) return v;
   trace_unused_signs(cfg_, ev, v);
-  if (reference_bias(cfg_, ev, s, v)) return v;
+  if (reference_bias(ev, s, v)) return v;
   std::string unknown_reason;
-  v.novelty_support = support_axis(cfg_, ev, v, unknown_reason);
+  v.novelty_support = support_axis(ev, v, unknown_reason);
   v.primary_mechanism = mechanism_axis(cfg_, ev, s, v);
   project(cfg_, ev, s, v.novelty_support, v.primary_mechanism, unknown_reason, v);
   return v;
-}
-
-RuleEngine RuleEngine::with_axis_disabled(const std::string& axis) const {
-  RuleEngine e = *this;
-  if (axis == "short_read")        e.cfg_.use_short_read = false;
-  else if (axis == "mapping")      e.cfg_.use_mapping = false;
-  else if (axis == "noncanonical") e.cfg_.use_noncanonical = false;
-  else if (axis == "rt_switch")    e.cfg_.use_rts = false;
-  else if (axis == "degradation")  e.cfg_.use_degradation = false;
-  else if (axis == "variant")      e.cfg_.use_variant = false;
-  else if (axis == "pangenome")    e.cfg_.use_pangenome = false;
-  else if (axis == "consensus")    e.cfg_.use_consensus = false;
-  else if (axis == "chain")        e.cfg_.use_chain = false;
-  else throw std::invalid_argument("unknown ablation axis '" + axis + "' (expected one of: short_read, mapping, "
-                                   "noncanonical, rt_switch, degradation, variant, pangenome, consensus, chain)");
-  return e;
 }
 
 }  // namespace panisoguard

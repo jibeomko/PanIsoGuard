@@ -118,10 +118,6 @@ TEST_CASE("adjudicator: pangenome graph-supported novel junction -> REFERENCE_BI
   CHECK(p->verdict.confidence == ConfidenceClass::kReferenceBias);
   CHECK(p->verdict.primary_mechanism == Mechanism::kPopulationKnown);
   CHECK_FALSE(p->verdict.circularity_flag);  // population reference data is non-circular
-
-  // Disabling the pangenome axis must drop the rescue (no SR/variant evidence here).
-  const auto out_off = adjudicate(in, RuleEngine().with_axis_disabled("pangenome"));
-  CHECK(find(out_off, "isoPan")->verdict.confidence != ConfidenceClass::kReferenceBias);
 }
 
 TEST_CASE("adjudicator: pangenome partial support does NOT rescue (all-or-nothing)", "[adjudicator]") {
@@ -370,10 +366,6 @@ TEST_CASE("adjudicator: a motif canonical on the reference only is a non-canonic
     CHECK(jx[0].canonical_on.empty());
     CHECK(jx[0].ref_motif == "GT-AG");
     CHECK(jx[0].hap_motifs == std::vector<std::string>{"GG-AG"});
-    // Ablating the variant axis removes the sign.
-    const auto off = adjudicate(in, RuleEngine().with_axis_disabled("variant"));
-    CHECK(off[0].verdict.confidence == ConfidenceClass::kUnconfirmed);
-    CHECK(off[0].verdict.verdict_reason == "unsupported_no_sign");
   }
   SECTION("circular-risk provenance: the sign is ignored") {
     in.haplotype_circular = true;

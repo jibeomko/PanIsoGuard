@@ -79,10 +79,8 @@ TEST_CASE("read_caller_support round-trips the combine matrix to native_id -> n_
   CHECK(support.by_native_id.at("n1") == 1);
   CHECK(support.by_native_id.count("absent") == 0);
   // ...and the chain fingerprint (the join key adjudicate uses) carries the same counts.
-  REQUIRE(support.has_fingerprints());
   CHECK(support.by_chain.at(fingerprint_intron_chain(chainA)) == 2);
   CHECK(support.by_chain.at(fingerprint_intron_chain(chainB)) == 1);
-  CHECK(support.n_native_id_collisions == 0);
   std::remove(path.c_str());
 }
 
@@ -100,7 +98,7 @@ TEST_CASE("consensus: duplicate native ids across callers stay separate per chai
   const std::string path = scratch("caller_support_collision.tsv");
   write_caller_support_matrix(path, b.build());
   const CallerSupport s = read_caller_support(path);
-  CHECK(s.n_native_id_collisions == 1);                 // reported, not silently max'ed
+  CHECK(s.by_native_id.at("transcript_1") == 2);        // by name the larger count wins; chains stay apart:
   CHECK(s.by_chain.at(fingerprint_intron_chain(chainX)) == 2);
   CHECK(s.by_chain.at(fingerprint_intron_chain(chainY)) == 1);
   std::remove(path.c_str());

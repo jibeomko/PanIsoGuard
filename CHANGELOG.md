@@ -5,6 +5,20 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Removed
+- **Everything that was not the adjudicator.** The Python PDF report tool (`python/`,
+  `panisoguard-report`, `examples/report`), the Snakemake pipeline (`workflow/`), the deprecated
+  `benchmark` subcommand and `ablate` (with the per-axis `use_*` switches), the `--hash-inputs`
+  MD5 option, the unused interval index (and the vendored cgranges header), the experimental
+  `-DWITH_PANGENOME_LIB` build option, and the native-id fallback for caller-support matrices
+  written before 0.0.6 (the `fingerprint` column is now required). The outputs lose the fields
+  that carried no decision: the soft-clip fraction (`bam_frac_softclip` in the JSONL and
+  junctions table, `max_softclip_frac` / `softclip_min_bp` in the config; the gate never fired
+  at its default) and the `graph_trace` and `bio_flags` objects of the JSONL. Every verdict,
+  class, reason and junction count is unchanged (byte-identical `adjudicated.tsv` on the worked
+  locus and on SQANTI-SIM chr22 with short reads, BAM and reference); the only change inside
+  `rule_trace` is that the mapping-artifact line no longer prints the soft-clip fraction.
+
 ### Changed
 - **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
   Korean study notes are gone from the repository; what they verified stays: the toy data, the

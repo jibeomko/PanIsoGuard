@@ -12,10 +12,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # --- Options -----------------------------------------------------------------
-# In-process gbwtgraph/GBZ support is EXPERIMENTAL and OFF by default. The MVP
-# (v1.0) consumes pangenome evidence only via subprocess/file tiers (GFA, rpvg
-# text output), so a plain `cmake .. && make` needs nothing but htslib.
-option(WITH_PANGENOME_LIB "Link in-process gbwtgraph/GBZ support (experimental)" OFF)
 option(PANISOGUARD_BUILD_TESTS "Build the unit-test suite" ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -58,12 +54,10 @@ message(STATUS "PanIsoGuard: using htslib ${HTSLIB_VERSION} (${HTSLIB_LIBRARY})"
 # prefixed ar, so without system binutils CMake finds no `ar` and a STATIC build fails.
 add_library(panisoguard_core OBJECT
   src/core/fingerprint.cpp
-  src/core/interval_index.cpp
   src/core/consensus.cpp
   src/core/verdict.cpp
   src/core/rules.cpp
   src/core/adjudicator.cpp
-  src/core/analysis.cpp
   src/core/decoys.cpp
   src/evidence/bam_features.cpp
   src/evidence/variant_motif.cpp
@@ -75,7 +69,7 @@ add_library(panisoguard_core OBJECT
   src/io/result_writer.cpp
 )
 target_include_directories(panisoguard_core PUBLIC "${CMAKE_SOURCE_DIR}/include")
-target_include_directories(panisoguard_core SYSTEM PUBLIC "${CMAKE_SOURCE_DIR}/thirdparty")  # vendored: cgranges, toml++
+target_include_directories(panisoguard_core SYSTEM PUBLIC "${CMAKE_SOURCE_DIR}/thirdparty")  # vendored: toml++
 target_link_libraries(panisoguard_core PUBLIC HTSlib::hts)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set(PANISOGUARD_WARNINGS -Wall -Wextra -Wshadow)
@@ -88,8 +82,6 @@ add_executable(panisoguard
   src/cli/run_common.cpp
   src/cli/cmd_combine.cpp
   src/cli/cmd_adjudicate.cpp
-  src/cli/cmd_benchmark.cpp
-  src/cli/cmd_ablate.cpp
   src/cli/cmd_example.cpp
   src/cli/cmd_decoys.cpp
 )
@@ -99,9 +91,6 @@ target_compile_definitions(panisoguard PRIVATE PANISOGUARD_VERSION="${PROJECT_VE
 # `panisoguard example` looks for the bundled examples next to the installed binary
 # (<prefix>/share/panisoguard) and falls back to the source checkout for a build-tree binary.
 target_compile_definitions(panisoguard PRIVATE PANISOGUARD_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
-if(WITH_PANGENOME_LIB)
-  target_compile_definitions(panisoguard PRIVATE HAVE_GBWTGRAPH=1)
-endif()
 
 install(TARGETS panisoguard RUNTIME DESTINATION bin)
 # The bundled examples ship with the binary (so the bioconda package and the Docker image
@@ -118,7 +107,6 @@ if(PANISOGUARD_BUILD_TESTS)
   add_executable(panisoguard_tests
     tests/unit/test_main.cpp
     tests/unit/fingerprint_test.cpp
-    tests/unit/interval_index_test.cpp
     tests/unit/sj_tab_test.cpp
     tests/unit/pangenome_test.cpp
     tests/unit/gtf_test.cpp
@@ -129,7 +117,6 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/rules_test.cpp
     tests/unit/adjudicator_test.cpp
     tests/unit/bam_features_test.cpp
-    tests/unit/analysis_test.cpp
     tests/unit/variant_motif_test.cpp
     tests/unit/decoys_test.cpp
   )

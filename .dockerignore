@@ -6,5 +6,4 @@ pigci-check
 **/output
 **/data/work
 *.pdf
-examples/report/showcase.report.pdf
 .github

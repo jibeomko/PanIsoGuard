@@ -64,7 +64,7 @@ TEST_CASE("pangenome supports() honours the haplotype-count threshold", "[pangen
 }
 
 TEST_CASE("pangenome rescue: graph-supported novel junction -> REFERENCE_BIAS", "[pangenome]") {
-  const RuleEngine engine;  // built-in defaults: use_pangenome = true
+  const RuleEngine engine;  // built-in defaults
   EvidenceVector ev;
   ev.structural_category = "novel_in_catalog";
   ev.is_novel = true;
@@ -89,12 +89,6 @@ TEST_CASE("pangenome rescue: graph-supported novel junction -> REFERENCE_BIAS", 
     REQUIRE(v.confidence == ConfidenceClass::kReferenceBias);
     REQUIRE(v.primary_mechanism == Mechanism::kPopulationKnown);
     REQUIRE_FALSE(v.circularity_flag);
-  }
-
-  SECTION("disabling the pangenome axis removes the rescue") {
-    const RuleEngine off = engine.with_axis_disabled("pangenome");
-    const Verdict v = off.evaluate(ev);
-    REQUIRE(v.confidence != ConfidenceClass::kReferenceBias);
   }
 
   SECTION("sample-derived/unknown provenance is held under the circularity firewall") {

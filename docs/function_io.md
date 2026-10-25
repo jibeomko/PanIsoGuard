@@ -28,15 +28,13 @@ The main modules and their input → output contracts. Types are defined under
 
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
-| Non-redundancy (`analysis.cpp`, `benchmark`; deprecated since 0.0.7) | adjudication results + SQANTI3 `filter_result` | `NonRedundancy` (2×2, Jaccard, McNemar) | Superseded by [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h); kept until the next minor release. |
-| Ablation (`analysis.cpp`, `ablate`) | assembled evidence + `RuleEngine` | `AxisAblation` (per-axis class-change counts) | Quantify each axis's marginal contribution. |
 | Decoy chains (`decoys.cpp`, `decoys`) | reference GTF transcripts (grouped by gene) + the long-read BAM | `Decoy[]` (novel-in-catalog recombinants of two annotated transcripts at a shared intron, never an annotated chain or a piece of one) → `<prefix>.decoys.tsv` / `.decoys.json` with each decoy's whole-chain read count | A per-dataset upper bound on the chain axis's false-lift rate (`BamReader::chain_support` on chains the annotation does not know). |
 
 ## Output writer
 
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
-| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `JunctionRow[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.junctions.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts; per-isoform `rule_trace` + `graph_trace` ([method_graph.md](method_graph.md)) + `bio_flags` (SQANTI3 descriptors passed through, verdict-neutral; [relationship_to_sqanti3.md](relationship_to_sqanti3.md)) in the JSONL; and run provenance. |
+| Result writer (`result_writer.cpp`) | `AdjudicationResult[]` + `JunctionRow[]` + `RunProvenance` | `<prefix>.adjudicated.tsv`, `.junctions.tsv`, `.attribution.jsonl`, `.provenance.log` | TSV verdicts; per-isoform evidence and `rule_trace` in the JSONL; per-junction evidence; and run provenance. |
 | Kept-isoform export (`write_kept_isoforms`, `adjudicate --write-kept`) | the input isoform GTF / BED12 + the ids whose `verdict` is in `--keep-verdicts` | a copy of the input holding only those records | A verdict-filtered annotation for downstream quantification; the provenance log names the file and the verdict list. |
 
 ## Key data types
