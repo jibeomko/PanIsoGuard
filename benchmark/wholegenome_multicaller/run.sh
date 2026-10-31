@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Whole-genome multi-caller consensus on REAL public data (GM12878 ONT dRNA).
+# Whole-genome multi-caller consensus on real public data (GM12878 ONT dRNA).
 # Three callers on one shared genome alignment, integrated by `combine`, validated by
-# splice-motif canonicality (no ground truth on real data). Honest, small-N result --
+# splice-motif canonicality (no ground truth on real data). A small result;
 # see README.md. All inputs public (ENCODE ENCSR368UNC; GRCh38/GENCODE v49); no private data.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"

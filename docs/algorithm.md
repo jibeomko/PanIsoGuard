@@ -31,9 +31,9 @@ for each SQANTI3 isoform record r:
 
 Notes:
 
-- Novel-junction axes require the caller chain **and** the reference catalog; without
+- Novel-junction axes require the caller chain and the reference catalog; without
   them, novelty-support is `UNKNOWN` (held, never guessed).
-- A junction is matched by **exact, strand-aware coordinates** — no fuzzy/overlap
+- A junction is matched by exact, strand-aware coordinates — no fuzzy/overlap
   matching — so all readers must agree on the 0-based half-open convention (they do,
   by normalizing at read time).
 - BAM features are memoized per `(chrom, strand, intron)` so junctions shared across
@@ -51,9 +51,9 @@ Applied in priority order; the full grid and rationale are in
                                  else UNCONFIRMED
      non-targeted (not novel) -> UNRESOLVED
 2. Reference-bias rescue (highest priority for novel isoforms):
-     if ALL novel junctions are graph-supported (pangenome axis) -> REFERENCE_BIAS
+     if all novel junctions are graph-supported (pangenome axis) -> REFERENCE_BIAS
          (held UNRESOLVED if the junction-set provenance is circular-risk)
-     else if ALL novel junctions are variant-explained (haplotype axis) -> REFERENCE_BIAS
+     else if all novel junctions are variant-explained (haplotype axis) -> REFERENCE_BIAS
          (held UNRESOLVED if the haplotype provenance is circular-risk)
 3. Otherwise project the 2-axis grid:
      Axis A novelty-support  = short-read corroboration of novel junctions
@@ -61,14 +61,14 @@ Applied in priority order; the full grid and rationale are in
      (support x mechanism) -> {NOVEL_CONFIRMED, NOVEL_PROBABLE, UNCONFIRMED, UNRESOLVED, ARTIFACT}
 ```
 
-The rescue branches return early and are **all-or-nothing**: a single explained
+The rescue branches return early and are all-or-nothing: a single explained
 junction does not rescue a multi-novel-junction isoform whose other junctions are
-genuinely new.
+new.
 
 ## Caller integration (combine)
 
 `combine` is a separate pre-step ([`src/core/consensus.cpp`](../src/core/consensus.cpp)):
 each caller's isoforms are reduced to intron-chain fingerprints and merged across
 callers (which use different running-ID schemes) into a stable `PIG.NNNNNN` id plus a
-caller-support matrix. Monoexonic transcripts are kept unmerged (honest, no
+caller-support matrix. Monoexonic transcripts are kept unmerged (no
 coordinate guessing).

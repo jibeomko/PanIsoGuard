@@ -1,6 +1,6 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
-  "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
+  "data_provenance": "real public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
   "generated_utc": "2026-10-19T11:49:48Z",
   "metrics": {
     "cross_library": {

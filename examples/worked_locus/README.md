@@ -18,7 +18,7 @@ Adding the inputs one at a time changes the verdict of `iso_A`, the isoform with
 | + haplotype FASTAs, provenance `unknown` | `UNRESOLVED` (the rescue is held by the circularity firewall) |
 | + provenance `wgs` | `REFERENCE_BIAS` |
 
-Two scripts keep this folder honest, and both run in CI:
+Two scripts check this folder, and both run in CI:
 
 - `check_worked_locus.py` recomputes every verdict of the nine isoforms under nine input
   combinations with the Python standard library only (readers, junction classification, short-read

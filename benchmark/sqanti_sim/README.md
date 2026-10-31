@@ -1,7 +1,7 @@
 # SQANTI-SIM truth-based benchmark (per-class P/R + AUPRC)
 
 The canonical controlled-novelty simulator [SQANTI-SIM](https://github.com/ConesaLab/SQANTI-SIM)
-generates a labelled truth set: a chosen set of real transcripts is **deleted** from the
+generates a labelled truth set: a chosen set of real transcripts is deleted from the
 annotation the caller sees, so a caller must rediscover them as novel. This gives a
 ground-truth P/R + AUPRC for PanIsoGuard's novel-isoform adjudication on a *real* caller
 pipeline — complementing the in-house [controlled_truth](../controlled_truth) and
@@ -21,8 +21,8 @@ panisoguard adjudicate --sj-tab truth.SJ.tab
 score.py           # match FLAIR isoforms to truth by intron chain -> P/R + AUPRC
 ```
 
-Truth labels (matched by exact intron chain): **genuine_novel** = chain of a deleted
-simulated transcript; **known** = chain still in the reduced annotation; **false_novel** =
+Truth labels (matched by exact intron chain): genuine_novel = chain of a deleted
+simulated transcript; known = chain still in the reduced annotation; false_novel =
 multi-exon chain matching no simulated transcript (a FLAIR/alignment artifact). The truth
 SJ.tab carries the introns of all simulated (expressed) transcripts, so a genuine novel's
 junctions are short-read-corroborated while an artifact's are not.
@@ -38,7 +38,7 @@ known                652           0          0           0          0         0
 false_novel            8           4          1          61          6        68
 ```
 
-Genuine-novel detection (predicted genuine = `HIGH/NOVEL_PROBABLE`):
+Genuine-novel detection (predicted genuine = `NOVEL_CONFIRMED` / `NOVEL_PROBABLE`):
 
 ```
 precision = 0.989   recall = 0.589   specificity(false rejected) = 0.966
@@ -48,27 +48,27 @@ known -> KNOWN: 652/652 = 1.000
 ```
 
 (0.0.4: `PARTIAL` support no longer promotes to `NOVEL_PROBABLE`; before that fix the
-same run read 4 false `MEDIUM`, precision 0.982, specificity 0.946, AUPRC 0.970.)
+same run read 4 false `NOVEL_PROBABLE`, precision 0.982, specificity 0.946, AUPRC 0.970.)
 
-> **Read this with [sqanti3_filter_h2h](../sqanti3_filter_h2h).** The truth SJ.tab is an
+> Read this with [sqanti3_filter_h2h](../sqanti3_filter_h2h). The truth SJ.tab is an
 > oracle (every expressed junction, 50 reads), and against the real baselines on this same
-> truth set PanIsoGuard is **not** more accurate: the one-line rule "every junction has ≥ 3
+> truth set PanIsoGuard is not more accurate: the one-line rule "every junction has ≥ 3
 > short reads" ranks as well, and at the default operating point has far higher recall.
 
 ## Interpretation
 
-- **Precision 0.989, specificity 0.966, AUPRC 0.971** — when PanIsoGuard calls an isoform
-  genuinely novel it is almost always right, and it rejects artifacts.
-- **Zero genuine_novel → ARTIFACT**: it never wrongly rejected a real novel isoform.
-- The **moderate recall (0.589) is abstention, not misclassification — but it has a cost**
+- Precision 0.989, specificity 0.966, AUPRC 0.971 — when PanIsoGuard calls an isoform
+  novel it is almost always right, and it rejects artifacts.
+- Zero genuine_novel → ARTIFACT: it never wrongly rejected a real novel isoform.
+- The moderate recall (0.589) is abstention, not misclassification — but it has a cost
   (the SQANTI3 rules filter and the one-line short-read rule keep most of these isoforms at
   ~0.93–0.99 precision; see [sqanti3_filter_h2h](../sqanti3_filter_h2h)):
-  - **NNC** (novel-not-in-catalog) recall is **perfect (1.000)** — these carry genuinely
+  - NNC (novel-not-in-catalog) recall is 1.000 — these carry
     novel junctions that the short-read axis corroborates.
-  - **NIC** (novel-in-catalog) recall 0.477 — NIC novelty is a *combination* of known
+  - NIC (novel-in-catalog) recall 0.477 — NIC novelty is a *combination* of known
     junctions; the isoforms with no individually-novel junction are held `UNRESOLVED`
     (the engine has nothing to corroborate, so it does not guess — documented behavior).
-  - **ISM** (incomplete-splice_match) "recall" 0.000 — ISMs are truncations of known
+  - ISM (incomplete-splice_match) "recall" 0.000 — ISMs are truncations of known
     transcripts *relative to the reduced annotation* and are assigned `UNCONFIRMED`,
     not a confident novel call — yet each of these 154 chains exactly matches a deleted
     (genuine) transcript, so this is lost recall, not a labelling artifact.

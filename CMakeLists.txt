@@ -48,7 +48,7 @@ if(NOT HTSLIB_HAS_REQUIRED_SYMBOLS)
 endif()
 message(STATUS "PanIsoGuard: using htslib ${HTSLIB_VERSION} (${HTSLIB_LIBRARY})")
 
-# --- Core library (M1) -------------------------------------------------------
+# --- Core library ----------------------------------------------------------
 # OBJECT, not STATIC: the core is internal (only the executable is installed), and an object
 # library needs no archiver. conda-forge compilers >= 2.0 ship an unprefixed c++ but only a
 # prefixed ar, so without system binutils CMake finds no `ar` and a STATIC build fails.
@@ -101,7 +101,7 @@ install(DIRECTORY examples/tiny examples/multi_caller examples/worked_locus DEST
 # --- Tests -------------------------------------------------------------------
 if(PANISOGUARD_BUILD_TESTS)
   enable_testing()
-  # M0 smoke test: the binary links and reports its version with exit code 0.
+  # Smoke test: the binary links and reports its version with exit code 0.
   add_test(NAME version_smoke COMMAND panisoguard --version)
 
   add_executable(panisoguard_tests

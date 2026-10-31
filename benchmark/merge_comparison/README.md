@@ -1,51 +1,48 @@
 # Merge-tool head-to-head — is the consensus claim a matcher artifact?
 
-The [multicaller](../multicaller) result rests on **how caller agreement is counted**.
-`panisoguard combine` groups isoforms by **exact intron-chain fingerprint**. Two fair
-objections a reviewer will raise:
+The [multicaller](../multicaller) result rests on how caller agreement is counted.
+`panisoguard combine` groups isoforms by exact intron-chain fingerprint. Two objections:
 
-1. **"`combine` just re-derives `gffcompare -i`."** Is it a novel algorithm or a
+1. "`combine` just re-derives `gffcompare -i`." Is it a novel algorithm or a
    re-implementation of the established N-way comparison?
 2. **"Exact matching splits true cross-caller agreements that a fuzzy merge (TAMA)
    would keep — so the ≥k precision is an artifact of your matcher, not the data."**
 
-This protocol settles both by putting every matcher on **one footing**: each produces
-caller-support groups over the **same 5 chr22 caller GTFs** (FLAIR + IsoQuant + Bambu +
-ESPRESSO + TALON), and we score each with the **identical** "≥ k callers" PR curve vs
-SQANTI-SIM truth. Matchers compared: `combine` (exact), **gffcompare -i** (the incumbent),
-**TAMA merge** (fuzzy, junction wobble 10 bp), and a controlled **exact→fuzzy wobble
+This protocol answers both by putting every matcher on one footing: each produces
+caller-support groups over the same 5 chr22 caller GTFs (FLAIR + IsoQuant + Bambu +
+ESPRESSO + TALON), and we score each with the identical "≥ k callers" PR curve vs
+SQANTI-SIM truth. Matchers compared: `combine` (exact), gffcompare -i (the incumbent),
+TAMA merge (fuzzy, junction wobble 10 bp), and a controlled **exact→fuzzy wobble
 sweep** (0–20 bp).
 
 ## Result 1 — `combine` ≡ `gffcompare -i` (exactly)
 
 | matcher | novel chains | ≥2 P/R | ≥3 P/R | n_callers dist (1·2·3·4·5) |
 |---------|-------------:|:------:|:------:|:--------------------------:|
-| **PanIsoGuard `combine` (exact)** | 1982 | 0.852 / 0.971 | **0.980 / 0.910** | 1105·163·254·128·332 |
-| **gffcompare -i** | 1982 | 0.852 / 0.971 | **0.980 / 0.910** | 1105·163·254·128·332 |
+| PanIsoGuard `combine` (exact) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
+| gffcompare -i | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
 | wobble 0 bp (control) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
 
-`combine` reproduces gffcompare's grouping **byte-for-byte** (same novel count, same
-n_callers distribution, same PR curve). So `combine` is **not a novel merge algorithm** —
-it is a clean, **htslib-native re-implementation** of the established intron-chain N-way
-comparison that feeds the adjudicator directly (no Perl, no GTF round-trip, no extra
-dependency). We state this honestly rather than imply novelty.
+`combine` reproduces gffcompare's grouping (same novel count, same n_callers
+distribution, same PR curve). So `combine` is not a new merge algorithm; it is a
+re-implementation in htslib of the established intron-chain N-way comparison that feeds
+the adjudicator directly (no Perl, no GTF round trip, no extra dependency).
 
-## Result 2 — the consensus precision is matcher-robust (not an exact-matching artifact)
+## Result 2 — the consensus precision is the same under every matcher
 
 | matcher | ≥2 precision | ≥3 precision |
 |---------|:-----------:|:-----------:|
-| combine / gffcompare (exact) | 0.852 | **0.980** |
-| TAMA (fuzzy, 10 bp) | 0.933 | **0.976** |
-| wobble 5 / 10 / 20 bp | 0.839 / 0.837 / 0.836 | **0.975 / 0.975 / 0.975** |
+| combine / gffcompare (exact) | 0.852 | 0.980 |
+| TAMA (fuzzy, 10 bp) | 0.933 | 0.976 |
+| wobble 5 / 10 / 20 bp | 0.839 / 0.837 / 0.836 | 0.975 / 0.975 / 0.975 |
 
-≥3-caller novel precision is **0.975–0.980 across every matcher** — exact, the incumbent,
-the fuzzy standard, and the whole wobble range. The headline ("requiring more callers
-raises precision") is a property of the **data** (the callers genuinely disagree on
-artifacts), not of PanIsoGuard's exact matcher.
+≥3-caller novel precision is 0.975–0.980 across every matcher — exact, the incumbent,
+the fuzzy standard, and the whole wobble range. The result ("requiring more callers raises precision") is a property of the data (the
+callers disagree on artifacts), not of PanIsoGuard's exact matcher.
 
 ## Result 3 — exact matching does not lose agreements at the boundary that matters
 
-The decisive metric: how many **genuine** novels does exact matching call *single-caller*
+The decisive metric: how many genuine novels does exact matching call *single-caller*
 that a fuzzy matcher merges into a *≥ 2 callers* group? Counted by the genuine chain's
 membership of the fuzzy group (a genuine chain merged into a group whose representative
 is a different, false chain still counts as merged).
@@ -53,8 +50,8 @@ is a different, false chain still counts as merged).
 | fuzzy matcher | genuine novels crossing single → ≥2 | genuine upgraded (any amount) |
 |---------------|:----:|:----:|
 | gffcompare | 0 | 0 |
-| TAMA (10 bp) | **4** | 78 |
-| wobble 2 / 5 / 10 / 20 bp | 0 / **1** / **1** / **1** | 2 / 46 / 62 / 80 |
+| TAMA (10 bp) | 4 | 78 |
+| wobble 2 / 5 / 10 / 20 bp | 0 / 1 / 1 / 1 | 2 / 46 / 62 / 80 |
 
 Of the 769 genuine novel chains in the truth (760 of them reported by at least one caller),
 4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
@@ -64,7 +61,7 @@ chains in 769 on this set, and the ≥ k precision (Result 2) is the same under 
 matcher. (TAMA's more aggressive merge collapses the call set to 974 novel chains and trades
 some recall at ≥ 3, 0.831 vs 0.910 — a different operating point, not a more accurate one.)
 
-**Correction (2026-11-01).** The scorer used to count this metric by each fuzzy group's
+Correction (2026-11-01). The scorer used to count this metric by each fuzzy group's
 representative chain, which missed a genuine chain merged into a group represented by a
 false chain; it reported 0 for every matcher. The counts above are the recomputation on the
 original inputs with the membership-based count; the precision-recall curves and the
@@ -93,6 +90,6 @@ python3 score_merge.py --callers callers.tsv --truth truth.truth.tsv --ref chr22
   --wobble 0,5,10,20 --emit-metrics ../results/merge_comparison/metrics.json
 ```
 
-All inputs are the **same public/simulated** SQANTI-SIM chr22 5-caller GTFs as the
+All inputs are the same public/simulated SQANTI-SIM chr22 5-caller GTFs as the
 [multicaller](../multicaller) protocol; no private data. Result envelope:
 [../results/merge_comparison/metrics.json](../results/merge_comparison/metrics.json).

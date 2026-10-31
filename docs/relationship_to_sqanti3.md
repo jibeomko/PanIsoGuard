@@ -7,23 +7,23 @@
 
 [SQANTI3](https://github.com/ConesaLab/SQANTI3) is a mature transcript-QC tool: its
 classification file already provides transcript-level QC features and its junctions
-file provides junction-level attributes. PanIsoGuard is a **decision layer on top of**
+file provides junction-level attributes. PanIsoGuard is a decision layer on top of
 that output, not a reimplementation of it. To avoid being read as "SQANTI3 rebuilt", it
-deliberately **does not** recompute any of SQANTI3's descriptors.
+deliberately does not recompute any of SQANTI3's descriptors.
 
 ## Overlap map
 
 | Feature | Already in SQANTI3 | PanIsoGuard's stance |
 |---------|--------------------|----------------------|
-| TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | **not used**; it stays in the classification file |
-| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | **consume** — `perc_A_downstream_TTS ≥ 60` **and** `polyA_motif_found ≠ TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
-| ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | **not used** |
-| splice-site motif / junction QC (`splice_site`, `RTS_junction`, `indel_near_junct`, `junction_category`) | yes (junctions file) | **consume** — `all_canonical` / `RTS_stage` are mechanism priors |
+| TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | not used; it stays in the classification file |
+| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | consume — `perc_A_downstream_TTS ≥ 60` and `polyA_motif_found ≠ TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
+| ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | not used |
+| splice-site motif / junction QC (`splice_site`, `RTS_junction`, `indel_near_junct`, `junction_category`) | yes (junctions file) | consume — `all_canonical` / `RTS_stage` are mechanism priors |
 | SQANTI-prior artifact rules | yes | already consumed: `RTS_stage`, `all_canonical`, `perc_A_downstream_TTS` |
-| short-read splice-junction support | partial | PanIsoGuard adds **per-edge** `SJ.tab` corroboration of *novel* junctions |
-| **multi-caller intron-chain consensus** | no | **PanIsoGuard differentiator** (`combine`) |
-| **graph / path-level caller recurrence** | no | **PanIsoGuard differentiator** |
-| **pangenome / haplotype reference-bias rescue + circularity firewall** | no | **PanIsoGuard's most independent contribution** |
+| short-read splice-junction support | partial | PanIsoGuard adds per-edge `SJ.tab` corroboration of *novel* junctions |
+| multi-caller intron-chain consensus | No | PanIsoGuard adds this (`combine`) |
+| path-level caller recurrence | No | PanIsoGuard adds this |
+| pangenome / haplotype reference-bias rescue with the circularity firewall | No | PanIsoGuard adds this |
 
 Sources: SQANTI3 QC output reference
 (<https://github-wiki-see.page/m/ConesaLab/SQANTI3/wiki/Understanding-the-output-of-SQANTI3-QC>)
@@ -37,25 +37,25 @@ RT-switching, CAGE/Quant-seq, and short-read support.
 PanIsoGuard's contribution is the **adjudication of an evidence-annotated intron chain**,
 integrating orthogonal, largely SQANTI-independent evidence:
 
-- **caller consensus** — the same intron-chain path supported by multiple callers
+- caller consensus — the same intron-chain path supported by multiple callers
   (`combine`); SQANTI3 is single-caller.
-- **short-read edge support** — per-novel-junction `SJ.tab` corroboration.
-- **long-read mapping** — read-level MAPQ / supplementary / indel features
+- short-read edge support — per-novel-junction `SJ.tab` corroboration.
+- long-read mapping — read-level MAPQ / supplementary / indel features
   on the reads that traverse a junction.
-- **personalized haplotype** — a novel junction that is non-canonical on the reference
+- personalized haplotype — a novel junction that is non-canonical on the reference
   but canonical on the sample's haplotype (reference bias, not new splicing).
-- **pangenome support** — a junction realizable on a population-graph path though absent
+- pangenome support — a junction realizable on a population-graph path though absent
   from the linear reference.
-- **circularity firewall** — rescues that would rest on the sample's own RNA-derived
+- circularity firewall — rescues that would rest on the sample's own RNA-derived
   data are held `UNRESOLVED`, never promoted.
 
 It explicitly avoids re-deriving TSS/TTS, ORF/NMD, polyA motif, or splice motif, and
 makes no SQANTI3-style ML/rule QC filter — those would duplicate SQANTI3.
 
 > **"Rescue" means the opposite thing in the two tools.** SQANTI3 *rescue* recovers a
-> **reference** transcript a caller failed to report (it adds a known model back).
+> reference transcript a caller failed to report (it adds a known model back).
 > PanIsoGuard's reference-bias *rescue* (`REFERENCE_BIAS`) does the reverse —
-> it **exonerates a sample's novel call** that only *looks* novel because of reference
+> it exonerates a sample's novel call that only *looks* novel because of reference
 > bias, gated by a circularity firewall. Same word, opposite direction; they do not
 > compete. (See also [relationship_to_merge_tools.md](relationship_to_merge_tools.md).)
 
@@ -70,7 +70,7 @@ file, next to PanIsoGuard's verdict.
 
 ## Attribution, licensing & citation
 
-PanIsoGuard is an **independent project** and is **not affiliated with, endorsed by, or
+PanIsoGuard is an independent project and is **not affiliated with, endorsed by, or
 a derivative work of** SQANTI3 or its authors. It interoperates with SQANTI3 only by
 **reading SQANTI3's output file** (the classification TSV) as input: it bundles no
 SQANTI3 code, links to no SQANTI3 library, and does not invoke or redistribute SQANTI3.

@@ -85,7 +85,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bool any_variant_eval = false;
     bool any_pan_eval = false;
     // Haplotype/path consistency: a transcript is one molecule from one haplotype, so a
-    // rescue needs ONE haplotype (or graph path) that explains every novel junction, not
+    // rescue needs one haplotype (or graph path) that explains every novel junction, not
     // a different one per junction. Intersect the per-junction sets.
     std::vector<bool> hap_common(haplotype != nullptr ? haplotype->n_haplotypes() : 0, true);
     std::vector<bool> hap_at;
@@ -203,10 +203,10 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
     ev.haplotype_consistent = n_variant_created > 0 &&
                               std::find(hap_common.begin(), hap_common.end(), true) != hap_common.end();
-    // Rescue requires ALL of the isoform's novel junctions to be explained by the
+    // Rescue requires all of the isoform's novel junctions to be explained by the
     // reference-bias evidence -- a single explained junction does not make a
-    // multi-novel-junction isoform "false novel" (the others may be genuinely new) --
-    // and explained on ONE haplotype (the per-junction count alone would accept junction
+    // multi-novel-junction isoform "false novel" (the others may be new) --
+    // and explained on one haplotype (the per-junction count alone would accept junction
     // 1 on haplotype A plus junction 2 on haplotype B).
     ev.variant_rescue = (n_novel > 0 && n_variant_created == n_novel && ev.haplotype_consistent);
     // Keep the circular-risk flag consistent with evaluability (it is only read by the

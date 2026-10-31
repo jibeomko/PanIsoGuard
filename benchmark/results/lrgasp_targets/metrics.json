@@ -1,6 +1,6 @@
 {
   "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/pig_lrgasp --emit-metrics ...",
-  "data_provenance": "REAL public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF (benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, with and without the Illumina SJ.tab. No private data.",
+  "data_provenance": "real public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF (benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, with and without the Illumina SJ.tab. No private data.",
   "generated_utc": "2026-10-22T13:07:26Z",
   "metrics": {
     "ont_nosr": {

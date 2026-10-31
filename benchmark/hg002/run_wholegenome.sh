@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Whole-genome YIELD of the variant reference-bias rescue on REAL GIAB HG002 v4.2.1
+# Whole-genome yield of the variant reference-bias rescue on real GIAB HG002 v4.2.1
 # variants (extends run.sh from chr22 N=1 to chr1-22). Per chromosome: build an
 # SNV-consensus haplotype, scan every GENCODE intron for a reference-bias splice site
 # (CREATED = non-canonical on the linear reference, canonical on the HG002 haplotype),

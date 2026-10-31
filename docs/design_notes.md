@@ -7,12 +7,12 @@ evidence: caller agreement, short-read junctions, long-read alignments, the samp
 haplotypes, and pangenome junctions. It does not recompute TSS/TTS, ORF/NMD, polyA or reference
 splice motifs, and it is not a SQANTI3-style QC filter (see
 [docs/relationship_to_sqanti3.md](relationship_to_sqanti3.md)). What it adds is the
-**decision logic**: fixed, readable rules that turn the evidence into a verdict. The thresholds
+decision logic: fixed, readable rules that turn the evidence into a verdict. The thresholds
 are in [`config/rules.default.toml`](../config/rules.default.toml) and can be changed without
 rebuilding, and every verdict records its `rule_trace` (see
 [docs/decision_engine.md](decision_engine.md)).
 
-> PanIsoGuard is an **independent project**; the SQANTI3 authors have not made or endorsed it.
+> PanIsoGuard is an independent project; the SQANTI3 authors have not made or endorsed it.
 > It only reads SQANTI3's output files. No SQANTI3 code is included or linked, so SQANTI3's
 > GPL-3.0 license does not extend to PanIsoGuard's MIT code. If you use SQANTI3 in your
 > pipeline, please cite it; see

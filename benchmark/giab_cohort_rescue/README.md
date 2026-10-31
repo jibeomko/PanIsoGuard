@@ -7,7 +7,7 @@ genomes, not only on one. Annotation + variant scan only (no RNA-seq,
 no caller runs); all GIAB v4.2.1 / GENCODE v49 data is public.
 
 For each individual: per chromosome, build the SNV-consensus haplotype, scan every GENCODE
-intron for a **reference-bias** splice site (`CREATED`: non-canonical on the linear
+intron for a reference-bias splice site (`CREATED`: non-canonical on the linear
 reference, canonical on that individual's haplotype), and adjudicate the variant axis
 (`--haplotype-provenance wgs` for the rescue, `unknown` for the firewall).
 
@@ -19,19 +19,19 @@ reference, canonical on that individual's haplotype), and adjudicate the variant
 | HG002 | 33 | 33 | 0 | 33 |
 | HG003 | 31 | 31 | 0 | 31 |
 | HG004 | 36 | 36 | 0 | 36 |
-| **cohort** | **137** | **137 / 137 (100 %)** | **0** | **137 / 137** |
+| cohort | 137 | 137 / 137 (100 %) | 0 | 137 / 137 |
 
-**Reading.** Each personalized genome carries **31–37** genuine reference-bias splice
+Reading. Each personalized genome carries 31–37 genuine reference-bias splice
 junctions — junctions a *reference-only* pipeline would wrongly report as novel. PanIsoGuard's
-variant axis **exonerates every one (137/137, 100 % sensitivity)** with **0 false rescues**,
-and the circularity firewall **holds all 137** when the provenance is circular-risk. So the
+variant axis exonerates every one (137/137, 100 % sensitivity) with 0 false rescues,
+and the circularity firewall holds all 137 when the provenance is circular-risk. So the
 rescue behaves consistently across individuals — a few dozen false-novel calls correctly
 reclassified per personalized genome, none falsely rescued in these scans — and its value
 rises with how far a sample diverges from the linear reference (non-reference individuals,
 personalized-genome / pangenome contexts).
 
-This is the **impact case** for the rescue (PanIsoGuard's genuine differentiator): rare per
-intron (~1 in 18k) but recurrent per genome and caught with perfect specificity. Recorded
+The rescue is rare per intron (~1 in 18k) but recurrent per genome, and no control
+junction was rescued in these scans. Recorded
 in [../results/giab_cohort_rescue](../results/giab_cohort_rescue).
 
 ## Reproduce

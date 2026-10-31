@@ -62,10 +62,10 @@ max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to 
 min_full_reads = 3
 
 # --- Reference-bias rescue: pangenome (engine-read; only when --pangenome-junctions supplied)
-# When ALL of an isoform's novel-vs-linear-reference junctions are realizable on ONE
+# When all of an isoform's novel-vs-linear-reference junctions are realizable on one
 # pangenome graph haplotype path (path ids are an optional 6th column; without them the
 # per-junction counts decide), the apparent novelty is consistent with reference
-# bias. The haplotype axis applies the same rule: one haplotype must carry every junction. This is independent (non-circular) evidence ONLY if the junction set comes
+# bias. The haplotype axis applies the same rule: one haplotype must carry every junction. This is independent (non-circular) evidence only if the junction set comes
 # from population assemblies; PanIsoGuard cannot verify the file, so it applies the
 # same circularity firewall as the variant axis (--pangenome-provenance: population/
 # external promote; sample_derived/unknown are held AMBIGUOUS). Experimental: not yet

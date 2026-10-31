@@ -79,7 +79,7 @@ if emit:
         "status": "tracked",
         "tool_version": prov.get("tool_version"),
         "ruleset_version": prov.get("ruleset_version"),
-        "data_provenance": "REAL public ENCODE GM12878 ONT direct-RNA (ENCFF440ZML, minimap2 -ax splice -uf); "
+        "data_provenance": "real public ENCODE GM12878 ONT direct-RNA (ENCFF440ZML, minimap2 -ax splice -uf); "
                            "285 caller-novel chains (IsoQuant+Bambu+ESPRESSO combine); reference-bias scan vs "
                            "NA12878=HG001 GIAB v4.2.1 SNV-consensus haplotype. Public data only, no private data.",
         "command": "see run.sh: build novel GTF + minimal classification; adjudicate --bam <ONT bam>; "
@@ -88,14 +88,14 @@ if emit:
         "notes": "Real-data robustness of the optional BAM mapping axis. (1) The terminal soft-clip fraction, "
                  "measured until 0.0.7 and never a default gate, fired on 187/191 (98%) of junctions on real ONT dRNA "
                  "(adapter/poly-A read ends); it is no longer computed. (2) The HiFi-calibrated 0.5 gates are "
-                 "CHEMISTRY-DEPENDENT: ONT's intrinsic indel error makes indel_near fire on 175/191 (92%) and barely "
+                 "chemistry-dependent: ONT's intrinsic indel error makes indel_near fire on 175/191 (92%) and barely "
                  "discriminates single (0.925) vs >=2-caller (0.732); the older low_mapq/supplementary signals barely "
-                 "fire (11/191, 4/191). The mapping axis is opt-in (--bam) and its thresholds MUST be re-calibrated per "
-                 "chemistry. (3) The sequence-level CONSENSUS axis separates the same data chemistry-independently "
+                 "fire (11/191, 4/191). The mapping axis is opt-in (--bam) and its thresholds need re-calibration per "
+                 "chemistry. (3) The sequence-level consensus axis separates the same data chemistry-independently "
                  "(254 single vs 31 reproducible). (4) Reference-bias rescue fires 0/1364: GM12878=NA12878 is GIAB "
                  "reference-grade, so the base rate is ~0 -- the rescue's value is reserved for divergent/non-reference "
                  "genomes (cf. giab_cohort_rescue: 137 across 4 personalized genomes). Small-N caveat on >=2-caller (31). "
-                 "(5) 0.0.7 whole-chain read support works on real ONT dRNA with EXACT coordinates: 94.5% of splice sites "
+                 "(5) 0.0.7 whole-chain read support works on real ONT dRNA with exact coordinates: 94.5% of splice sites "
                  "among near-matching reads are exact, 155/285 chains have >= 3 exact full-chain reads (a +-5 bp tolerance "
                  "would add 20), 71% of >=2-caller chains vs 52% of single-caller ones; no tolerance is needed. With "
                  "--platform ont the indel-near gate is off and these chains become NOVEL_PROBABLE (148) instead of "

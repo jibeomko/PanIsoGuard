@@ -1,8 +1,8 @@
 # Head-to-head vs the SQANTI3 filter (and a one-line short-read rule)
 
-**Question:** on the same truth set and the same inputs, is PanIsoGuard more accurate than
+Question: on the same truth set and the same inputs, is PanIsoGuard more accurate than
 what users already run — the SQANTI3 rules / ML filter — or than the simplest possible
-short-read rule? **Answer: no.** Its ranking ties a one-line rule; at its default
+short-read rule? Answer: no. Its ranking ties a one-line rule; at its default
 operating point it trades a lot of recall for a little precision; with no short reads it
 is worse than the SQANTI3 rules filter. The only measurable edge is small and comes from
 the BAM mapping axis.
@@ -11,15 +11,15 @@ the BAM mapping axis.
 
 Truth set = [../sqanti_sim](../sqanti_sim) (GENCODE v49 chr22, SQANTI-SIM, FLAIR, SQANTI3
 6.0.1), scored with the same exact-intron-chain labels. Task: genuine vs false among the
-**870 non-FSM multi-exon isoforms** (730 genuine / 140 false).
+870 non-FSM multi-exon isoforms (730 genuine / 140 false).
 
 Short-read settings (every method gets the same junctions):
 
 | setting | junctions |
 |---|---|
-| `none` | no short reads |
+| `none` | No short reads |
 | `oracle` | the truth-derived SJ.tab of `../sqanti_sim` (every simulated junction, 50 reads) |
-| `sr_N` | **realistic**: N wgsim 2×100 pairs from the simulated transcripts, weighted by their long-read counts → STAR 2-pass → `SJ.out.tab` |
+| `sr_N` | realistic: N wgsim 2×100 pairs from the simulated transcripts, weighted by their long-read counts → STAR 2-pass → `SJ.out.tab` |
 
 Methods:
 
@@ -28,22 +28,22 @@ Methods:
 | `SQ3rules` | `sqanti3_filter.py rules`, default JSON |
 | `SQ3strict` | `sqanti3_filter.py rules` with `min_cov ≥ 3` required |
 | `SQ3ml` | `sqanti3_filter.py ml`, defaults |
-| `allSJ3` | one line: keep an isoform iff **every junction has ≥ 3 unique short reads** (SQANTI3 `min_cov`) |
-| `PIG` / `PIG+bam` | `panisoguard adjudicate` (± `--bam`); positive = `HIGH/NOVEL_PROBABLE`, ranked by class |
+| `allSJ3` | One line: keep an isoform iff every junction has ≥ 3 unique short reads (SQANTI3 `min_cov`) |
+| `PIG` / `PIG+bam` | `panisoguard adjudicate` (± `--bam`); positive = `NOVEL_CONFIRMED` / `NOVEL_PROBABLE`, ranked by class |
 
 ## Result (non-FSM, n = 870)
 
 | short reads | method | precision | recall | F1 | AUPRC |
 |---|---|---:|---:|---:|---:|
-| none | SQ3rules | 0.918 | 0.886 | **0.902** | **0.909** |
+| none | SQ3rules | 0.918 | 0.886 | 0.902 | 0.909 |
 | none | PIG | — (0 calls) | 0.000 | — | 0.824 |
-| none | PIG+bam | **0.993** | 0.748 | 0.853 | **0.953** |
+| none | PIG+bam | 0.993 | 0.748 | 0.853 | 0.953 |
 | sr_1M | SQ3rules | 0.918 | 0.890 | 0.904 | 0.909 |
 | sr_1M | SQ3strict | 0.978 | 0.840 | 0.903 | 0.955 |
-| sr_1M | allSJ3 | 0.976 | **0.945** | **0.960** | 0.968 |
-| sr_1M | PIG | **0.990** | 0.545 | 0.703 | 0.969 |
-| sr_1M | PIG+bam | **0.993** | 0.745 | 0.851 | **0.974** |
-| oracle | allSJ3 | 0.976 | **1.000** | **0.988** | 0.976 |
+| sr_1M | allSJ3 | 0.976 | 0.945 | 0.960 | 0.968 |
+| sr_1M | PIG | 0.990 | 0.545 | 0.703 | 0.969 |
+| sr_1M | PIG+bam | 0.993 | 0.745 | 0.851 | 0.974 |
+| oracle | allSJ3 | 0.976 | 1.000 | 0.988 | 0.976 |
 | oracle | PIG | 0.989 | 0.589 | 0.738 | 0.971 |
 | oracle | PIG+bam | 0.991 | 0.782 | 0.874 | 0.977 |
 
@@ -58,7 +58,7 @@ AUPRC difference vs `allSJ3`, bootstrap 95 % CI (2000 resamples):
 | PIG | [−0.015, +0.005] | [−0.008, +0.013] | [−0.010, +0.010] | [−0.010, +0.010] |
 | PIG+bam | [−0.009, +0.011] | [−0.002, +0.019] | [−0.004, +0.016] | [−0.004, +0.016] |
 
-With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam **[+0.029, +0.061]**
+With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam [+0.029, +0.061]
 (better, since the 0.0.7 whole-chain read support). Before 0.0.6 the BAM gain with short
 reads was significant at 250k pairs ([+0.002, +0.021]); the 0.0.6 rule that a junction feeds
 the BAM gate only with ≥ 3 spanning reads removed that.
@@ -82,9 +82,9 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
 
 ## Reading
 
-- **Ranking:** PanIsoGuard ties `allSJ3` in every setting, with or without the BAM
+- Ranking: PanIsoGuard ties `allSJ3` in every setting, with or without the BAM
   (every AUPRC difference is within the bootstrap interval).
-- **Operating point:** PanIsoGuard's precision is the highest (0.990–0.992 vs 0.976).
+- Operating point: PanIsoGuard's precision is the highest (0.990–0.992 vs 0.976).
   Without the BAM it holds nearly all NIC isoforms `UNRESOLVED` (no individually-novel
   junction to corroborate) and all ISM isoforms `UNCONFIRMED`, so it recalls ~0.55 against
   `allSJ3`'s ~0.94. With the BAM (0.0.7), NIC isoforms whose whole intron chain is carried
@@ -92,14 +92,14 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
   ([../chain_support](../chain_support)). ISM carried end to end becomes `KNOWN_FRAGMENT`,
   which is not a novel call. On NNC it has the same TP/FP
   counts as `allSJ3`.
-- **No short reads:** without the BAM PanIsoGuard makes no positive calls (everything is
+- No short reads: without the BAM PanIsoGuard makes no positive calls (everything is
   held `UNRESOLVED` unless `--caller-support` is given) and ranks below SQANTI3's default
   rules. With the BAM it keeps 546 genuine / 4 false (recall 0.75 at precision 0.993) and
   ranks above them; those calls rest on the caller's own reads, hence `NOVEL_PROBABLE`.
 - `SQ3ml` is not used for conclusions: its default training labels (FSM = TP, NNC = TN)
   are wrong for this simulation, where most NNC are genuine.
 
-So PanIsoGuard is **not a more accurate filter**. What it adds is a per-call verdict
+So PanIsoGuard is not a more accurate filter. What it adds is a per-call verdict
 with the rule trace and the mechanism behind it, and explicit abstention.
 
 ## Fixed along the way

@@ -1,7 +1,7 @@
 # Releasing PanIsoGuard
 
 How to cut a release and ship it to bioconda. The version string is the single source of
-truth in **two** files, kept in lockstep by CI (`scripts/check_version_sync.py`):
+truth in two files, kept in lockstep by CI (`scripts/check_version_sync.py`):
 
 | file | field |
 |------|-------|
@@ -41,7 +41,7 @@ V=0.0.4
 # 1) finalize the changelog: rename "[Unreleased]" to "[X.Y.Z] - <date>" (edit CHANGELOG.md);
 #    step 3's workflow copies this section into the release notes
 
-# 2) bump the version in BOTH sources (sha256 is fixed in step 4)
+# 2) bump the version in both sources (sha256 is fixed in step 4)
 sed -i -E "s/(project\(panisoguard VERSION )[0-9.]+/\1$V/" CMakeLists.txt
 sed -i -E "s/(set version = \")[0-9.]+/\1$V/" recipes/bioconda/meta.yaml
 python3 scripts/check_version_sync.py        # must print OK (checks the version string, not the sha)
@@ -51,7 +51,7 @@ git push origin main
 
 # 3) tag. Pushing it runs .github/workflows/release.yml, which creates the GitHub Release:
 #    notes = bioconda source block + this version's CHANGELOG section, plus the
-#    bioconda-source.yaml asset. Do NOT `gh release create` by hand (it will already exist).
+#    bioconda-source.yaml asset. Do not `gh release create` by hand (it will already exist).
 git tag -a "v$V" -m "PanIsoGuard v$V"
 git push origin "v$V"
 sleep 10   # let the Release run register before watching it

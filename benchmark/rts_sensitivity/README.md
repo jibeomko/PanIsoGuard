@@ -14,8 +14,8 @@ decision without a direct real-data test, is spelled out below.
 | end2end chr22 | 4 | 4 / 0 | genuine `NOVEL_PROBABLE` 19/20 → 15/20 |
 | LRGASP WTC11 PacBio, + Illumina / none | 910 / 1,321 | validated targets among them: MTHFS; CENPK, MTHFS | the held ones would be `UNCONFIRMED`, never `ARTIFACT` |
 | LRGASP WTC11 ONT, + Illumina / none | 121 / 222 | MTHFS, USF1; CENPK, MTHFS, RND2, USF1 | |
-| HG03516 Kinnex (arm C) | 1,297 of 7,081 `NOVEL_PROBABLE` | all 1,297 are SQANTI3-filter `Artifact`s | |
-| HG02717 Kinnex (arm C) | 1,357 of 8,368 | all `Artifact`s | |
+| HG03516 Kinnex (arm C) | 1,297 of 7,081 `NOVEL_PROBABLE` | All 1,297 are SQANTI3-filter `Artifact`s | |
+| HG02717 Kinnex (arm C) | 1,357 of 8,368 | All `Artifact`s | |
 | GM12878 ONT direct RNA | 0 | | |
 
 `KNOWN_FRAGMENT` has the same annotation for ISM (`ism_chain_support;rts_sign`): 8 on
@@ -23,7 +23,7 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
 
 ## Reading
 
-- **What the evidence covers.** The simulation produces no RT switching, so its 87 / 0 says only
+- What the evidence covers. The simulation produces no RT switching, so its 87 / 0 says only
   that the flag lands on genuine isoforms (it is computed from the reference sequence around
   the junction, so in a simulation every flag is a false sign). LRGASP adds the one real-data
   measurement: `RTS_stage` is TRUE on 12–18 % of the experimentally validated isoforms IsoQuant
@@ -33,7 +33,7 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   carried by ≥ 3 reads in the other platform's
   library too (CENPK 4 / 16, MTHFS 49 / 57, RND2 38 / 76, USF1 7 / 1 PacBio / ONT reads; USF1
   is the one with a single PacBio read).
-- **The artifact side is still unmeasured.** [../lrgasp_wtc11](../lrgasp_wtc11)
+- The artifact side is still unmeasured. [../lrgasp_wtc11](../lrgasp_wtc11)
   (`cross_library.py`) counts each lifted PacBio isoform's reads in the ONT library of the same
   cells and the reverse. PacBio lifts carrying the sign reproduce in ONT at about half the rate
   of the unflagged lifts in every bin of PacBio depth (own count 3–5: 4.5 % vs 12.6 %; 6–10:
@@ -47,10 +47,10 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   ones. What remains unmeasured is how often a real RT-switching chimera that ≥ 3 reads carry
   end to end is flagged, which is what "hold" would protect against. Template switching is
   sequence-driven, so it can recur across molecules; read count alone does not rule it out.
-- **What the choice moves.** On real Iso-Seq about one `NOVEL_PROBABLE` in six (1,297 / 7,081;
+- What the choice moves. On real Iso-Seq about one `NOVEL_PROBABLE` in six (1,297 / 7,081;
   1,357 / 8,368) rests on it, and every one of those is an isoform SQANTI3's rules filter
   discards. Under "hold" they are `UNCONFIRMED` (review), not `ARTIFACT`.
-- **The trade, and why annotate.** The one real-data number is the false-sign rate: the flag
+- The trade, and why annotate. The one real-data number is the false-sign rate: the flag
   is wrong about one time in six on isoforms known to exist, and a sign that weak should not
   by itself move a read-supported chain from "keep" to "review". Under "annotate" the
   confident set keeps the flagged lifts (about one `NOVEL_PROBABLE` in six on real Iso-Seq);

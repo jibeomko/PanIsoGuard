@@ -254,7 +254,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   No truth on that sample.
 - The head-to-head ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h)) re-run
   with the chain axis: at 1 M pairs PanIsoGuard + BAM goes from precision 0.990 / recall
-  0.545 to **0.993 / 0.745** (AUPRC 0.974, still tied with the one-line rule); with no
+  0.545 to 0.993 / 0.745 (AUPRC 0.974, still tied with the one-line rule); with no
   short reads from 0 calls to 546 genuine / 4 false (recall 0.75, AUPRC 0.953 vs SQANTI3
   rules 0.909, bootstrap CI [+0.029, +0.061]). Per-class at 1 M + BAM: NOVEL_PROBABLE
   193 / 1, KNOWN_FRAGMENT 153 / 11, UNRESOLVED 0 / 6 (the genuine held NIC moved up),
@@ -276,7 +276,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   depended on it, the cost row did.
 
 ### Fixed
-- `panisoguard-report` page 1 counted the pre-0.0.6 class names in its headline ribbon, so on
+- `panisoguard-report` page 1 counted the pre-0.0.6 class names in its ribbon, so on
   current output the trustworthy / needs-a-look / reference-bias boxes were always 0; it now
   counts the current names and maps old files to them once.
 - `panisoguard example` no longer uses `std::filesystem`, which bioconda's osx-64 build
@@ -314,7 +314,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
     HG03516's mapping-artifact calls rested on < 3 reads).
   - `UNSUPPORTED` needs coverage: if none of the isoform's known junctions has short-read
     support either, support is `UNKNOWN` (`no_coverage`), not evidence against.
-  - Intra-priming (`degradation`) needs perc_A ≥ 60 **and** no polyA motif upstream
+  - Intra-priming (`degradation`) needs perc_A ≥ 60 and no polyA motif upstream
     (SQANTI3 `polyA_motif_found`, when it ran with `--polyA_motif_list`); 20–30 % of
     perc_A-flagged 3' ends carry a motif and are no longer flagged. The column moved from
     `bio_flags` to `evidence`.
@@ -366,7 +366,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   the 3-way benchmark: all unchanged).
 - `benchmark/sqanti3_filter_h2h/emit_metrics.py` and `score.py --emit-metrics` of the 3-way
   benchmark now write their envelopes (the head-to-head bootstrap was a scratch script).
-- README no longer calls the classes an ordered scale (HIGH > MEDIUM > LOW); on
+- README no longer calls the classes an ordered scale (HIGH > MEDIUM > low); on
   SQANTI-SIM at every short-read depth `UNRESOLVED` is more precise than `UNCONFIRMED`
   (`benchmark/sqanti3_filter_h2h/per_class.py`).
 
@@ -486,15 +486,15 @@ tool, not a more accurate filter (see README, "How it compares").
   (variant-rescue yield), `giab_cohort_rescue` (rescue across a 4-individual GIAB
   cohort: 137/137, 0 false), `bam_axis` (wiring the indel-near / soft-clip read
   signals: 41/124 false caught, 0 genuine loss), and
-  `gm12878_realdata` (the BAM axis on a **real** ONT dataset: soft-clip default-off
-  empirically vindicated — 98 % fire rate on ONT — and the mapping thresholds shown to
+  `gm12878_realdata` (the BAM axis on a real ONT dataset: soft-clip default-off
+  borne out — 98 % fire rate on ONT — and the mapping thresholds shown to
   be chemistry-dependent; reference-bias rescue 0/1364 on the reference-grade sample), and
   `refbias_cohort` + `hg03516_refbias` (the **positive real-data application, replicated**:
   the reference-bias rescue fires on real PacBio Iso-Seq from **two** divergent West African
   individuals — HG03516 (ESN) + HG02717 (GWD), HPRC R2 — **86 reference-bias novel junctions
-  (77 novel vs GENCODE), 86/86 rescued, 0 false, firewall holds all 86**, perfectly specific
+  (77 novel vs GENCODE), 86/86 rescued, 0 false, firewall holds all 86**, with no false rescue in the scan
   across both genomes, vs 0 on reference-grade GM12878; independently adversarially audited,
-  caveats stated — the differentiator firing on real divergent-genome RNA).
+  caveats stated — the reference-bias rescue firing on real divergent-genome RNA).
 
 ### Fixed
 - **`PARTIAL` short-read support no longer promotes to `MEDIUM_CONF_NOVEL`.** An isoform
@@ -522,11 +522,11 @@ tool, not a more accurate filter (see README, "How it compares").
   now says this up front. The "AUPRC 0.970 vs 0.831 baseline" claim is dropped: 0.831 was
   the positive rate, not a method. `docs/validation.md` now states that the
   reference-bias benchmarks use the rescue rule's own criterion as truth.
-- **Honest positioning** (after head-to-head benchmarking): `combine` is a clean
+- **Positioning** (after head-to-head benchmarking): `combine` is a
   re-implementation of `gffcompare -i` (not a novel merge), the consensus precision is
-  matcher-robust, and the reference-bias rescue is a **high-specificity, high-sensitivity
-  guardrail with a low base rate** (~1 in 18k introns genome-wide) — a correctness
-  safeguard, not a high-yield discovery engine. New
+  the same under every matcher, and the reference-bias rescue is a **high-specificity, high-sensitivity
+  check with a low base rate** (~1 in 18k introns genome-wide) — a correctness
+  check, not a high-yield discovery engine. New
   [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md).
 - **SQANTI3 attribution** — independence disclaimer + citation (Pardo-Palacios *et al.*,
   *Nat Methods* 2024) + the "rescue" name-clash disambiguation.

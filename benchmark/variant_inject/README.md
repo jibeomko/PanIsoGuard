@@ -6,7 +6,7 @@ haplotype — i.e. a "novel" call that is really reference bias, not new splicin
 
 ## Two layers
 
-**1. Motif-reconstruction core (verified here, no external tools).**
+1. Motif-reconstruction core (verified here, no external tools).
 The decisive question — *does a variant create/destroy a canonical GT-AG motif?* —
 is implemented in `src/evidence/variant_motif.cpp` and verified deterministically
 in `tests/unit/variant_motif_test.cpp` against a controlled fixture
@@ -16,7 +16,7 @@ non-canonical `GG-AG` donor into a canonical `GT-AG`. The provider returns
 it `UNRESOLVED` under circular-risk provenance). This is 100% recovery of the
 injected motif at the mechanism level.
 
-**2. Read-simulation recovery (requires external tools; not run in this env).**
+2. Read-simulation recovery (requires external tools; not run in this env).
 The full harness injects N variant-created and N variant-disrupted canonical
 motifs at known GENCODE v49 loci, simulates variant-allele long reads, aligns them
 to the UNMODIFIED GRCh38, runs the FLAIR→SQANTI pipeline, and confirms ≥95% of the

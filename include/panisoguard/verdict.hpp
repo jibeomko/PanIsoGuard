@@ -80,11 +80,11 @@ struct EvidenceVector {
   // variant (reference-bias) axis: a novel junction that is non-canonical on the
   // reference but canonical on a personalized haplotype FASTA.
   bool variant_evaluable = false;
-  bool variant_rescue = false;            // ALL novel junctions variant-created on ONE common haplotype
+  bool variant_rescue = false;            // all novel junctions variant-created on one common haplotype
   int n_novel_jx_variant_created = 0;     // how many are created on >= 1 haplotype (per-junction view)
   bool haplotype_consistent = false;      // one haplotype carries the canonical motif at every
                                           // created junction (a chain lives on one haplotype)
-  int n_novel_jx_variant_disrupted = 0;   // canonical on the reference, non-canonical on EVERY
+  int n_novel_jx_variant_disrupted = 0;   // canonical on the reference, non-canonical on every
                                           // haplotype: the canonical motif exists only on the reference
   bool variant_circular = false;  // haplotype provenance is RNA-derived/unknown (circular-risk)
 
@@ -92,7 +92,7 @@ struct EvidenceVector {
   // pangenome graph haplotype path. Non-circular only when the junction set was
   // extracted from independent population assemblies (gated by provenance).
   bool pangenome_evaluable = false;
-  bool pangenome_rescue = false;       // ALL novel junctions graph-supported, on one common path if known
+  bool pangenome_rescue = false;       // all novel junctions graph-supported, on one common path if known
   bool pangenome_circular = false;     // junction-set provenance is sample-derived/unknown (circular-risk)
   int n_novel_jx_pangenome = 0;
   bool pangenome_path_evaluable = false;  // at least one supporting junction row listed its path ids

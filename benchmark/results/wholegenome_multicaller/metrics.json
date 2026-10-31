@@ -1,6 +1,6 @@
 {
   "command": "panisoguard combine --gtf <caller:gtf>... --ref-gtf gencode.v49.gtf --out matrix.tsv; benchmark/wholegenome_multicaller/score_wholegenome.py --matrix matrix.tsv --genome GRCh38.fa --gtf <caller:gtf>... --emit-metrics metrics.json",
-  "data_provenance": "REAL public sample gm12878, whole-genome, GRCh38/GENCODE v49. Callers run fresh on the one shared minimap2 genome alignment. No ground truth on real data: consensus is validated by an ORTHOGONAL, caller-independent signal -- splice-motif canonicality (GT-AG/GC-AG/AT-AC). No private data.",
+  "data_provenance": "real public sample gm12878, whole-genome, GRCh38/GENCODE v49. Callers run fresh on the one shared minimap2 genome alignment. No ground truth on real data: consensus is validated by an ORTHOGONAL, caller-independent signal -- splice-motif canonicality (GT-AG/GC-AG/AT-AC). No private data.",
   "generated_utc": null,
   "metrics": {
     "all_novel": {
@@ -14,27 +14,27 @@
       "n": 31
     },
     "decision_impact": {
-      "reported_novel_by_policy": {
-        "naive_union_any_caller": 285,
-        "single_caller_bambu_alone": 195,
-        "single_caller_isoquant_alone": 113,
-        "single_caller_espresso_alone": 9,
-        "panisoguard_consensus_ge2": 31
-      },
       "caller_private_novels": {
         "bambu": 164,
-        "isoquant": 84,
         "espresso": 6,
+        "isoquant": 84,
         "total": 254
       },
+      "frac_single_caller": 0.891,
+      "interpretation": "Decision impact on real GM12878: the reported novel-isoform count swings 31 -> 285 (9.2x) purely by integration policy. 254/285 (89%) of the naive-union novels are caller-PRIVATE -- claimed by exactly one of three callers and corroborated by none of the others (bambu 164, isoquant 84, espresso 6). The >= 2-caller consensus core is 31 chains (also the only 100%-canonical subset). PanIsoGuard reports that reproducible core and makes the policy explicit/auditable, rather than the 285-chain union a naive multi-caller merge would report. This is the conclusions-change case: which novels you would report depends entirely on whether you require cross-caller agreement.",
       "pairwise_co_support_in_consensus": {
-        "bambu+isoquant": 29,
         "bambu+espresso": 3,
+        "bambu+isoquant": 29,
         "espresso+isoquant": 1
       },
-      "union_over_consensus_fold": 9.2,
-      "frac_single_caller": 0.891,
-      "interpretation": "Decision impact on REAL GM12878: the reported novel-isoform count swings 31 -> 285 (9.2x) purely by integration policy. 254/285 (89%) of the naive-union novels are caller-PRIVATE -- claimed by exactly one of three callers and corroborated by none of the others (bambu 164, isoquant 84, espresso 6). The >= 2-caller consensus core is 31 chains (also the only 100%-canonical subset). PanIsoGuard reports that reproducible core and makes the policy explicit/auditable, rather than the 285-chain union a naive multi-caller merge would report. This is the conclusions-change case: which novels you would report depends entirely on whether you require cross-caller agreement."
+      "reported_novel_by_policy": {
+        "naive_union_any_caller": 285,
+        "panisoguard_consensus_ge2": 31,
+        "single_caller_bambu_alone": 195,
+        "single_caller_espresso_alone": 9,
+        "single_caller_isoquant_alone": 113
+      },
+      "union_over_consensus_fold": 9.2
     },
     "n_resolved_novel_chains": 285,
     "n_unresolved": 0,
@@ -67,7 +67,7 @@
       }
     }
   },
-  "notes": "Whole-genome real-data extension of the chr22 multicaller protocol; HONEST result, read with its caveats. (1) DISAGREEMENT holds at genome scale: of the novel chains, the large majority are single-caller and only a small minority are recovered by >= 2 callers -- callers disagree on most novel calls even on real data, the same motivation as chr22. (2) QUALITY direction is correct but the headroom is SMALL: multi-caller novel chains are 100% canonical while single-caller are already ~97.6% canonical. Production callers at recommended settings (IsoQuant, Bambu, ESPRESSO) are internally stringent, so they emit few non-canonical artifacts for consensus to filter -- a ceiling effect, and the absolute novel count is small (real cell line, most transcripts are known). The strong artifact-filtering on chr22 (single-caller precision 0.012) came largely from the LIBERAL end (unfiltered TALON's false novels); at recommended settings callers are cleaner. On real data with stringent callers, the practical value of consensus is the reproducible high-confidence core + confidence stratification, not large-scale artifact removal. Small N: interpret the +canonical delta directionally.",
+  "notes": "Whole-genome real-data extension of the chr22 multicaller protocol; read with its caveats. (1) Disagreement holds at genome scale: of the novel chains, the large majority are single-caller and only a small minority are recovered by >= 2 callers; callers disagree on most novel calls even on real data, the same motivation as chr22. (2) The quality direction is correct but the headroom is small: multi-caller novel chains are 100% canonical while single-caller ones are already ~97.6% canonical. Production callers at recommended settings (IsoQuant, Bambu, ESPRESSO) are internally stringent, so they emit few non-canonical artifacts for consensus to filter; a ceiling effect, and the absolute novel count is small (real cell line, most transcripts are known). The strong artifact filtering on chr22 (single-caller precision 0.012) came largely from the liberal end (unfiltered TALON's false novels); at recommended settings callers are cleaner. On real data with stringent callers, the practical value of consensus is the reproducible high-confidence core and confidence stratification, not large-scale artifact removal. Small N: interpret the +canonical delta directionally.",
   "protocol": "wholegenome_multicaller",
   "ruleset_version": "builtin-0.0.1",
   "scope": "gm12878_wholegenome_3caller",

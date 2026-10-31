@@ -173,7 +173,7 @@ def main():
         env = {"protocol": "refbias_3way", "scope": "hprc_r2_grch38_vs_personalized_pipelines", "status": "tracked",
                "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
-               "data_provenance": "REAL public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: "
+               "data_provenance": "real public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: "
                                   "A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on "
                                   "the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; "
                                   "C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",

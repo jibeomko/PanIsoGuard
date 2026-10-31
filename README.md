@@ -23,8 +23,8 @@ a log of the inputs that were used.
 > default thresholds were set on one simulated data set and checked on real PacBio and ONT
 > data ([Validation](#validation)).
 >
-> **What it is, and what it is not.** PanIsoGuard gives **verdicts you can trace**. It is
-> **not a more accurate filter.** On simulated data with known answers, it ranks isoforms about
+> **What it is, and what it is not.** PanIsoGuard gives verdicts you can trace. It is
+> not a more accurate filter. On simulated data with known answers, it ranks isoforms about
 > as well as a one-line rule ("keep an isoform if every junction has at least 3 short reads").
 > By default it prefers precision to recall. Without short reads it confirms nothing unless you
 > give it the long-read BAM; with the BAM it ranks above the SQANTI3 rules filter, on the
@@ -143,7 +143,7 @@ docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data -w /data panisoguard \
 ### From source
 
 The [Quick start](#quick-start) already builds from source, inside conda. To use your own
-compiler instead, you need a C++17 compiler, CMake 3.20 or newer, and **htslib 1.18 or newer**.
+compiler instead, you need a C++17 compiler, CMake 3.20 or newer, and htslib 1.18 or newer.
 The htslib in many Linux distributions is too old; conda avoids that problem. CMake looks for
 htslib in `$CONDA_PREFIX`; otherwise pass `-DCMAKE_PREFIX_PATH=/path/to/prefix`.
 
@@ -221,7 +221,7 @@ panisoguard adjudicate \
 
 **Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22) — instead of the sample's
 own haplotypes, give splice junctions taken from a pangenome graph such as HPRC (extracted
-beforehand, for example with vg/rpvg). If **every** novel junction of an isoform is found on
+beforehand, for example with vg/rpvg). If every novel junction of an isoform is found on
 some haplotype of the pangenome, the isoform is reported as reference bias. This counts as
 independent evidence only if the junctions come from population assemblies, so
 `--pangenome-provenance` works like `--haplotype-provenance`: `population` or `external` can
@@ -263,9 +263,9 @@ panisoguard combine \
 
 | File | What is in it |
 |------|----------|
-| `<prefix>.adjudicated.tsv`   | one row per isoform: the confidence class, the `verdict` (known / known_fragment / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), novel-junction counts, and `genomic_compatibility` (the DNA side on its own: `haplotype` / `pangenome` / `partial` / `none` / `NA`, whatever the verdict) |
-| `<prefix>.attribution.jsonl` | one JSON record per isoform: all the evidence that was used and the `rule_trace` (the rules that decided the verdict, in order) |
-| `<prefix>.junctions.tsv`     | one row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
+| `<prefix>.adjudicated.tsv`   | One row per isoform: the confidence class, the `verdict` (known / known_fragment / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), novel-junction counts, and `genomic_compatibility` (the DNA side on its own: `haplotype` / `pangenome` / `partial` / `none` / `NA`, whatever the verdict) |
+| `<prefix>.attribution.jsonl` | One JSON record per isoform: all the evidence that was used and the `rule_trace` (the rules that decided the verdict, in order) |
+| `<prefix>.junctions.tsv`     | One row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
 With `--write-kept PATH`, `adjudicate` also copies the input isoform GTF (or BED12) keeping only
@@ -328,11 +328,11 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 
 | Evidence | Input | Needed? | What PanIsoGuard checks |
 |---|---|---|---|
-| SQANTI3 QC | `--classification` | required | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end |
+| SQANTI3 QC | `--classification` | Required | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end |
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
 | Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). The defaults suit PacBio HiFi; ONT reads need different thresholds. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
-| Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | with the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
+| Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | With the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
 | Sample's genome | `--reference` and `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |
 | Pangenome | `--pangenome-junctions` | optional | whether every novel junction is found in a pangenome (reference bias; tested on HPRC v1.1 chr22) |
 
@@ -373,14 +373,14 @@ verdicts: a gene on a 1,700 bp chromosome with three reference transcripts and n
 isoforms, with every input a run can take. Adding the inputs one at a time changes the verdict of
 `iso_A`, the isoform with one novel junction, from `UNRESOLVED` (nothing to test it with) to
 `ARTIFACT` (short reads do not support its non-canonical junction) to `REFERENCE_BIAS` (the
-junction is canonical on the sample's haplotype, with independent provenance). Two scripts keep the
-example honest and run in CI: `check_worked_locus.py` recomputes every verdict with the Python
+junction is canonical on the sample's haplotype, with independent provenance). Two scripts check the
+example and run in CI: `check_worked_locus.py` recomputes every verdict with the Python
 standard library and compares it with the binary, and `rules_replay.py` is the whole rulebook of
 `RuleEngine::evaluate()` in 42 lines of Python, replayed against the binary's `attribution.jsonl`.
 
 ## When to use PanIsoGuard
 
-Use it when you have **novel** long-read isoforms and want to know **why** each one is trusted
+Use it when you have novel long-read isoforms and want to know why each one is trusted
 or not. If you only need a filtered GTF, the SQANTI3 rules filter (or keeping the isoforms whose
 junctions all have short-read support) is just as accurate and simpler; see
 [How it compares](#how-it-compares).
@@ -424,13 +424,13 @@ Full tables, bootstrap confidence intervals and caveats are in
 
 | short reads | method | precision | recall | F1 | AUPRC |
 |---|---|---:|---:|---:|---:|
-| none | SQANTI3 rules filter | 0.918 | 0.886 | **0.902** | **0.909** |
+| none | SQANTI3 rules filter | 0.918 | 0.886 | 0.902 | 0.909 |
 | none | PanIsoGuard | — (0 calls) | 0.000 | — | 0.824 |
-| none | PanIsoGuard + BAM | **0.993** | 0.748 | 0.853 | **0.953** |
+| none | PanIsoGuard + BAM | 0.993 | 0.748 | 0.853 | 0.953 |
 | 1M | SQANTI3 rules filter | 0.918 | 0.890 | 0.904 | 0.909 |
-| 1M | every junction ≥ 3 short reads | 0.976 | **0.945** | **0.960** | 0.968 |
-| 1M | PanIsoGuard | **0.990** | 0.545 | 0.703 | 0.969 |
-| 1M | PanIsoGuard + BAM | **0.993** | 0.745 | 0.851 | **0.974** |
+| 1M | Every junction ≥ 3 short reads | 0.976 | 0.945 | 0.960 | 0.968 |
+| 1M | PanIsoGuard | 0.990 | 0.545 | 0.703 | 0.969 |
+| 1M | PanIsoGuard + BAM | 0.993 | 0.745 | 0.851 | 0.974 |
 
 - PanIsoGuard is the most precise, but it keeps fewer of the real isoforms (lower recall).
   With short reads alone it holds back on NIC isoforms that only combine known junctions
@@ -506,7 +506,7 @@ One thread, one `adjudicate` run with the long-read BAM, measured with `/usr/bin
 | GM12878 ONT direct RNA, 285 novel chains | 285 | 0.27 GB | | 4 s | 0.41 GB |
 | LRGASP WTC11 PacBio, IsoQuant | 78,256 | 3.5 GB | SJ.tab | 2.2 min | 0.59 GB |
 | LRGASP WTC11 ONT, IsoQuant | 39,542 | 12.4 GB | SJ.tab | 5.9 min | 0.44 GB |
-| HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | two haplotype FASTAs | 3.3 min | 0.47 GB |
+| HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | Two haplotype FASTAs | 3.3 min | 0.47 GB |
 | `decoys` on the same BAMs | 139,003 decoys | | | 1–12 min | 0.41 GB |
 
 Building the GENCODE v49 catalog takes about 3 s of that; the rest is reading the BAM at each

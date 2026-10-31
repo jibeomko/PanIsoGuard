@@ -8,7 +8,7 @@ and the engine emits a per-isoform `rule_trace`.
 ## Framing constraints (non-negotiable)
 
 - PanIsoGuard reports **orthogonal attribution + confidence + provenance**.
-- It **never** claims to beat the SQANTI3 random-forest filter or FLAIR2; the
+- It never claims to beat the SQANTI3 random-forest filter or FLAIR2; the
   head-to-head is in [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h).
 - It **does not recompute SQANTI3 QC descriptors** (TSS/TTS, ORF/NMD, polyA/splice
   motif): those are consumed as priors, while the
@@ -27,12 +27,12 @@ on two axes; the binned pair is projected to one confidence class.
   isoform's novel junctions): `SUPPORTED` / `PARTIAL` / `UNSUPPORTED`, or `UNKNOWN`
   when the axis is not evaluable. `UNSUPPORTED` (0 of N novel junctions corroborated)
   counts as evidence *against* only when the locus is covered: if none of the isoform's
-  **known** junctions has short-read support either, the sample is too shallow there and
+  known junctions has short-read support either, the sample is too shallow there and
   the support stays `UNKNOWN` (reason `no_coverage`; since 0.0.6). An isoform whose
   junctions are all novel has no known junction to gauge coverage with, so its 0 of N is
   `UNSUPPORTED`; an `SJ.tab` with no junctions at all leaves the axis not evaluable rather
   than marking every junction unsupported. When short-read
-  corroboration is `UNKNOWN`, **multi-caller consensus** (`--caller-support`, from a
+  corroboration is `UNKNOWN`, multi-caller consensus (`--caller-support`, from a
   `panisoguard combine` matrix) can stand in as a *weaker, methodological* form of
   support: a novel chain independently recovered by ≥ `consensus_min_callers` callers
   is corroborated, but only enough to reach `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`
@@ -47,8 +47,8 @@ on two axes; the binned pair is projected to one confidence class.
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
 | mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions). A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
-| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on **every** haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
-| degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` **and** no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
+| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on every haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
+| degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` and no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
 
@@ -68,11 +68,11 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
 
 1. **Reference-bias rescue (highest priority).** A novel-vs-linear-reference
    junction explained by reference bias is `REFERENCE_BIAS`, via either:
-   - *Pangenome axis* (`--pangenome-junctions`): **all** of the isoform's novel
+   - *Pangenome axis* (`--pangenome-junctions`): all of the isoform's novel
      junctions are realizable on a pangenome graph haplotype path (mechanism
      `population_known`) — consistent with reference bias, not proof the splice is
      used. Independent only if the junction set is from population assemblies, which
-     PanIsoGuard cannot verify, so it is gated by the **same circularity firewall**
+     PanIsoGuard cannot verify, so it is gated by the same circularity firewall
      as the variant axis: `--pangenome-provenance population`/`external` promote,
      while `sample_derived`/`unknown` (the default) are held `UNRESOLVED`. Checked on
      real HPRC v1.1 chr22 graph junctions (GATE-1; see
@@ -91,7 +91,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    when neither axis offers an independent one (so an unknown-provenance pangenome file
    does not block a rescue by the sample's WGS haplotypes, and the other way round).
 
-   Both rescues need **all** of the isoform's novel junctions explained, **by one
+   Both rescues need all of the isoform's novel junctions explained, **by one
    haplotype or one graph path**: a transcript is one molecule from one allele, so
    junction 1 fixed on haplotype A plus junction 2 fixed on haplotype B explains
    nothing. The adjudicator intersects the per-junction haplotype sets
@@ -212,7 +212,7 @@ haplotypes rather than SQANTI3),
 `consensus_with_<mechanism>`, `chain_support[;rt_switch_sign]`,
 `chain_support_with_<mechanism>` (each `;independent_library` with `--validation-bam`), and the
 `UNKNOWN`-support reasons `no_short_reads`, `no_coverage`, `no_novel_junction`,
-`caller_chain_absent`. The classes are **not** an ordered scale: on SQANTI-SIM truth
+`caller_chain_absent`. The classes are not an ordered scale: on SQANTI-SIM truth
 `UNRESOLVED` (mostly NIC with no novel junction to test) has precision 0.96 while
 `UNCONFIRMED` novel isoforms have 0.36–0.56 (see
 [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h), `per_class.py`).
@@ -220,7 +220,7 @@ haplotypes rather than SQANTI3),
 **`ARTIFACT` semantics (read carefully).** `ARTIFACT` denotes *(UNSUPPORTED × any
 mechanism)* — short reads were checked at a covered locus, none supports the novel
 junction, and an artifact sign is present — i.e. a **combined confidence × mechanism**
-signal, **not** a standalone claim that the call is spurious. Since ruleset 0.0.5 no
+signal, not a standalone claim that the call is spurious. Since ruleset 0.0.5 no
 isoform is `ARTIFACT` without short reads (the mapping sign alone holds it
 `UNCONFIRMED`). A novel isoform with an unusual motif but no short-read backing lands
 here; users should cross-check `ARTIFACT` calls against the original reads before hard
@@ -228,7 +228,7 @@ filtering.
 
 **NIC behaviour.** A `novel_in_catalog` isoform's novel junction is a *novel pairing
 of known splice sites*, i.e. a novel intron not present in the catalog, so it IS
-counted as a novel junction and DOES receive short-read / BAM / variant evaluation
+counted as a novel junction and does receive short-read / BAM / variant evaluation
 (it is not auto-`UNRESOLVED`). The residual `UNRESOLVED` set is non-targeted categories
 plus isoforms whose every junction is an already-known intron (no novel junction to
 evaluate). `rule_trace` and `verdict_reason` record which `UNKNOWN` reason applies
@@ -238,7 +238,7 @@ evaluate). `rule_trace` and `verdict_reason` record which `UNKNOWN` reason appli
 
 Every reclassification records its driving axis and (for the variant axis) a
 provenance/circularity flag. A verdict resting solely on variants derived from the
-same RNA reads being adjudicated is flagged (`circularity_flag = true`) and is **not**
+same RNA reads being adjudicated is flagged (`circularity_flag = true`) and is not
 promoted to a hard class. `provenance.log` reports which axes were evaluable.
 
 ## Evidence gates
@@ -247,11 +247,11 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
   a canonical GT-AG?) is verified deterministically at the motif level
   (`tests/unit/variant_motif_test.cpp`; see [benchmark/variant_inject](../benchmark/variant_inject)).
 - **GATE-1 (met)**: the pangenome reference is the **HPRC v1.1 Minigraph-Cactus
-  GRCh38** graph, with HG002/NA24385 confirmed **out-of-graph** (absent from the 47
+  GRCh38** graph, with HG002/NA24385 confirmed out-of-graph (absent from the 47
   assembly samples → non-circular). On chr22, `vg deconstruct` → population deletions →
   graph-supported junctions: the rescue produces **0 false rescues** on real FLAIR novel
-  junctions, **fires correctly** when a novel intron is a real population deletion
-  (population provenance), and is **held by the circularity firewall** under
+  junctions, fires correctly when a novel intron is a real population deletion
+  (population provenance), and is held by the circularity firewall under
   circular-risk provenance — see [benchmark/pangenome](../benchmark/pangenome) and
   [benchmark/results/pangenome](../benchmark/results/pangenome).
 

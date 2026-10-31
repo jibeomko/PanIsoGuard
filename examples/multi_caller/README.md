@@ -1,6 +1,6 @@
 # Multi-caller quickstart (self-contained, offline, <1 s)
 
-The shortest end-to-end run of PanIsoGuard's headline flow — **integrate several callers,
+The shortest end-to-end run of PanIsoGuard's main flow — **integrate several callers,
 then let cross-caller agreement decide which novel isoforms to trust** — on tiny committed
 fixtures (no downloads, no real callers, deterministic).
 

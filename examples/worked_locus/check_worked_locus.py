@@ -6,7 +6,7 @@ Python standard library only (readers, junction classification, short-read suppo
 features, splice motifs, fingerprints, the rules), runs `panisoguard adjudicate` / `combine`
 on the same inputs under nine input combinations, and stops with an error if any isoform
 differs in novelty support, mechanism, confidence class or junction counts. It also checks
-the headline numbers quoted in README.md. CTest runs it as `integration_worked_locus`.
+the numbers quoted in README.md. CTest runs it as `integration_worked_locus`.
 
     python3 check_worked_locus.py [path/to/panisoguard]      # default: ../../build/panisoguard
 """
@@ -303,7 +303,7 @@ def main():
                     print(f"MISMATCH {name} {iso}: PanIsoGuard {got[iso]} vs by hand {want}")
             print(f"{name:14s} {len(cls)} isoforms, iso_A -> {got['iso_A'][2]}")
 
-    # The headline numbers quoted in README.md.
+    # The numbers quoted in README.md.
     step = [results[f"step{i}"]["iso_A"][2] for i in range(6)]
     expect = ["UNRESOLVED", "UNRESOLVED", "ARTIFACT", "ARTIFACT", "UNRESOLVED", "REFERENCE_BIAS"]
     checks = [

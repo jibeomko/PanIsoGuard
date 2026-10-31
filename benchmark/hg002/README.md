@@ -1,8 +1,7 @@
 # HG002 variant-axis validation (real, non-circular)
 
-The acceptance-critical validation of the headline `REFERENCE_BIAS`
-mechanism on **real, independent (WGS-derived) variants** — GIAB HG002 — so the
-rescue evidence is genuinely independent of the RNA being adjudicated (the
+The validation of the `REFERENCE_BIAS` mechanism on real, independent (WGS-derived)
+variants, GIAB HG002, so the rescue evidence is independent of the RNA being adjudicated (the
 circularity firewall's `wgs` provenance).
 
 ## Method
@@ -13,9 +12,9 @@ circularity firewall's `wgs` provenance).
    excluded — the documented coordinate-shift caveat).
 3. Scan the reference annotation's introns for splice donor/acceptor dinucleotides
    that differ between GRCh38 and the HG002 haplotype:
-   - **CREATED** — non-canonical on GRCh38, canonical on HG002 = reference bias
-   - **DISRUPTED** — canonical on GRCh38, non-canonical on HG002
-   - **CONTROL** — canonical on both
+   - CREATED — non-canonical on GRCh38, canonical on HG002 = reference bias
+   - DISRUPTED — canonical on GRCh38, non-canonical on HG002
+   - CONTROL — canonical on both
 4. Build adjudicate inputs from these loci and run PanIsoGuard with
    `--reference-haplotype hap.fa --haplotype-provenance wgs`.
 
@@ -29,7 +28,7 @@ Needs `bcftools` (e.g. conda env with bcftools ≥1.18), `samtools`, and `paniso
 
 ## Result (GENCODE v49 chr22, GIAB HG002 v4.2.1)
 
-Of 13,496 unique chr22 introns, exactly **1 CREATED** (reference-bias) and **2
+Of 13,496 unique chr22 introns, exactly 1 CREATED (reference-bias) and **2
 DISRUPTED** splice motifs are produced by real HG002 SNVs (annotated introns are
 overwhelmingly canonical on GRCh38, so motif-altering SNVs are rare — as expected).
 
@@ -43,8 +42,8 @@ CONTROL  ×5     UNRESOLVED                       (not falsely rescued)
 PanIsoGuard's variant axis, fed the real HG002 WGS-derived haplotype (non-circular),
 correctly rescued the single genuine reference-bias junction — a junction that looks
 non-canonical/suspect on GRCh38 but is a clean GT-AG on HG002's own genome — and
-produced **zero false rescues** on the disrupted/control loci. This validates the
-headline mechanism on real human-genome variation.
+produced zero false rescues on the disrupted/control loci. This validates the
+mechanism on real human-genome variation.
 
 (For a controlled, high-N version of the same rescue logic see
 [../synthetic_axes](../synthetic_axes); for the short-read axis see
@@ -54,21 +53,20 @@ headline mechanism on real human-genome variation.
 
 The chr22 result above is one genuine case (N=1). Extending the **same annotation +
 variant scan to the whole genome** (HG002 v4.2.1, GENCODE v49, chr1–22; no RNA-seq, no
-caller runs) answers the obvious follow-up — *is the rescue a real, recurring mechanism,
-or a guardrail that never fires?*
+caller runs) answers the follow-up question: is the rescue a recurring mechanism, or a check that
+never fires?
 
 | genome-wide (597,781 GENCODE introns scanned) | |
 |---|---|
-| genuine **reference-bias** junctions (CREATED) | **33** |
-| rescued under `wgs` provenance (**sensitivity**) | **33 / 33** |
-| **false rescues** (specificity) | **0** |
-| held by the **circularity firewall** under circular-risk provenance | **33 / 33** |
+| genuine reference-bias junctions (CREATED) | 33 |
+| rescued under `wgs` provenance (sensitivity) | 33 / 33 |
+| false rescues (specificity) | 0 |
+| held by the circularity firewall under circular-risk provenance | 33 / 33 |
 
-**Honest reading.** Reference bias at splice junctions is **rare but not zero** — 33 cases
+Reference bias at splice junctions is rare but not zero — 33 cases
 across ~600k introns (~1 in 18,000). In this scan the axis rescued all 33 and none of the
 control junctions, and the firewall held all 33 under circular-risk provenance. So the
-reference-bias rescue is a guardrail with a low base rate — a correctness safeguard, not a
-high-yield discovery engine. Its yield rises for samples from non-reference individuals or
+reference-bias rescue is a check with a low base rate, not a discovery method. Its yield rises for samples from non-reference individuals or
 personalized-genome contexts. (DISRUPTED — 236 canonical→non-canonical junctions — is
 computed but intentionally not consumed by the engine, so it is correctly never rescued.)
 Recorded in [../results/hg002_wholegenome](../results/hg002_wholegenome).

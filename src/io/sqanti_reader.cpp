@@ -17,7 +17,7 @@ const std::string& field_at(const std::vector<std::string>& f, int idx) {
 
 constexpr int kMaxParseWarnings = 5;
 
-// A non-NA token that does not fully parse as a number is genuinely malformed (not an
+// A non-NA token that does not fully parse as a number is malformed (not an
 // intentional NA). Fall back to the sentinel so a bad QC value degrades to
 // not_evaluable rather than a wrong prior, but warn (bounded) so it is not SILENT.
 void warn_unparseable(const char* what, std::size_t lineno, const std::string& s, int& warnings) {
