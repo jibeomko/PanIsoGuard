@@ -41,6 +41,10 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
     Bed12Record rec;
     const std::string chrom = f[0];
     const int64_t chrom_start = parse_int_field(f[1], "chromStart", "BED12", lineno);  // 0-based
+    const int64_t chrom_end = parse_int_field(f[2], "chromEnd", "BED12", lineno);
+    if (chrom_end < chrom_start) {
+      throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": chromEnd is before chromStart");
+    }
     rec.name = f[3];
 
     rec.chain.chrom = chrom;
@@ -55,7 +59,15 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
                                ": blockCount does not match blockSizes/blockStarts");
     }
 
-    // Exons are 0-based half-open [chrom_start+start, chrom_start+start+size).
+    // Exons are 0-based half-open [chrom_start+start, chrom_start+start+size) and must lie
+    // inside [chromStart, chromEnd) in order.
+    for (int i = 0; i < block_count; ++i) {
+      const bool ordered = i == 0 || starts[i] >= starts[i - 1] + sizes[i - 1];
+      if (sizes[i] <= 0 || starts[i] < 0 || chrom_start + starts[i] + sizes[i] > chrom_end || !ordered) {
+        throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": block " + std::to_string(i + 1) +
+                                 " is empty, out of order, or outside chromStart..chromEnd");
+      }
+    }
     // Intron between consecutive exons = [exon_i.end, exon_{i+1}.start).
     for (int i = 0; i + 1 < block_count; ++i) {
       const int64_t exon_i_end = chrom_start + starts[i] + sizes[i];

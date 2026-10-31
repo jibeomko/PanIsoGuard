@@ -25,9 +25,9 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
         return "UNCONFIRMED"
     if cat not in NOVEL:
         return "UNRESOLVED"
-    for axis in ("pangenome", "variant"):                      # reference-bias rescue first
-        if e[f"{axis}_evaluable"] and e[f"{axis}_rescue"]:
-            return "UNRESOLVED" if e[f"{axis}_circular"] else "REFERENCE_BIAS"
+    rescues = [e[f"{a}_circular"] for a in ("pangenome", "variant") if e[f"{a}_evaluable"] and e[f"{a}_rescue"]]
+    if rescues:                                                # reference-bias rescue first: independent evidence
+        return "REFERENCE_BIAS" if not all(rescues) else "UNRESOLVED"   # on either axis promotes, else held
     n, k = e["n_novel_junctions"], e["n_novel_jx_sr_supported"]
     if not (e["sj_evaluable"] and e["chain_available"]) or n == 0:
         sup = "UNKNOWN"

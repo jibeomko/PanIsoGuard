@@ -15,6 +15,7 @@
 #include "panisoguard/bam_features.hpp"
 #include "panisoguard/decoys.hpp"
 #include "panisoguard/gtf.hpp"
+#include "panisoguard/tsv.hpp"
 #include "panisoguard/version.hpp"
 
 namespace {
@@ -130,14 +131,15 @@ int cmd_decoys(int argc, char** argv) {
           << '\t' << (lifted ? "true" : "false") << '\n';
       if (k % 20000 == 0) std::fprintf(stderr, "  %zu / %zu decoys\n", k, decoys.size());
     }
+    close_checked(tsv, out_prefix + ".decoys.tsv");
     std::ofstream js(out_prefix + ".decoys.json");
     if (!js) throw std::runtime_error("cannot write " + out_prefix + ".decoys.json");
     auto tally = [&](const char* name, const Tally& t, bool last = false) {
       js << "  \"" << name << "\": {\"n\": " << t.n << ", \"lifted\": " << t.lifted
          << ", \"rate\": " << t.rate() << "}" << (last ? "\n" : ",\n");
     };
-    js << "{\n  \"tool_version\": \"" << kVersion << "\",\n  \"ref_gtf\": \"" << ref_gtf << "\",\n  \"bam\": \""
-       << bam_path << "\",\n  \"min_full_reads\": " << min_full << ",\n  \"max_per_gene\": " << max_per_gene
+    js << "{\n  \"tool_version\": \"" << kVersion << "\",\n  \"ref_gtf\": \"" << json_escape(ref_gtf)
+       << "\",\n  \"bam\": \"" << json_escape(bam_path) << "\",\n  \"min_full_reads\": " << min_full << ",\n  \"max_per_gene\": " << max_per_gene
        << ",\n  \"seed\": " << seed << ",\n";
     tally("decoys", all);
     tally("decoys_both_parents_lifted", both_parents);
@@ -149,6 +151,7 @@ int cmd_decoys(int argc, char** argv) {
       first = false;
     }
     js << "}\n}\n";
+    close_checked(js, out_prefix + ".decoys.json");
     std::fprintf(stderr,
         "decoys with >= %d whole-chain reads: %zu / %zu (%.4f)\n"
         "  among decoys whose two parents both have >= %d: %zu / %zu (%.4f)\n"

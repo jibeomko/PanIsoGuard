@@ -4,8 +4,8 @@
 individuals.** On real PacBio Kinnex Iso-Seq from **two unrelated West African individuals**
 — HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, Gambian Mandinka), both HPRC Release 2
 with same-individual Iso-Seq **and** a HiFi de-novo phased assembly — PanIsoGuard's
-reference-bias rescue fires on real caller-reported novel splice junctions and is
-**perfectly specific across both genomes**. The reference-grade European control GM12878
+reference-bias rescue fires on real caller-reported novel splice junctions, with no false
+rescue on the control junctions of either scan. The reference-grade European control GM12878
 (= NA12878) yields **0** ([gm12878_realdata](../gm12878_realdata)).
 
 Each individual is processed identically (see [hg03516_refbias](../hg03516_refbias) for the
@@ -27,10 +27,18 @@ junctions are reference bias — **77** of which a reference-only pipeline would
 novel discoveries. Each is non-canonical on GRCh38 but canonical on that individual's own
 HiFi-assembly haplotype via a real personal SNV at the splice dinucleotide. PanIsoGuard
 exonerates **all 86 with 0 false rescues**, and the circularity firewall holds every one
-under circular-risk provenance. The rescue fires consistently (~40–46 per genome) and is
-**perfectly specific in both** — the cohort evidence that it is a reliable safeguard whose
-yield **scales with divergence** (0 on reference-grade GM12878; cf. the
+under circular-risk provenance. The rescue fires at a similar rate in both genomes (40 and
+46) with no false rescue in either scan, and its yield rises with divergence from the
+reference (0 on reference-grade GM12878; cf. the
 [giab_cohort_rescue](../giab_cohort_rescue), 137 across 4 personalized genomes).
+
+**Aggregator correction (2026-10-31).** An audit found two errors in `analyze.py`: the
+cohort total `rescued_unique` was the number of candidate junctions, not of junctions
+actually rescued, and the DISRUPTED / CONTROL negatives at other coordinates were dropped
+before the false-rescue count. Both are fixed; the envelope now carries per-junction
+`rescued_junctions`, `firewall_held_junctions` and `missing_scan_rows`. Recounting the
+original per-individual results gives the same numbers: 40 and 46 rescued, 0 false, all
+held under circular-risk provenance.
 
 ## Caveats (carried from the [hg03516_refbias](../hg03516_refbias) audit; apply to both)
 

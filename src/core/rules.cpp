@@ -1,6 +1,8 @@
 #include "panisoguard/rules.hpp"
 
+#include <cmath>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include "tomlplusplus/toml.hpp"
@@ -10,41 +12,68 @@ namespace panisoguard {
 RuleEngine RuleEngine::from_toml(const std::string& path) {
   RuleEngine engine;
   RuleConfig& c = engine.cfg_;
-
   const toml::table tbl = toml::parse_file(path);  // throws toml::parse_error on failure
 
-  if (auto meta = tbl["meta"].as_table()) {
-    c.sqanti3_version_target = (*meta)["sqanti3_version_target"].value_or(c.sqanti3_version_target);
-    c.ruleset_version = (*meta)["ruleset_version"].value_or(c.ruleset_version);
-  }
-  if (auto ns = tbl["axis_novelty_support"].as_table()) {
-    c.sj_min_uniq_reads = static_cast<int>((*ns)["sj_min_uniq_reads"].value_or<int64_t>(c.sj_min_uniq_reads));
-    c.sj_require_canonical_motif = (*ns)["sj_require_canonical_motif"].value_or(c.sj_require_canonical_motif);
-    c.consensus_min_callers = static_cast<int>((*ns)["consensus_min_callers"].value_or<int64_t>(c.consensus_min_callers));
-  }
-  if (auto art = tbl["axis_artifact"].as_table()) {
-    if (auto deg = (*art)["degradation"].as_table()) {
-      c.perc_A_degradation_threshold =
-          (*deg)["max_perc_A_downstream_TTS"].value_or(c.perc_A_degradation_threshold);
-    }
-    if (auto map = (*art)["mapping"].as_table()) {
-      c.bam_min_mapq = static_cast<int>((*map)["min_mapq"].value_or<int64_t>(c.bam_min_mapq));
-      c.bam_min_spanning = static_cast<int>((*map)["min_spanning"].value_or<int64_t>(c.bam_min_spanning));
-      c.bam_junction_window_bp = static_cast<int>((*map)["junction_window_bp"].value_or<int64_t>(c.bam_junction_window_bp));
-      c.bam_max_low_mapq_frac = (*map)["max_low_mapq_frac"].value_or(c.bam_max_low_mapq_frac);
-      c.bam_max_supplementary_frac = (*map)["max_supplementary_frac"].value_or(c.bam_max_supplementary_frac);
-      c.bam_max_indel_near_frac = (*map)["max_indel_near_frac"].value_or(c.bam_max_indel_near_frac);
-    }
-  }
-  if (auto ch = tbl["axis_chain"].as_table()) {
-    c.chain_min_full_reads = static_cast<int>((*ch)["min_full_reads"].value_or<int64_t>(c.chain_min_full_reads));
-    if (c.chain_min_full_reads < 1) c.chain_min_full_reads = 1;
-  }
-  if (auto pg = tbl["axis_pangenome"].as_table()) {
-    c.pangenome_min_haplotypes =
-        static_cast<int>((*pg)["min_haplotypes"].value_or<int64_t>(c.pangenome_min_haplotypes));
-    if (c.pangenome_min_haplotypes < 1) c.pangenome_min_haplotypes = 1;  // a 0/negative gate would rescue everything
-  }
+  // Every key is optional (a missing key keeps the default). A key that is present must have
+  // the right type and a value inside its range; otherwise the run stops here instead of
+  // running with a threshold that was silently clamped or converted.
+  auto fail = [&](const std::string& key, const std::string& why) {
+    throw std::runtime_error(path + ": " + key + " " + why);
+  };
+  auto get_int = [&](const toml::table* t, const char* section, const char* key, int64_t lo, int64_t hi, int& dst) {
+    const toml::node* n = t == nullptr ? nullptr : t->get(key);
+    if (n == nullptr) return;
+    const std::string name = std::string(section) + "." + key;
+    if (!n->is_integer()) fail(name, "must be an integer");
+    const int64_t v = n->as_integer()->get();
+    if (v < lo || v > hi) fail(name, "must be between " + std::to_string(lo) + " and " + std::to_string(hi));
+    dst = static_cast<int>(v);
+  };
+  auto get_double = [&](const toml::table* t, const char* section, const char* key, double lo, double hi, double& dst) {
+    const toml::node* n = t == nullptr ? nullptr : t->get(key);
+    if (n == nullptr) return;
+    const std::string name = std::string(section) + "." + key;
+    if (!n->is_number()) fail(name, "must be a number");
+    const double v = n->is_integer() ? static_cast<double>(n->as_integer()->get()) : n->as_floating_point()->get();
+    if (!std::isfinite(v) || v < lo || v > hi) fail(name, "must be between " + std::to_string(lo) + " and " + std::to_string(hi));
+    dst = v;
+  };
+  auto get_bool = [&](const toml::table* t, const char* section, const char* key, bool& dst) {
+    const toml::node* n = t == nullptr ? nullptr : t->get(key);
+    if (n == nullptr) return;
+    if (!n->is_boolean()) fail(std::string(section) + "." + key, "must be true or false");
+    dst = n->as_boolean()->get();
+  };
+  auto get_string = [&](const toml::table* t, const char* section, const char* key, std::string& dst) {
+    const toml::node* n = t == nullptr ? nullptr : t->get(key);
+    if (n == nullptr) return;
+    if (!n->is_string()) fail(std::string(section) + "." + key, "must be a string");
+    dst = n->as_string()->get();
+  };
+
+  const toml::table* meta = tbl["meta"].as_table();
+  get_string(meta, "meta", "sqanti3_version_target", c.sqanti3_version_target);
+  get_string(meta, "meta", "ruleset_version", c.ruleset_version);
+
+  const toml::table* ns = tbl["axis_novelty_support"].as_table();
+  get_int(ns, "axis_novelty_support", "sj_min_uniq_reads", 1, 1000000, c.sj_min_uniq_reads);
+  get_bool(ns, "axis_novelty_support", "sj_require_canonical_motif", c.sj_require_canonical_motif);
+  get_int(ns, "axis_novelty_support", "consensus_min_callers", 1, 1000, c.consensus_min_callers);
+
+  const toml::table* art = tbl["axis_artifact"].as_table();
+  const toml::table* deg = art == nullptr ? nullptr : (*art)["degradation"].as_table();
+  get_double(deg, "axis_artifact.degradation", "max_perc_A_downstream_TTS", 0.0, 100.0, c.perc_A_degradation_threshold);
+  const toml::table* map = art == nullptr ? nullptr : (*art)["mapping"].as_table();
+  get_int(map, "axis_artifact.mapping", "min_mapq", 0, 255, c.bam_min_mapq);
+  get_int(map, "axis_artifact.mapping", "min_spanning", 1, 1000000, c.bam_min_spanning);
+  get_int(map, "axis_artifact.mapping", "junction_window_bp", 0, 10000, c.bam_junction_window_bp);
+  // A fraction gate above 1.0 can never fire: that is how a gate is switched off.
+  get_double(map, "axis_artifact.mapping", "max_low_mapq_frac", 0.0, 2.0, c.bam_max_low_mapq_frac);
+  get_double(map, "axis_artifact.mapping", "max_supplementary_frac", 0.0, 2.0, c.bam_max_supplementary_frac);
+  get_double(map, "axis_artifact.mapping", "max_indel_near_frac", 0.0, 2.0, c.bam_max_indel_near_frac);
+
+  get_int(tbl["axis_chain"].as_table(), "axis_chain", "min_full_reads", 1, 1000000, c.chain_min_full_reads);
+  get_int(tbl["axis_pangenome"].as_table(), "axis_pangenome", "min_haplotypes", 1, 1000000, c.pangenome_min_haplotypes);
   return engine;
 }
 
@@ -175,45 +204,51 @@ bool pass_through(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& 
   return false;
 }
 
-// --- 1. Reference-bias rescue: pangenome first, then the sample's haplotypes. True when final.
+// --- 1. Reference-bias rescue: the pangenome and the sample's haplotypes. True when final.
 // Rescue needs ALL of the isoform's novel junctions explained (an isoform is "reference bias"
 // only if its whole novelty is); the per-junction count is in the evidence. Both axes pass the
 // circularity firewall: provenance that is not independent of the sample's RNA holds the call
-// instead of promoting it. The pangenome axis is checked first so an independent graph rescues
-// even when the haplotype provenance is circular-risk. A rescue is not blocked by a mapping
-// sign (that blocked a correct rescue in refbias_phasing), but the sign is carried in the
-// reason so the call can be reviewed.
+// instead of promoting it, but only when neither axis offers an independent rescue. A rescue
+// is not blocked by a mapping sign (that blocked a correct rescue in refbias_phasing); the
+// sign is carried in the reason so the call can be reviewed.
 bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
   const std::string mapping_note = s.mapping_sign ? ";mapping_sign" : "";
+  const std::string mapping_trace = s.mapping_sign ? "; mapping sign present" : "";
   const bool all_pan = ev.n_novel_junctions > 0 && ev.n_novel_jx_pangenome == ev.n_novel_junctions;
   const bool all_created = ev.n_novel_junctions > 0 && ev.n_novel_jx_variant_created == ev.n_novel_junctions;
-  if (ev.pangenome_evaluable && ev.pangenome_rescue) {
+  const bool pan_rescue = ev.pangenome_evaluable && ev.pangenome_rescue;
+  const bool var_rescue = ev.variant_evaluable && ev.variant_rescue;
+  const std::string pan_frac = std::to_string(ev.n_novel_jx_pangenome) + "/" + std::to_string(ev.n_novel_junctions);
+  // Independent evidence on either axis promotes; a circular-risk rescue holds the call only
+  // when no independent rescue applies.
+  if (pan_rescue && !ev.pangenome_circular) {
     v.primary_mechanism = Mechanism::kPopulationKnown;
-    const std::string frac = std::to_string(ev.n_novel_jx_pangenome) + "/" + std::to_string(ev.n_novel_junctions);
-    if (ev.pangenome_circular) {
-      v.circularity_flag = true;
-      trace(v, "all " + frac + " novel junctions realizable on a pangenome path, but the junction-set "
-                   "provenance is sample-derived/unknown (circular-risk) -> held UNRESOLVED (not promoted)");
-      finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "firewall_held");
-      return true;
-    }
-    trace(v, "all " + frac + " novel junctions realizable on a pangenome haplotype path (independent "
-                 "population data) -> REFERENCE_BIAS (population_known)" + (s.mapping_sign ? "; mapping sign present" : ""));
+    trace(v, "all " + pan_frac + " novel junctions realizable on a pangenome haplotype path (independent "
+                 "population data) -> REFERENCE_BIAS (population_known)" + mapping_trace);
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "pangenome_path" + mapping_note);
     return true;
   }
-  if (ev.variant_evaluable && ev.variant_rescue) {
+  if (var_rescue && !ev.variant_circular) {
     v.primary_mechanism = Mechanism::kVariant;
-    if (ev.variant_circular) {
-      v.circularity_flag = true;
-      trace(v, "variant creates canonical motif on haplotype but provenance is circular-risk "
-               "(RNA-derived/unknown) -> held UNRESOLVED (not promoted)");
-      finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "firewall_held");
-      return true;
-    }
     trace(v, "variant creates canonical splice motif on haplotype, non-canonical on reference -> "
-             "REFERENCE_BIAS (reference bias)" + std::string(s.mapping_sign ? "; mapping sign present" : ""));
+             "REFERENCE_BIAS (reference bias)" + mapping_trace);
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "haplotype_variant" + mapping_note);
+    return true;
+  }
+  if (pan_rescue) {
+    v.primary_mechanism = Mechanism::kPopulationKnown;
+    v.circularity_flag = true;
+    trace(v, "all " + pan_frac + " novel junctions realizable on a pangenome path, but the junction-set "
+                 "provenance is sample-derived/unknown (circular-risk) -> held UNRESOLVED (not promoted)");
+    finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "firewall_held");
+    return true;
+  }
+  if (var_rescue) {
+    v.primary_mechanism = Mechanism::kVariant;
+    v.circularity_flag = true;
+    trace(v, "variant creates canonical motif on haplotype but provenance is circular-risk "
+             "(RNA-derived/unknown) -> held UNRESOLVED (not promoted)");
+    finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "firewall_held");
     return true;
   }
   // Every novel junction is explained individually, but by different haplotypes / graph

@@ -1,8 +1,11 @@
 #include "catch2/catch.hpp"
 
+#include <cstdio>
+#include <fstream>
 #include <stdexcept>
 
 #include "panisoguard/rules.hpp"
+#include "test_util.hpp"
 
 using namespace panisoguard;
 
@@ -281,4 +284,49 @@ TEST_CASE("rules: an ISM carried end to end by long reads is a KNOWN_FRAGMENT", 
   CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
   ev.chain_evaluable = false;
   CHECK(eng.evaluate(ev).verdict_reason == "ism");
+}
+
+TEST_CASE("rules: an independent rescue on one axis is not held by a circular-risk rescue on the other", "[rules][rescue]") {
+  const RuleEngine eng;
+  EvidenceVector ev = novel_ev(1, 0);
+  ev.sj_evaluable = false;
+  ev.variant_evaluable = true;  ev.variant_rescue = true;  ev.n_novel_jx_variant_created = 1;  ev.haplotype_consistent = true;
+  ev.pangenome_evaluable = true;  ev.pangenome_rescue = true;  ev.n_novel_jx_pangenome = 1;
+
+  ev.variant_circular = false;  ev.pangenome_circular = true;   // independent haplotype + unknown graph
+  Verdict v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kReferenceBias);
+  CHECK(v.verdict_reason == "haplotype_variant");
+  CHECK_FALSE(v.circularity_flag);
+
+  ev.variant_circular = true;  ev.pangenome_circular = false;   // independent graph + RNA-derived haplotype
+  v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kReferenceBias);
+  CHECK(v.verdict_reason == "pangenome_path");
+
+  ev.variant_circular = true;  ev.pangenome_circular = true;    // neither independent: held
+  v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnresolved);
+  CHECK(v.verdict_reason == "firewall_held");
+  CHECK(v.circularity_flag);
+}
+
+TEST_CASE("rules: a config value of the wrong type or outside its range is an error", "[rules][config]") {
+  auto with_toml = [](const std::string& body) {
+    const std::string path = scratch("rules_cfg.toml");
+    std::ofstream(path) << body;
+    struct Guard { std::string p; ~Guard() { std::remove(p.c_str()); } } g{path};
+    return RuleEngine::from_toml(path).config();
+  };
+  CHECK(with_toml("[axis_novelty_support]\nconsensus_min_callers = 3\n").consensus_min_callers == 3);
+  CHECK(with_toml("[axis_artifact.mapping]\nmax_indel_near_frac = 1.1\n").bam_max_indel_near_frac == Approx(1.1));
+  CHECK(with_toml("").chain_min_full_reads == 3);                                         // missing keys keep defaults
+  CHECK_THROWS(with_toml("[axis_novelty_support]\nconsensus_min_callers = -1\n"));          // below range
+  CHECK_THROWS(with_toml("[axis_novelty_support]\nconsensus_min_callers = 4294967296\n"));  // would wrap to 0
+  CHECK_THROWS(with_toml("[axis_novelty_support]\nconsensus_min_callers = \"two\"\n"));     // wrong type
+  CHECK_THROWS(with_toml("[axis_chain]\nmin_full_reads = 0\n"));
+  CHECK_THROWS(with_toml("[axis_chain]\nmin_full_reads = 2.5\n"));
+  CHECK_THROWS(with_toml("[axis_artifact.degradation]\nmax_perc_A_downstream_TTS = 250\n"));
+  CHECK_THROWS(with_toml("[axis_artifact.mapping]\nmin_mapq = 300\n"));
+  CHECK_THROWS(with_toml("[axis_novelty_support]\nsj_require_canonical_motif = \"yes\"\n"));
 }

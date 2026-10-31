@@ -32,6 +32,10 @@ jobs:
             if [ "$code" = "200" ] && [ -s src.tar.gz ]; then break; fi
             echo "attempt $i: HTTP $code — waiting for the tarball"; sleep 5
           done
+          if [ "$code" != "200" ] || [ ! -s src.tar.gz ]; then
+            echo "tag archive not available after 12 attempts (last HTTP $code)"; exit 1
+          fi
+          tar -tzf src.tar.gz >/dev/null   # a real gzip tarball, not an error page
           SHA=$(sha256sum src.tar.gz | cut -d' ' -f1)
           echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
           echo "sha256=$SHA"  >> "$GITHUB_OUTPUT"

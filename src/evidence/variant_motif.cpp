@@ -72,14 +72,22 @@ bool is_canonical_pair(const std::string& donor, const std::string& acceptor) {
          (donor == "AT" && acceptor == "AC");
 }
 
+// A dinucleotide with an N or any other ambiguity code cannot be judged canonical or not.
+bool is_acgt(const std::string& s) {
+  for (char c : s)
+    if (c != 'A' && c != 'C' && c != 'G' && c != 'T') return false;
+  return true;
+}
+
 }  // namespace
 
 SpliceMotif splice_motif(const FastaFetcher& fa, const std::string& chrom, const Junction& intron,
                          Strand strand) {
   SpliceMotif m;
+  if (strand == Strand::kUnknown) return m;  // donor and acceptor cannot be told apart: not evaluable
   const std::string left = fa.fetch(chrom, intron.start, intron.start + 2);   // genomic 5' of intron
   const std::string right = fa.fetch(chrom, intron.end - 2, intron.end);      // genomic 3' of intron
-  if (left.size() != 2 || right.size() != 2) return m;  // not evaluable
+  if (left.size() != 2 || right.size() != 2 || !is_acgt(left) || !is_acgt(right)) return m;  // missing or ambiguous
   m.evaluable = true;
 
   std::string donor, acceptor;
@@ -106,17 +114,21 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
   m.ref = splice_motif(*ref_, chrom, intron, strand);
   m.haps.reserve(haps_.size());
   for (const auto& hap : haps_) m.haps.push_back(splice_motif(*hap, chrom, intron, strand));
-  if (!m.ref.evaluable) return m;
-  bool any_hap_eval = false, any_hap_canonical = false, all_hap_noncanonical = true;
+  if (!m.ref.evaluable || m.haps.empty()) return m;
+  bool all_hap_evaluable = true, any_hap_canonical = false;
   for (const auto& h : m.haps) {
-    if (!h.evaluable) continue;
-    any_hap_eval = true;
-    if (h.canonical) { any_hap_canonical = true; all_hap_noncanonical = false; }
+    if (!h.evaluable) all_hap_evaluable = false;
+    else if (h.canonical) any_hap_canonical = true;
   }
-  if (!any_hap_eval) return m;
-  if (!m.ref.canonical && any_hap_canonical) m.verdict = VariantVerdict::kCreated;
-  else if (m.ref.canonical && all_hap_noncanonical) m.verdict = VariantVerdict::kDisrupted;
-  else m.verdict = VariantVerdict::kNone;
+  // One canonical haplotype is positive evidence on its own; "none" and "disrupted" are
+  // statements about every haplotype, so an unreadable haplotype leaves them undecided.
+  if (!m.ref.canonical) {
+    m.verdict = any_hap_canonical ? VariantVerdict::kCreated
+              : all_hap_evaluable ? VariantVerdict::kNone : VariantVerdict::kNotEvaluable;
+  } else {
+    m.verdict = any_hap_canonical ? VariantVerdict::kNone
+              : all_hap_evaluable ? VariantVerdict::kDisrupted : VariantVerdict::kNotEvaluable;
+  }
   return m;
 }
 

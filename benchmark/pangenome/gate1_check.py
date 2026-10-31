@@ -146,9 +146,12 @@ def main():
         fails = []
         npos = sum(1 for k in truth if truth[k] == "POS")
         rescued_pop = held_unk = circ_unk = 0
+        for name, v in (("population", vp), ("unknown", vu)):
+            if set(v) != set(truth):
+                fails.append(f"{name} run: verdict rows {sorted(set(truth) - set(v))} missing, {sorted(set(v) - set(truth))} unexpected")
         for iso, cat_ in truth.items():
             cls_pop, _, reason_pop = vp.get(iso, ("MISSING", "", ""))
-            cls_unk, circ_unk_flag, _ = vu.get(iso, ("MISSING", "", ""))
+            cls_unk, circ_unk_flag, reason_unk = vu.get(iso, ("MISSING", "", ""))
             if cat_ == "PATHOK":
                 if cls_pop != "REFERENCE_BIAS":
                     fails.append(f"{iso}: two junctions on a shared path -> {cls_pop} (expected REFERENCE_BIAS)")
@@ -161,12 +164,12 @@ def main():
                     fails.append(f"{iso}: population -> {cls_pop} (expected REFERENCE_BIAS)")
                 else:
                     rescued_pop += 1
-                if cls_unk == "REFERENCE_BIAS":
-                    fails.append(f"{iso}: unknown provenance was PROMOTED (firewall breach!)")
+                if cls_unk != "UNRESOLVED" or circ_unk_flag != "true" or reason_unk != "firewall_held":
+                    fails.append(f"{iso}: unknown provenance -> {cls_unk}/{reason_unk}/circularity={circ_unk_flag} "
+                                 "(expected UNRESOLVED/firewall_held/true)")
                 else:
                     held_unk += 1
-                    if circ_unk_flag == "true":
-                        circ_unk += 1
+                    circ_unk += 1
             else:  # NEARMISS / CONTROL must never be rescued
                 if cls_pop == "REFERENCE_BIAS":
                     fails.append(f"{iso} ({cat_}): falsely rescued (expected held)")

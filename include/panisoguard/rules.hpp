@@ -33,7 +33,7 @@ struct RuleConfig {
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes; the history is in CHANGELOG.md.
-  std::string ruleset_version = "builtin-0.0.5";
+  std::string ruleset_version = "builtin-0.0.6";
 };
 
 class RuleEngine {

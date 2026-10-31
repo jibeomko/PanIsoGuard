@@ -67,28 +67,38 @@ def analyze(W):
     hom = sum(1 for r in kept if r[4] == "mat,pat")
     novel = sum(1 for r in kept if (int(r[1]), int(r[2])) not in GI.get(r[0], set()))
     def tally(tag):
-        resc = fr = held = 0
+        # Every scan row is read. A CREATED row is counted only for a kept (read-supported)
+        # candidate junction; the DISRUPTED / CONTROL negatives are counted wherever they are,
+        # since a false rescue on a control junction is a false rescue. Per junction: rescued
+        # when at least one haplotype's row is REFERENCE_BIAS, held when every CREATED row of it
+        # was UNRESOLVED under circular-risk provenance.
+        rows = fr = missing = 0
+        rescued, held_rows, created_rows = set(), defaultdict(int), defaultdict(int)
         for d in glob.glob(f"{W}/scan/chr*.pat") + glob.glob(f"{W}/scan/chr*.mat"):
             adj = f"{d}/adj_{tag}.adjudicated.tsv"
-            if not os.path.exists(adj): continue
+            if not os.path.exists(adj): missing += 1; continue
             truth = {l.split('\t')[0]: l.strip().split('\t')[1] for l in open(f"{d}/vt.truth")}
             exj = defaultdict(list); chrom = d.split('/')[-1].split('.')[0]
             for ln in open(f"{d}/vt.gtf"):
                 f = ln.rstrip('\n').split('\t'); iso = f[8].split('transcript_id "')[1].split('"')[0]
                 exj[iso].append((int(f[3]), int(f[4])))
             jc = {i: (chrom, sorted(v)[0][1], sorted(v)[1][0] - 1) for i, v in exj.items() if len(v) >= 2}
-            hdr = None
+            hdr = None; seen = set()
             for ln in open(adj):
                 f = ln.rstrip('\n').split('\t')
                 if hdr is None: hdr = {c: i for i, c in enumerate(f)}; continue
-                iso = f[hdr['isoform_id']]; cls = f[hdr['confidence_class']]; lab = truth.get(iso)
-                if jc.get(iso) not in keptset: continue
-                if tag == "wgs":
-                    if lab == "CREATED" and cls == "REFERENCE_BIAS": resc += 1
-                    if lab in ("DISRUPTED", "CONTROL_canon") and cls == "REFERENCE_BIAS": fr += 1
-                elif lab == "CREATED" and cls == "UNRESOLVED": held += 1
-        return resc, fr, held
-    rw, fr, _ = tally("wgs"); _, _, held = tally("unk")
+                iso = f[hdr['isoform_id']]; cls = f[hdr['confidence_class']]; lab = truth.get(iso); seen.add(iso)
+                if lab in ("DISRUPTED", "CONTROL_canon"):
+                    if cls == "REFERENCE_BIAS": fr += 1
+                    continue
+                if lab != "CREATED" or jc.get(iso) not in keptset: continue
+                j = jc[iso]; rows += 1; created_rows[j] += 1
+                if cls == "REFERENCE_BIAS": rescued.add(j)
+                if cls == "UNRESOLVED" and f[hdr['circularity_flag']] == "true": held_rows[j] += 1
+            missing += sum(1 for i in truth if i not in seen)
+        held = {j for j, n in created_rows.items() if held_rows[j] == n}
+        return rows, rescued, fr, held, missing
+    rw, rescued, fr, _, missing_wgs = tally("wgs"); _, _, _, held, missing_unk = tally("unk")
     uj = set()
     for g in glob.glob(f"{W}/scan/chr*.novel.gtf"):
         chrom = g.split('/')[-1].split('.')[0]; e2 = defaultdict(list)
@@ -105,7 +115,8 @@ def analyze(W):
         "homozygous": hom, "heterozygous": len(kept) - hom,
         "read_support_exact": {"ge2": sum(1 for x in ks if x >= 2), "of": len(ks),
                                 "median": int(statistics.median(ks)), "max": max(ks), "min": min(ks)},
-        "rescued_rows": rw, "false_rescues": fr, "firewall_held_rows": held,
+        "rescued_rows": rw, "rescued_junctions": len(rescued & keptset), "false_rescues": fr,
+        "firewall_held_junctions": len(held & keptset), "missing_scan_rows": missing_wgs + missing_unk,
         "unique_novel_junctions_scanned": len(uj),
     }
 
@@ -115,9 +126,10 @@ for label, W in PAIRS:
 tot = {
     "reference_bias_junctions": sum(p["reference_bias_junctions"] for p in per.values()),
     "novel_vs_gencode_v49": sum(p["novel_vs_gencode_v49"] for p in per.values()),
-    "rescued_unique": sum(p["reference_bias_junctions"] for p in per.values()),
+    "rescued_unique": sum(p["rescued_junctions"] for p in per.values()),
     "false_rescues": sum(p["false_rescues"] for p in per.values()),
-    "firewall_held_all": all(p["firewall_held_rows"] >= p["reference_bias_junctions"] for p in per.values()),
+    "firewall_held_all": all(p["firewall_held_junctions"] == p["reference_bias_junctions"] for p in per.values()),
+    "missing_scan_rows": sum(p["missing_scan_rows"] for p in per.values()),
     "individuals": len(per),
 }
 out = {"per_individual": per, "cohort_total": tot}
@@ -146,8 +158,9 @@ if EMIT:
             "GM12878's 0 is DIRECTIONAL not a controlled rate (denominator/chemistry/variant-method differ); the "
             "personal genome is a HiFi de-novo ASSEMBLY SNV call (paftools placeholder QC, SNV-only -> indel "
             "reference bias invisible), molecule-independent (DNA vs RNA) but sharing the GRCh38+minimap2 backbone. "
-            "The replication across two unrelated West African genomes is the cohort evidence that the rescue is a "
-            "consistent, perfectly-specific safeguard whose yield scales with divergence (cf. giab_cohort_rescue).",
+            "Across two unrelated West African genomes the rescue fired on every read-supported candidate with no "
+            "false rescue on the DISRUPTED / CONTROL negatives in this set; its yield rises with divergence from the "
+            "reference (cf. giab_cohort_rescue).",
     }
     json.dump(env, open(EMIT, "w"), indent=2, sort_keys=True)
     print(f"\nwrote {EMIT}", file=sys.stderr)

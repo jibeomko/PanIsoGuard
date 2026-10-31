@@ -185,13 +185,17 @@ def verdict(iso, row, chain, inp):
         return "UNKNOWN", "none", "UNCONFIRMED", n_novel, n_sr, False
     if cat not in NOVEL:
         return "UNKNOWN", "none", "UNRESOLVED", n_novel, n_sr, False
+    rescues = []                                          # (mechanism, circular) per axis that explains every novel junction
     for axis, n_ok, mech in (("pangenome", n_pan, "population_known"), ("ref_seq", n_created, "variant_created")):
         if axis in inp and n_novel and n_ok == n_novel:
             if axis == "ref_seq" and not any(hap_common):   # created on different haplotypes: held
                 return "UNKNOWN", mech, "UNRESOLVED", n_novel, n_sr, False
-            circular = inp[axis + "_circular"]
-            return ("UNKNOWN", mech, "UNRESOLVED" if circular else "REFERENCE_BIAS",
-                    n_novel, n_sr, circular)
+            rescues.append((mech, inp[axis + "_circular"]))
+    independent = [m for m, circular in rescues if not circular]   # independent evidence on either axis promotes
+    if independent:
+        return "UNKNOWN", independent[0], "REFERENCE_BIAS", n_novel, n_sr, False
+    if rescues:
+        return "UNKNOWN", rescues[0][0], "UNRESOLVED", n_novel, n_sr, True
     if sj is None or not chain or n_novel == 0:
         sup = "UNKNOWN"
     elif n_sr == n_novel:

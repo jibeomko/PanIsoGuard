@@ -69,6 +69,25 @@ def metrics_equal(a, b) -> bool:
     return a == b
 
 
+ROOT = HERE.parent.parent  # the repository
+
+
+def ruleset_version(pig: str) -> str:
+    """The ruleset the binary applies, read from the provenance log of a run on the tiny example."""
+    tiny = ROOT / "examples" / "tiny" / "data"
+    with tempfile.TemporaryDirectory() as t:
+        r = subprocess.run([pig, "adjudicate", "--classification", str(tiny / "classification.tsv"),
+                            "--isoforms-gtf", str(tiny / "caller.gtf"), "--out-prefix", f"{t}/p"],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            sys.stderr.write(f"cannot read the ruleset from {pig}:\n{r.stderr}\n")
+            sys.exit(1)
+        for line in open(f"{t}/p.provenance.log"):
+            if line.startswith("ruleset_version\t"):
+                return line.rstrip("\n").split("\t", 1)[1]
+    sys.exit("provenance.log has no ruleset_version line")
+
+
 def regen_metrics(proto: str, pig: str) -> dict:
     """Run the protocol's ci_check.py with --emit-metrics and return the bare dict."""
     ci = BENCH / proto / "ci_check.py"
@@ -82,21 +101,42 @@ def regen_metrics(proto: str, pig: str) -> dict:
         return json.loads(out.read_text())
 
 
+_JSON_TYPES = {"string": str, "object": dict, "array": list, "boolean": bool, "null": type(None),
+               "number": (int, float), "integer": int}
+
+
 def validate_envelope(path: Path, schema: dict) -> list:
-    """Lightweight, dependency-free check of the required keys / status enum."""
+    """Dependency-free check of schema.json: required keys, no extra keys, each key's type (or
+    list of types), enum, and minProperties."""
     errs = []
     try:
         env = json.loads(path.read_text())
     except Exception as e:
         return [f"{path}: not valid JSON ({e})"]
+    if not isinstance(env, dict):
+        return [f"{path}: envelope must be a JSON object"]
     for key in schema["required"]:
         if key not in env:
             errs.append(f"{path}: missing required key '{key}'")
-    status_enum = schema["properties"]["status"]["enum"]
-    if env.get("status") not in status_enum:
-        errs.append(f"{path}: status '{env.get('status')}' not in {status_enum}")
-    if not isinstance(env.get("metrics"), dict) or not env.get("metrics"):
-        errs.append(f"{path}: 'metrics' must be a non-empty object")
+    props = schema["properties"]
+    if schema.get("additionalProperties") is False:
+        for key in env:
+            if key not in props:
+                errs.append(f"{path}: key '{key}' is not in the schema")
+    for key, spec in props.items():
+        if key not in env:
+            continue
+        val = env[key]
+        types = spec["type"] if isinstance(spec["type"], list) else [spec["type"]]
+        ok = any(isinstance(val, _JSON_TYPES[t]) and not (t in ("number", "integer") and isinstance(val, bool))
+                 for t in types)
+        if not ok:
+            errs.append(f"{path}: '{key}' must be of type {types}, got {type(val).__name__}")
+            continue
+        if "enum" in spec and val not in spec["enum"]:
+            errs.append(f"{path}: '{key}' = {val!r} not in {spec['enum']}")
+        if "minProperties" in spec and isinstance(val, dict) and len(val) < spec["minProperties"]:
+            errs.append(f"{path}: '{key}' must have at least {spec['minProperties']} entries")
     return errs
 
 
@@ -115,6 +155,7 @@ def main() -> int:
 
     schema = json.loads((HERE / "schema.json").read_text())
     ver = tool_version(pig)
+    ruleset = ruleset_version(pig)
     drift, changed, skipped = [], [], []
     from shutil import which
 
@@ -142,7 +183,7 @@ def main() -> int:
             "scope": meta["scope"],
             "status": "tracked",
             "tool_version": ver,
-            "ruleset_version": "builtin-0.0.2",
+            "ruleset_version": ruleset,
             "generated_utc": stamp,
             "data_provenance": meta["data_provenance"],
             "command": meta["command"],

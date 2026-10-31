@@ -1,8 +1,5 @@
 #include "panisoguard/result_writer.hpp"
 
-#include "panisoguard/gtf.hpp"
-
-#include <cstdio>
 #include <ctime>
 #include <fstream>
 #include <map>
@@ -10,31 +7,11 @@
 #include <type_traits>
 #include <sys/stat.h>
 
+#include "panisoguard/gtf.hpp"
+#include "panisoguard/tsv.hpp"
+
 namespace panisoguard {
 namespace {
-
-std::string json_escape(const std::string& s) {
-  std::string o;
-  o.reserve(s.size() + 8);
-  for (char c : s) {
-    switch (c) {
-      case '"':  o += "\\\""; break;
-      case '\\': o += "\\\\"; break;
-      case '\n': o += "\\n";  break;
-      case '\r': o += "\\r";  break;
-      case '\t': o += "\\t";  break;
-      default:
-        if (static_cast<unsigned char>(c) < 0x20) {
-          char buf[8];
-          std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-          o += buf;
-        } else {
-          o += c;
-        }
-    }
-  }
-  return o;
-}
 
 // DNA-side summary, independent of the verdict: do the sample's haplotypes / the pangenome
 // make the isoform's novel junctions canonical / realizable? "haplotype" and "pangenome"
@@ -65,6 +42,7 @@ void write_tsv(const std::string& path, const std::vector<AdjudicationResult>& r
         << '\t' << (r.verdict.circularity_flag ? "true" : "false")
         << '\t' << genomic_compatibility(r.evidence) << '\n';
   }
+  close_checked(out, path);
 }
 
 void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>& results) {
@@ -123,6 +101,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
     }
     out << "]}" << '\n';
   }
+  close_checked(out, path);
 }
 
 // "size=<bytes>\tmtime=<UTC>" for one input file, so a re-run can tell whether it saw the
@@ -206,6 +185,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "# verdict counts\n";
   for (const auto& kv : verdict_counts) out << "verdict." << kv.first << '\t' << kv.second << '\n';
   out << "total\t" << results.size() << '\n';
+  close_checked(out, path);
 }
 
 }  // namespace
@@ -242,10 +222,14 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
     }
     out << '\t' << (rb.empty() ? "-" : rb) << '\n';
   }
+  close_checked(out, path);
 }
 
 std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const std::string& out_path,
                                 const std::unordered_set<std::string>& keep) {
+  if (same_file(in_path, out_path)) {
+    throw std::runtime_error("--write-kept " + out_path + " is the input isoform file; opening it for writing would erase it");
+  }
   std::ifstream in(in_path);
   if (!in) throw std::runtime_error("cannot open " + in_path);
   std::ofstream out(out_path);
@@ -274,6 +258,7 @@ std::size_t write_kept_isoforms(const std::string& in_path, bool is_bed, const s
     out << line << '\n';
     written.insert(id);
   }
+  close_checked(out, out_path);
   return written.size();
 }
 

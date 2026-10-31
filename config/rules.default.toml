@@ -13,7 +13,7 @@
 # to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.5"   # bump together with the built-in in rules.hpp
+ruleset_version        = "default-0.0.6"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 
 # --- Axis A: novelty support (engine-read) -----------------------------------

@@ -5,7 +5,7 @@ then let cross-caller agreement decide which novel isoforms to trust** — on ti
 fixtures (no downloads, no real callers, deterministic).
 
 ```bash
-./run.sh            # combine -> adjudicate --caller-support -> (optional) PDF report
+./run.sh            # combine -> adjudicate --caller-support
 ```
 
 ## What it shows
@@ -15,14 +15,14 @@ splice structure, not by name):
 
 | isoform | recovered by | verdict |
 |---------|--------------|---------|
-| `isoA` | flair + isoquant + bambu (**3 callers**) | **MEDIUM_CONF_NOVEL** |
-| `isoB` | flair + isoquant (**2 callers**) | **MEDIUM_CONF_NOVEL** |
-| `isoC` | flair only (**1 caller**) | **AMBIGUOUS** |
+| `isoA` | flair + isoquant + bambu (**3 callers**) | **NOVEL_PROBABLE** |
+| `isoB` | flair + isoquant (**2 callers**) | **NOVEL_PROBABLE** |
+| `isoC` | flair only (**1 caller**) | **UNRESOLVED** |
 
-With no orthogonal short-read evidence, a single-caller novel is held `AMBIGUOUS`, while a
-novel chain recovered by ≥ 2 callers is promoted to `MEDIUM_CONF_NOVEL` (the consensus axis
-never promotes past `MEDIUM` — caller agreement is methodological, not experimental,
-corroboration). `run.sh` diffs its output against [expected/](expected/).
+With no short-read evidence, a single-caller novel is held `UNRESOLVED`, while a novel chain
+recovered by two or more callers is `NOVEL_PROBABLE`. The consensus axis never reaches
+`NOVEL_CONFIRMED`: caller agreement is methodological, not experimental, corroboration.
+`run.sh` diffs its output against [expected/](expected/).
 
 ## The pipeline (same three commands on real data)
 

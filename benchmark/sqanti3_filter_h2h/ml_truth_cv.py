@@ -10,7 +10,7 @@ qualifies.
 Usage: ml_truth_cv.py --work W --gtf CALLER.gtf --cls CALLER_classification.txt --label talon --out DIR
          [--folds 2] [--emit-metrics ../results/caller_filters/metrics.json]
 """
-import argparse, datetime, json, os, random, subprocess, sys
+import argparse, datetime, hashlib, json, os, random, subprocess, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from score_h2h import build_labels, metrics, table  # noqa: E402
@@ -37,15 +37,27 @@ def main():
         d = f"{a.out}/{a.label}/fold{k}"; os.makedirs(d, exist_ok=True)
         open(f"{d}/tp.txt", "w").write("\n".join(tp) + "\n"); open(f"{d}/tn.txt", "w").write("\n".join(tn) + "\n")
         out_cls = f"{d}/ml_ML_classification.txt"
-        if not os.path.exists(out_cls):
+        # A model is reused only for the exact split it was trained on: the split's identity
+        # (inputs, seed, folds, train ids) is written next to it and compared before reuse.
+        split = {"cls": os.path.abspath(a.cls), "gtf": os.path.abspath(a.gtf), "seed": a.seed, "folds": a.folds, "fold": k,
+                 "train_ids": hashlib.sha256("\n".join(train).encode()).hexdigest()}
+        split_path = f"{d}/split.json"
+        cached = os.path.exists(out_cls) and os.path.exists(split_path) and json.load(open(split_path)) == split
+        if not cached:
+            for stale in (out_cls, split_path):
+                if os.path.exists(stale): os.remove(stale)
             subprocess.run(["sqanti3_filter.py", "ml", "--sqanti_class", a.cls, "--TP", f"{d}/tp.txt", "--TN", f"{d}/tn.txt", "-o", "ml", "-d", d, "--skip_report"],
                            check=True, stdout=open(f"{d}/log.txt", "w"), stderr=subprocess.STDOUT)
+            json.dump(split, open(split_path, "w"))
         if "Skipping ML filter" in open(f"{d}/log.txt").read():
             sys.exit(f"{a.label}: sqanti3_filter ml skipped the model (see {d}/log.txt)")
         for r in table(out_cls):
             if r["isoform"] in tset:
                 prob = float(r["POS_MLprob"]) if r["POS_MLprob"] not in ("NA", "") else 0.0
                 pred[r["isoform"]] = (r["filter_result"] == "Isoform", prob)
+    unscored = [t for t in ids if t not in pred]
+    if unscored:
+        sys.exit(f"{a.label}: {len(unscored)} isoform(s) were never scored by their held-out fold (e.g. {unscored[0]})")
     m = metrics(pred, ids, label)
     res = {"TP": m["tp"], "FP": m["fp"], **{k: round(m[k], 3) for k in ("prec", "rec", "spec", "f1", "auprc")},
            "folds": a.folds, "seed": a.seed, "n_scored": len(pred), "n_genuine": sum(label[t] == "genuine_novel" for t in ids)}

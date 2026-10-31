@@ -64,3 +64,5 @@ benchmark/**/data/
 # bulky regenerated intermediates stay ignored via benchmark/results/.gitignore +
 # the *.fa/*.bam/... rules above).
 !benchmark/results/
+!tests/data/tiny/strand.bam
+!tests/data/tiny/strand.bam.bai

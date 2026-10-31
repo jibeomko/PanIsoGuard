@@ -89,9 +89,8 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     // a different one per junction. Intersect the per-junction sets.
     std::vector<bool> hap_common(haplotype != nullptr ? haplotype->n_haplotypes() : 0, true);
     std::vector<bool> hap_at;
-    std::vector<std::string> path_common;
-    bool path_ids_complete = true;  // every graph-supported junction listed its path ids
-    bool first_path = true;
+    std::vector<std::string> path_common;   // paths shared by every supporting junction that listed ids
+    int n_pan_with_paths = 0;
     auto sr_supported = [&](const auto& intron, JunctionRow* jr) {
       const SjRecord* hit = sj->find_exact(chain.chrom, chain.strand, intron);
       const bool ok = hit != nullptr && hit->n_uniq >= cfg.sj_min_uniq_reads &&
@@ -156,16 +155,15 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         if (pan_ok) {
           ++n_pan;
           const auto& ids = prec->haplotype_ids;
-          if (ids.empty()) {
-            path_ids_complete = false;
-          } else if (first_path) {
-            path_common = ids;
-            first_path = false;
-          } else {
-            std::vector<std::string> keep;
-            for (const auto& id : path_common)
-              if (std::find(ids.begin(), ids.end(), id) != ids.end()) keep.push_back(id);
-            path_common.swap(keep);
+          if (!ids.empty()) {
+            if (n_pan_with_paths++ == 0) {
+              path_common = ids;
+            } else {
+              std::vector<std::string> keep;
+              for (const auto& id : path_common)
+                if (std::find(ids.begin(), ids.end(), id) != ids.end()) keep.push_back(id);
+              path_common.swap(keep);
+            }
           }
         }
       }
@@ -173,7 +171,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       if (bam != nullptr) {
         auto cit = bam_cache.find(key);
         if (cit == bam_cache.end()) {
-          cit = bam_cache.emplace(key, bam->features_at_junction(chain.chrom, intron, bp)).first;
+          cit = bam_cache.emplace(key, bam->features_at_junction(chain.chrom, intron, chain.strand, bp)).first;
         }
         const JunctionBamFeatures& f = cit->second;
         if (jr != nullptr) { jr->bam_evaluable = f.evaluated; jr->bam = f; }
@@ -216,9 +214,10 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.variant_circular = ev.variant_evaluable && haplotype_circular;
     ev.pangenome_evaluable = (pangenome != nullptr) && any_pan_eval;
     ev.n_novel_jx_pangenome = n_pan;
-    // Path identity is optional in the junction file; when every supporting row carries
-    // it, the rescue also needs one path shared by all novel junctions.
-    ev.pangenome_path_evaluable = n_pan > 0 && path_ids_complete;
+    // Path identity is optional in the junction file. The rows that carry it must admit one
+    // path shared by all of them; a row without ids cannot confirm a path, but it cannot hide
+    // a contradiction between the rows that have them either.
+    ev.pangenome_path_evaluable = n_pan_with_paths > 0;
     ev.pangenome_path_consistent = ev.pangenome_path_evaluable && !path_common.empty();
     ev.pangenome_rescue = (n_novel > 0 && n_pan == n_novel &&
                            (!ev.pangenome_path_evaluable || ev.pangenome_path_consistent));

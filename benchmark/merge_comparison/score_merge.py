@@ -84,6 +84,7 @@ class Scorer:
         truth chain across redundant groups -> recall stays <= 1 and matchers are comparable.
         Returns key_info {key: (max_nc, novel, genuine)} and the genuine_key -> max_nc map."""
         key_info = {}
+        member_nc = {}   # genuine chain_key -> max n_callers of ANY group that contains it
         for callers, constituents in groups:
             rep = rep_key(constituents)
             if rep is None:
@@ -93,7 +94,16 @@ class Scorer:
                 key_info[rep] = (nc, rep not in self.ref, rep in self.truth_genuine)
             else:
                 key_info[rep] = (max(key_info[rep][0], nc),) + key_info[rep][1:]
-        gkey_nc = {k: v[0] for k, v in key_info.items() if v[2]}
+            for c in constituents:
+                if c is None:
+                    continue
+                k = chain_key(*c)
+                if k in self.truth_genuine:
+                    member_nc[k] = max(member_nc.get(k, 0), nc)
+        # The representative decides the PR curve. The agreement split must see a genuine chain
+        # that a fuzzy matcher merged into a multi-caller group whose representative is a
+        # different chain, so it is keyed by membership.
+        gkey_nc = member_nc
         return key_info, gkey_nc
 
     def pr_curve(self, key_info):
