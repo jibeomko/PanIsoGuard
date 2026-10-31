@@ -59,8 +59,8 @@ Found by a code audit on 2026-10-31; each has a regression test.
   treated complex alleles as deletions and unphased calls as phased; the GM12878 protocol
   read file names the upstream protocol does not write; the release workflow computed a
   checksum even when every download attempt had failed. Second pass: the merge-comparison
-  agreement split, recounted by membership on the original inputs, is 4 of 730 genuine
-  isoforms for TAMA and 1 for wobble ≥ 5 bp, not 0 as the envelope, the README and the
+  agreement split, recounted by membership on the original inputs, is 4 of 769 genuine
+  chains for TAMA and 1 for wobble ≥ 5 bp, not 0 as the envelope, the README and the
   scorer's own note said (the precision-recall curves are unchanged); the cohort aggregator
   now counts rescued rows only when rescued, takes the expected rows from the truth, and
   reports `firewall_held_all` only when no row is missing; the cross-validation cache key

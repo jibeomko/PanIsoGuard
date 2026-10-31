@@ -7,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <climits>
+#include <cstdlib>
 #include <sys/stat.h>
 
 namespace panisoguard {
@@ -68,18 +70,31 @@ inline bool same_file(const std::string& a, const std::string& b) {
   return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
 }
 
+// The path a file will have once written: its directory resolved through symlinks (when it
+// exists) plus the file name. Lets two paths be compared before either file exists.
+inline std::string resolved_path(const std::string& p) {
+  const std::size_t slash = p.rfind('/');
+  const std::string dir = slash == std::string::npos ? "." : slash == 0 ? "/" : p.substr(0, slash);
+  const std::string name = slash == std::string::npos ? p : p.substr(slash + 1);
+  char buf[PATH_MAX];
+  const char* real = realpath(dir.c_str(), buf);
+  return (real != nullptr ? std::string(real) : dir) + "/" + name;
+}
+
 // Refuse an output path that names an input file, or another output: writing it would erase
-// the input behind a successful exit. A path that does not exist yet cannot collide, and a
-// symlink or hard link to an input is the input.
+// the input, or an earlier output, behind a successful exit. Existing files are compared by
+// inode (a symlink or hard link to an input is the input); files not written yet by their
+// resolved path.
 inline void refuse_overwriting_inputs(const std::vector<std::string>& outputs, const std::vector<std::string>& inputs) {
+  auto clash = [](const std::string& a, const std::string& b) { return same_file(a, b) || resolved_path(a) == resolved_path(b); };
   for (std::size_t i = 0; i < outputs.size(); ++i) {
     if (outputs[i].empty()) continue;
     for (const auto& in : inputs) {
-      if (!in.empty() && same_file(outputs[i], in))
+      if (!in.empty() && clash(outputs[i], in))
         throw std::runtime_error("output " + outputs[i] + " is the input file " + in + "; choose another path");
     }
     for (std::size_t j = i + 1; j < outputs.size(); ++j) {
-      if (!outputs[j].empty() && same_file(outputs[i], outputs[j]))
+      if (!outputs[j].empty() && clash(outputs[i], outputs[j]))
         throw std::runtime_error("outputs " + outputs[i] + " and " + outputs[j] + " are the same file");
     }
   }

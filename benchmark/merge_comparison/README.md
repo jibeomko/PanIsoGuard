@@ -56,10 +56,11 @@ is a different, false chain still counts as merged).
 | TAMA (10 bp) | **4** | 78 |
 | wobble 2 / 5 / 10 / 20 bp | 0 / **1** / **1** / **1** | 2 / 46 / 62 / 80 |
 
-Of 730 genuine novel isoforms, 4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
+Of the 769 genuine novel chains in the truth (760 of them reported by at least one caller),
+4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
 boundary under a fuzzy matcher; the rest of the upgrades move within the multi-caller pile
 (for example 3 → 4 callers). So exact matching costs the consensus gate at most 4 genuine
-isoforms in 730 on this set, and the ≥ k precision (Result 2) is the same under every
+chains in 769 on this set, and the ≥ k precision (Result 2) is the same under every
 matcher. (TAMA's more aggressive merge collapses the call set to 974 novel chains and trades
 some recall at ≥ 3, 0.831 vs 0.910 — a different operating point, not a more accurate one.)
 
@@ -74,7 +75,7 @@ n_callers distributions did not change.
 - Multi-caller consensus is established practice (LRGASP; *Nat Commun* 2024), not a
   PanIsoGuard invention. `combine` groups isoforms the way gffcompare -i does and feeds the
   result to the adjudicator as one evidence axis; the ≥ k precision is the same under a fuzzy
-  matcher, and exact matching moves at most 4 of 730 genuine isoforms across the
+  matcher, and exact matching moves at most 4 of 769 genuine chains across the
   single/multi-caller boundary on this set.
 - What PanIsoGuard adds is the reference-bias rescue with its circularity firewall and the
   single verdict with its reasons. See

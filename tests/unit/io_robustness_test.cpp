@@ -121,7 +121,14 @@ TEST_CASE("an output that is an input file, through a symlink too, is refused be
   CHECK(throws_containing([&] { refuse_overwriting_inputs({link}, {in}); }, {"is the input file"}));
   CHECK(throws_containing([&] { refuse_overwriting_inputs({in}, {"", in}); }, {"is the input file"}));
   CHECK(throws_containing([&] { refuse_overwriting_inputs({in, link}, {}); }, {"are the same file"}));
-  CHECK_NOTHROW(refuse_overwriting_inputs({other, ""}, {in}));   // an output that does not exist yet cannot collide
+  CHECK_NOTHROW(refuse_overwriting_inputs({other, ""}, {in}));   // a different, not yet existing output is fine
+  // two outputs that do not exist yet but will be the same file (--out-prefix r --write-kept r.adjudicated.tsv)
+  const std::string fresh = scratch("not_yet_written.tsv");
+  std::remove(fresh.c_str());
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({fresh, fresh}, {}); }, {"are the same file"}));
+  const std::size_t cut = fresh.rfind('/');
+  const std::string spelled_differently = fresh.substr(0, cut) + "/./" + fresh.substr(cut + 1);
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({fresh, spelled_differently}, {}); }, {"are the same file"}));
   std::remove(link.c_str());
   std::remove(in.c_str());
 }
