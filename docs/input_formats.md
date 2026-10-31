@@ -37,15 +37,21 @@ evaluable and novel isoforms fall to `UNRESOLVED`.
 9-column STAR `SJ.out.tab` / merged `combined_SJ.tab`: `chrom, intron_start,
 intron_end, strand{0,1,2}, motif{0..6}, annotated, n_uniq, n_multi, max_overhang`.
 A novel junction is corroborated if it matches (chrom, strand, coords) exactly with
-`n_uniq ≥ sj_min_uniq_reads` and (by default) a canonical motif.
+`n_uniq ≥ sj_min_uniq_reads` and (by default) a canonical motif. A file with no junctions
+at all leaves the short-read axis not evaluable (with a warning) rather than marking every
+novel junction unsupported.
 
 ## BAM/CRAM (`--bam`, optional)
 
 A coordinate-sorted, **indexed** (`.bai`/`.csi`) genome alignment of the long reads
 (splice-aware: `N` CIGAR ops at introns). CRAM additionally needs `--reference`.
 Read-level features are computed only over reads whose `N` op exactly matches a
-novel junction. Note: a per-sample BAM gives sample-specific coverage; for a merged
-isoform set, use a merged BAM for full coverage.
+novel junction. A read whose aligner recorded the transcript strand (`XS:A` from STAR or
+HISAT2, `ts:A` from minimap2, which is relative to the read and flipped for reverse
+alignments) counts only for junctions and chains on that strand; a read without the tag
+counts for either. A read error in the file (for example a truncated BAM) stops the run
+instead of counting as a junction with no reads. Note: a per-sample BAM gives
+sample-specific coverage; for a merged isoform set, use a merged BAM for full coverage.
 
 ## Personalized haplotype FASTA (`--reference-haplotype`, optional; repeatable)
 
@@ -53,7 +59,10 @@ A `faidx`-indexed personalized genome FASTA (e.g. from `bcftools consensus` on a
 sample VCF) plus `--reference` (the unmodified genome). The variant axis compares
 the splice motif at each novel junction between the reference and the haplotype(s).
 **Caveat:** coordinates must align between reference and haplotype — fine for SNVs;
-indels shift downstream coordinates (a documented limitation). Set
+indels shift downstream coordinates (a documented limitation). A splice dinucleotide that
+contains an N, a junction of unknown strand, or a haplotype whose contig is missing from
+the FASTA is not evaluable at that junction: `created` needs one readable canonical
+haplotype, `disrupted` needs every haplotype readable. Set
 `--haplotype-provenance {wgs|external}` for independent genomic data (promotes the
 rescue) vs `{rna_derived|unknown}` (held under the circularity firewall).
 
@@ -85,5 +94,17 @@ is independent evidence only if the file was extracted from population assemblie
 PanIsoGuard cannot verify that, so the rescue is gated by
 `--pangenome-provenance {population|external|sample_derived|unknown}` — `population`/
 `external` promote, while the default `unknown` (and `sample_derived`) are held
-`UNRESOLVED` under the same circularity firewall as the variant axis. **Experimental:**
-not yet validated on real graph data (GATE-1).
+`UNRESOLVED` under the same circularity firewall as the variant axis. When path ids are
+given on some rows only, the rows that have them must share a path; a row without ids
+cannot hide a contradiction between the others. Checked on real HPRC v1.1 chr22 graph
+junctions ([benchmark/pangenome](../benchmark/pangenome), CTest `integration_pangenome_gate1`).
+
+## Rules TOML (`--config`, optional)
+
+[`config/rules.default.toml`](../config/rules.default.toml) lists every key with its default;
+a missing key keeps the default. A key that is present must have the right type and a value
+in its range, or the run stops with the key name and the range: integer counts (`sj_min_uniq_reads`,
+`consensus_min_callers`, `min_spanning`, `min_full_reads`, `min_haplotypes`) are 1 or more;
+`min_mapq` is 0–255; `junction_window_bp` is 0–10000; `max_perc_A_downstream_TTS` is 0–100;
+the three mapping fraction gates are 0–2, where a value above 1 can never fire and so
+switches that gate off.

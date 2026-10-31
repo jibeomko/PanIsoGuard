@@ -28,7 +28,10 @@ on two axes; the binned pair is projected to one confidence class.
   when the axis is not evaluable. `UNSUPPORTED` (0 of N novel junctions corroborated)
   counts as evidence *against* only when the locus is covered: if none of the isoform's
   **known** junctions has short-read support either, the sample is too shallow there and
-  the support stays `UNKNOWN` (reason `no_coverage`; since 0.0.6). When short-read
+  the support stays `UNKNOWN` (reason `no_coverage`; since 0.0.6). An isoform whose
+  junctions are all novel has no known junction to gauge coverage with, so its 0 of N is
+  `UNSUPPORTED`; an `SJ.tab` with no junctions at all leaves the axis not evaluable rather
+  than marking every junction unsupported. When short-read
   corroboration is `UNKNOWN`, **multi-caller consensus** (`--caller-support`, from a
   `panisoguard combine` matrix) can stand in as a *weaker, methodological* form of
   support: a novel chain independently recovered by ≥ `consensus_min_callers` callers
@@ -43,7 +46,7 @@ on two axes; the binned pair is projected to one confidence class.
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions). | `--bam` |
+| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. `--platform ont` turns the indel-near gate off (it is HiFi-calibrated and fires on ~90 % of ONT junctions). A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
 | noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on **every** haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
 | degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` **and** no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
@@ -71,16 +74,22 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
      used. Independent only if the junction set is from population assemblies, which
      PanIsoGuard cannot verify, so it is gated by the **same circularity firewall**
      as the variant axis: `--pangenome-provenance population`/`external` promote,
-     while `sample_derived`/`unknown` (the default) are held `UNRESOLVED`. It is
-     evaluated first, so an *independent* graph rescues even when the sample's own
-     haplotype provenance is circular-risk. **Validated** on the real HPRC v1.1 chr22
-     graph (GATE-1; see [benchmark/pangenome](../benchmark/pangenome)).
+     while `sample_derived`/`unknown` (the default) are held `UNRESOLVED`. Checked on
+     real HPRC v1.1 chr22 graph junctions (GATE-1; see
+     [benchmark/pangenome](../benchmark/pangenome)).
    - *Variant axis* (`--reference-haplotype`): the junction is non-canonical on the
      reference but canonical on a personalized haplotype (mechanism
      `variant_created`). **Circularity firewall:** if the haplotype provenance is
      RNA-derived/unknown this is *not* independent evidence, so it is held
      `UNRESOLVED` with `circularity_flag=true` and never promoted; only
-     `wgs`/`external` provenance promotes.
+     `wgs`/`external` provenance promotes. A splice dinucleotide that contains an N, a
+     junction of unknown strand, or a haplotype whose contig cannot be read is *not
+     evaluable*: `created` needs one readable canonical haplotype, while `disrupted`
+     and `none` are statements about every haplotype and need every haplotype readable.
+
+   Independent evidence on either axis promotes. A circular-risk rescue holds the call only
+   when neither axis offers an independent one (so an unknown-provenance pangenome file
+   does not block a rescue by the sample's WGS haplotypes, and the other way round).
 
    Both rescues need **all** of the isoform's novel junctions explained, **by one
    haplotype or one graph path**: a transcript is one molecule from one allele, so
@@ -89,9 +98,11 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    (`evidence.haplotype_consistent`); when every junction is created but the
    intersection is empty the call is held `UNRESOLVED` with reason
    `haplotype_inconsistent`. The pangenome file may list the path ids per junction
-   (optional 6th column); when it does, the same intersection applies
-   (`evidence.pangenome_path_consistent`, reason `path_inconsistent`), and when it does
-   not the rescue rests on the counts alone (`pangenome_path_consistent = null`). The
+   (optional 6th column); the rows that list them must share one path
+   (`evidence.pangenome_path_consistent`, reason `path_inconsistent`). A row without ids
+   cannot confirm a path, but it cannot hide a contradiction between rows that have them;
+   only when no row lists ids does the rescue rest on the counts alone
+   (`pangenome_path_consistent = null`). The
    per-junction count is in `evidence.n_novel_jx_variant_created` /
    `n_novel_jx_pangenome`. A rescue is not blocked by a BAM mapping sign (that blocked
    a correct rescue in [benchmark/refbias_phasing](../benchmark/refbias_phasing)), but

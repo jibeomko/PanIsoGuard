@@ -6,24 +6,26 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PIG="${PIG:-$HERE/../../build/panisoguard}"
-WORK="${WORK:-/path/to/gm12878_mc}"        # wholegenome_multicaller dir: matrix3.tsv + caller GTFs + ONT BAM
+WORK="${WORK:-/path/to/gm12878_mc}"        # the wholegenome_multicaller data dir: matrix.tsv + caller GTFs + ONT BAM
+BAM="${BAM:-$WORK/gm.main.bam}"             # as wholegenome_multicaller/run.sh writes it
+MATRIX="${MATRIX:-$WORK/matrix.tsv}"
 HAP="${HAP:-/path/to/HG001/work}"          # per-chrom ref.fa/hap.fa (see benchmark/giab_cohort_rescue)
 REFGTF="${REFGTF:-/path/to/gencode.v49.annotation.gtf}"
 OUT="${OUT:-/tmp/gm12878_realdata}"; mkdir -p "$OUT/scan"
 SCAN="$HERE/../hg002/scan_variant_axis.py"
 
 # 1. build a GTF of the novel chains + a minimal SQANTI classification (keyed by PIG id)
-python3 "$HERE/build_inputs.py" "$WORK" "$OUT"
+python3 "$HERE/build_inputs.py" "$WORK" "$OUT" "$MATRIX"
 
 # 2. adjudicate the novel chains WITH the real ONT BAM (mapping axis on real reads): the HiFi
 #    defaults (rb) and the ONT preset (rb_ont; indel-near gate off), both with the 0.0.7
 #    whole-chain read support
 "$PIG" adjudicate --classification "$OUT/novel.cls" --isoforms-gtf "$OUT/novel_chains.gtf" \
-    --ref-gtf "$REFGTF" --bam "$WORK/gm12878.main.bam" --out-prefix "$OUT/rb"
+    --ref-gtf "$REFGTF" --bam "$BAM" --out-prefix "$OUT/rb"
 "$PIG" adjudicate --classification "$OUT/novel.cls" --isoforms-gtf "$OUT/novel_chains.gtf" \
-    --ref-gtf "$REFGTF" --bam "$WORK/gm12878.main.bam" --platform ont --out-prefix "$OUT/rb_ont"
+    --ref-gtf "$REFGTF" --bam "$BAM" --platform ont --out-prefix "$OUT/rb_ont"
 # 2b. how exact are ONT splice sites? chain reads at 0..10 bp tolerance (needs pysam)
-"${PY:-python3}" "$HERE/chain_wobble.py" "$OUT/novel_chains.gtf" "$WORK/gm12878.main.bam" "$OUT/pig_ncallers.json" \
+"${PY:-python3}" "$HERE/chain_wobble.py" "$OUT/novel_chains.gtf" "$BAM" "$OUT/pig_ncallers.json" \
     --out "$OUT/chain_wobble.json"
 
 # 3. reference-bias scan of every novel junction vs NA12878's own haplotype (chr1-22)

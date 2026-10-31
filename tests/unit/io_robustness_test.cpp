@@ -103,3 +103,30 @@ TEST_CASE("SJ.tab / pangenome: inverted intron (start > end) is rejected", "[io]
   CHECK(throws_containing([&] { read_pangenome_junctions(pg.path); },
                           {"pangenome", "intron_start", "intron_end"}));
 }
+
+TEST_CASE("--write-kept refuses to overwrite its own input", "[io][result_writer]") {
+  const std::string gtf = tiny("mini.gtf");
+  CHECK(throws_containing([&] { write_kept_isoforms(gtf, false, gtf, {"T1"}); }, {"input isoform file"}));
+}
+
+#ifdef __linux__
+TEST_CASE("a write that does not reach the disk is an error", "[io][result_writer]") {
+  CHECK(throws_containing([&] { write_junctions_tsv("/dev/full", {}); }, {"write failed"}));
+  CHECK(throws_containing([&] { write_kept_isoforms(tiny("mini.gtf"), false, "/dev/full", {"T1"}); }, {"write failed"}));
+}
+#endif
+
+TEST_CASE("GTF: one transcript_id on two chromosomes or strands is rejected", "[io][robustness]") {
+  TempFile f("chr1\tx\texon\t100\t200\t.\t+\t.\ttranscript_id \"T\";\n"
+             "chr2\tx\texon\t300\t400\t.\t-\t.\ttranscript_id \"T\";\n");
+  CHECK(throws_containing([&] { read_gtf_transcripts(f.path); }, {"GTF line 2", "more than one chromosome or strand"}));
+}
+
+TEST_CASE("BED12: a block outside chromStart..chromEnd or out of order is rejected", "[io][robustness]") {
+  TempFile outside("chr1\t100\t300\tiso\t0\t+\t100\t300\t0\t2\t50,50,\t0,400,\n");   // second block ends at 550 > 300
+  CHECK(throws_containing([&] { read_bed12(outside.path); }, {"BED12 line 1", "block 2"}));
+  TempFile overlap("chr1\t100\t300\tiso\t0\t+\t100\t300\t0\t2\t50,50,\t0,20,\n");    // blocks overlap
+  CHECK(throws_containing([&] { read_bed12(overlap.path); }, {"BED12 line 1", "block 2"}));
+  TempFile ok("chr1\t100\t300\tiso\t0\t+\t100\t300\t0\t2\t50,50,\t0,150,\n");
+  CHECK(read_bed12(ok.path).size() == 1);
+}

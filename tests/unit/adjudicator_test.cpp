@@ -418,3 +418,38 @@ TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and mark
   CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
   CHECK(out[0].verdict.verdict_reason == "chain_support;independent_library");
 }
+
+TEST_CASE("adjudicator: disjoint pangenome paths are a contradiction even when another junction has no path ids", "[adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoMix", "novel_not_in_catalog", "canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoMix"] = chain({{200, 350}, {400, 450}, {600, 700}});  // three novel junctions
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+  in.pangenome_circular = false;
+
+  SECTION("{A}, {B}, {} -> no common path -> held") {
+    PangenomeJunctions pan;
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 1, {"A"}});
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{400, 450}, Strand::kPlus, 1, {"B"}});
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{600, 700}, Strand::kPlus, 1, {}});
+    in.pangenome = &pan;
+    const auto out = adjudicate(in, RuleEngine());
+    CHECK_FALSE(out[0].evidence.pangenome_rescue);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kUnresolved);
+    CHECK(out[0].verdict.verdict_reason == "path_inconsistent");
+  }
+  SECTION("{A}, {A,B}, {} -> path A is shared by the rows that list ids -> rescued") {
+    PangenomeJunctions pan;
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{200, 350}, Strand::kPlus, 1, {"A"}});
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{400, 450}, Strand::kPlus, 2, {"A", "B"}});
+    pan.add(PangenomeJunctionRecord{"chr1", Junction{600, 700}, Strand::kPlus, 1, {}});
+    in.pangenome = &pan;
+    const auto out = adjudicate(in, RuleEngine());
+    CHECK(out[0].evidence.pangenome_rescue);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kReferenceBias);
+  }
+}

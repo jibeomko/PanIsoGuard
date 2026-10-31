@@ -138,7 +138,7 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
 - **Deterministic + auditable** — every verdict carries a `rule_trace` listing the
   rules that fired; no randomness in the decision path.
 - **Orthogonal axes** — each evidence axis is optional, so a run with only SQANTI priors
-  still produces honest verdicts.
+  still produces verdicts that say which axes were checked.
 - **Circularity firewall** — a rescue that would rest on the sample's own RNA-derived
   data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
 - **htslib-only** — the sole non-vendored dependency; toml++ and Catch2 are vendored

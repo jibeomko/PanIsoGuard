@@ -1,10 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdio>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <sys/stat.h>
 
 namespace panisoguard {
 
@@ -47,6 +50,46 @@ inline std::vector<std::string> split_tsv(const std::string& line) { return spli
 // Strip a trailing CR and/or LF (CRLF-safe line handling).
 inline void chomp(std::string& s) {
   while (!s.empty() && (s.back() == '\n' || s.back() == '\r')) s.pop_back();
+}
+
+// Finish writing a file and fail if any write did not reach it: a full disk or a closed
+// pipe otherwise leaves a truncated file behind a successful exit code.
+inline void close_checked(std::ofstream& out, const std::string& path) {
+  out.flush();
+  if (!out) throw std::runtime_error("write failed: " + path);
+  out.close();
+  if (out.fail()) throw std::runtime_error("write failed: " + path);
+}
+
+// True when the two paths name the same file (through symlinks and hard links).
+inline bool same_file(const std::string& a, const std::string& b) {
+  struct stat sa, sb;
+  if (stat(a.c_str(), &sa) != 0 || stat(b.c_str(), &sb) != 0) return false;
+  return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
+}
+
+// JSON string escaping: quotes, backslashes and control characters.
+inline std::string json_escape(const std::string& s) {
+  std::string o;
+  o.reserve(s.size() + 8);
+  for (char c : s) {
+    switch (c) {
+      case '"':  o += "\\\""; break;
+      case '\\': o += "\\\\"; break;
+      case '\n': o += "\\n";  break;
+      case '\r': o += "\\r";  break;
+      case '\t': o += "\\t";  break;
+      default:
+        if (static_cast<unsigned char>(c) < 0x20) {
+          char buf[8];
+          std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+          o += buf;
+        } else {
+          o += c;
+        }
+    }
+  }
+  return o;
 }
 
 // Name-indexed header: tolerant column lookup that survives column reordering

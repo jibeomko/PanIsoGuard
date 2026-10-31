@@ -119,8 +119,14 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   const SjTable* sj_ptr = nullptr;
   if (!c.sj_tab.empty()) {
     sj = read_sj_tab(c.sj_tab);
-    sj_ptr = &sj;
     std::fprintf(stderr, "read %zu short-read junctions\n", sj.size());
+    if (sj.size() == 0) {
+      // With no junctions at all, "no read at this junction" says nothing: the axis stays off
+      // rather than marking every novel junction unsupported.
+      std::fprintf(stderr, "WARNING: %s holds no junctions; the short-read axis is not evaluable in this run\n", c.sj_tab.c_str());
+    } else {
+      sj_ptr = &sj;
+    }
   }
 
   std::unique_ptr<BamReader> bam;

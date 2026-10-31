@@ -82,14 +82,18 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
     if (f[2] != "exon") continue;
     const std::string tid = extract_gtf_attr(f[8], "transcript_id");
     if (tid.empty()) continue;
+    const Strand strand = parse_strand(f[6].empty() ? '.' : f[6][0]);
     auto it = acc.find(tid);
     if (it == acc.end()) {
       ExonAcc a;
       a.chrom = f[0];
       a.gene_id = extract_gtf_attr(f[8], "gene_id");
-      a.strand = parse_strand(f[6].empty() ? '.' : f[6][0]);
+      a.strand = strand;
       it = acc.emplace(tid, std::move(a)).first;
       order.push_back(tid);
+    } else if (it->second.chrom != f[0] || it->second.strand != strand) {
+      throw std::runtime_error("GTF line " + std::to_string(lineno) + ": transcript_id \"" + tid +
+                               "\" has exons on more than one chromosome or strand");
     }
     // Context-rich error on a malformed exon coordinate instead of a bare stoll terminate.
     const int64_t es = parse_int_field(f[3], "exon start", "GTF", lineno);

@@ -153,6 +153,7 @@ void write_caller_support_matrix(const std::string& path,
         << (iso.monoexonic ? std::string("NA") : std::to_string(fingerprint_intron_chain(iso.chain)))
         << '\n';
   }
+  close_checked(out, path);
 }
 
 CallerSupport read_caller_support(const std::string& path) {

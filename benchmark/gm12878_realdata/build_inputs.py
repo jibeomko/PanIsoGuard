@@ -6,12 +6,13 @@ From the wholegenome_multicaller combine matrix + the three caller GTFs, emit:
   - novel.cls        : a minimal SQANTI-style classification (all novel_not_in_catalog)
   - pig_ncallers.json: PIG id -> n_callers (for the consensus stratification)
 
-Usage: build_inputs.py <WORK: gm12878_mc dir> <OUT dir>
+Usage: build_inputs.py <WORK: wholegenome_multicaller data dir> <OUT dir> [matrix.tsv (default WORK/matrix.tsv)]
 """
 import json, sys
 from collections import defaultdict
 
 WORK, OUT = sys.argv[1], sys.argv[2]
+MATRIX = sys.argv[3] if len(sys.argv) > 3 else f"{WORK}/matrix.tsv"
 GTFS = {"bambu": f"{WORK}/bambu.novel.gtf",
         "isoquant": f"{WORK}/isoquant_out/gm/gm.transcript_models.gtf",
         "espresso": f"{WORK}/espresso_out/samples_N2_R0_updated.gtf"}
@@ -37,7 +38,7 @@ HDR = ("isoform\tchrom\tstrand\tstructural_category\tassociated_gene\tassociated
        "dist_to_CAGE_peak\tdist_to_polyA_site\tfilter_result\n")
 g = open(f"{OUT}/novel_chains.gtf", "w"); c = open(f"{OUT}/novel.cls", "w"); c.write(HDR)
 ncallers = {}; n = 0
-for ln in open(f"{WORK}/matrix3.tsv"):
+for ln in open(MATRIX):
     f = ln.rstrip("\n").split("\t")
     if f[0] == "pig_id" or len(f) < 9 or f[7] != "novel":
         continue

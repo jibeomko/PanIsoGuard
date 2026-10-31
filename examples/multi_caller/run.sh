@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Self-contained multi-caller quickstart: combine 3 callers -> adjudicate with the
-# consensus axis -> (optional) PDF report. Tiny committed fixtures, runs in <1s offline.
-# Shows the headline: a novel chain recovered by >= 2 callers is promoted to
-# MEDIUM_CONF_NOVEL, a single-caller novel is held AMBIGUOUS.
+# Multi-caller quickstart: combine three callers, then adjudicate with the consensus axis.
+# Tiny committed fixtures, runs in under a second offline. A novel chain recovered by two or
+# more callers is NOVEL_PROBABLE; a single-caller novel is held UNRESOLVED.
 set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd); cd "$SCRIPT_DIR"
 
@@ -22,7 +21,7 @@ OUT=${1:-output}; mkdir -p "$OUT"
   --out "$OUT/caller_support.tsv"
 
 # 2) adjudicate FLAIR's isoforms, feeding cross-caller agreement (no short-read here,
-#    so the consensus axis decides). >=2 callers -> MEDIUM_CONF_NOVEL; 1 caller -> AMBIGUOUS.
+#    so the consensus axis decides). >=2 callers -> NOVEL_PROBABLE; 1 caller -> UNRESOLVED.
 "$PIG" adjudicate \
   --classification data/flair.classification.tsv \
   --isoforms-gtf data/flair.gtf \

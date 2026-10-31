@@ -56,7 +56,7 @@ haplotype (HG001 GIAB v4.2.1) finds **0** reference-bias (`CREATED`) junctions. 
 **expected, honest** result: GM12878 = NA12878 is the GIAB **reference-grade** sample (about
 as concordant with GRCh38 as a human genome gets), so the rescue's base rate is ~0 — matching
 the `pangenome_public` null. The rescue's value **rises with divergence** from the reference;
-on personalized genomes it fires consistently and perfectly specifically (the
+on personalized genomes it fires at a similar rate per genome with no false rescue in those scans (the
 [giab_cohort_rescue](../giab_cohort_rescue): **137 across 4 individuals, 0 false**). A
 divergent / non-reference long-read RNA sample with a matched personal genome is the data
 that would show the rescue firing on real RNA calls; sourcing one is the open data-access item.
@@ -103,6 +103,7 @@ about accuracy.
 
 ```bash
 WORK=/path/to/gm12878_mc ./run.sh   # needs the wholegenome_multicaller combine + the ONT BAM
+# the data dir of wholegenome_multicaller/run.sh: gm.main.bam + matrix.tsv; override with BAM=... MATRIX=... when named otherwise
                                      # + the HG001 SNV-consensus haplotypes (see giab_cohort_rescue)
                                      # PY=<python with pysam> for chain_wobble.py
 ```

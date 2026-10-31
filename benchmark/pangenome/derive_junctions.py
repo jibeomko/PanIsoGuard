@@ -61,7 +61,7 @@ def main() -> int:
 
     seen = {}  # (chrom, start, end) -> [n_haplotypes (max support seen), set(haplotype ids)]
     samples = []
-    n_records = n_del = 0
+    n_records = n_del = n_complex = n_unphased = 0
     for line in open(vcf):
         if line.startswith("#CHROM"):
             samples = line.rstrip("\n").split("\t")[9:]
@@ -84,7 +84,11 @@ def main() -> int:
             del_len = len(ref) - len(alt)
             if del_len < min_del:
                 continue
-            # left-anchored deletion: deleted span is REF beyond the shared ALT prefix
+            # Only a pure deletion, i.e. ALT is a prefix of REF, maps to one intron-like span;
+            # a complex allele (substitution plus deletion) has no single deleted interval.
+            if not ref.startswith(alt):
+                n_complex += 1
+                continue
             start = pos + len(alt)          # 1-based first deleted base
             end = pos + len(ref) - 1        # 1-based last deleted base
             if start > end:
@@ -93,8 +97,11 @@ def main() -> int:
             key = (chrom, start, end)
             ids = set()
             for sample, gt in zip(samples, f[9:]):
-                alleles = gt.split(":")[0].replace("/", "|").split("|")
-                for h, a in enumerate(alleles):
+                call = gt.split(":")[0]
+                if "/" in call:       # unphased: the allele is in the sample but on no known haplotype path
+                    n_unphased += 1
+                    continue
+                for h, a in enumerate(call.split("|")):
                     if a == str(i + 1):
                         ids.add(f"{sample}#{h + 1}")
             rec = seen.setdefault(key, [0, set()])
@@ -110,7 +117,7 @@ def main() -> int:
             o.write(f"{chrom}\t{start}\t{end}\t+\t{nhap}\t{idcol}\n")
             o.write(f"{chrom}\t{start}\t{end}\t-\t{nhap}\t{idcol}\n")
 
-    sys.stderr.write(f"records={n_records}  deletions>= {min_del}bp={n_del}  "
+    sys.stderr.write(f"records={n_records}  deletions>= {min_del}bp={n_del}  complex alleles skipped={n_complex}  unphased calls skipped={n_unphased}  "
                      f"unique junctions={len(seen)} (x2 strands = {2*len(seen)} rows)\n")
     return 0
 

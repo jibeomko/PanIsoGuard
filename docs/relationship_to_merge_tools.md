@@ -1,63 +1,49 @@
-# Relationship to multi-caller merge / consensus tools
+# Relationship to multi-caller merge tools
 
-Multi-caller consensus is **established practice** in long-read transcriptomics (LRGASP;
-Pardo-Palacios *et al.* *Nat Commun* 2024). PanIsoGuard's `combine` is **not a novel
-merge algorithm** — it operationalizes that practice as one evidence axis feeding the
-adjudicator. This page maps the overlap honestly and says where PanIsoGuard is
-genuinely differentiated vs merely duplicative.
+Multi-caller consensus is established practice in long-read transcriptomics (LRGASP;
+Pardo-Palacios *et al.* *Nat Commun* 2024). PanIsoGuard's `combine` is not a new merge
+algorithm: it matches isoforms across callers by exact intron chain and feeds the result to
+the adjudicator as one evidence axis. This page says where it overlaps with existing tools
+and where it differs.
 
-## Overlap map
+## Overlap
 
-| Tool | What it does | Overlap with PanIsoGuard | Honest verdict |
-|------|--------------|--------------------------|----------------|
-| **gffcompare `-i`** (Pertea & Pertea 2020) | N-way comparison of multiple GTFs by intron chain; `.tracking` shows which inputs share each transfrag | **`combine` re-implements this.** Head-to-head, `combine` reproduces gffcompare's grouping **exactly** (same n_callers distribution + PR curve, see [benchmark/merge_comparison](../benchmark/merge_comparison)) | **Duplicative by design** — `combine` is a clean htslib-native re-implementation (no Perl, no GTF round-trip) that feeds the adjudicator directly. Not a new algorithm; we credit gffcompare. |
-| **TAMA merge** (Kuo *et al.* 2020) | Fuzzy merge of transcript models with configurable 5′/junction/3′ wobble | `combine` uses **exact** junction matching, not wobble | **Matcher-robust, not a gap.** On the same data, exact vs TAMA(10 bp) vs a 0–20 bp wobble sweep give the same ≥3 consensus precision (0.975–0.980), and **0** genuine novels cross the single↔multi boundary under any fuzzy matcher. Exact matching does not lose the agreements the consensus gate depends on. |
-| **Bambu NDR** (Chen *et al.* 2023) | A trained per-transcript novel-discovery-rate (probabilistic confidence) | Both assign confidence to novel transcripts | **Orthogonal & single-caller.** NDR scores one caller's models from read evidence; PanIsoGuard's confidence is **cross-caller + cross-axis**. Complementary — Bambu's NDR can be one of the callers PanIsoGuard integrates. |
-| **IsoQuant / FLAIR / ESPRESSO built-in collapse** | Each caller's own transcript construction / quantification | These are the **inputs** PanIsoGuard consumes | **Upstream.** PanIsoGuard is caller-agnostic and sits above them. |
-| **SQANTI3 rescue / filter** | Recovers lost **reference** transcripts; ML/rule QC filter | Name clash on "rescue" (see below); QC overlap covered in [relationship_to_sqanti3.md](relationship_to_sqanti3.md) | **Different direction.** See the disambiguation note. |
-| **IsoformSwitchAnalyzeR** (Vitting-Seerup 2019) | Downstream isoform-switching / functional consequence analysis | none on the calling side | **Downstream consumer**, not a competitor. |
+| Tool | What it does | Relation to PanIsoGuard |
+|------|--------------|-------------------------|
+| **gffcompare `-i`** (Pertea & Pertea 2020) | N-way comparison of GTFs by intron chain; `.tracking` lists which inputs share each transfrag | `combine` does the same grouping. On the same five caller sets it reproduces gffcompare's n_callers distribution and precision-recall curve ([benchmark/merge_comparison](../benchmark/merge_comparison)). The difference is practical: one htslib binary, no GTF round trip, output in the form the adjudicator reads. |
+| **TAMA merge** (Kuo *et al.* 2020) | Fuzzy merge with configurable 5′, junction and 3′ tolerances | `combine` matches junctions exactly. On the chr22 set, exact matching, TAMA at 10 bp, and a 0–20 bp wobble sweep give the same precision at ≥ 3 callers (0.975–0.980), and no genuine novel isoform moves across the single/multi-caller boundary under any tolerance. |
+| **Bambu NDR** (Chen *et al.* 2023) | A trained per-transcript novel-discovery rate | Single-caller confidence from read evidence; PanIsoGuard's class combines callers and evidence axes. Bambu can be one of the callers `combine` integrates. |
+| **IsoQuant, FLAIR, ESPRESSO collapse** | Each caller's own transcript construction | These are the inputs. PanIsoGuard sits above them and does not call isoforms. |
+| **SQANTI3 rescue and filter** | Recovers reference transcripts a caller missed; rule and ML QC filters | The word "rescue" means the opposite thing in the two tools (below); the QC overlap is in [relationship_to_sqanti3.md](relationship_to_sqanti3.md). |
+| **IsoformSwitchAnalyzeR** (Vitting-Seerup 2019) | Downstream isoform-switch analysis | A consumer of filtered annotations, not an alternative. |
 
-## "Rescue" means the opposite thing here vs SQANTI3
+## "Rescue" in SQANTI3 and in PanIsoGuard
 
-A frequent confusion: **SQANTI3 rescue** recovers a **reference** model that a caller
-*failed to report* (it adds a known transcript back). **PanIsoGuard's reference-bias
-rescue** (`REFERENCE_BIAS`) does the opposite — it **exonerates a sample's
-novel call** that looks novel only because of *reference bias* (a haplotype/pangenome
-path makes the apparent novel junction explainable without new splicing), and it is gated
-by a **circularity firewall** so a rescue never rests on the sample's own RNA-derived
-data. (Also noted in [relationship_to_sqanti3.md](relationship_to_sqanti3.md).)
+SQANTI3 rescue adds back a **reference** transcript that a caller failed to report.
+PanIsoGuard's reference-bias rescue (`REFERENCE_BIAS`) keeps a **sample's novel call**
+that looks novel only because the sample's genome differs from the reference: a haplotype
+or a pangenome path makes the junction's splice site canonical. A circularity firewall holds
+the call unless the haplotype or junction set comes from DNA-level data independent of the
+sample's RNA. (Also noted in [relationship_to_sqanti3.md](relationship_to_sqanti3.md).)
 
-## Where PanIsoGuard is actually differentiated
+## What PanIsoGuard adds
 
-The consensus axis is **sound and validated** (above) but is **not** the differentiator —
-it is shared practice done correctly. PanIsoGuard's genuine contributions, which no
-surveyed merge/QC tool provides, are:
+The consensus axis is shared practice. Two things in PanIsoGuard are not in the merge or QC
+tools above:
 
-1. **Reference-bias rescue + circularity firewall** — reclassifying a *sample* novel call
-   as reference bias on **independent** (variant / pangenome) evidence, never on circular
-   RNA-derived data. No surveyed merge/QC tool does this. *Honestly scoped:* it is a
-   **high-specificity, high-sensitivity guardrail with a low base rate**, not a high-yield
-   discovery engine — reference bias at splice junctions is rare but *recurrent per genome*:
-   across a **four-individual GIAB cohort** (HG001/2/3/4) it finds 31–37 genuine cases each
-   (**137 total → 137/137 rescued, 0 false, 137/137 firewall-held**); population-deletion
-   reference bias in typical cell lines is ~0. Its value is *correctness* (it never
-   over-promotes, and catches every genuine case), and it rises for non-reference /
-   personalized-genome samples. **On real long-read RNA from TWO divergent
-   West African individuals (HG03516 ESN + HG02717 GWD, HPRC R2 — same-individual Iso-Seq +
-   HiFi assembly each) the rescue fires on real caller calls and is perfectly specific in
-   both: 40 + 46 = 86 IsoQuant novel junctions are reference bias (77 novel vs GENCODE —
-   discoveries a reference-only pipeline would report), 86/86 rescued with 0 false and the
-   firewall holding all 86; the reference-grade control GM12878 yields 0** (a directional
-   contrast, not a controlled rate — see the protocol's caveats). See
-   [benchmark/refbias_cohort](../benchmark/refbias_cohort) (the positive real-data case,
-   replicated) and [benchmark/hg03516_refbias](../benchmark/hg03516_refbias) (its audited
-   deep-dive), [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue),
-   [benchmark/hg002](../benchmark/hg002), and [benchmark/pangenome](../benchmark/pangenome).
-2. **One unified, auditable verdict** — consensus, short-read, long-read-mapping, variant,
-   and pangenome evidence projected into a single confidence class with a machine-readable
-   `rule_trace`, rather than leaving the user to reconcile a `.tracking` file, an NDR
-   score, and a QC table by hand.
-
-In short: PanIsoGuard's pitch should lead with the **rescue + firewall + unified
-adjudication**, and present multi-caller consensus as a **correctly-operationalized,
-matcher-robust standard input** — not as a novel merge.
+1. **Reference-bias rescue with a circularity firewall.** A novel call is reclassified as
+   reference bias only on independent haplotype or pangenome evidence, never on the
+   sample's own RNA-derived variants. The yield is low and depends on how far the sample
+   is from the reference: across the four GIAB genomes it is 31–37 junctions each (137 in
+   total, all rescued under independent provenance, none rescued under circular-risk
+   provenance, no rescue of a control junction in that scan;
+   [benchmark/giab_cohort_rescue](../benchmark/giab_cohort_rescue)); on real Iso-Seq from
+   two West African individuals (HG03516, HG02717; HPRC Release 2) it is 40 and 46
+   caller-reported junctions, 77 of them novel to GENCODE, with the same outcome
+   ([benchmark/refbias_cohort](../benchmark/refbias_cohort)); on the reference-grade GM12878
+   it is 0 ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata)). These are
+   constructed and observational scans, not controlled rates; see each protocol's caveats.
+2. **One verdict with its reasons.** Consensus, short-read, long-read mapping, haplotype
+   and pangenome evidence go into one confidence class with a `verdict_reason` and a
+   `rule_trace`, instead of a `.tracking` file, an NDR score and a QC table that the user
+   reconciles by hand.

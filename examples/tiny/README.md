@@ -5,8 +5,8 @@ three expected outcomes without requiring aligners, samtools, or large inputs:
 
 | isoform | evidence pattern | expected class |
 |---------|------------------|----------------|
-| `iso_known` | matches the reference transcript | `HIGH_CONF_KNOWN` |
-| `iso_novel_supported` | one novel junction supported by `SJ.tab` | `HIGH_CONF_NOVEL` |
+| `iso_known` | matches the reference transcript | `KNOWN` |
+| `iso_novel_supported` | one novel junction supported by `SJ.tab` | `NOVEL_CONFIRMED` |
 | `iso_novel_artifact` | unsupported novel junction with SQANTI3 non-canonical/RTS/degradation priors | `ARTIFACT` |
 
 ## Run

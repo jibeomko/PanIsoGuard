@@ -5,6 +5,64 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Fixed
+Found by a code audit on 2026-10-31; each has a regression test.
+- `--write-kept` pointed at the input isoform file truncated it and reported success; the
+  path is now refused (same inode).
+- A write that did not reach the disk (full disk, closed pipe) left a truncated output file
+  behind exit code 0; every output file is now flushed and checked, in `adjudicate`,
+  `combine` and `decoys`.
+- A splice dinucleotide containing an N was judged non-canonical, so an N on the reference
+  with a canonical haplotype became `REFERENCE_BIAS`; it is not evaluable now, as is a
+  junction of unknown strand.
+- "Non-canonical on every haplotype" (the `;haplotype_disrupted` sign) was concluded when one
+  haplotype's contig could not be read; it now needs every haplotype readable, and `created`
+  needs one readable canonical haplotype.
+- Reads the aligner placed on the opposite strand (`XS:A`, minimap2 `ts:A`) counted as
+  spanning reads and as whole-chain support for an isoform on the other strand; they are
+  skipped now (untagged reads still count for either strand).
+- An htslib read error in the BAM (for example a truncated file) was returned as an evaluated
+  junction with no reads; it is an error now, and so is an index query that fails.
+- Pangenome path ids: when some junctions listed path ids and another did not, a contradiction
+  between the listed sets ({A} and {B}) was ignored and the isoform rescued; the rows that
+  list ids must now share a path.
+- An independent haplotype rescue was blocked when a circular-risk pangenome file explained
+  the same isoform (the pangenome branch returned first); independent evidence on either
+  axis now promotes, and the firewall holds only when neither axis is independent.
+- A config value of the wrong type was silently replaced by the default and an out-of-range
+  value (negative, or large enough to wrap to 0) was accepted; `--config` now rejects both
+  with the key name and its range.
+- An `SJ.tab` with no junctions marked every novel junction unsupported; the short-read axis
+  is now not evaluable for such a run, with a warning.
+- A transcript whose exons sat on two chromosomes or strands was read as one chain, and a
+  BED12 block outside `chromStart..chromEnd` (or overlapping its neighbour) was accepted;
+  both are errors now.
+- `decoys` wrote file paths into its JSON unescaped.
+- Benchmark tooling: the cohort aggregator (`benchmark/refbias_cohort/analyze.py`) counted
+  candidate junctions as rescued and dropped the negatives at other coordinates from the
+  false-rescue count (recounting the original results gives the same 40 + 46 rescued, 0
+  false); `ml_truth_cv.py` reused a cached model for a different split; the pangenome gate
+  check accepted missing verdict rows; the merge-comparison agreement split missed a genuine
+  chain merged under a different representative; `collect.py` recorded a hard-coded ruleset
+  and validated only the required keys of an envelope (it now checks every key's type and
+  rejects unknown keys, and reads the ruleset from the binary); the population-VCF script
+  treated complex alleles as deletions and unphased calls as phased; the GM12878 protocol
+  read file names the upstream protocol does not write; the release workflow computed a
+  checksum even when every download attempt had failed.
+
+### Changed
+- **Ruleset `builtin-0.0.6`.** The two reference-bias fixes above (independent rescue on
+  either axis first; ambiguous or unreadable splice sites not evaluable) change verdicts only
+  in those cases. On the worked locus and on SQANTI-SIM chr22 with short reads, BAM and
+  reference every class and reason is unchanged; the strand-aware read counting moved the
+  whole-chain count of 5 and the spanning-read count of 4 of 1,579 isoforms without changing
+  a verdict.
+- **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
+  Korean study notes are gone from the repository; what they verified stays: the toy data, the
+  stdlib recomputation of every verdict (`check_worked_locus.py`, CTest `integration_worked_locus`)
+  and, new as a file of its own, the 42-line Python replay of the rulebook (`rules_replay.py`,
+  CTest `integration_rules_replay`). `panisoguard example worked_locus` replaces `notes-data`.
+
 ### Removed
 - **Everything that was not the adjudicator.** The Python PDF report tool (`python/`,
   `panisoguard-report`, `examples/report`), the Snakemake pipeline (`workflow/`), the deprecated
@@ -23,13 +81,6 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   test-only accessors. Code: one `junction_key` and one `split` helper replace four copies
   each; the projection step returns one struct; a malformed `fingerprint` column or decoys
   option fails with a message instead of a bare exception.
-
-### Changed
-- **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
-  Korean study notes are gone from the repository; what they verified stays: the toy data, the
-  stdlib recomputation of every verdict (`check_worked_locus.py`, CTest `integration_worked_locus`)
-  and, new as a file of its own, the 42-line Python replay of the rulebook (`rules_replay.py`,
-  CTest `integration_rules_replay`). `panisoguard example worked_locus` replaces `notes-data`.
 
 ### Benchmarks
 - **New: [benchmark/tusco_negatives](benchmark/tusco_negatives).** The first real-data negatives:
