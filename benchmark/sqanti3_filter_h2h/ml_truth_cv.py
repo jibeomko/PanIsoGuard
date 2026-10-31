@@ -27,12 +27,16 @@ def digest(path):
 
 
 def program_identity(name):
-    """Path, size and mtime of the executable that will train the model (a changed SQANTI3 is a changed model)."""
+    """The filter program that will train the model: its resolved path, the digest of its file and
+    its --version output when it has one (a changed SQANTI3 is a changed model)."""
     p = shutil.which(name)
     if p is None:
         return None
-    st = os.stat(p)
-    return {"path": os.path.realpath(p), "size": st.st_size, "mtime": int(st.st_mtime)}
+    try:
+        version = subprocess.run([p, "--version"], capture_output=True, text=True, timeout=60).stdout.strip()
+    except Exception:
+        version = None
+    return {"path": os.path.realpath(p), "sha256": digest(p), "version": version}
 
 
 def main():
