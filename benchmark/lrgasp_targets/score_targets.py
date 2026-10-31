@@ -52,7 +52,7 @@ def main():
         env = {"protocol": "lrgasp_targets", "scope": "lrgasp_wtc11_validation_targets_as_would_be_isoforms", "status": "tracked",
                "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
-               "data_provenance": "REAL public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP "
+               "data_provenance": "real public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP "
                                   "Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF "
                                   "(benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, "
                                   "with and without the Illumina SJ.tab. No private data.",

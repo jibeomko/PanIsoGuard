@@ -11,7 +11,7 @@ is what makes fingerprint matching and short-read corroboration exact:
 ## SQANTI3 classification (`--classification`, required)
 
 Tab-separated, with a header. The only mandatory column is `isoform`; everything
-else is read by **name** (tolerant of column reordering and appended columns).
+else is read by name (tolerant of column reordering and appended columns).
 Read (as priors, never recomputed): `chrom`, `strand`, `structural_category`, `RTS_stage`,
 `all_canonical`, `perc_A_downstream_TTS` and, when present, `polyA_motif_found`. Every
 other column is ignored. Category strings are the
@@ -43,7 +43,7 @@ novel junction unsupported.
 
 ## BAM/CRAM (`--bam`, optional)
 
-A coordinate-sorted, **indexed** (`.bai`/`.csi`) genome alignment of the long reads
+A coordinate-sorted, indexed (`.bai`/`.csi`) genome alignment of the long reads
 (splice-aware: `N` CIGAR ops at introns). CRAM additionally needs `--reference`.
 Read-level features are computed only over reads whose `N` op exactly matches a
 novel junction. A read whose aligner recorded the transcript strand (`XS:A` from STAR or
@@ -85,8 +85,8 @@ not a population frequency — raise it for stricter support); the optional 6th 
 a comma-separated list of the haplotype/path ids carrying the junction (e.g.
 `HG002#1,HG005#2`; duplicate rows for one junction union their ids;
 `benchmark/pangenome/derive_junctions.py` writes it from the genotype columns of a
-`vg deconstruct` VCF). When **all** of an
-isoform's novel-vs-linear-reference junctions are found here — on **one common path**, if
+`vg deconstruct` VCF). When all of an
+isoform's novel-vs-linear-reference junctions are found here — on one common path, if
 path ids are given — the apparent novelty is consistent
 with reference bias → `REFERENCE_BIAS` (mechanism `population_known`); with path ids and
 no common path the call is held `UNRESOLVED` (`path_inconsistent`). This

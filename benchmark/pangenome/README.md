@@ -1,16 +1,16 @@
 # Pangenome reference-bias rescue — GATE-1 (real HPRC graph)
 
-Validates the **file-based pangenome reference-bias axis** on the real
+Validates the file-based pangenome reference-bias axis on the real
 [HPRC v1.1 Minigraph-Cactus GRCh38 graph](https://github.com/human-pangenomics/hpp_pangenome_resources),
-satisfying **GATE-1** in [../../docs/decision_engine.md](../../docs/decision_engine.md).
+satisfying GATE-1 in [../../docs/decision_engine.md](../../docs/decision_engine.md).
 
 ## Idea
 
-A population **deletion** carried on a pangenome haplotype is the genomic form of a
+A population deletion carried on a pangenome haplotype is the genomic form of a
 reference-bias "novel intron": an RNA read from a haplotype that carries the deletion,
 aligned to the linear reference, spans the deleted span as an apparent novel intron,
 though no new splice site exists. So a novel junction that exactly matches a population
-deletion is reference bias, not new splicing — and only **independent** (non-circular)
+deletion is reference bias, not new splicing — and only independent (non-circular)
 evidence if it comes from haplotypes *other than the sample being adjudicated*.
 
 ## Pipeline
@@ -23,22 +23,22 @@ HPRC v1.1 MC GRCh38 graph (hprc-v1.1-mc-grch38.gbz)
   -> panisoguard adjudicate --pangenome-junctions ... --pangenome-provenance population
 ```
 
-**Non-circular by construction:** the adjudicated sample is **out of the graph** —
-`vg paths --list-samples` on the HPRC graph lists 47 assembly samples and does **not**
+Non-circular by construction: the adjudicated sample is out of the graph —
+`vg paths --list-samples` on the HPRC graph lists 47 assembly samples and does not
 include HG002/NA24385, so any graph support comes from *other* population haplotypes.
 
 ## Validation (GENCODE v49 chr22; HPRC v1.1 chr22 → 1,520 graph junctions)
 
 | Axis | Setup | Result |
 |------|-------|--------|
-| **Specificity** | real FLAIR chr22 isoforms (1,579; 730 genuine-novel) run through the HPRC junctions, provenance `population` | **0 false rescues** — no genuine novel junction coincides with a population deletion (0 rescued overall) |
-| **Sensitivity** | constructed isoforms whose novel intron **is** a real HPRC deletion ([gate1_check.py](gate1_check.py)) | **6/6 rescued** `REFERENCE_BIAS` under `population` provenance |
-| **Circularity firewall** | same isoforms, default `unknown` provenance | **6/6 held `UNRESOLVED`** with `circularity_flag=true` (never promoted) |
-| **Exactness** | near-miss (5 bp off) and off-graph control introns | **0 false rescues** (exact junction match required) |
+| Specificity | Real FLAIR chr22 isoforms (1,579; 730 genuine-novel) run through the HPRC junctions, provenance `population` | 0 false rescues — no genuine novel junction coincides with a population deletion (0 rescued overall) |
+| Sensitivity | constructed isoforms whose novel intron is a real HPRC deletion ([gate1_check.py](gate1_check.py)) | 6/6 rescued `REFERENCE_BIAS` under `population` provenance |
+| Circularity firewall | Same isoforms, default `unknown` provenance | 6/6 held `UNRESOLVED` with `circularity_flag=true` (never promoted) |
+| Exactness | near-miss (5 bp off) and off-graph control introns | 0 false rescues (exact junction match required) |
 
-So the pangenome axis rescues an apparent novel junction **only** when it is a real
-population deletion realizable on the graph, **only** when the provenance is declared
-independent, and **never** spuriously on genuine novel junctions.
+So the pangenome axis rescues an apparent novel junction only when it is a real
+population deletion realizable on the graph, only when the provenance is declared
+independent, and never spuriously on genuine novel junctions.
 
 ## Reproduce
 
@@ -62,10 +62,10 @@ python3 gate1_check.py /path/to/panisoguard testdata/sample_junctions.tsv
 
 ## Whole-genome specificity on real public data (GM12878 + K562)
 
-Extends the GATE-1 specificity from chr22 to **whole-genome** on **two independent,
+Extends the GATE-1 specificity from chr22 to whole-genome on **two independent,
 fully public** samples: GM12878 (NA12878) and K562 ONT direct-RNA from ENCODE
 (ENCSR368UNC, ENCSR917JIA), each classified with SQANTI3 vs GENCODE v49 and adjudicated
-against the **whole-genome** HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
+against the whole-genome HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
 chr1-22/X/Y paths → 71,435 junctions). Both samples are out of the HPRC graph (non-circular).
 
 ```text
@@ -76,21 +76,20 @@ combined                   75,740                  0                          ~c
 GM12878 BAM mapping axis: 390 novel isoforms flagged as mapping artifacts.
 ```
 
-**Honest reading.** Zero false rescues across **75,740 novel isoforms** (two samples)
+Zero false rescues across 75,740 novel isoforms (two samples)
 confirms whole-genome specificity on real data. A proximity scan shows novel junctions
-do **not** coincide with population deletions (the handful within a few bp are at chance
+do not coincide with population deletions (the handful within a few bp are at chance
 level among ~190k introns) — they are real splice sites, not reference bias. So
-**reference-bias-via-population-deletion is genuinely rare in typical samples**, and the
-pangenome axis is best understood as a **high-specificity guardrail** (it will not
-over-promote) rather than a high-yield discovery axis. Recorded in
+reference bias through population deletions is rare in typical samples, and the
+pangenome axis is a check with a low base rate rather than a discovery axis. Recorded in
 [../results/pangenome_public](../results/pangenome_public); fully reproducible from
 public ENCODE/HPRC inputs (no private data).
 
 ## Scope / what remains
 
-Validated for **specificity** at chr22 (constructed sensitivity/firewall) and
-**whole-genome** scale (two real public samples, GM12878 + K562) on real HPRC v1.1. The
+Validated for specificity at chr22 (constructed sensitivity/firewall) and
+whole-genome scale (two real public samples, GM12878 + K562) on real HPRC v1.1. The
 derivation uses graph
-**deletions** (the dominant reference-bias mechanism); insertion/inversion-based
-junctions and an **in-process** graph traversal
+deletions (the dominant reference-bias mechanism); insertion/inversion-based
+junctions and an in-process graph traversal
 remain future work — today the axis consumes the pre-extracted junction file.

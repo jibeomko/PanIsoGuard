@@ -19,8 +19,8 @@ and where it differs.
 
 ## "Rescue" in SQANTI3 and in PanIsoGuard
 
-SQANTI3 rescue adds back a **reference** transcript that a caller failed to report.
-PanIsoGuard's reference-bias rescue (`REFERENCE_BIAS`) keeps a **sample's novel call**
+SQANTI3 rescue adds back a reference transcript that a caller failed to report.
+PanIsoGuard's reference-bias rescue (`REFERENCE_BIAS`) keeps a sample's novel call
 that looks novel only because the sample's genome differs from the reference: a haplotype
 or a pangenome path makes the junction's splice site canonical. A circularity firewall holds
 the call unless the haplotype or junction set comes from DNA-level data independent of the

@@ -139,7 +139,7 @@
       "recall": 0.988296488946684
     }
   },
-  "notes": "Caller-agnostic multi-caller integration over 5 callers. Single-caller novel calls are overwhelmingly artifacts (precision rises monotonically with the number of supporting callers); requiring >= min_callers raises novel-call precision sharply. The pr_curve sweeps the consensus threshold 1..n: the F1-optimal threshold SCALES with the number of callers (more callers -> require more agreement). engine_demo confirms the wired consensus axis reproduces this through `adjudicate --caller-support` on real caller output (long-read only, no short-read SJ): a single caller yields 0 confident novel calls (all UNRESOLVED), while consensus promotes the cross-caller-agreed novels. consensus_min_callers is configurable (TOML); the default is 2.",
+  "notes": "Caller-agnostic multi-caller integration over 5 callers. Single-caller novel calls are overwhelmingly artifacts (precision rises monotonically with the number of supporting callers); requiring >= min_callers raises novel-call precision sharply. The pr_curve sweeps the consensus threshold 1..n: the F1-optimal threshold scales with the number of callers (more callers -> require more agreement). engine_demo confirms the wired consensus axis reproduces this through `adjudicate --caller-support` on real caller output (long-read only, no short-read SJ): a single caller yields 0 confident novel calls (all UNRESOLVED), while consensus promotes the cross-caller-agreed novels. consensus_min_callers is configurable (TOML); the default is 2.",
   "protocol": "multicaller",
   "ruleset_version": "builtin-0.0.3",
   "scope": "gencode_v49_chr22_5caller",

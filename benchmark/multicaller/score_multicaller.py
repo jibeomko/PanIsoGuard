@@ -265,7 +265,7 @@ def main():
                 "Single-caller novel calls are overwhelmingly artifacts (precision "
                 "rises monotonically with the number of supporting callers); requiring "
                 ">= min_callers raises novel-call precision sharply. The pr_curve sweeps "
-                "the consensus threshold 1..n: the F1-optimal threshold SCALES with the "
+                "the consensus threshold 1..n: the F1-optimal threshold scales with the "
                 "number of callers (more callers -> require more agreement). engine_demo "
                 "confirms the wired consensus axis reproduces this through `adjudicate "
                 "--caller-support` on real caller output (long-read only, no short-read "

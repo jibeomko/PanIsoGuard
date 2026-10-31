@@ -168,7 +168,7 @@ def main():
                                                                  if sum(by_support[k]) else None))
                                          for k in sorted(by_support)},
                          pr_curve=pr_curve, min_callers=args.min_callers),
-            notes=("Generalization of the chr22 multicaller result to a SECOND, denser, "
+            notes=("Generalization of the chr22 multicaller result to a second, denser, "
                 "multi-contig reference (SIRV-Set4). Confirms the consensus signal "
                 "(single-caller novels mostly artifacts; >= k-caller agreement raises "
                 "precision) is not specific to one reference/simulator. Strand-agnostic "

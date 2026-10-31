@@ -8,7 +8,7 @@ Four labelled isoform categories, one test intron each:
 |----------|-----------------|------------|-----|-----------|------------------|
 | A genuine | canonical | supported | clean | = ref | `NOVEL_CONFIRMED` |
 | B noncanon-artifact | non-canonical | none | clean | = ref | `ARTIFACT` (noncanonical) |
-| C mapping-artifact | canonical | none | low-MAPQ spanning | = ref | `ARTIFACT` (mapping) — needs `--bam` |
+| C mapping-artifact | canonical | none | Low-MAPQ spanning | = ref | `ARTIFACT` (mapping) — needs `--bam` |
 | D reference-bias | non-canonical | none | clean | canonical (SNV) | `REFERENCE_BIAS` — needs `--reference-haplotype` |
 
 ## Run
@@ -32,8 +32,8 @@ python score_axes.py work/truth.tsv work/full.adjudicated.tsv
 |------------------|-----------|------|----------|------|
 | A genuine | NOVEL_CONFIRMED | HIGH | HIGH | HIGH |
 | B noncanon-artifact | ARTIFACT | ARTIFACT | ARTIFACT | ARTIFACT |
-| C mapping-artifact | UNCONFIRMED | **ARTIFACT (mapping)** | LOW | **ARTIFACT** |
-| D reference-bias | ARTIFACT | ARTIFACT | **REFERENCE_BIAS** | **REFERENCE_BIAS** |
+| C mapping-artifact | UNCONFIRMED | ARTIFACT (mapping) | Low | ARTIFACT |
+| D reference-bias | ARTIFACT | ARTIFACT | REFERENCE_BIAS | REFERENCE_BIAS |
 
 All 160 isoforms are classified per truth in the full configuration (0 errors).
 The per-config deltas isolate each axis: the BAM axis alone moves C from

@@ -32,7 +32,7 @@ CLS = (
 ISO_GTF = (
     'chr1\tt\texon\t100\t200\t.\t+\t.\tgene_id "G1"; transcript_id "isoX";\n'
     'chr1\tt\texon\t400\t600\t.\t+\t.\tgene_id "G1"; transcript_id "isoX";\n')
-# reference catalog WITHOUT isoX's intron (so isoX is genuinely novel)
+# reference catalog WITHOUT isoX's intron (so isoX is novel)
 REF_GTF = (
     'chr1\tt\texon\t100\t200\t.\t+\t.\tgene_id "REF"; transcript_id "REF";\n'
     'chr1\tt\texon\t250\t350\t.\t+\t.\tgene_id "REF"; transcript_id "REF";\n')

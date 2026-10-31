@@ -299,7 +299,7 @@ def main():
             protocol="merge_comparison", scope="gencode_v49_chr22_5caller",
             status="tracked", tool_version=args.tool_version, ruleset_version=None,
             generated_utc=None,
-            data_provenance=("SQANTI-SIM GENCODE v49 chr22, the SAME 5 caller GTFs as the "
+            data_provenance=("SQANTI-SIM GENCODE v49 chr22, the same 5 caller GTFs as the "
                 "multicaller protocol (FLAIR/IsoQuant/Bambu/ESPRESSO/TALON). Matchers: "
                 "PanIsoGuard combine (exact intron-chain), gffcompare -i (incumbent N-way), "
                 "TAMA merge (fuzzy), and a controlled exact->fuzzy junction-wobble sweep. "
@@ -313,10 +313,10 @@ def main():
                 "Head-to-head vs the incumbent multi-caller merge tools. (1) PanIsoGuard "
                 "`combine` (exact intron-chain) produces a caller-support grouping IDENTICAL "
                 "to gffcompare -i (same novel count, same n_callers distribution, same PR "
-                "curve) -> combine is a clean, htslib-native re-implementation of the "
+                "curve) -> combine is a re-implementation in htslib of the "
                 "established N-way intron-chain comparison that feeds the adjudicator "
-                "directly, NOT a novel merge algorithm. (2) The consensus precision claim is "
-                "MATCHER-ROBUST: >=3-caller novel precision is ~0.975-0.980 across exact "
+                "directly, not a new merge algorithm. (2) The consensus precision claim is "
+                "the same under every matcher: >=3-caller novel precision is ~0.975-0.980 across exact "
                 "(combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled "
                 "exact->fuzzy wobble sweep (0-20bp). (3) Agreement split, counted by the "
                 "genuine chain's membership of a fuzzy group (genuine novels that exact "

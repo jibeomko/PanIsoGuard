@@ -8,7 +8,7 @@
 namespace panisoguard {
 
 // ---------------------------------------------------------------------------
-// Coordinate convention (used by ALL readers and the catalog):
+// Coordinate convention (used by all readers and the catalog):
 //   Every internal coordinate is 0-based, half-open.
 //   A Junction is an INTRON [start, end): start = first intronic base,
 //   end = one-past-the-last intronic base.
@@ -19,7 +19,7 @@ namespace panisoguard {
 //     exon_i and exon_{i+1}                            -> {exon_i.e, exon_{i+1}.s - 1}
 //   * BED12 blocks (0-based, relative to chromStart);
 //     intron between block_i and block_{i+1}           -> {block_i.end, block_{i+1}.start}
-// so the SAME intron yields the SAME {start,end} regardless of source, which is
+// so the same intron yields the same {start,end} regardless of source, which is
 // what makes fingerprint matching and SJ.tab corroboration exact.
 // ---------------------------------------------------------------------------
 

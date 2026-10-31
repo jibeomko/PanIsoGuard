@@ -1,6 +1,6 @@
 # Controlled-truth E1 (incomplete-reference protocol)
 
-A fast, fully-local correctness check of PanIsoGuard's **adjudication logic** — no
+A fast, fully-local correctness check of PanIsoGuard's adjudication logic — no
 read simulator or upstream caller required. Truth is generated directly from a
 reference annotation, so every isoform's genuine/false label is known.
 
@@ -8,14 +8,14 @@ reference annotation, so every isoform's genuine/false label is known.
 
 From one chromosome of a reference GTF (e.g. GENCODE):
 
-- **Genuine novels** = ~20% of multi-exon transcripts *hidden* from the catalog
+- Genuine novels = ~20% of multi-exon transcripts *hidden* from the catalog
   handed to PanIsoGuard. They are real, so their novel junctions appear in the
   short-read `SJ.tab`.
-- **False novels** = kept transcripts with one internal exon boundary shifted,
+- False novels = kept transcripts with one internal exon boundary shifted,
   creating a junction that is neither annotated nor read-supported.
 
-A correct adjudicator should classify genuine novels as `HIGH/NOVEL_PROBABLE`
-and fabricated ones as `UNCONFIRMED` / `ARTIFACT`, and may honestly **abstain**
+A correct adjudicator should classify genuine novels as `NOVEL_CONFIRMED` / `NOVEL_PROBABLE`
+and fabricated ones as `UNCONFIRMED` / `ARTIFACT`, and may abstain
 (`UNRESOLVED`) on genuine isoforms whose every junction is already known (NIC-like:
 no novel junction to corroborate).
 
@@ -41,15 +41,15 @@ Decisive calls (n=2288): precision(genuine)=1.000 specificity(false)=1.000 F1=1.
 Abstain (UNRESOLVED): genuine 986/2206 (44.7%), false 2/1070 (0.2%)
 ```
 
-**Zero misclassifications on decisive calls**: every short-read-corroborated genuine
+Zero misclassifications on decisive calls: every short-read-corroborated genuine
 novel was kept and every read-unsupported fabricated junction was rejected. The
-44.7% genuine abstention is by design — those are NIC-like isoforms whose every
+44.7% genuine abstention is intended — those are NIC-like isoforms whose every
 junction is already annotated, so there is no novel junction to corroborate; the
 engine holds them `UNRESOLVED` rather than guessing.
 
-## Scope (honest)
+## Scope
 
-This isolates the **short-read corroboration axis** (the primary novelty signal)
+This isolates the short-read corroboration axis (the primary novelty signal)
 against controlled truth; it does not exercise the BAM/variant axes or the upstream
 callers. The full read-simulation E1 (PBSIM3/NanoSim → minimap2 → FLAIR → SQANTI3
 → PanIsoGuard), which also validates the simulator and the callers, is the

@@ -58,13 +58,13 @@ TEST_CASE("rules: unevaluable novelty support is UNRESOLVED, not a guess", "[rul
   const Verdict v = RuleEngine().evaluate(e);
   CHECK(v.confidence == ConfidenceClass::kUnresolved);
   CHECK_FALSE(v.rule_trace.empty());
-  CHECK_FALSE(v.circularity_flag);  // Tier-0 never sets circularity
+  CHECK_FALSE(v.circularity_flag);  // the SQANTI-only path never sets circularity
 }
 
 TEST_CASE("rules: BAM mapping artifact axis", "[rules]") {
   const RuleEngine eng;
 
-  // SR-supported novel but reads map poorly -> demoted to MEDIUM (conflicting).
+  // SR-supported novel but reads map poorly -> NOVEL_PROBABLE (conflicting evidence).
   EvidenceVector sup = novel_ev(1, 1);
   sup.bam_evaluable = true;
   sup.bam_n_junctions_gated = 1;
@@ -111,7 +111,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
   CHECK(vi.primary_mechanism == Mechanism::kMapping);
   CHECK(vi.confidence == ConfidenceClass::kArtifact);
 
-  // SR-SUPPORTED + indel mapping artifact -> demoted HIGH -> MEDIUM (one step, not
+  // SR-SUPPORTED + indel mapping artifact -> NOVEL_PROBABLE instead of NOVEL_CONFIRMED (one step, not
   // ARTIFACT): the conflicting-evidence case the projection grid must preserve.
   EvidenceVector sup = novel_ev(1, 1);
   sup.bam_evaluable = true;
@@ -123,7 +123,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
   CHECK(vsup.confidence == ConfidenceClass::kNovelProbable);
 
   // Below threshold (the genuine-junction regime, chr22 genuine indel_near max ~0.19):
-  // no mapping flag, so a clean SR-supported novel stays HIGH (zero collateral damage).
+  // no mapping flag, so a clean SR-supported novel stays NOVEL_CONFIRMED.
   EvidenceVector ok = novel_ev(1, 1);
   ok.bam_evaluable = true;
   ok.bam_n_junctions_gated = 1;
@@ -145,7 +145,7 @@ TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel c
   base.catalog_evaluable = true;  // the chain was examined against a catalog
   CHECK(eng.evaluate(base).confidence == ConfidenceClass::kUnresolved);
 
-  // ...but >= 2 independent callers recovering the chain promotes it to MEDIUM (never HIGH:
+  // ...but >= 2 independent callers recovering the chain promotes it to NOVEL_PROBABLE (never NOVEL_CONFIRMED:
   // caller agreement is methodological, not experimental, corroboration).
   EvidenceVector consensus = base;
   consensus.consensus_evaluable = true;
@@ -154,13 +154,13 @@ TEST_CASE("rules: multi-caller consensus corroborates an UNKNOWN-support novel c
   CHECK(vc.confidence == ConfidenceClass::kNovelProbable);
   CHECK_FALSE(vc.rule_trace.empty());
 
-  // A single caller does not reach the gate -> still AMBIGUOUS.
+  // A single caller does not reach the gate -> still UNRESOLVED.
   EvidenceVector single = base;
   single.consensus_evaluable = true;
   single.n_callers = 1;
   CHECK(eng.evaluate(single).confidence == ConfidenceClass::kUnresolved);
 
-  // Consensus + an artifact mechanism (non-canonical) -> LOW_CONF_PARTIAL, not MEDIUM.
+  // Consensus + an artifact mechanism (non-canonical) -> UNCONFIRMED, not NOVEL_PROBABLE.
   EvidenceVector mech = consensus;
   mech.noncanonical = true;
   CHECK(eng.evaluate(mech).confidence == ConfidenceClass::kUnconfirmed);

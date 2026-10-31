@@ -28,11 +28,11 @@ bash run_e2e.sh e2e_work
 Tools (each typically its own conda env): `pbsim3`, `minimap2`, `samtools`,
 `FLAIR 3.x`, `SQANTI3 5.x`, and the built `panisoguard`.
 
-> **FLAIR caveat:** FLAIR 3.0.0's `bam2Bed12` entry point is broken on bioconda
+> FLAIR caveat: FLAIR 3.0.0's `bam2Bed12` entry point is broken on bioconda
 > (`ModuleNotFoundError: No module named 'flair.bam2Bed12'`); `bam2bed12.py` here is a
 > drop-in BAM→BED12 converter that bypasses it and feeds `flair collapse`.
 >
-> **Truth caveat:** rigorous read-level truth bookkeeping is SQANTI-SIM's job; this
+> Truth caveat: read-level truth bookkeeping is SQANTI-SIM's job; this
 > harness labels truth by intron-chain match to the hidden transcripts instead, which
 > is sufficient to score genuine-vs-artifact novelty.
 
@@ -49,11 +49,11 @@ false              0         242          7
 precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisive) = 1.000
 ```
 
-- **PanIsoGuard rejected 242/249 (97%) of FLAIR's false-novel artifacts** and abstained on
+- PanIsoGuard rejected 242/249 (97%) of FLAIR's false-novel artifacts and abstained on
   the other 7 — on real, messy caller output it removes essentially all spurious novelty.
-- **No genuine novel was wrongly rejected** (0 false negatives) and **no artifact was called
+- No genuine novel was wrongly rejected (0 false negatives) and **no artifact was called
   genuine** (0 false positives).
-- **19/20 genuine novels are `NOVEL_PROBABLE`** through whole-chain long-read support: they
+- 19/20 genuine novels are `NOVEL_PROBABLE` through whole-chain long-read support: they
   are NIC-like, every junction already in the reduced annotation, so the short-read axis has
   nothing to test; before 0.0.7 they were held `UNRESOLVED` (16/20) or `UNCONFIRMED`. The
   remaining one has fewer than 3 whole-chain reads and stays `UNRESOLVED`.

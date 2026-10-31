@@ -1,7 +1,7 @@
 # Committed benchmark results
 
 PanIsoGuard's accuracy claims must not live only in prose. This directory is the
-**git-tracked home for every benchmark metric**, so a reviewer can read the numbers
+git-tracked home for every benchmark metric, so a reviewer can read the numbers
 (and how they were produced) without assembling 4–5 bioinformatics conda
 environments, and CI can detect when a change moves them.
 
@@ -31,9 +31,9 @@ Each `<protocol>/metrics.json` is one envelope: `protocol`, `scope`, `status`,
 
 | status | meaning |
 |--------|---------|
-| `tracked` | a real committed result. Self-contained protocols (`controlled_truth`, `synthetic_axes`) are regenerated and **drift-checked** by `collect.py`. Heavy protocols (`sqanti_sim`, `end2end`, `hg002`) are produced by their documented `command` (real GENCODE v49 chr22 runs of the current binary); `collect.py` validates their envelope for schema but cannot regenerate them without the external data. |
-| `transcribed_pending_tracked_run` | number copied from `docs/validation.md`; the protocol needs heavy external tooling, so it is **not yet** regenerated here. `source` records where it came from. |
-| `pending` | not yet produced. |
+| `tracked` | a real committed result. Self-contained protocols (`controlled_truth`, `synthetic_axes`) are regenerated and drift-checked by `collect.py`. Heavy protocols (`sqanti_sim`, `end2end`, `hg002`) are produced by their documented `command` (real GENCODE v49 chr22 runs of the current binary); `collect.py` validates their envelope for schema but cannot regenerate them without the external data. |
+| `transcribed_pending_tracked_run` | number copied from `docs/validation.md`; the protocol needs heavy external tooling, so it is not yet regenerated here. `source` records where it came from. |
+| `pending` | Not yet produced. |
 
 ## Regenerating
 
@@ -51,11 +51,11 @@ so a tracked metric and its pass/fail assertion share one code path.
 
 ## The SQANTI-SIM AUPRC sweep (release blocker)
 
-`sqanti_sim/sweep.tsv` is the template for the **threshold sweep** called out in
+`sqanti_sim/sweep.tsv` is the template for the threshold sweep called out in
 `docs/validation.md` ("Calibration caveat"): one row per `config/rules.default.toml`
 threshold configuration, with its AUPRC and operating-point precision/specificity.
 Today it holds a single seed row — the shipped `default-0.0.1` config, transcribed
-from the published AUPRC 0.970. The sweep is **automated** by
+from the published AUPRC 0.970. The sweep is automated by
 [`benchmark/sqanti_sim/sweep.py`](../sqanti_sim/sweep.py): the expensive half is
 producing the truth set once (`run.sh`); given those artifacts the harness re-runs
 `adjudicate` across the threshold grid, scores each config with `score.py`, writes
@@ -73,7 +73,7 @@ python3 benchmark/results/collect.py --check           # confirm schema-valid
 
 That flips `sqanti_sim` to `status=tracked`. Until then it stays
 `transcribed_pending_tracked_run` and the thresholds remain conservative defaults,
-**not** swept/tuned. The heavy protocols `end2end` and `hg002` carry the same
+not swept/tuned. The heavy protocols `end2end` and `hg002` carry the same
 transcribed-pending envelope (with a `command` to reproduce) and become `tracked`
 the same way.
 

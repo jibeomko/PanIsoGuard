@@ -2,7 +2,7 @@
 """Reference-bias rescue on REAL long-read RNA across a divergent-individual cohort.
 
 Consolidates the per-individual scans (see ../hg03516_refbias) into one cohort envelope.
-Applies a single PRINCIPLED filter -- drop any candidate junction with 0 exact-coordinate
+Applies one filter -- drop any candidate junction with 0 exact-coordinate
 spanning Iso-Seq reads (these are displaced-coordinate caller-model artifacts; this is the
 data-driven generalization of the chr17/P2RX5 drop the HG03516 audit flagged by hand).
 
@@ -143,7 +143,7 @@ if EMIT:
     env = {
         "protocol": "refbias_cohort", "scope": "hprc_r2_west_african_cohort_real_longread",
         "status": "tracked", "tool_version": _versions(PAIRS[0][1])[0], "ruleset_version": _versions(PAIRS[0][1])[1],
-        "data_provenance": "REAL public HPRC Release 2 long-read RNA (PacBio Kinnex Iso-Seq) + HiFi de-novo "
+        "data_provenance": "real public HPRC Release 2 long-read RNA (PacBio Kinnex Iso-Seq) + HiFi de-novo "
             "phased assemblies for the SAME individuals: HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, "
             "Gambian Mandinka) -- two independent West African individuals. Personal SNV-consensus haplotypes "
             "from assembly minimap2 asm5 + paftools.js call vs GRCh38 (SNVs only, length-matched). GENCODE v49. "
@@ -151,17 +151,17 @@ if EMIT:
         "command": "per individual: benchmark/hg03516_refbias/run.sh (download + haplotypes + IsoQuant + scan + "
             "adjudicate); benchmark/refbias_cohort/analyze.py <gencode> HG03516:<wd1> HG02717:<wd2>",
         "metrics": out,
-        "notes": "POSITIVE real-data application, REPLICATED across two independent divergent African individuals: "
+        "notes": "Real-data application, replicated across two independent divergent African individuals: "
             "the reference-bias rescue fires on real long-read RNA -- HG03516 40 + HG02717 46 = 86 reference-bias "
             "novel splice junctions (77 novel vs GENCODE -- discoveries a reference-only pipeline would report), "
             "each non-canonical on GRCh38 but canonical on that individual's own HiFi-assembly haplotype via a real "
             "personal SNV. 86/86 rescued (REFERENCE_BIAS) under independent-DNA provenance, 0 false "
             "rescues; the circularity firewall holds all 86 UNRESOLVED under circular-risk provenance. Both "
-            "individuals were processed identically; the principled read-support filter (drop junctions with 0 "
+            "individuals were processed identically; the read-support filter (drop junctions with 0 "
             "exact-coordinate spanning reads) removed 1 displaced-coordinate caller-model artifact each. Same "
             "caveats as hg03516_refbias (independently audited): the divergent-vs-reference-grade contrast with "
-            "GM12878's 0 is DIRECTIONAL not a controlled rate (denominator/chemistry/variant-method differ); the "
-            "personal genome is a HiFi de-novo ASSEMBLY SNV call (paftools placeholder QC, SNV-only -> indel "
+            "GM12878's 0 is directional, not a controlled rate (denominator/chemistry/variant-method differ); the "
+            "personal genome is a HiFi de-novo assembly SNV call (paftools placeholder QC, SNV-only -> indel "
             "reference bias invisible), molecule-independent (DNA vs RNA) but sharing the GRCh38+minimap2 backbone. "
             "Across two unrelated West African genomes the rescue fired on every read-supported candidate with no "
             "false rescue on the DISRUPTED / CONTROL negatives in this set; its yield rises with divergence from the "

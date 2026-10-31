@@ -126,7 +126,7 @@ def main():
         env = {"protocol": "lrgasp_wtc11", "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina", "status": "tracked",
                "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
-               "data_provenance": "REAL public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), "
+               "data_provenance": "real public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), "
                                   "Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; "
                                   "truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 "
                                   "consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 "

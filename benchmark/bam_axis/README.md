@@ -2,19 +2,19 @@
 
 The BAM read-level axis (`adjudicate --bam`) inspects the spanning reads at every novel
 junction and measures four fractions: low-MAPQ, supplementary/secondary, **terminal
-soft-clip**, and **indel-adjacent-to-the-junction**. Before v0.0.4 only the first two fed
+soft-clip, and indel-adjacent-to-the-junction**. Before v0.0.4 only the first two fed
 the verdict; the soft-clip and indel-near fractions were computed and emitted to
-`attribution.jsonl` for inspection but **never acted on**. This protocol asks whether they
+`attribution.jsonl` for inspection but never acted on. This protocol asks whether they
 *should* be — and wires the answer in.
 
 ## The mechanism (and why it is the "pangenome insertion" case)
 
 A genuine spliceosomal intron aligns as a clean `N` (ref-skip) in the read CIGAR. A common
-**false** novel junction is instead an **alignment-ambiguous indel** — a small insertion or
+false novel junction is instead an alignment-ambiguous indel — a small insertion or
 deletion that the aligner could equally render as a short intron, so the caller reports a
 "novel junction" that is really an indel. That is exactly what `bam_frac_indel_near`
 measures: the fraction of exact-spanning reads that carry an indel within the junction
-window. (A sample **insertion** relative to the reference does not create a reference-
+window. (A sample insertion relative to the reference does not create a reference-
 coordinate intron the way a deletion does — it surfaces as an indel/soft-clip near the
 junction. So the BAM indel-near signal is how insertion-driven apparent-novelty gets
 caught, complementing the deletion-driven reference-bias rescue of the variant/pangenome
@@ -22,39 +22,39 @@ axis.)
 
 ## Does it discriminate? (chr22 SQANTI-SIM truth)
 
-Adjudicating the chr22 SQANTI-SIM FLAIR output **with `--bam`** and stratifying
+Adjudicating the chr22 SQANTI-SIM FLAIR output with `--bam` and stratifying
 `bam_frac_indel_near` by truth (novel junctions, reads actually spanning):
 
 | novel-junction set | n | mean indel_near | max / p90 |
 |--------------------|--:|----------------:|----------:|
-| **genuine** | 430 | 0.032 | max **0.190** |
-| **false**   | 124 | **0.129** | 11 % above 0.5 |
+| genuine | 430 | 0.032 | max 0.190 |
+| false   | 124 | 0.129 | 11 % above 0.5 |
 
-Genuine junctions top out at **0.190**; a false junction with ≥ 3 spanning reads has an
+Genuine junctions top out at 0.190; a false junction with ≥ 3 spanning reads has an
 indel next to it on every read 11 % of the time. (Before 0.0.6 the fraction was taken over
 every junction with ≥ 1 read, which gave a false mean of 0.350 and 33 % above 0.5: most of
 that came from 1–2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
 `min_spanning = 3` leaves those out.)
 
-**Soft-clip** is ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020) —
+Soft-clip is ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020) —
 it does not discriminate here. It is wired into the same mapping mechanism but **disabled
 by default** (`max_softclip_frac = 1.01`, which can never fire). Two reasons: it has no
 demonstrated yield on this set, and — unlike `indel_near`, which is junction-proximal
-(`bam_junction_window_bp`) — the soft-clip feature is a **terminal** soft-clip *anywhere*
+(`bam_junction_window_bp`) — the soft-clip feature is a terminal soft-clip *anywhere*
 on the read, so on real long reads it also fires on adapter / poly-A read ends of
 legitimate junction-spanning reads. A default-on gate would therefore risk demoting genuine
-novels (HIGH → MEDIUM). The knob is left for users who validate it on their own chemistry;
+novels (`NOVEL_CONFIRMED` → `NOVEL_PROBABLE`). The knob is left for users who validate it on their own chemistry;
 making it junction-proximal is future work.
 
 ## The operating point (zero genuine cost)
 
-Because genuine `indel_near` never exceeds 0.190, **any** gate in [0.20, 0.80] flags zero
-genuine junctions. At the shipped default **0.5** (matching the low-MAPQ / supplementary
+Because genuine `indel_near` never exceeds 0.190, any gate in [0.20, 0.80] flags zero
+genuine junctions. At the shipped default 0.5 (matching the low-MAPQ / supplementary
 gates):
 
 | gate (`max_indel_near_frac`) | false caught | genuine flagged | precision |
 |:---:|:---:|:---:|:---:|
-| 0.5 | **14 / 124** | **0** | **1.000** |
+| 0.5 | 14 / 124 | 0 | 1.000 |
 
 ## Impact — wired ON vs OFF (same binary, same inputs)
 
@@ -63,15 +63,15 @@ gates above 1.0 (OFF, never fires):
 
 | | OFF (low-MAPQ/supp only) | ON (+ indel-near) |
 |---|:---:|:---:|
-| false-novel **specificity** | 0.966 | 0.966 (unchanged) |
-| genuine **sensitivity** | 0.782 | 0.782 (unchanged; 0.589 before the 0.0.7 whole-chain support, which is on in both) |
-| genuine isoforms lost from confident-novel | — | **0** |
+| false-novel specificity | 0.966 | 0.966 (unchanged) |
+| genuine sensitivity | 0.782 | 0.782 (unchanged; 0.589 before the 0.0.7 whole-chain support, which is on in both) |
+| genuine isoforms lost from confident-novel | — | 0 |
 
-False-novel transitions OFF→ON: **9** `UNCONFIRMED → ARTIFACT`. **Zero** genuine
+False-novel transitions OFF→ON: 9 `UNCONFIRMED → ARTIFACT`. Zero genuine
 isoforms changed class. (0.0.4–0.0.5: 41 / 124 caught and 24 relabelled, before the ≥ 3-read
 gate.)
 
-> **Superseded headline.** Before 0.0.4 this table read specificity 0.946 → 0.966: the gain
+> Superseded table. Before 0.0.4 this table read specificity 0.946 → 0.966: the gain
 > was 3 false novels demoted `NOVEL_PROBABLE → UNCONFIRMED`. All 3 had *partial*
 > short-read support, and the PARTIAL-never-promotes fix (see
 > [sqanti3_filter_h2h](../sqanti3_filter_h2h)) now keeps them non-confident without the BAM,

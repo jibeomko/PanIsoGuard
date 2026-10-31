@@ -17,7 +17,7 @@ namespace panisoguard {
 // Used by the pangenome (reference-bias) rescue axis: a junction that is novel
 // relative to the LINEAR reference but realizable on a pangenome haplotype path is
 // consistent with reference bias rather than new splicing. This is independent
-// (non-circular) evidence ONLY when the junction set is extracted from population
+// (non-circular) evidence only when the junction set is extracted from population
 // assemblies; PanIsoGuard cannot verify the supplied file's provenance, so the
 // rescue is gated by --pangenome-provenance and the same circularity firewall as
 // the variant axis (a coordinate match shows the junction is possible on a path,

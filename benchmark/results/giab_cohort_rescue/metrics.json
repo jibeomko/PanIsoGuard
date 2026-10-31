@@ -36,7 +36,7 @@
     "rescued_total": 137,
     "sensitivity": 1.0
   },
-  "notes": "COHORT-level yield of the reference-bias rescue across four personalized human genomes (extends the single-sample HG002 result). Each individual carries 31-37 genuine reference-bias splice junctions (137 total); the variant axis rescues ALL of them (137/137, 100% sensitivity), with 0 false rescues, and the circularity firewall holds every one (137/137) under circular-risk provenance. So the rescue is a consistent, perfectly-specific guardrail across individuals -- a few dozen false-novel calls exonerated per personalized genome -- not a one-off. Its practical value rises with sample divergence from the linear reference. [0.0.6] re-run with 0.0.6 (haplotype-consistency rule): 137/137 rescued, 0 false, 137/137 held; unchanged",
+  "notes": "Cohort-level yield of the reference-bias rescue across four personalized human genomes (extends the single-sample HG002 result). Each individual carries 31-37 reference-bias splice junctions (137 total); the variant axis rescues all of them (137/137), with 0 false rescues, and the circularity firewall holds every one (137/137) under circular-risk provenance. The rescue behaves the same way in each genome: a few dozen false-novel calls reclassified per personalized genome, none falsely rescued in these scans. Its value rises with sample divergence from the linear reference. [0.0.6] re-run with 0.0.6 (haplotype-consistency rule): 137/137 rescued, 0 false, 137/137 held; unchanged",
   "protocol": "giab_cohort_rescue",
   "ruleset_version": "builtin-0.0.3",
   "scope": "giab_hg001_hg002_hg003_hg004_wholegenome",

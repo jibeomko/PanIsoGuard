@@ -1,9 +1,9 @@
 # LRGASP WTC11: experimentally validated isoforms, real PacBio and ONT data
 
-The first check of PanIsoGuard against **experimentally validated** isoforms on **real**
+The first check of PanIsoGuard against experimentally validated isoforms on real
 long-read data. LRGASP (Pardo-Palacios et al., *Nature Methods* 2024) amplified 89 WTC11
 isoform targets by RT-PCR and sequenced the amplicons on ONT and PacBio; a target counted as
-**supported** when at least one gapless (< 2 bp indel), high-identity amplicon read matched
+supported when at least one gapless (< 2 bp indel), high-identity amplicon read matched
 its intron chain (Supplementary Data 15; 79 supported, 3 likely, 7 unsupported; 25 FSM, 36
 NIC, 28 NNC by the LRGASP annotation). We join those targets to the WTC11 consolidated models
 (their exact intron chains), run the public WTC11 reads through IsoQuant, SQANTI3 and
@@ -21,7 +21,7 @@ SJ.tab. Everything public (ENCODE, GitHub LRGASP/supplementary_data, cgl.gi.ucsc
 
 ## Result
 
-Of the 56 **supported NIC/NNC** targets, IsoQuant reconstructed the exact intron chain for
+Of the 56 supported NIC/NNC targets, IsoQuant reconstructed the exact intron chain for
 27 (PacBio) and 22 (ONT). Ten (PacBio) / six (ONT) of those are full splice matches in
 GENCODE v49 (annotated since LRGASP's v38) and come out `KNOWN`. The rest are novel against
 v49:
@@ -30,11 +30,11 @@ v49:
 |---|---:|---:|---:|---:|
 | n | 17 | 17 | 16 | 16 |
 | `NOVEL_CONFIRMED` | 10 | 0 | 9 | 0 |
-| `NOVEL_PROBABLE` | 6 (4 `chain_support`, 1 `chain_support;rt_switch_sign`, 1 `supported_with_rt_switch`) | **17** (`chain_support`, 2 of them `;rt_switch_sign`) | 5 (1 `chain_support`, 2 `chain_support;rt_switch_sign`, 2 `supported_with_rt_switch`) | **16** (`chain_support`, 4 of them `;rt_switch_sign`) |
+| `NOVEL_PROBABLE` | 6 (4 `chain_support`, 1 `chain_support;rt_switch_sign`, 1 `supported_with_rt_switch`) | 17 (`chain_support`, 2 of them `;rt_switch_sign`) | 5 (1 `chain_support`, 2 `chain_support;rt_switch_sign`, 2 `supported_with_rt_switch`) | 16 (`chain_support`, 4 of them `;rt_switch_sign`) |
 | `UNCONFIRMED` | 1 | 0 | 2 | 0 |
-| `ARTIFACT` | **0** | **0** | **0** | **0** |
+| `ARTIFACT` | 0 | 0 | 0 | 0 |
 
-- **No experimentally supported isoform is called an artifact**, on either platform, with
+- No experimentally supported isoform is called an artifact, on either platform, with
   or without short reads. SQANTI3's default rules filter on the same classifications (`sq_rules/`,
   no coverage column, so its perc_A and RTS rules) discards 2 of the 17 (PacBio: CENPK, MTHFS)
   and 4 of the 16 (ONT: CENPK, MTHFS, RND2, USF1) validated novel isoforms, every one for the
@@ -47,7 +47,7 @@ v49:
   ruleset 0.0.5 the sign is noted in the reason (`chain_support;rt_switch_sign`,
   `supported_with_rt_switch`) and does not hold them `UNCONFIRMED` (under 0.0.4 MTHFS and,
   on ONT, USF1 were held).
-- **Without short reads, whole-chain read support does the work**: all 17 / 16 become
+- Without short reads, whole-chain read support does the work: all 17 / 16 become
   `NOVEL_PROBABLE` through `chain_support` (2 / 4 with `;rt_switch_sign`), CALB1 and SAC3D1
   included: the long reads carry their chains, and only the short-read axis could not see
   them. That is the real-data counterpart of the SQANTI-SIM result in
@@ -55,7 +55,7 @@ v49:
 - The called FSM targets (14 of 23 on PacBio, 18 of 23 on ONT) are all `KNOWN`, as are the
   10 / 6 NIC/NNC targets that GENCODE v49 has since annotated; the 2 / 1 called `likely`
   targets are `KNOWN` or `NOVEL_PROBABLE`.
-- **Unsupported targets (7)**: IsoQuant reconstructed none of the six novel ones on either
+- Unsupported targets (7): IsoQuant reconstructed none of the six novel ones on either
   platform (so PanIsoGuard had nothing to judge), and the one FSM (ZBTB45, annotated) is
   `KNOWN` on PacBio. The validation set carries too few negatives to say anything about
   precision; this protocol is a recall-side check.
@@ -67,7 +67,7 @@ the other's calls: the PacBio isoforms adjudicated with `--bam pb.bam --validati
 (whole-chain reads counted in ONT, the mapping axis still on the caller's own reads) and the
 reverse (`cross_library.py`; `adjx_*` outputs).
 
-| caller library → independent library | validated novel targets with ≥ 3 / ≥ 1 independent reads | class without short reads | same-library chain lifts (NIC/NNC) with ≥ 3 independent reads | expressed FSM (≥ 3 own reads) with ≥ 3 independent reads |
+| caller library → independent library | validated novel targets with ≥ 3 / ≥ 1 independent reads | class without short reads | Same-library chain lifts (NIC/NNC) with ≥ 3 independent reads | expressed FSM (≥ 3 own reads) with ≥ 3 independent reads |
 |---|---:|---|---:|---:|
 | PacBio → ONT | 13 / 15 of 17 | 13 `NOVEL_PROBABLE` (`chain_support;independent_library`), 4 `UNRESOLVED` | 1,789 / 8,171 (22 %) | 11,919 / 28,574 (42 %) |
 | ONT → PacBio | 14 / 15 of 16 | 14 `NOVEL_PROBABLE`, 2 `UNRESOLVED` | 1,477 / 2,759 (54 %) | 11,792 / 15,007 (79 %) |
@@ -85,7 +85,7 @@ has ≥ 3 ONT reads, the PacBio novel lifts without a sign reproduce like the kn
 or better (NIC 23 / 32 / 44 / 60 / 78 %, NNC 30 / 47 / 50 / 77 / 84 %, against FSM 18 / 29 /
 39 / 50 / 72 % in the same depth bins).
 
-**The RT-switch sign, seen from the other library.** PacBio lifts that carry SQANTI3's
+The RT-switch sign, seen from the other library. PacBio lifts that carry SQANTI3's
 `RTS_stage` reproduce in ONT at about half the rate of the unflagged lifts in every depth bin
 (3–5: 4.5 % vs 12.6 %; 6–10: 7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs
 40.1 %; > 50: 40.7 % vs 51.1 %). That is not evidence of RT artifacts, because the annotated
@@ -99,7 +99,7 @@ unflagged ones (FSM 70 / 83 / 93 / 94 / 98 % vs 55 / 69 / 82 / 93 / 98 %; lifts 
 flag's artifact side either way ([../rts_sensitivity](../rts_sensitivity)); it does say that
 an ONT library is a poor independent witness for repeat-flanked junctions.
 
-**Why `;independent_library` still stops at `NOVEL_PROBABLE`.** A second library attests that
+Why `;independent_library` still stops at `NOVEL_PROBABLE`. A second library attests that
 the chain is expressed in the sample, not that it is spliced as called: an artifact that
 recurs across protocols (a sequence-driven template switch, a systematic misalignment) passes
 it too. The evidence is reported (`evidence.chain_independent`, the reason suffix) so a user
@@ -109,7 +109,7 @@ can require it; it is not promoted.
 
 Supplementary Data 15's second sheet holds 79 targets that GENCODE annotators reviewed
 (`known` 27, `novel` 43, `rejected` 9; chains from LRGASP's manual-annotation BEDs, 76
-resolvable), with **26 unsupported** by the amplicons. This is the only experimentally
+resolvable), with 26 unsupported by the amplicons. This is the only experimentally
 confirmed negative set available, so it was the natural place to look for real-data
 precision. It does not deliver it:
 
@@ -117,7 +117,7 @@ precision. It does not deliver it:
 |---|---:|---:|---|
 | supported | 46 | 16 | 14 `KNOWN`, 1 `NOVEL_PROBABLE`, 1 `UNCONFIRMED` |
 | likely | 4 | 2 | 1 `KNOWN`, 1 `UNCONFIRMED` |
-| unsupported, GENCODE `rejected` (the true negatives) | 7 | **0** | — |
+| unsupported, GENCODE `rejected` (the true negatives) | 7 | 0 | — |
 | unsupported, GENCODE `known` / `novel` | 19 | 6 | 5 `KNOWN` (annotated transcripts whose amplicon failed), 1 `UNRESOLVED` (DLX4, NIC) |
 
 ONT: 11 / 1 / 0 / 3 called, all `KNOWN`. The seven `rejected` models, the negatives that
@@ -127,7 +127,7 @@ pass-through, not adjudicated). The one unsupported novel chain the caller did p
 (DLX4+B) was held `UNRESOLVED` on both platforms, with and without short reads (fewer than
 3 whole-chain reads). One case, in the right direction, is not a precision estimate.
 
-**SQANTI3's RT-switching sign on validated isoforms.** Of the experimentally supported
+SQANTI3's RT-switching sign on validated isoforms. Of the experimentally supported
 targets IsoQuant reconstructed, `RTS_stage = TRUE` on 5 of 41 (PacBio; 3 FSM, 2 NIC) and
 7 of 40 (ONT; 3 FSM, 3 NIC, 1 NNC): a 12–18 % false-sign rate on isoforms that exist.
 PanIsoGuard consumes the sign as SQANTI3 reports it; this measured rate is why, since
@@ -135,7 +135,7 @@ ruleset 0.0.5, the sign only annotates a call that short reads or whole-chain re
 (`;rt_switch_sign`) instead of holding it `UNCONFIRMED`, and why a sign alone never makes
 an `ARTIFACT`.
 
-**What it does not show.** 29 (PacBio) / 34 (ONT) supported novel targets were not
+What it does not show. 29 (PacBio) / 34 (ONT) supported novel targets were not
 reconstructed by IsoQuant at all, and only one of them sits inside a longer model. They are
 the rarely detected targets (median 1 LRGASP PacBio pipeline found them, against 11 for the
 ones IsoQuant did call), the same abundance effect LRGASP reports. That is caller recall, not

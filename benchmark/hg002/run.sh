@@ -3,7 +3,7 @@
 # variants: GIAB HG002 -> SNV-only personalized haplotype -> find splice motifs that
 # the variant creates/disrupts -> PanIsoGuard adjudicate (provenance=wgs, non-circular).
 #
-# This is the acceptance-critical, non-circular validation of the headline
+# This is the non-circular validation of the
 # REFERENCE_BIAS mechanism (reference bias != new splicing).
 set -euo pipefail
 

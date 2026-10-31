@@ -1,6 +1,6 @@
 {
   "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
-  "data_provenance": "REAL public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
+  "data_provenance": "real public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
   "generated_utc": "2026-10-18T01:32:24Z",
   "metrics": {
     "samples": {
@@ -329,7 +329,7 @@
       }
     }
   },
-  "notes": "Unit = GRCh38 novel junction of arm A, labelled by where the SAME reads splice on the personal genome. T = same-canonical (non-canonical on GRCh38) + shifted-known + unspliced; T_core drops unspliced (short introns that minimap2 renders as a deletion on the diploid assembly, median 82 bp; 308/499 of B2's are spliced on the SNV genome B1). R_rule = junctions meeting the rescue's own criterion (what the axis sees); R = junctions inside isoforms that got the REFERENCE_BIAS verdict (needs ALL of the isoform's novel junctions explained, NIC/NNC only). The gap R_rule -> R (35 -> 13) is the all-junctions rule and the category pass-throughs, not the motif criterion. Precision misses (4/35) are junctions whose reads come from the non-canonical haplotype. Firewall: 0 rescues under unknown provenance, 18/18 held.",
+  "notes": "Unit = GRCh38 novel junction of arm A, labelled by where the same reads splice on the personal genome. T = same-canonical (non-canonical on GRCh38) + shifted-known + unspliced; T_core drops unspliced (short introns that minimap2 renders as a deletion on the diploid assembly, median 82 bp; 308/499 of B2's are spliced on the SNV genome B1). R_rule = junctions meeting the rescue's own criterion (what the axis sees); R = junctions inside isoforms that got the REFERENCE_BIAS verdict (needs all of the isoform's novel junctions explained, NIC/NNC only). The gap R_rule -> R (35 -> 13) is the all-junctions rule and the category pass-throughs, not the motif criterion. Precision misses (4/35) are junctions whose reads come from the non-canonical haplotype. Firewall: 0 rescues under unknown provenance, 18/18 held.",
   "protocol": "refbias_3way",
   "ruleset_version": "builtin-0.0.5",
   "scope": "hprc_r2_grch38_vs_personalized_pipelines",

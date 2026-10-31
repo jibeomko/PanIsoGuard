@@ -1,6 +1,6 @@
 {
   "command": "benchmark/verdict_distribution/score_distribution.py --run LABEL=x.adjudicated.tsv ... --emit-metrics benchmark/results/verdict_distribution/metrics.json",
-  "data_provenance": "REAL public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, no short reads). No private data.",
+  "data_provenance": "real public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, no short reads). No private data.",
   "generated_utc": "2026-10-19T13:33:11Z",
   "metrics": {
     "hg02717_kinnex": {

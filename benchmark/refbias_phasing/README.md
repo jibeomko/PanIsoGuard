@@ -1,17 +1,17 @@
 # Phasing check of the reference-bias rescue (non-circular)
 
-**Question:** when PanIsoGuard rescues a novel junction as reference bias, is the junction really
+Question: when PanIsoGuard rescues a novel junction as reference bias, is the junction really
 used by the haplotype on which it is canonical? The earlier benchmarks cannot say: their truth
 label (`CREATED`: non-canonical on GRCh38, canonical on the individual's haplotype) is the rescue
 rule itself ([docs/validation.md](../../docs/validation.md)). Reading the motif-creating allele in
 the junction reads is impossible too, because that base is intronic and spliced out.
 
-**Test.** For a *heterozygous* reference-bias junction (canonical on one haplotype H only), the
+Test. For a *heterozygous* reference-bias junction (canonical on one haplotype H only), the
 long reads that use the junction should carry H's alleles at the gene's other heterozygous SNVs,
 while the other haplotype O is still expressed at the locus (reads not using the junction carry
 O alleles). Phase comes from the trio-phased HiFi assembly (pat/mat), not from the RNA.
 
-**Answer: yes, in 27 of 28 testable junctions.**
+Answer: yes, in 27 of 28 testable junctions.
 
 ## Result
 
@@ -27,9 +27,9 @@ reads (chr17:3681978-3685514, homozygous in both, so untestable either way).
 | heterozygous | 23 | 31 | 54 |
 | &nbsp;&nbsp;too few phased junction reads (< 3) | 9 | 14 | 23 |
 | &nbsp;&nbsp;other haplotype not seen at the locus | 2 | 1 | 3 |
-| &nbsp;&nbsp;**tested** | **12** | **16** | **28** |
-| &nbsp;&nbsp;&nbsp;&nbsp;consistent (all phased junction reads from H) | 11 | 16 | **27** |
-| &nbsp;&nbsp;&nbsp;&nbsp;contradicted (junction reads from O) | 1 | 0 | **1** |
+| &nbsp;&nbsp;tested | 12 | 16 | 28 |
+| &nbsp;&nbsp;&nbsp;&nbsp;consistent (all phased junction reads from H) | 11 | 16 | 27 |
+| &nbsp;&nbsp;&nbsp;&nbsp;contradicted (junction reads from O) | 1 | 0 | 1 |
 | junction reads, tested junctions: H / O | 172 / 3 | 400 / 0 | 572 / 3 |
 | other reads at the same loci: H / O | 669 / 654 | 1839 / 1078 | |
 

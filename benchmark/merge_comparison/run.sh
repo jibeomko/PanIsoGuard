@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Merge-tool head-to-head: PanIsoGuard `combine` (exact intron-chain) vs gffcompare -i
 # (incumbent N-way), TAMA merge (fuzzy), and a controlled exact->fuzzy wobble sweep, on
-# the SAME 5 chr22 caller GTFs as the multicaller protocol. Answers two reviewer
+# the same 5 chr22 caller GTFs as the multicaller protocol. Answers two reviewer
 # objections: (1) does combine just re-derive gffcompare? (2) is the consensus precision
 # an artifact of exact matching? See README.md. All inputs public/simulated; no private data.
 set -euo pipefail

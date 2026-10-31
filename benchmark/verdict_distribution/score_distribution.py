@@ -38,7 +38,7 @@ def main():
         env = {"protocol": "verdict_distribution", "scope": "real_data_verdict_distribution_lrgasp_wtc11_hprc_kinnex", "status": "tracked",
                "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
-               "data_provenance": "REAL public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, "
+               "data_provenance": "real public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, "
                                   "IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 "
                                   "HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, "
                                   "no short reads). No private data.",

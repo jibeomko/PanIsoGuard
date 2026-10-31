@@ -1,12 +1,12 @@
 # Architecture
 
-PanIsoGuard is an **adjudication layer**: it consumes the output of long-read
+PanIsoGuard is an adjudication layer: it consumes the output of long-read
 isoform callers (and SQANTI3) plus optional evidence inputs, and re-classifies each
 *novel* isoform into a confidence class with a mechanistic attribution and a
 provenance/circularity flag. It does not call isoforms and does not recompute
 SQANTI3's QC features.
 
-The codebase (C++17, htslib-only) is organized into **five layers**, from the user
+The codebase (C++17, htslib-only) is organized into five layers, from the user
 boundary inward:
 
 ## Map
@@ -111,7 +111,7 @@ All signals are assembled into one `EvidenceVector`
 
 ## 5. Decision layer
 
-The `RuleEngine` ([`src/core/rules.cpp`](../src/core/rules.cpp)) is a **deterministic**
+The `RuleEngine` ([`src/core/rules.cpp`](../src/core/rules.cpp)) is a deterministic
 projection of the `EvidenceVector` onto a `Verdict` (confidence class + primary
 mechanism + circularity flag + `rule_trace`). Thresholds live in a runtime
 [`config/rules.default.toml`](../config/rules.default.toml); the projection logic and
@@ -141,5 +141,5 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
   still produces verdicts that say which axes were checked.
 - **Circularity firewall** — a rescue that would rest on the sample's own RNA-derived
   data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
-- **htslib-only** — the sole non-vendored dependency; toml++ and Catch2 are vendored
+- htslib-only — the sole non-vendored dependency; toml++ and Catch2 are vendored
   single-header components.

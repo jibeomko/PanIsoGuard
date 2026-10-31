@@ -194,7 +194,7 @@ def main():
             ruleset_version=args.ruleset_version,
             generated_utc=None,
             data_provenance=(
-                "REAL public sample %s, whole-genome, GRCh38/GENCODE v49. Callers run "
+                "real public sample %s, whole-genome, GRCh38/GENCODE v49. Callers run "
                 "fresh on the one shared minimap2 genome alignment. No ground truth on "
                 "real data: consensus is validated by an ORTHOGONAL, caller-independent "
                 "signal -- splice-motif canonicality (GT-AG/GC-AG/AT-AC). No private "
@@ -208,18 +208,18 @@ def main():
             metrics=metrics,
             notes=(
                 "Whole-genome real-data extension of the chr22 multicaller protocol; "
-                "HONEST result, read with its caveats. (1) DISAGREEMENT holds at genome "
+                "Read with its caveats. (1) Disagreement holds at genome "
                 "scale: of the novel chains, the large majority are single-caller and "
                 "only a small minority are recovered by >= 2 callers -- callers disagree "
                 "on most novel calls even on real data, the same motivation as chr22. "
-                "(2) QUALITY direction is correct but the headroom is SMALL: multi-caller "
+                "(2) The quality direction is correct but the headroom is small: multi-caller "
                 "novel chains are 100% canonical while single-caller are already ~97.6% "
                 "canonical. Production callers at recommended settings (IsoQuant, Bambu, "
                 "ESPRESSO) are internally stringent, so they emit few non-canonical "
                 "artifacts for consensus to filter -- a ceiling effect, and the absolute "
                 "novel count is small (real cell line, most transcripts are known). The "
                 "strong artifact-filtering on chr22 (single-caller precision 0.012) came "
-                "largely from the LIBERAL end (unfiltered TALON's false novels); at "
+                "largely from the liberal end (unfiltered TALON's false novels); at "
                 "recommended settings callers are cleaner. On real data with stringent "
                 "callers, the practical value of consensus is the reproducible "
                 "high-confidence core + confidence stratification, not large-scale "
