@@ -102,7 +102,9 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    (`evidence.pangenome_path_consistent`, reason `path_inconsistent`). A row without ids
    cannot confirm a path, but it cannot hide a contradiction between rows that have them;
    only when no row lists ids does the rescue rest on the counts alone
-   (`pangenome_path_consistent = null`). The
+   (`pangenome_path_consistent = null`). `evidence.pangenome_path_complete` says whether
+   every supporting junction listed its ids, so "consistent" can be told from "all on one
+   path". The
    per-junction count is in `evidence.n_novel_jx_variant_created` /
    `n_novel_jx_pangenome`. A rescue is not blocked by a BAM mapping sign (that blocked
    a correct rescue in [benchmark/refbias_phasing](../benchmark/refbias_phasing)), but

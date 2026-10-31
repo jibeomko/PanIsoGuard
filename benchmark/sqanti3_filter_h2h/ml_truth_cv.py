@@ -10,12 +10,29 @@ qualifies.
 Usage: ml_truth_cv.py --work W --gtf CALLER.gtf --cls CALLER_classification.txt --label talon --out DIR
          [--folds 2] [--emit-metrics ../results/caller_filters/metrics.json]
 """
-import argparse, datetime, hashlib, json, os, random, subprocess, sys
+import argparse, datetime, hashlib, json, os, random, shutil, subprocess, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from score_h2h import build_labels, metrics, table  # noqa: E402
 
 MIN_PER_CLASS = 250  # sqanti3_filter.py ml: "user-defined TP and TN sets must have >=250 isoforms"
+
+
+def digest(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def program_identity(name):
+    """Path, size and mtime of the executable that will train the model (a changed SQANTI3 is a changed model)."""
+    p = shutil.which(name)
+    if p is None:
+        return None
+    st = os.stat(p)
+    return {"path": os.path.realpath(p), "size": st.st_size, "mtime": int(st.st_mtime)}
 
 
 def main():
@@ -37,10 +54,12 @@ def main():
         d = f"{a.out}/{a.label}/fold{k}"; os.makedirs(d, exist_ok=True)
         open(f"{d}/tp.txt", "w").write("\n".join(tp) + "\n"); open(f"{d}/tn.txt", "w").write("\n".join(tn) + "\n")
         out_cls = f"{d}/ml_ML_classification.txt"
-        # A model is reused only for the exact split it was trained on: the split's identity
-        # (inputs, seed, folds, train ids) is written next to it and compared before reuse.
-        split = {"cls": os.path.abspath(a.cls), "gtf": os.path.abspath(a.gtf), "seed": a.seed, "folds": a.folds, "fold": k,
-                 "train_ids": hashlib.sha256("\n".join(train).encode()).hexdigest()}
+        # A model is reused only for the exact split it was trained on: the identity of the
+        # inputs (file contents, not paths), the labels it was trained with, the split and the
+        # filter program are written next to it and compared before reuse.
+        split = {"cls_sha256": digest(a.cls), "gtf_sha256": digest(a.gtf), "truth_sha256": digest(f"{a.work}/truth.truth.tsv"),
+                 "tp_sha256": digest(f"{d}/tp.txt"), "tn_sha256": digest(f"{d}/tn.txt"),
+                 "seed": a.seed, "folds": a.folds, "fold": k, "sqanti3_filter": program_identity("sqanti3_filter.py")}
         split_path = f"{d}/split.json"
         cached = os.path.exists(out_cls) and os.path.exists(split_path) and json.load(open(split_path)) == split
         if not cached:

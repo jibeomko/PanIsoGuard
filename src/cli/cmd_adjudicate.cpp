@@ -96,6 +96,10 @@ int cmd_adjudicate(int argc, char** argv) {
   }
 
   try {
+    // Before anything is read or written: no output may be an input file.
+    refuse_overwriting_inputs({out_prefix + ".adjudicated.tsv", out_prefix + ".attribution.jsonl",
+                               out_prefix + ".junctions.tsv", out_prefix + ".provenance.log", write_kept},
+                              input_paths(common));
     const LoadedRun run = load_and_adjudicate(common);
     RunProvenance prov = provenance_for(common, run);
     prov.kept_path = write_kept;

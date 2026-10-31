@@ -103,7 +103,8 @@ junctions ([benchmark/pangenome](../benchmark/pangenome), CTest `integration_pan
 
 [`config/rules.default.toml`](../config/rules.default.toml) lists every key with its default;
 a missing key keeps the default. A key that is present must have the right type and a value
-in its range, or the run stops with the key name and the range: integer counts (`sj_min_uniq_reads`,
+in its range, a section must be a table, and a key PanIsoGuard does not read (a misspelling)
+is an error, or the run stops with the key name and the range: integer counts (`sj_min_uniq_reads`,
 `consensus_min_callers`, `min_spanning`, `min_full_reads`, `min_haplotypes`) are 1 or more;
 `min_mapq` is 0–255; `junction_window_bp` is 0–10000; `max_perc_A_downstream_TTS` is 0–100;
 the three mapping fraction gates are 0–2, where a value above 1 can never fire and so

@@ -9,24 +9,28 @@
         "genuine_upgraded": 0
       },
       "tama": {
-        "genuine_reaching_ge2_but_le1_in_exact": 0,
-        "genuine_upgraded": 55
+        "genuine_reaching_ge2_but_le1_in_exact": 4,
+        "genuine_upgraded": 78
       },
       "wobble_0bp": {
         "genuine_reaching_ge2_but_le1_in_exact": 0,
         "genuine_upgraded": 0
       },
       "wobble_10bp": {
-        "genuine_reaching_ge2_but_le1_in_exact": 0,
-        "genuine_upgraded": 52
+        "genuine_reaching_ge2_but_le1_in_exact": 1,
+        "genuine_upgraded": 62
       },
       "wobble_20bp": {
+        "genuine_reaching_ge2_but_le1_in_exact": 1,
+        "genuine_upgraded": 80
+      },
+      "wobble_2bp": {
         "genuine_reaching_ge2_but_le1_in_exact": 0,
-        "genuine_upgraded": 67
+        "genuine_upgraded": 2
       },
       "wobble_5bp": {
-        "genuine_reaching_ge2_but_le1_in_exact": 0,
-        "genuine_upgraded": 38
+        "genuine_reaching_ge2_but_le1_in_exact": 1,
+        "genuine_upgraded": 46
       }
     },
     "methods": {
@@ -342,6 +346,58 @@
           }
         ]
       },
+      "wobble_2bp": {
+        "n_callers_distribution": {
+          "1": 1031,
+          "2": 169,
+          "3": 255,
+          "4": 130,
+          "5": 332
+        },
+        "novel_chains": 1917,
+        "pr_curve": [
+          {
+            "f1": 0.565897244973939,
+            "false": 1157,
+            "genuine": 760,
+            "min_callers": 1,
+            "precision": 0.396452790818988,
+            "recall": 0.988296488946684
+          },
+          {
+            "f1": 0.9027190332326284,
+            "false": 139,
+            "genuine": 747,
+            "min_callers": 2,
+            "precision": 0.8431151241534989,
+            "recall": 0.9713914174252276
+          },
+          {
+            "f1": 0.9434724091520861,
+            "false": 16,
+            "genuine": 701,
+            "min_callers": 3,
+            "precision": 0.9776847977684798,
+            "recall": 0.9115734720416124
+          },
+          {
+            "f1": 0.7408610885458977,
+            "false": 6,
+            "genuine": 456,
+            "min_callers": 4,
+            "precision": 0.987012987012987,
+            "recall": 0.5929778933680104
+          },
+          {
+            "f1": 0.5976385104450499,
+            "false": 3,
+            "genuine": 329,
+            "min_callers": 5,
+            "precision": 0.9909638554216867,
+            "recall": 0.42782834850455137
+          }
+        ]
+      },
       "wobble_5bp": {
         "n_callers_distribution": {
           "1": 1000,
@@ -397,7 +453,7 @@
     },
     "total_truth_genuine_novel": 769
   },
-  "notes": "Head-to-head vs the incumbent multi-caller merge tools. (1) PanIsoGuard `combine` (exact intron-chain) produces a caller-support grouping IDENTICAL to gffcompare -i (same novel count, same n_callers distribution, same PR curve) -> combine is a clean, htslib-native re-implementation of the established N-way intron-chain comparison that feeds the adjudicator directly, NOT a novel merge algorithm. (2) The consensus precision claim is MATCHER-ROBUST: >=3-caller novel precision is ~0.975-0.980 across exact (combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled exact->fuzzy wobble sweep (0-20bp). (3) Critically, the agreement-split metric is 0 for every fuzzy matcher: NO genuine novel that exact matching calls single-caller is upgraded to >=2 callers by any fuzzy matcher -- the single<->multi boundary that the consensus gate depends on is not an artifact of exact matching. Honest framing: multi-caller consensus is established field practice (LRGASP); combine operationalizes it correctly and the reference-bias rescue remains PanIsoGuard's true differentiator.",
+  "notes": "Head-to-head vs the incumbent multi-caller merge tools. (1) PanIsoGuard `combine` (exact intron-chain) produces a caller-support grouping IDENTICAL to gffcompare -i (same novel count, same n_callers distribution, same PR curve) -> combine is a clean, htslib-native re-implementation of the established N-way intron-chain comparison that feeds the adjudicator directly, NOT a novel merge algorithm. (2) The consensus precision claim is MATCHER-ROBUST: >=3-caller novel precision is ~0.975-0.980 across exact (combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled exact->fuzzy wobble sweep (0-20bp). (3) Agreement split, counted by the genuine chain's membership of a fuzzy group (genuine novels that exact matching leaves at <=1 caller but the fuzzy matcher merges into a >=2-caller group, of all genuine novels whose caller count rose): gffcompare 0 of 0 upgraded; tama 4 of 78 upgraded; wobble_0bp 0 of 0 upgraded; wobble_2bp 0 of 2 upgraded; wobble_5bp 1 of 46 upgraded; wobble_10bp 1 of 62 upgraded; wobble_20bp 1 of 80 upgraded. Multi-caller consensus is established practice (LRGASP); combine implements it with exact matching, and the reference-bias rescue is what PanIsoGuard adds.",
   "protocol": "merge_comparison",
   "ruleset_version": null,
   "scope": "gencode_v49_chr22_5caller",

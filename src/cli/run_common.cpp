@@ -44,6 +44,13 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   return false;
 }
 
+std::vector<std::string> input_paths(const CommonArgs& c) {
+  std::vector<std::string> v = {c.classification, c.isoforms_bed, c.isoforms_gtf, c.ref_gtf, c.sj_tab, c.bam_path,
+                                c.validation_bam, c.reference, c.pangenome_junctions, c.caller_support, c.config};
+  v.insert(v.end(), c.reference_haplotypes.begin(), c.reference_haplotypes.end());
+  return v;
+}
+
 bool common_args_ok(const CommonArgs& c, std::string& err) {
   if (c.classification.empty()) { err = "--classification is required"; return false; }
   if (c.platform != "hifi" && c.platform != "ont") {

@@ -92,6 +92,7 @@ int cmd_decoys(int argc, char** argv) {
     return 1;
   }
   try {
+    refuse_overwriting_inputs({out_prefix + ".decoys.tsv", out_prefix + ".decoys.json"}, {ref_gtf, bam_path, reference});
     const std::vector<Transcript> ts = read_gtf_transcripts(ref_gtf);
     std::fprintf(stderr, "read %zu reference transcripts\n", ts.size());
     const std::vector<Decoy> decoys = make_decoys(ts, max_per_gene, seed);

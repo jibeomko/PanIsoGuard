@@ -87,6 +87,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"pangenome_circular\":" << (e.pangenome_circular ? "true" : "false") << ","
         << "\"n_novel_jx_pangenome\":" << e.n_novel_jx_pangenome << ","
         << "\"pangenome_path_consistent\":" << (e.pangenome_path_evaluable ? (e.pangenome_path_consistent ? "true" : "false") : "null") << ","
+        << "\"pangenome_path_complete\":" << (e.pangenome_path_evaluable ? (e.pangenome_path_complete ? "true" : "false") : "null") << ","
         << "\"consensus_evaluable\":" << (e.consensus_evaluable ? "true" : "false") << ","
         << "\"n_callers\":" << (e.consensus_evaluable ? std::to_string(e.n_callers) : "null") << ","
         << "\"chain_evaluable\":" << (e.chain_evaluable ? "true" : "false") << ","

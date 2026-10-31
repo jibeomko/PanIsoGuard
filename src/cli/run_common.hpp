@@ -40,6 +40,9 @@ inline bool pangenome_provenance_is_circular(const std::string& p) {
   return !(p == "population" || p == "external");
 }
 
+// Every input path named on the command line (for the output-conflict check).
+std::vector<std::string> input_paths(const CommonArgs& c);
+
 // If argv[i] is a shared flag, store it (advancing i past its value) and return
 // true; otherwise return false so the caller can handle subcommand-specific flags.
 bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, CommonArgs& c);

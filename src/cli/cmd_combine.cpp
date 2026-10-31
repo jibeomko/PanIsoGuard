@@ -10,6 +10,7 @@
 #include "panisoguard/bed12.hpp"
 #include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
+#include "panisoguard/tsv.hpp"
 
 namespace {
 
@@ -87,6 +88,10 @@ int cmd_combine(int argc, char** argv) {
 
   using namespace panisoguard;
   try {  // surface I/O and parse errors as a clean message + exit code (like the other subcommands)
+  std::vector<std::string> inputs = {ref_gtf};
+  for (const auto& in : gtfs) inputs.push_back(in.path);
+  for (const auto& in : beds) inputs.push_back(in.path);
+  refuse_overwriting_inputs({out_path}, inputs);
   ConsensusBuilder builder;
 
   for (const auto& in : gtfs) {
