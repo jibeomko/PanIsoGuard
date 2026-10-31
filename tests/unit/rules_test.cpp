@@ -329,4 +329,11 @@ TEST_CASE("rules: a config value of the wrong type or outside its range is an er
   CHECK_THROWS(with_toml("[axis_artifact.degradation]\nmax_perc_A_downstream_TTS = 250\n"));
   CHECK_THROWS(with_toml("[axis_artifact.mapping]\nmin_mapq = 300\n"));
   CHECK_THROWS(with_toml("[axis_novelty_support]\nsj_require_canonical_motif = \"yes\"\n"));
+  // a section that is not a table, a misspelt key, an unknown section
+  CHECK_THROWS(with_toml("axis_chain = 1\n"));
+  CHECK_THROWS(with_toml("[axis_artifact]\nmapping = \"wrong\"\n"));
+  CHECK_THROWS(with_toml("[axis_chain]\nmin_full_read = 10\n"));
+  CHECK_THROWS(with_toml("[axis_novelty]\nsj_min_uniq_reads = 3\n"));
+  // the informational sections older configs carried are still accepted
+  CHECK_NOTHROW(with_toml("[axis_artifact.rt_switch]\n[confidence]\nclasses = [\"KNOWN\"]\n"));
 }

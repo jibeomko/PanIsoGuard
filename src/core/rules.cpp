@@ -1,6 +1,7 @@
 #include "panisoguard/rules.hpp"
 
 #include <cmath>
+#include <initializer_list>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -51,19 +52,47 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
     dst = n->as_string()->get();
   };
 
-  const toml::table* meta = tbl["meta"].as_table();
+  // A section that is present must be a table, and may hold only the keys PanIsoGuard reads:
+  // a misspelt key would otherwise leave its default in force without a word.
+  auto section = [&](const toml::table* parent, const std::string& name, const char* key) -> const toml::table* {
+    const toml::node* n = parent == nullptr ? nullptr : parent->get(key);
+    if (n == nullptr) return nullptr;
+    if (!n->is_table()) fail(name, "must be a table ([" + name + "] section)");
+    return n->as_table();
+  };
+  auto only_keys = [&](const toml::table* t, const std::string& name, std::initializer_list<const char*> allowed) {
+    if (t == nullptr) return;
+    for (const auto& kv : *t) {
+      const std::string key(kv.first.str());
+      bool known = false;
+      for (const char* a : allowed) known = known || key == a;
+      if (!known) fail(name + "." + key, "is not a key PanIsoGuard reads (misspelt?)");
+    }
+  };
+  only_keys(&tbl, "config", {"meta", "axis_novelty_support", "axis_artifact", "axis_chain", "axis_pangenome", "confidence"});
+
+  const toml::table* meta = section(&tbl, "meta", "meta");
+  only_keys(meta, "meta", {"sqanti3_version_target", "ruleset_version"});
   get_string(meta, "meta", "sqanti3_version_target", c.sqanti3_version_target);
   get_string(meta, "meta", "ruleset_version", c.ruleset_version);
 
-  const toml::table* ns = tbl["axis_novelty_support"].as_table();
+  const toml::table* ns = section(&tbl, "axis_novelty_support", "axis_novelty_support");
+  only_keys(ns, "axis_novelty_support", {"sj_min_uniq_reads", "sj_require_canonical_motif", "consensus_min_callers"});
   get_int(ns, "axis_novelty_support", "sj_min_uniq_reads", 1, 1000000, c.sj_min_uniq_reads);
   get_bool(ns, "axis_novelty_support", "sj_require_canonical_motif", c.sj_require_canonical_motif);
   get_int(ns, "axis_novelty_support", "consensus_min_callers", 1, 1000, c.consensus_min_callers);
 
-  const toml::table* art = tbl["axis_artifact"].as_table();
-  const toml::table* deg = art == nullptr ? nullptr : (*art)["degradation"].as_table();
+  const toml::table* art = section(&tbl, "axis_artifact", "axis_artifact");
+  // rt_switch and noncanonical have no thresholds; older configs carried them as empty notes.
+  only_keys(art, "axis_artifact", {"degradation", "mapping", "rt_switch", "noncanonical"});
+  section(art, "axis_artifact.rt_switch", "rt_switch");
+  section(art, "axis_artifact.noncanonical", "noncanonical");
+  const toml::table* deg = section(art, "axis_artifact.degradation", "degradation");
+  only_keys(deg, "axis_artifact.degradation", {"max_perc_A_downstream_TTS"});
   get_double(deg, "axis_artifact.degradation", "max_perc_A_downstream_TTS", 0.0, 100.0, c.perc_A_degradation_threshold);
-  const toml::table* map = art == nullptr ? nullptr : (*art)["mapping"].as_table();
+  const toml::table* map = section(art, "axis_artifact.mapping", "mapping");
+  only_keys(map, "axis_artifact.mapping", {"min_mapq", "min_spanning", "junction_window_bp", "max_low_mapq_frac",
+                                           "max_supplementary_frac", "max_indel_near_frac"});
   get_int(map, "axis_artifact.mapping", "min_mapq", 0, 255, c.bam_min_mapq);
   get_int(map, "axis_artifact.mapping", "min_spanning", 1, 1000000, c.bam_min_spanning);
   get_int(map, "axis_artifact.mapping", "junction_window_bp", 0, 10000, c.bam_junction_window_bp);
@@ -72,8 +101,13 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   get_double(map, "axis_artifact.mapping", "max_supplementary_frac", 0.0, 2.0, c.bam_max_supplementary_frac);
   get_double(map, "axis_artifact.mapping", "max_indel_near_frac", 0.0, 2.0, c.bam_max_indel_near_frac);
 
-  get_int(tbl["axis_chain"].as_table(), "axis_chain", "min_full_reads", 1, 1000000, c.chain_min_full_reads);
-  get_int(tbl["axis_pangenome"].as_table(), "axis_pangenome", "min_haplotypes", 1, 1000000, c.pangenome_min_haplotypes);
+  const toml::table* chain = section(&tbl, "axis_chain", "axis_chain");
+  only_keys(chain, "axis_chain", {"min_full_reads"});
+  get_int(chain, "axis_chain", "min_full_reads", 1, 1000000, c.chain_min_full_reads);
+  const toml::table* pan = section(&tbl, "axis_pangenome", "axis_pangenome");
+  only_keys(pan, "axis_pangenome", {"min_haplotypes"});
+  get_int(pan, "axis_pangenome", "min_haplotypes", 1, 1000000, c.pangenome_min_haplotypes);
+  only_keys(section(&tbl, "confidence", "confidence"), "confidence", {"classes"});  // documentation only
   return engine;
 }
 

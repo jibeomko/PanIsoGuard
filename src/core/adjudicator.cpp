@@ -219,6 +219,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     // a contradiction between the rows that have them either.
     ev.pangenome_path_evaluable = n_pan_with_paths > 0;
     ev.pangenome_path_consistent = ev.pangenome_path_evaluable && !path_common.empty();
+    ev.pangenome_path_complete = n_pan > 0 && n_pan_with_paths == n_pan;
     ev.pangenome_rescue = (n_novel > 0 && n_pan == n_novel &&
                            (!ev.pangenome_path_evaluable || ev.pangenome_path_consistent));
     ev.pangenome_circular = ev.pangenome_evaluable && pangenome_circular;

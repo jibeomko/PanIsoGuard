@@ -42,15 +42,20 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
     const std::string chrom = f[0];
     const int64_t chrom_start = parse_int_field(f[1], "chromStart", "BED12", lineno);  // 0-based
     const int64_t chrom_end = parse_int_field(f[2], "chromEnd", "BED12", lineno);
-    if (chrom_end < chrom_start) {
-      throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": chromEnd is before chromStart");
+    if (chrom_start < 0 || chrom_end < chrom_start) {
+      throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": chromStart/chromEnd are not 0 <= start <= end");
     }
+    const int64_t span = chrom_end - chrom_start;  // both non-negative: no overflow
     rec.name = f[3];
 
     rec.chain.chrom = chrom;
     rec.chain.strand = parse_strand(f[5].empty() ? '.' : f[5][0]);
 
-    const int block_count = static_cast<int>(parse_int_field(f[9], "blockCount", "BED12", lineno));
+    const long long block_count_ll = parse_int_field(f[9], "blockCount", "BED12", lineno);
+    if (block_count_ll < 1 || block_count_ll > 1000000) {
+      throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": blockCount must be between 1 and 1000000");
+    }
+    const int block_count = static_cast<int>(block_count_ll);
     const std::vector<int64_t> sizes = parse_int_list(f[10], "blockSizes", lineno);
     const std::vector<int64_t> starts = parse_int_list(f[11], "blockStarts", lineno);
     if (static_cast<int>(sizes.size()) != block_count ||
@@ -60,10 +65,12 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
     }
 
     // Exons are 0-based half-open [chrom_start+start, chrom_start+start+size) and must lie
-    // inside [chromStart, chromEnd) in order.
+    // inside [chromStart, chromEnd) in order. Compared against the span so that no sum can
+    // overflow: once a block passed, start + size <= span.
     for (int i = 0; i < block_count; ++i) {
+      const bool fits = sizes[i] >= 1 && sizes[i] <= span && starts[i] >= 0 && starts[i] <= span - sizes[i];
       const bool ordered = i == 0 || starts[i] >= starts[i - 1] + sizes[i - 1];
-      if (sizes[i] <= 0 || starts[i] < 0 || chrom_start + starts[i] + sizes[i] > chrom_end || !ordered) {
+      if (!fits || !ordered) {
         throw std::runtime_error("BED12 line " + std::to_string(lineno) + ": block " + std::to_string(i + 1) +
                                  " is empty, out of order, or outside chromStart..chromEnd");
       }

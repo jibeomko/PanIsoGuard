@@ -95,8 +95,9 @@ struct EvidenceVector {
   bool pangenome_rescue = false;       // ALL novel junctions graph-supported, on one common path if known
   bool pangenome_circular = false;     // junction-set provenance is sample-derived/unknown (circular-risk)
   int n_novel_jx_pangenome = 0;
-  bool pangenome_path_evaluable = false;  // every supporting junction row listed its path ids
-  bool pangenome_path_consistent = false; // ...and one path carries all of them
+  bool pangenome_path_evaluable = false;  // at least one supporting junction row listed its path ids
+  bool pangenome_path_consistent = false; // ...and the rows that list ids share one path
+  bool pangenome_path_complete = false;   // every supporting junction row listed its path ids
 
   // multi-caller consensus (optional)
   bool consensus_evaluable = false;  int n_callers = 0;

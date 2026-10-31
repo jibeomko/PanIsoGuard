@@ -38,6 +38,16 @@ Found by a code audit on 2026-10-31; each has a regression test.
   BED12 block outside `chromStart..chromEnd` (or overlapping its neighbour) was accepted;
   both are errors now.
 - `decoys` wrote file paths into its JSON unescaped.
+- Second audit pass (2026-11-01): any output of `adjudicate`, `combine` or `decoys` that is an
+  input file (the reference GTF or classification given to `--write-kept`, a default output
+  path symlinked to an input, two outputs on one file) is refused before anything is read;
+  `--config` also rejects a section that is not a table and a key PanIsoGuard does not read
+  (a misspelling no longer leaves the default silently in force); the BED12 geometry check
+  no longer overflows on huge coordinates and rejects a negative `chromStart` and
+  `blockCount` 0; `attribution.jsonl` gains `pangenome_path_complete` (every supporting
+  junction listed path ids) next to `pangenome_path_consistent` (the listed ones agree); the
+  BAM reader frees its iterator and record through RAII on every exit path; the decoys CTest
+  runs on a fixture that yields a decoy.
 - Benchmark tooling: the cohort aggregator (`benchmark/refbias_cohort/analyze.py`) counted
   candidate junctions as rescued and dropped the negatives at other coordinates from the
   false-rescue count (recounting the original results gives the same 40 + 46 rescued, 0
@@ -48,7 +58,14 @@ Found by a code audit on 2026-10-31; each has a regression test.
   rejects unknown keys, and reads the ruleset from the binary); the population-VCF script
   treated complex alleles as deletions and unphased calls as phased; the GM12878 protocol
   read file names the upstream protocol does not write; the release workflow computed a
-  checksum even when every download attempt had failed.
+  checksum even when every download attempt had failed. Second pass: the merge-comparison
+  agreement split, recounted by membership on the original inputs, is 4 of 730 genuine
+  isoforms for TAMA and 1 for wobble ≥ 5 bp, not 0 as the envelope, the README and the
+  scorer's own note said (the precision-recall curves are unchanged); the cohort aggregator
+  now counts rescued rows only when rescued, takes the expected rows from the truth, and
+  reports `firewall_held_all` only when no row is missing; the cross-validation cache key
+  includes the contents of the classification, GTF and truth files, the TP/TN labels and
+  the filter program.
 
 ### Changed
 - **Ruleset `builtin-0.0.6`.** The two reference-bias fixes above (independent rescue on

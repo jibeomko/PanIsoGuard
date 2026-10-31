@@ -278,7 +278,9 @@ def main():
     for name, m in methods.items():
         print(f"{name:18s} " + " ".join(f"{m['dist'].get(str(k), 0):4d}" for k in range(1, 6)))
 
-    # agreement-split: genuine novels exact assigns =1 caller but another matcher >=2
+    # agreement-split: genuine novels that exact matching leaves at <=1 caller but another
+    # matcher merges into a >=2-caller group (by membership of the genuine chain)
+    splits = {}
     if 'panisoguard_exact' in methods:
         base = methods['panisoguard_exact']['gkey']
         print(f"\n=== agreement-split vs PanIsoGuard-exact (genuine novels exact under-counts) ===")
@@ -287,8 +289,10 @@ def main():
                 continue
             split = sum(1 for k, nc in m['gkey'].items() if nc >= 2 and base.get(k, 0) <= 1)
             recov = sum(1 for k, nc in m['gkey'].items() if nc > base.get(k, 0))
+            splits[name] = (split, recov)
             print(f"  {name:16s}: {split:4d} genuine novels reach >=2 callers here but <=1 in exact "
                   f"(total upgraded: {recov})")
+    split_text = "; ".join(f"{name} {s} of {r} upgraded" for name, (s, r) in splits.items()) or "n/a"
 
     if args.emit_metrics:
         out = dict(
@@ -314,28 +318,21 @@ def main():
                 "directly, NOT a novel merge algorithm. (2) The consensus precision claim is "
                 "MATCHER-ROBUST: >=3-caller novel precision is ~0.975-0.980 across exact "
                 "(combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled "
-                "exact->fuzzy wobble sweep (0-20bp). (3) Critically, the agreement-split "
-                "metric is 0 for every fuzzy matcher: NO genuine novel that exact matching "
-                "calls single-caller is upgraded to >=2 callers by any fuzzy matcher -- the "
-                "single<->multi boundary that the consensus gate depends on is not an "
-                "artifact of exact matching. Honest framing: multi-caller consensus is "
-                "established field practice (LRGASP); combine operationalizes it correctly "
-                "and the reference-bias rescue remains PanIsoGuard's true differentiator."),
+                "exact->fuzzy wobble sweep (0-20bp). (3) Agreement split, counted by the "
+                "genuine chain's membership of a fuzzy group (genuine novels that exact "
+                "matching leaves at <=1 caller but the fuzzy matcher merges into a >=2-caller "
+                "group, of all genuine novels whose caller count rose): " + split_text + ". "
+                "Multi-caller consensus is established practice (LRGASP); combine implements "
+                "it with exact matching, and the reference-bias rescue is what PanIsoGuard "
+                "adds."),
             metrics=dict(
                 total_truth_genuine_novel=sc.total_genuine,
                 methods={name: dict(novel_chains=sum(1 for v in m['key_info'].values() if v[1]),
                                     n_callers_distribution=m['dist'], pr_curve=m['curve'])
                          for name, m in methods.items()},
                 agreement_split_vs_exact={
-                    name: dict(
-                        genuine_reaching_ge2_but_le1_in_exact=sum(
-                            1 for k, nc in m['gkey'].items()
-                            if nc >= 2 and methods['panisoguard_exact']['gkey'].get(k, 0) <= 1),
-                        genuine_upgraded=sum(
-                            1 for k, nc in m['gkey'].items()
-                            if nc > methods['panisoguard_exact']['gkey'].get(k, 0)))
-                    for name, m in methods.items()
-                    if name != 'panisoguard_exact' and 'panisoguard_exact' in methods},
+                    name: dict(genuine_reaching_ge2_but_le1_in_exact=s, genuine_upgraded=r)
+                    for name, (s, r) in splits.items()},
             ),
         )
         with open(args.emit_metrics, 'w') as fh:

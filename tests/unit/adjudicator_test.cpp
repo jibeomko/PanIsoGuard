@@ -450,6 +450,8 @@ TEST_CASE("adjudicator: disjoint pangenome paths are a contradiction even when a
     in.pangenome = &pan;
     const auto out = adjudicate(in, RuleEngine());
     CHECK(out[0].evidence.pangenome_rescue);
+    CHECK(out[0].evidence.pangenome_path_consistent);
+    CHECK_FALSE(out[0].evidence.pangenome_path_complete);   // one junction listed no path: not "all on one path"
     CHECK(out[0].verdict.confidence == ConfidenceClass::kReferenceBias);
   }
 }

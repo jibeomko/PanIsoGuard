@@ -68,6 +68,23 @@ inline bool same_file(const std::string& a, const std::string& b) {
   return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
 }
 
+// Refuse an output path that names an input file, or another output: writing it would erase
+// the input behind a successful exit. A path that does not exist yet cannot collide, and a
+// symlink or hard link to an input is the input.
+inline void refuse_overwriting_inputs(const std::vector<std::string>& outputs, const std::vector<std::string>& inputs) {
+  for (std::size_t i = 0; i < outputs.size(); ++i) {
+    if (outputs[i].empty()) continue;
+    for (const auto& in : inputs) {
+      if (!in.empty() && same_file(outputs[i], in))
+        throw std::runtime_error("output " + outputs[i] + " is the input file " + in + "; choose another path");
+    }
+    for (std::size_t j = i + 1; j < outputs.size(); ++j) {
+      if (!outputs[j].empty() && same_file(outputs[i], outputs[j]))
+        throw std::runtime_error("outputs " + outputs[i] + " and " + outputs[j] + " are the same file");
+    }
+  }
+}
+
 // JSON string escaping: quotes, backslashes and control characters.
 inline std::string json_escape(const std::string& s) {
   std::string o;

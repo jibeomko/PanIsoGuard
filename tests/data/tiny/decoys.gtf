@@ -1,0 +1,8 @@
+chr1	toy	exon	101	200	.	+	.	gene_id "G1"; transcript_id "A";
+chr1	toy	exon	301	400	.	+	.	gene_id "G1"; transcript_id "A";
+chr1	toy	exon	501	600	.	+	.	gene_id "G1"; transcript_id "A";
+chr1	toy	exon	701	800	.	+	.	gene_id "G1"; transcript_id "A";
+chr1	toy	exon	51	150	.	+	.	gene_id "G1"; transcript_id "B";
+chr1	toy	exon	301	400	.	+	.	gene_id "G1"; transcript_id "B";
+chr1	toy	exon	501	600	.	+	.	gene_id "G1"; transcript_id "B";
+chr1	toy	exon	901	1000	.	+	.	gene_id "G1"; transcript_id "B";

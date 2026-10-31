@@ -182,10 +182,10 @@ if(PANISOGUARD_BUILD_TESTS)
       COMMAND ${Python3_EXECUTABLE}
               "${CMAKE_SOURCE_DIR}/examples/worked_locus/rules_replay.py"
               $<TARGET_FILE:panisoguard>)
-    # `panisoguard decoys` end to end on the worked locus: both output files are written and
-    # the JSON parses (the decoy generator itself is unit-tested).
+    # `panisoguard decoys` end to end: two transcripts of one gene that share an intron give
+    # one decoy; both output files are written and the JSON counts it.
     add_test(NAME integration_decoys
-      COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/decoys' && '$<TARGET_FILE:panisoguard>' decoys --ref-gtf '${CMAKE_SOURCE_DIR}/examples/worked_locus/data/reference.gtf' --bam '${CMAKE_SOURCE_DIR}/examples/worked_locus/data/long_reads.bam' --out '${CMAKE_BINARY_DIR}/decoys/toy' >/dev/null 2>&1 && head -n1 '${CMAKE_BINARY_DIR}/decoys/toy.decoys.tsv' | grep -q '^decoy_id' && '${Python3_EXECUTABLE}' -c \"import json,sys; d=json.load(open('${CMAKE_BINARY_DIR}/decoys/toy.decoys.json')); sys.exit(0 if 'decoys' in d and 'parents' in d else 1)\"")
+      COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/decoys' && '$<TARGET_FILE:panisoguard>' decoys --ref-gtf '${CMAKE_SOURCE_DIR}/tests/data/tiny/decoys.gtf' --bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out '${CMAKE_BINARY_DIR}/decoys/toy' >/dev/null 2>&1 && test \"$(wc -l < '${CMAKE_BINARY_DIR}/decoys/toy.decoys.tsv')\" -ge 2 && '${Python3_EXECUTABLE}' -c \"import json,sys; d=json.load(open('${CMAKE_BINARY_DIR}/decoys/toy.decoys.json')); sys.exit(0 if d['decoys']['n'] >= 1 and d['parents']['n'] == 2 else 1)\"")
   else()
     message(STATUS "PanIsoGuard: Python3 not found -- skipping truth-based integration tests")
   endif()

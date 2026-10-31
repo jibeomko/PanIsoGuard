@@ -46,31 +46,38 @@ artifacts), not of PanIsoGuard's exact matcher.
 ## Result 3 — exact matching does not lose agreements at the boundary that matters
 
 The decisive metric: how many **genuine** novels does exact matching call *single-caller*
-that a fuzzy matcher upgrades to *≥ 2 callers*?
+that a fuzzy matcher merges into a *≥ 2 callers* group? Counted by the genuine chain's
+membership of the fuzzy group (a genuine chain merged into a group whose representative
+is a different, false chain still counts as merged).
 
 | fuzzy matcher | genuine novels crossing single → ≥2 | genuine upgraded (any amount) |
 |---------------|:----:|:----:|
-| gffcompare | **0** | 0 |
-| TAMA (10 bp) | **0** | 55 |
-| wobble 5 / 10 / 20 bp | **0** | 38 / 52 / 67 |
+| gffcompare | 0 | 0 |
+| TAMA (10 bp) | **4** | 78 |
+| wobble 2 / 5 / 10 / 20 bp | 0 / **1** / **1** / **1** | 2 / 46 / 62 / 80 |
 
-**Zero** at every wobble level and for TAMA. The chains a fuzzy merge upgrades (55 for
-TAMA) all move *within* the multi-caller pile (e.g. 3→4 callers); **none** crosses the
-single↔multi boundary the consensus gate depends on. The single-caller artifacts are
-genuinely single-caller — no other caller reports anything within 20 bp — so fuzzy
-merging does not rescue them and does not inflate the ≥k precision. (TAMA's more
-aggressive merge collapses the call set to 974 novel chains and trades some recall at ≥3,
-0.831 vs 0.910 — a different operating point, not a more accurate one.)
+Of 730 genuine novel isoforms, 4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
+boundary under a fuzzy matcher; the rest of the upgrades move within the multi-caller pile
+(for example 3 → 4 callers). So exact matching costs the consensus gate at most 4 genuine
+isoforms in 730 on this set, and the ≥ k precision (Result 2) is the same under every
+matcher. (TAMA's more aggressive merge collapses the call set to 974 novel chains and trades
+some recall at ≥ 3, 0.831 vs 0.910 — a different operating point, not a more accurate one.)
 
-## Honest takeaway
+**Correction (2026-11-01).** The scorer used to count this metric by each fuzzy group's
+representative chain, which missed a genuine chain merged into a group represented by a
+false chain; it reported 0 for every matcher. The counts above are the recomputation on the
+original inputs with the membership-based count; the precision-recall curves and the
+n_callers distributions did not change.
 
-- Multi-caller consensus is **established field practice** (LRGASP; *Nat Commun* 2024),
-  not a PanIsoGuard invention. `combine` **operationalizes it correctly** — provably
-  equal to gffcompare, robust to the exact-vs-fuzzy choice — and feeds it into the
-  adjudicator as one evidence axis.
-- The consensus axis is therefore a **sound, validated** component, but **not the
-  differentiator**. PanIsoGuard's genuine moat is the **reference-bias rescue + circularity
-  firewall** (no surveyed merge/QC tool does this) and the unified auditable verdict. See
+## Takeaway
+
+- Multi-caller consensus is established practice (LRGASP; *Nat Commun* 2024), not a
+  PanIsoGuard invention. `combine` groups isoforms the way gffcompare -i does and feeds the
+  result to the adjudicator as one evidence axis; the ≥ k precision is the same under a fuzzy
+  matcher, and exact matching moves at most 4 of 730 genuine isoforms across the
+  single/multi-caller boundary on this set.
+- What PanIsoGuard adds is the reference-bias rescue with its circularity firewall and the
+  single verdict with its reasons. See
   [../../docs/relationship_to_merge_tools.md](../../docs/relationship_to_merge_tools.md).
 
 ## Reproduce

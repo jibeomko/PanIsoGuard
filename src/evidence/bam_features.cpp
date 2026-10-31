@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -79,15 +80,20 @@ bool strand_compatible(const bam1_t* b, Strand wanted) {
   return s == Strand::kUnknown || s == wanted;
 }
 
-hts_itr_t* query(hts_idx_t* idx, const std::string& path, int tid, int64_t beg, int64_t end) {
-  hts_itr_t* itr = sam_itr_queryi(idx, tid, beg, end);
-  if (itr == nullptr) throw std::runtime_error("cannot query the index of " + path);
+struct ItrDeleter { void operator()(hts_itr_t* p) const { hts_itr_destroy(p); } };
+struct RecDeleter { void operator()(bam1_t* p) const { bam_destroy1(p); } };
+using Itr = std::unique_ptr<hts_itr_t, ItrDeleter>;
+using Rec = std::unique_ptr<bam1_t, RecDeleter>;
+
+Itr query(hts_idx_t* idx, const std::string& path, int tid, int64_t beg, int64_t end) {
+  Itr itr(sam_itr_queryi(idx, tid, beg, end));
+  if (!itr) throw std::runtime_error("cannot query the index of " + path);
   return itr;
 }
 
-bam1_t* new_record() {
-  bam1_t* b = bam_init1();
-  if (b == nullptr) throw std::runtime_error("out of memory reading a BAM record");
+Rec new_record() {
+  Rec b(bam_init1());
+  if (!b) throw std::runtime_error("out of memory reading a BAM record");
   return b;
 }
 
@@ -106,10 +112,11 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
 
   const int64_t beg = intron.start - p.junction_window_bp > 0 ? intron.start - p.junction_window_bp : 0;
   const int64_t end = intron.end + p.junction_window_bp;
-  hts_itr_t* itr = query(impl_->idx, impl_->path, tid, beg, end);
-  bam1_t* b = new_record();
+  const Itr itr = query(impl_->idx, impl_->path, tid, beg, end);
+  const Rec rec = new_record();
+  bam1_t* b = rec.get();
   int ret;
-  while ((ret = sam_itr_next(impl_->fp, itr, b)) >= 0) {
+  while ((ret = sam_itr_next(impl_->fp, itr.get(), b)) >= 0) {
     if (b->core.flag & BAM_FUNMAP) continue;
     if (!strand_compatible(b, strand)) continue;
 
@@ -149,8 +156,6 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
     if (b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) ++f.n_supplementary;
     if (indel_near) ++f.n_indel_near;
   }
-  bam_destroy1(b);
-  hts_itr_destroy(itr);
   check_read(ret, impl_->path, chrom);
   f.evaluated = true;
   return f;
@@ -166,11 +171,12 @@ ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
   // deep, isoform-rich locus). n_partial is counted over the same reads.
   const int64_t beg = chain.introns.front().start > 0 ? chain.introns.front().start - 1 : 0;
   const int64_t end = chain.introns.front().start + 1;
-  hts_itr_t* itr = query(impl_->idx, impl_->path, tid, beg, end);
-  bam1_t* b = new_record();
+  const Itr itr = query(impl_->idx, impl_->path, tid, beg, end);
+  const Rec rec = new_record();
+  bam1_t* b = rec.get();
   std::vector<Junction> introns;
   int ret;
-  while ((ret = sam_itr_next(impl_->fp, itr, b)) >= 0) {
+  while ((ret = sam_itr_next(impl_->fp, itr.get(), b)) >= 0) {
     if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) continue;
     if (!strand_compatible(b, chain.strand)) continue;
     introns.clear();
@@ -186,8 +192,6 @@ ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
     if (contiguous_subchain(chain.introns, introns)) ++s.n_full;
     else if (contiguous_subchain(introns, chain.introns)) ++s.n_partial;
   }
-  bam_destroy1(b);
-  hts_itr_destroy(itr);
   check_read(ret, impl_->path, chain.chrom);
   s.evaluated = true;
   return s;

@@ -67,37 +67,41 @@ def analyze(W):
     hom = sum(1 for r in kept if r[4] == "mat,pat")
     novel = sum(1 for r in kept if (int(r[1]), int(r[2])) not in GI.get(r[0], set()))
     def tally(tag):
-        # Every scan row is read. A CREATED row is counted only for a kept (read-supported)
-        # candidate junction; the DISRUPTED / CONTROL negatives are counted wherever they are,
-        # since a false rescue on a control junction is a false rescue. Per junction: rescued
-        # when at least one haplotype's row is REFERENCE_BIAS, held when every CREATED row of it
-        # was UNRESOLVED under circular-risk provenance.
-        rows = fr = missing = 0
-        rescued, held_rows, created_rows = set(), defaultdict(int), defaultdict(int)
+        # The rows to expect come from vt.truth, not from whatever the adjudication wrote: every
+        # CREATED isoform of a kept (read-supported) junction, per haplotype scan, plus every
+        # DISRUPTED / CONTROL negative wherever it is. A row that is absent is missing, not held.
+        # Per junction: rescued when at least one haplotype's row is REFERENCE_BIAS; held when
+        # every expected row is present and UNRESOLVED under circular-risk provenance.
+        rescued_rows = fr = missing = 0
+        rescued, held_rows, expected_rows = set(), defaultdict(int), defaultdict(int)
         for d in glob.glob(f"{W}/scan/chr*.pat") + glob.glob(f"{W}/scan/chr*.mat"):
-            adj = f"{d}/adj_{tag}.adjudicated.tsv"
-            if not os.path.exists(adj): missing += 1; continue
             truth = {l.split('\t')[0]: l.strip().split('\t')[1] for l in open(f"{d}/vt.truth")}
             exj = defaultdict(list); chrom = d.split('/')[-1].split('.')[0]
             for ln in open(f"{d}/vt.gtf"):
                 f = ln.rstrip('\n').split('\t'); iso = f[8].split('transcript_id "')[1].split('"')[0]
                 exj[iso].append((int(f[3]), int(f[4])))
             jc = {i: (chrom, sorted(v)[0][1], sorted(v)[1][0] - 1) for i, v in exj.items() if len(v) >= 2}
-            hdr = None; seen = set()
-            for ln in open(adj):
-                f = ln.rstrip('\n').split('\t')
-                if hdr is None: hdr = {c: i for i, c in enumerate(f)}; continue
-                iso = f[hdr['isoform_id']]; cls = f[hdr['confidence_class']]; lab = truth.get(iso); seen.add(iso)
+            verdict = {}
+            adj = f"{d}/adj_{tag}.adjudicated.tsv"
+            if os.path.exists(adj):
+                hdr = None
+                for ln in open(adj):
+                    f = ln.rstrip('\n').split('\t')
+                    if hdr is None: hdr = {c: i for i, c in enumerate(f)}; continue
+                    verdict[f[hdr['isoform_id']]] = (f[hdr['confidence_class']], f[hdr['circularity_flag']])
+            for iso, lab in truth.items():
+                cls, circ = verdict.get(iso, (None, None))
                 if lab in ("DISRUPTED", "CONTROL_canon"):
-                    if cls == "REFERENCE_BIAS": fr += 1
+                    if cls is None: missing += 1
+                    elif cls == "REFERENCE_BIAS": fr += 1
                     continue
                 if lab != "CREATED" or jc.get(iso) not in keptset: continue
-                j = jc[iso]; rows += 1; created_rows[j] += 1
-                if cls == "REFERENCE_BIAS": rescued.add(j)
-                if cls == "UNRESOLVED" and f[hdr['circularity_flag']] == "true": held_rows[j] += 1
-            missing += sum(1 for i in truth if i not in seen)
-        held = {j for j, n in created_rows.items() if held_rows[j] == n}
-        return rows, rescued, fr, held, missing
+                j = jc[iso]; expected_rows[j] += 1
+                if cls is None: missing += 1; continue
+                if cls == "REFERENCE_BIAS": rescued.add(j); rescued_rows += 1
+                if cls == "UNRESOLVED" and circ == "true": held_rows[j] += 1
+        held = {j for j, n in expected_rows.items() if held_rows[j] == n}
+        return rescued_rows, rescued, fr, held, missing
     rw, rescued, fr, _, missing_wgs = tally("wgs"); _, _, _, held, missing_unk = tally("unk")
     uj = set()
     for g in glob.glob(f"{W}/scan/chr*.novel.gtf"):
@@ -128,7 +132,8 @@ tot = {
     "novel_vs_gencode_v49": sum(p["novel_vs_gencode_v49"] for p in per.values()),
     "rescued_unique": sum(p["rescued_junctions"] for p in per.values()),
     "false_rescues": sum(p["false_rescues"] for p in per.values()),
-    "firewall_held_all": all(p["firewall_held_junctions"] == p["reference_bias_junctions"] for p in per.values()),
+    "firewall_held_all": all(p["firewall_held_junctions"] == p["reference_bias_junctions"] and p["missing_scan_rows"] == 0
+                             for p in per.values()),
     "missing_scan_rows": sum(p["missing_scan_rows"] for p in per.values()),
     "individuals": len(per),
 }

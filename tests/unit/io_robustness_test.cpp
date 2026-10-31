@@ -10,6 +10,7 @@
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/result_writer.hpp"
 #include "panisoguard/sj_tab.hpp"
+#include "panisoguard/tsv.hpp"
 #include "test_util.hpp"
 
 using namespace panisoguard;
@@ -105,8 +106,33 @@ TEST_CASE("SJ.tab / pangenome: inverted intron (start > end) is rejected", "[io]
 }
 
 TEST_CASE("--write-kept refuses to overwrite its own input", "[io][result_writer]") {
-  const std::string gtf = tiny("mini.gtf");
+  const std::string gtf = scratch("kept_input.gtf");   // a copy, so a regression cannot touch the fixture
+  { std::ofstream(gtf) << slurp(tiny("mini.gtf")); }
   CHECK(throws_containing([&] { write_kept_isoforms(gtf, false, gtf, {"T1"}); }, {"input isoform file"}));
+  CHECK(slurp(gtf) == slurp(tiny("mini.gtf")));
+  std::remove(gtf.c_str());
+}
+
+TEST_CASE("an output that is an input file, through a symlink too, is refused before anything is written", "[io]") {
+  const std::string in = scratch("conflict_in.gtf"), link = scratch("conflict_link.tsv"), other = scratch("conflict_other.tsv");
+  { std::ofstream(in) << "x\n"; }
+  std::remove(link.c_str());
+  REQUIRE(symlink(in.c_str(), link.c_str()) == 0);
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({link}, {in}); }, {"is the input file"}));
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({in}, {"", in}); }, {"is the input file"}));
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({in, link}, {}); }, {"are the same file"}));
+  CHECK_NOTHROW(refuse_overwriting_inputs({other, ""}, {in}));   // an output that does not exist yet cannot collide
+  std::remove(link.c_str());
+  std::remove(in.c_str());
+}
+
+TEST_CASE("BED12: numeric edges are rejected without overflow", "[io][robustness]") {
+  TempFile huge("chr1\t9223372036854775800\t9223372036854775807\tiso\t0\t+\t0\t0\t0\t1\t10,\t0,\n");
+  CHECK_THROWS(read_bed12(huge.path));
+  TempFile negative("chr1\t-5\t300\tiso\t0\t+\t0\t0\t0\t1\t50,\t0,\n");
+  CHECK(throws_containing([&] { read_bed12(negative.path); }, {"chromStart/chromEnd"}));
+  TempFile zero_blocks("chr1\t100\t300\tiso\t0\t+\t0\t0\t0\t0\t,\t,\n");
+  CHECK(throws_containing([&] { read_bed12(zero_blocks.path); }, {"blockCount"}));
 }
 
 #ifdef __linux__
