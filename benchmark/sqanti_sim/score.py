@@ -10,7 +10,7 @@ Truth per FLAIR isoform (matched by exact intron chain):
   monoexonic     - no intron chain (excluded from the novel-detection task)
 
 Reports: confusion (truth x confidence class), genuine-novel detection
-precision/recall at the decisive threshold (HIGH/NOVEL_PROBABLE = predicted
+precision/recall at the decisive threshold (NOVEL_CONFIRMED/NOVEL_PROBABLE = predicted
 genuine), per-SQANTI-category recall, and AUPRC for genuine-vs-false ranking.
 
 Usage: score.py <flair.isoforms.gtf> <truth.tsv> <adjudicated.tsv>
@@ -75,7 +75,7 @@ print("truth".ljust(14) + "".join(c[:9].rjust(10) for c in classes) + "   total"
 for tl in ["genuine_novel","known","false_novel","monoexonic"]:
     c = conf[tl]; print(tl.ljust(14) + "".join(str(c[k]).rjust(10) for k in classes) + str(sum(c.values())).rjust(8))
 
-# ---- genuine-novel detection (decisive): predicted genuine = HIGH/NOVEL_PROBABLE ----
+# ---- genuine-novel detection (decisive): predicted genuine = NOVEL_CONFIRMED/NOVEL_PROBABLE ----
 # restrict to the discrimination task: truth in {genuine_novel, false_novel} (multi-exon)
 GEN = {"NOVEL_CONFIRMED","NOVEL_PROBABLE"}
 tp = sum(1 for _,tl,vc,_ in rows if tl=='genuine_novel' and vc in GEN)
@@ -85,7 +85,7 @@ tn = sum(1 for _,tl,vc,_ in rows if tl=='false_novel'  and vc not in GEN)
 prec = tp/(tp+fp) if tp+fp else float('nan')
 rec  = tp/(tp+fn) if tp+fn else float('nan')
 spec = tn/(tn+fp) if tn+fp else float('nan')
-print("\n=== genuine-novel detection (predicted genuine = HIGH/NOVEL_PROBABLE) ===")
+print("\n=== genuine-novel detection (predicted genuine = NOVEL_CONFIRMED/NOVEL_PROBABLE) ===")
 print(f"genuine_novel={tp+fn}  false_novel={fp+tn}")
 print(f"precision={prec:.3f}  recall={rec:.3f}  specificity(false rejected)={spec:.3f}")
 

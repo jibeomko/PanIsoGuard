@@ -10,6 +10,7 @@
 #include <climits>
 #include <cstdlib>
 #include <sys/stat.h>
+#include <unistd.h>
 
 namespace panisoguard {
 
@@ -70,9 +71,20 @@ inline bool same_file(const std::string& a, const std::string& b) {
   return sa.st_dev == sb.st_dev && sa.st_ino == sb.st_ino;
 }
 
-// The path a file will have once written: its directory resolved through symlinks (when it
-// exists) plus the file name. Lets two paths be compared before either file exists.
-inline std::string resolved_path(const std::string& p) {
+// The path a file will have once written: a final symlink followed to its target (which need
+// not exist yet), then the directory resolved through symlinks (when it exists) plus the file
+// name. Lets two paths be compared before either file exists.
+inline std::string resolved_path(std::string p) {
+  for (int hop = 0; hop < 40; ++hop) {   // bounded like the kernel's symlink-loop limit
+    struct stat st;
+    if (lstat(p.c_str(), &st) != 0 || !S_ISLNK(st.st_mode)) break;
+    char target[PATH_MAX];
+    const ssize_t n = readlink(p.c_str(), target, sizeof(target) - 1);
+    if (n < 0) break;
+    target[n] = '\0';
+    const std::size_t at = p.rfind('/');
+    p = target[0] == '/' || at == std::string::npos ? std::string(target) : p.substr(0, at + 1) + target;
+  }
   const std::size_t slash = p.rfind('/');
   const std::string dir = slash == std::string::npos ? "." : slash == 0 ? "/" : p.substr(0, slash);
   const std::string name = slash == std::string::npos ? p : p.substr(slash + 1);
@@ -84,7 +96,7 @@ inline std::string resolved_path(const std::string& p) {
 // Refuse an output path that names an input file, or another output: writing it would erase
 // the input, or an earlier output, behind a successful exit. Existing files are compared by
 // inode (a symlink or hard link to an input is the input); files not written yet by their
-// resolved path.
+// resolved path (a symlink to a file not written yet is that file).
 inline void refuse_overwriting_inputs(const std::vector<std::string>& outputs, const std::vector<std::string>& inputs) {
   auto clash = [](const std::string& a, const std::string& b) { return same_file(a, b) || resolved_path(a) == resolved_path(b); };
   for (std::size_t i = 0; i < outputs.size(); ++i) {

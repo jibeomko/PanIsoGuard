@@ -1,11 +1,12 @@
-# BAM mapping axis — wiring the indel-near / soft-clip read signals
+# BAM mapping axis — wiring the indel-near read signal
 
 The BAM read-level axis (`adjudicate --bam`) inspects the spanning reads at every novel
-junction and measures four fractions: low-MAPQ, supplementary/secondary, **terminal
-soft-clip, and indel-adjacent-to-the-junction**. Before v0.0.4 only the first two fed
-the verdict; the soft-clip and indel-near fractions were computed and emitted to
-`attribution.jsonl` for inspection but never acted on. This protocol asks whether they
-*should* be — and wires the answer in.
+junction. When this protocol was run (0.0.4) it measured four fractions: low-MAPQ,
+supplementary/secondary, terminal soft-clip and indel-adjacent-to-the-junction. Only the
+first two fed the verdict; the soft-clip and indel-near fractions were written to
+`attribution.jsonl` but never acted on. This protocol asks whether they should be. The
+answer wired in indel-near. The soft-clip fraction never became a default gate and was
+removed in 0.0.8, so its numbers below are history.
 
 ## The mechanism (and why it is the "pangenome insertion" case)
 
@@ -36,15 +37,16 @@ every junction with ≥ 1 read, which gave a false mean of 0.350 and 33 % above 
 that came from 1–2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
 `min_spanning = 3` leaves those out.)
 
-Soft-clip is ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020) —
-it does not discriminate here. It is wired into the same mapping mechanism but **disabled
-by default** (`max_softclip_frac = 1.01`, which can never fire). Two reasons: it has no
-demonstrated yield on this set, and — unlike `indel_near`, which is junction-proximal
-(`bam_junction_window_bp`) — the soft-clip feature is a terminal soft-clip *anywhere*
-on the read, so on real long reads it also fires on adapter / poly-A read ends of
-legitimate junction-spanning reads. A default-on gate would therefore risk demoting genuine
-novels (`NOVEL_CONFIRMED` → `NOVEL_PROBABLE`). The knob is left for users who validate it on their own chemistry;
-making it junction-proximal is future work.
+Soft-clip was ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020): it
+did not discriminate here. It was wired into the same mapping mechanism but switched off
+by default (its gate could never fire), for two reasons: it had no demonstrated yield on
+this set, and, unlike `indel_near`, which is junction-proximal (`junction_window_bp`), it
+measured a terminal soft-clip anywhere on the read, so on real long reads it also fired on
+adapter / poly-A read ends of legitimate junction-spanning reads
+([gm12878_realdata](../gm12878_realdata): 187 of 191 ONT junctions). A default-on gate
+would have demoted genuine novels (`NOVEL_CONFIRMED` → `NOVEL_PROBABLE`). The fraction and
+its config keys (`max_softclip_frac`, `softclip_min_bp`) were removed in 0.0.8; a config
+that still sets them is rejected.
 
 ## The operating point (zero genuine cost)
 
@@ -58,8 +60,8 @@ gates):
 
 ## Impact — wired ON vs OFF (same binary, same inputs)
 
-`adjudicate --bam` with the default config (ON) vs a config that raises the indel/softclip
-gates above 1.0 (OFF, never fires):
+`adjudicate --bam` with the default config (ON) vs a config that raises the indel-near
+gate above 1.0 (OFF, never fires):
 
 | | OFF (low-MAPQ/supp only) | ON (+ indel-near) |
 |---|:---:|:---:|
@@ -87,5 +89,5 @@ WORK=/path/to/sqanti_sim/work ./run.sh   # needs the sqanti_sim work dir (FLAIR 
 
 Inputs are public/simulated (SQANTI-SIM GENCODE v49 chr22, the same shared alignment as the
 [sqanti_sim](../sqanti_sim) / [multicaller](../multicaller) protocols). The unit test
-`rules: indel-near and soft-clip are mapping-artifact triggers` pins the rule logic.
+`rules: indel-near is a mapping-artifact trigger` pins the rule logic.
 Result envelope: [../results/bam_axis/metrics.json](../results/bam_axis/metrics.json).

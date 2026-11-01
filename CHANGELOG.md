@@ -48,6 +48,17 @@ Found by a code audit on 2026-10-31; each has a regression test.
   junction listed path ids) next to `pangenome_path_consistent` (the listed ones agree); the
   BAM reader frees its iterator and record through RAII on every exit path; the decoys CTest
   runs on a fixture that yields a decoy.
+- Fourth audit pass (2026-11-01): an output that is a symlink to a file not written yet
+  (`ln -s result.adjudicated.tsv kept.gtf`, then `--out-prefix result --write-kept kept.gtf`)
+  passed the output check and the verdict table was overwritten by the GTF. A final symlink
+  is now followed to its target before outputs are compared.
+- Benchmark write-ups: the merge comparison said the consensus precision was the same under
+  every matcher; it is similar at ≥ 3 callers (0.975–0.980) and differs at ≥ 2 (0.836–0.933).
+  The bam_axis and GM12878 write-ups described the removed soft-clip gate as a current
+  setting. Old class names in the synthetic_axes table and in benchmark script docstrings
+  replaced. `docs/validation.md` rows corrected: bam_axis (false mean 0.129 after the
+  spanning-read gate; 0.350 before it) and refbias_3way (verdict-level 12 of 32 and 21 of 39
+  next to the rule-level counts).
 - Benchmark tooling: the cohort aggregator (`benchmark/refbias_cohort/analyze.py`) counted
   candidate junctions as rescued and dropped the negatives at other coordinates from the
   false-rescue count (recounting the original results gives the same 40 + 46 rescued, 0
@@ -523,8 +534,8 @@ tool, not a more accurate filter (see README, "How it compares").
   the positive rate, not a method. `docs/validation.md` now states that the
   reference-bias benchmarks use the rescue rule's own criterion as truth.
 - **Positioning** (after head-to-head benchmarking): `combine` is a
-  re-implementation of `gffcompare -i` (not a novel merge), the consensus precision is
-  the same under every matcher, and the reference-bias rescue is a **high-specificity, high-sensitivity
+  re-implementation of `gffcompare -i` (not a novel merge), the ≥ 3-caller consensus precision is
+  similar under every matcher, and the reference-bias rescue is a **high-specificity, high-sensitivity
   check with a low base rate** (~1 in 18k introns genome-wide) — a correctness
   check, not a high-yield discovery engine. New
   [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md).

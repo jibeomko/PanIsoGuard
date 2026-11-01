@@ -294,6 +294,10 @@ def main():
                   f"(total upgraded: {recov})")
     split_text = "; ".join(f"{name} {s} of {r} upgraded" for name, (s, r) in splits.items()) or "n/a"
 
+    def precision_range(k):
+        ps = [pt['precision'] for m in methods.values() for pt in m['curve'] if pt['min_callers'] == k]
+        return f"{min(ps):.3f}-{max(ps):.3f}"
+
     if args.emit_metrics:
         out = dict(
             protocol="merge_comparison", scope="gencode_v49_chr22_5caller",
@@ -311,14 +315,15 @@ def main():
             source=None,
             notes=(
                 "Head-to-head vs the incumbent multi-caller merge tools. (1) PanIsoGuard "
-                "`combine` (exact intron-chain) produces a caller-support grouping IDENTICAL "
+                "`combine` (exact intron-chain) produces a caller-support grouping identical "
                 "to gffcompare -i (same novel count, same n_callers distribution, same PR "
                 "curve) -> combine is a re-implementation in htslib of the "
                 "established N-way intron-chain comparison that feeds the adjudicator "
-                "directly, not a new merge algorithm. (2) The consensus precision claim is "
-                "the same under every matcher: >=3-caller novel precision is ~0.975-0.980 across exact "
-                "(combine/gffcompare), fuzzy TAMA (junction wobble 10bp), and a controlled "
-                "exact->fuzzy wobble sweep (0-20bp). (3) Agreement split, counted by the "
+                "directly, not a new merge algorithm. (2) At >=3 callers the novel precision is "
+                "similar under every matcher in this experiment, " + precision_range(3) + " across exact "
+                "(combine/gffcompare), fuzzy TAMA (junction wobble 10bp) and a controlled "
+                "exact->fuzzy wobble sweep (0-20bp); at >=2 callers the matchers differ (" +
+                precision_range(2) + "). (3) Agreement split, counted by the "
                 "genuine chain's membership of a fuzzy group (genuine novels that exact "
                 "matching leaves at <=1 caller but the fuzzy matcher merges into a >=2-caller "
                 "group, of all genuine novels whose caller count rose): " + split_text + ". "

@@ -7,7 +7,7 @@ false_novel = multi-exon chain matching no simulated transcript. Task: genuine v
 false among multi-exon isoforms, reported overall (non-FSM) and per SQANTI category.
 
 Methods are NAME=KIND:PATH, KIND one of
-  pig     PanIsoGuard adjudicated.tsv   positive = HIGH/NOVEL_PROBABLE, score = class rank
+  pig     PanIsoGuard adjudicated.tsv   positive = NOVEL_CONFIRMED/NOVEL_PROBABLE, score = class rank
   piglen  PanIsoGuard adjudicated.tsv   positive = anything but ARTIFACT (keep-filter semantics)
   rules   SQANTI3 *_RulesFilter_classification.txt   positive = filter_result == Isoform
   ml      SQANTI3 *_ML_classification.txt            positive = filter_result == Isoform, score = POS_MLprob
