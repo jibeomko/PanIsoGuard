@@ -15,7 +15,7 @@ Note on sweepable knobs: this protocol's truth SJ.tab is truth-derived with a fi
 n_uniq=50 and canonical motif (prep_truth_sj.py), so the short-read stringency knobs
 (sj_min_uniq_reads below ~50, sj_require_canonical_motif) are near-inert here and the
 grid includes a value above 50 to expose the support cliff; the knob that actually
-moves verdicts is perc_A_degradation_threshold (degradation mechanism -> HIGH vs MED).
+moves verdicts is perc_A_degradation_threshold (degradation mechanism -> NOVEL_CONFIRMED vs NOVEL_PROBABLE).
 
 Usage:
   sweep.py PIG --work DIR [--out sweep.tsv] [--emit-metrics results/sqanti_sim/metrics.json]

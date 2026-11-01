@@ -11,26 +11,26 @@ Section 4 (0.0.7) adds the whole-chain read support on the same reads. The input
 adjudicated with the real ONT BAM, plus a reference-bias scan of every novel junction
 against NA12878's own genome (GM12878 = NA12878 = GIAB HG001).
 
-## 1. The BAM mapping thresholds are chemistry-dependent (and soft-clip default-OFF is right)
+## 1. The BAM mapping thresholds are chemistry-dependent
 
-Running the mapping axis (`--bam`) on the real ONT reads, fraction of the **191
-BAM-evaluable** novel junctions each signal flags at the shipped 0.5 gate:
+Running the mapping axis (`--bam`) on the real ONT reads, fraction of the 191
+BAM-evaluable novel junctions each signal flags at the shipped 0.5 gate:
 
 | BAM signal | Fires on real ONT (frac > 0.5) | status |
 |------------|:------------------------------:|--------|
-| soft-clip | 187 / 191 (98 %) | shipped default-OFF |
+| soft-clip (measured until 0.0.7, removed in 0.0.8) | 187 / 191 (98 %) | never a default gate |
 | indel-near | 175 / 191 (92 %) | default-on (HiFi-calibrated) |
-| Low-MAPQ | 11 / 191 (6 %) | default-on |
+| low-MAPQ | 11 / 191 (6 %) | default-on |
 | supplementary | 4 / 191 (2 %) | default-on |
 
 Two things this shows:
 
-- The soft-clip gate was right to be off (it has since been removed). ONT direct-RNA reads carry terminal
-  soft-clips (adapter / poly-A) on 98 % of junction-spanning reads. Had the soft-clip
-  gate shipped on (it did, briefly, before the code review), it would have demoted
-  nearly every novel call on real ONT data. This is exactly the false-positive the review
-  flagged: the soft-clip feature is terminal-anywhere, not junction-proximal. It is now
-  off by default (`max_softclip_frac = 1.01`); this run is the evidence.
+- The soft-clip gate was right to be off. ONT direct-RNA reads carry terminal soft-clips
+  (adapter / poly-A) on 98 % of junction-spanning reads. Had the gate shipped on (it did,
+  briefly, before the code review), it would have demoted nearly every novel call on real
+  ONT data, because the feature was a terminal soft-clip anywhere on the read, not near the
+  junction. It was off by default through 0.0.7 and the fraction was removed in 0.0.8; this
+  run is the evidence.
 - The HiFi-calibrated `indel_near` gate over-flags on ONT. ONT's intrinsic indel error
   rate makes "indel adjacent to junction" pervasive, so the 0.5 gate (genuine max 0.19
   on clean HiFi — see [bam_axis](../bam_axis)) fires on 92 % of ONT junctions and barely

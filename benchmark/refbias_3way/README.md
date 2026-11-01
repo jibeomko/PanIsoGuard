@@ -96,12 +96,12 @@ empty: the firewall check.
   non-canonical or absent in the person (the scan's DISRUPTED class). PanIsoGuard does not
   model these; report their count.
 - isoform level: novel models kept by the SQANTI3 rules filter in A, in B1, in B2, and kept
-  by PanIsoGuard in C (`HIGH/NOVEL_PROBABLE` + `REFERENCE_BIAS`); in
+  by PanIsoGuard in C (`NOVEL_CONFIRMED` / `NOVEL_PROBABLE` + `REFERENCE_BIAS`); in
   particular "discarded in A, kept in B2" vs "rescued in C".
 - cost per arm: wall time, CPU-hours, peak RSS, disk; C counted as adjudicate only (arm A
   is sunk cost for both A and C).
 
-## Inputs on disk (HG03516, `/mnt/Data/pig_hg03516`, 38 GB)
+## Inputs on disk (HG03516, `/mnt/Data/PanIsoGuard_bench/pig_hg03516`, 38 GB)
 
 | file | what | made by |
 |---|---|---|
@@ -113,7 +113,7 @@ empty: the firewall check.
 | `{mat,pat}_consensus.fa` | bcftools consensus, SNV only, length-matched to GRCh38 | `geno.sh` |
 | `scan/`, `refbias_unique.tsv` | the 40-junction rescue subset and its per-chromosome adjudicate inputs | `scan_refbias.sh` |
 
-HG02717 (`/mnt/Data/pig_hg02717`) has the same set (69,228 models, 24,941 novel; 46
+HG02717 (`/mnt/Data/PanIsoGuard_bench/pig_hg02717`) has the same set (69,228 models, 24,941 novel; 46
 rescue junctions). Run HG03516 first, replicate on HG02717 once the scripts are fixed.
 
 Reference: `/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa`,

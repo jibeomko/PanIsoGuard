@@ -11,8 +11,8 @@ Builds a labelled benchmark for PanIsoGuard's adjudication from a reference GTF
   * every REAL junction gets short-read support in the emitted SJ.tab; fabricated
     junctions do not.
 
-A correct adjudicator should call genuine novels HIGH/MEDIUM and fabricated ones
-LOW/ARTIFACT, and may abstain (UNRESOLVED) on genuine isoforms whose every
+A correct adjudicator should call genuine novels NOVEL_CONFIRMED/NOVEL_PROBABLE and
+fabricated ones UNCONFIRMED/ARTIFACT, and may abstain (UNRESOLVED) on genuine isoforms whose every
 junction is already known (no novel junction to corroborate).
 
 Usage:  python gen.py <reference.gtf> [outdir=.]

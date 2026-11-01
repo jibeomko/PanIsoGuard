@@ -28,7 +28,7 @@ distribution, same PR curve). So `combine` is not a new merge algorithm; it is a
 re-implementation in htslib of the established intron-chain N-way comparison that feeds
 the adjudicator directly (no Perl, no GTF round trip, no extra dependency).
 
-## Result 2 — the consensus precision is the same under every matcher
+## Result 2 — at ≥ 3 callers the precision is similar under every matcher
 
 | matcher | ≥2 precision | ≥3 precision |
 |---------|:-----------:|:-----------:|
@@ -36,9 +36,11 @@ the adjudicator directly (no Perl, no GTF round trip, no extra dependency).
 | TAMA (fuzzy, 10 bp) | 0.933 | 0.976 |
 | wobble 5 / 10 / 20 bp | 0.839 / 0.837 / 0.836 | 0.975 / 0.975 / 0.975 |
 
-≥3-caller novel precision is 0.975–0.980 across every matcher — exact, the incumbent,
-the fuzzy standard, and the whole wobble range. The result ("requiring more callers raises precision") is a property of the data (the
-callers disagree on artifacts), not of PanIsoGuard's exact matcher.
+At ≥ 3 callers the novel precision is 0.975–0.980 under every matcher in this experiment:
+exact, gffcompare, TAMA and the whole wobble range. At ≥ 2 callers the matchers differ
+(0.836–0.933; TAMA's larger groups lift it). That requiring more callers raises precision
+is a property of the data (the callers disagree on artifacts), not of PanIsoGuard's exact
+matcher.
 
 ## Result 3 — exact matching does not lose agreements at the boundary that matters
 
@@ -57,7 +59,7 @@ Of the 769 genuine novel chains in the truth (760 of them reported by at least o
 4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
 boundary under a fuzzy matcher; the rest of the upgrades move within the multi-caller pile
 (for example 3 → 4 callers). So exact matching costs the consensus gate at most 4 genuine
-chains in 769 on this set, and the ≥ k precision (Result 2) is the same under every
+chains in 769 on this set, and the ≥ 3 precision (Result 2) is similar under every
 matcher. (TAMA's more aggressive merge collapses the call set to 974 novel chains and trades
 some recall at ≥ 3, 0.831 vs 0.910 — a different operating point, not a more accurate one.)
 
@@ -71,8 +73,8 @@ n_callers distributions did not change.
 
 - Multi-caller consensus is established practice (LRGASP; *Nat Commun* 2024), not a
   PanIsoGuard invention. `combine` groups isoforms the way gffcompare -i does and feeds the
-  result to the adjudicator as one evidence axis; the ≥ k precision is the same under a fuzzy
-  matcher, and exact matching moves at most 4 of 769 genuine chains across the
+  result to the adjudicator as one evidence axis; the ≥ 3 precision is similar under a fuzzy
+  matcher on this set, and exact matching moves at most 4 of 769 genuine chains across the
   single/multi-caller boundary on this set.
 - What PanIsoGuard adds is the reference-bias rescue with its circularity firewall and the
   single verdict with its reasons. See

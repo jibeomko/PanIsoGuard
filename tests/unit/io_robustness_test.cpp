@@ -129,6 +129,13 @@ TEST_CASE("an output that is an input file, through a symlink too, is refused be
   const std::size_t cut = fresh.rfind('/');
   const std::string spelled_differently = fresh.substr(0, cut) + "/./" + fresh.substr(cut + 1);
   CHECK(throws_containing([&] { refuse_overwriting_inputs({fresh, spelled_differently}, {}); }, {"are the same file"}));
+  // an output that is a symlink to an output not written yet (ln -s result.adjudicated.tsv kept.gtf;
+  // --out-prefix result --write-kept kept.gtf); the link's relative target is read against its directory
+  const std::string dangling = scratch("conflict_dangling.gtf");
+  std::remove(dangling.c_str());
+  REQUIRE(symlink(fresh.substr(cut + 1).c_str(), dangling.c_str()) == 0);
+  CHECK(throws_containing([&] { refuse_overwriting_inputs({fresh, dangling}, {}); }, {"are the same file"}));
+  std::remove(dangling.c_str());
   std::remove(link.c_str());
   std::remove(in.c_str());
 }
