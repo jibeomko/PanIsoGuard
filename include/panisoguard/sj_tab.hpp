@@ -38,9 +38,18 @@ class SjTable {
 
   std::size_t size() const { return records_.size(); }
 
+  // True when a short-read junction on `chrom`, on `strand` or of unknown strand, overlaps
+  // [start, end): the locus has spliced short reads at all, so a junction they do not show
+  // is absent rather than unobserved.
+  bool any_in_span(const std::string& chrom, Strand strand, int64_t start, int64_t end) const;
+
  private:
+  struct Span { int64_t start, end; Strand strand; };
   std::vector<SjRecord> records_;
   std::unordered_map<std::string, std::size_t> by_coord_;
+  mutable std::unordered_map<std::string, std::vector<Span>> by_chrom_;   // sorted by start; built on first use
+  mutable std::unordered_map<std::string, int64_t> longest_;             // longest intron per chrom
+  mutable bool span_indexed_ = false;
 };
 
 // Parse a STAR SJ.tab (9 columns, no header). Throws std::runtime_error on

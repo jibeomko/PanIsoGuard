@@ -50,7 +50,7 @@ panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf
 | `confirmed` | novel, and the evidence supports it: short reads at every novel junction, or long reads / caller agreement across the whole chain | keep |
 | `reference_bias` | looks novel only because the sample's genome differs from the reference | keep; it is real |
 | `unconfirmed` | the evidence is weak, missing, or conflicting | review |
-| `artifact` | short reads were checked, none supports it, and an artifact sign is present | discard |
+| `artifact` | short reads splice at the locus, none supports it, and an artifact sign is present | discard |
 | `not_adjudicated` | a SQANTI3 category PanIsoGuard does not judge (genic, antisense, fusion, intergenic) | your call |
 
 **Next:** `--write-kept kept.gtf` writes the annotation filtered to the kept verdicts;

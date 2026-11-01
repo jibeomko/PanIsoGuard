@@ -59,6 +59,7 @@ struct EvidenceVector {
   int n_novel_jx_sr_supported = 0;
   int n_known_junctions = 0;
   int n_known_jx_sr_supported = 0;
+  bool sj_no_junction_in_span = false;  // short reads were given but none splices within the isoform's span
 
   // SQANTI3 QC priors (consumed, never recomputed). polyA_motif_found is only present
   // when SQANTI3 was run with a polyA motif list; it refines the perc_A intra-priming sign.

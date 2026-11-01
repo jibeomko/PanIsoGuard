@@ -87,9 +87,13 @@ for i in range(N):
     cls.write(f"{iso}\tchrS\t+\tnovel_not_in_catalog\t{iso}\tnovel\tmulti-exon\tFALSE\t{canon}\t"
               f"10.0\t0\tNA\tNA\tIsoform\n")
     truth.write(f"{iso}\t{cat}\t{truth_label[cat]}\n")
-    # short-read support: category A only (1-based intron [ds+1, de])
+    # short-read support: category A only (1-based intron [ds+1, de]). Every other locus gets
+    # one spliced junction that is not the test intron, so the test intron is absent from a
+    # covered locus rather than unobserved in a shallow one.
     if cat == "A":
         sj.write(f"chrS\t{ds+1}\t{de}\t1\t1\t1\t20\t0\t30\n")
+    else:
+        sj.write(f"chrS\t{ds+51}\t{de-50}\t1\t1\t0\t5\t0\t30\n")
     # BAM coverage
     if cat == "A":
         reads(iso, b, 60, 0, 3)         # clean

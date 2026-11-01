@@ -344,7 +344,8 @@ TEST_CASE("adjudicator: a motif canonical on the reference only is a non-canonic
   sqanti.records.push_back(rec("isoD", "novel_not_in_catalog", "canonical"));  // SQANTI3 saw the reference
   std::map<std::string, IntronChain> chains;
   chains["isoD"] = chain_on("chrT2", {{20, 40}, {60, 80}});
-  SjTable sjt;  // evaluable, no reads anywhere -> UNSUPPORTED (no known junctions to gauge coverage)
+  SjTable sjt;  // a spliced read elsewhere in the span, none at the isoform's junctions -> UNSUPPORTED
+  sjt.add(SjRecord{"chrT2", {30, 50}, Strand::kUnknown, 0, false, 2, 0, 20});
   AdjudicateInputs in;
   in.sqanti = &sqanti;
   in.chains = &chains;
@@ -395,6 +396,57 @@ TEST_CASE("adjudicator: chain support from the BAM fills the evidence and lifts 
   CHECK(out[0].verdict.novelty_support == NoveltySupport::kUnknown);
   CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
   CHECK(out[0].verdict.verdict_reason == "chain_support");
+}
+
+TEST_CASE("adjudicator: an all-novel isoform with no spliced short read in its span is held, not an artifact", "[adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoLone", "novel_not_in_catalog", "non_canonical"));
+  std::map<std::string, IntronChain> chains;
+  chains["isoLone"] = chain({{200, 350}});   // one junction, novel: no known junction to gauge coverage with
+  AdjudicateInputs in;
+  in.sqanti = &sqanti;
+  in.chains = &chains;
+  in.catalog = &cat;
+
+  SECTION("short reads only on another chromosome, or on the other strand: no coverage") {
+    SjTable sjt;
+    sjt.add(SjRecord{"chr9", {200, 350}, Strand::kPlus, 1, true, 50, 0, 30});
+    sjt.add(SjRecord{"chr1", {250, 300}, Strand::kMinus, 1, false, 50, 0, 30});
+    in.sj = &sjt;
+    const auto out = adjudicate(in, RuleEngine());
+    REQUIRE(out.size() == 1);
+    CHECK(out[0].evidence.sj_no_junction_in_span);
+    CHECK(out[0].verdict.novelty_support == NoveltySupport::kUnknown);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kUnresolved);
+    CHECK(out[0].verdict.verdict_reason == "no_coverage");
+  }
+  SECTION("a spliced read within the span, not at the junction: absence, and the sign makes it an artifact") {
+    SjTable sjt;
+    sjt.add(SjRecord{"chr1", {250, 300}, Strand::kUnknown, 0, false, 2, 0, 20});
+    in.sj = &sjt;
+    const auto out = adjudicate(in, RuleEngine());
+    REQUIRE(out.size() == 1);
+    CHECK_FALSE(out[0].evidence.sj_no_junction_in_span);
+    CHECK(out[0].verdict.novelty_support == NoveltySupport::kUnsupported);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kArtifact);
+  }
+}
+
+TEST_CASE("adjudicator: a classification whose chromosome or strand differs from the isoform file is refused", "[adjudicator]") {
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoA", "novel_not_in_catalog", "canonical"));
+  sqanti.records.push_back(rec("isoMissing", "novel_not_in_catalog", "canonical"));   // not in the isoform file: not compared
+  std::map<std::string, IntronChain> chains;
+  chains["isoA"] = chain({{200, 350}});
+  CHECK_NOTHROW(check_same_coordinates(sqanti, chains));
+  sqanti.records[0].strand = Strand::kUnknown;             // an unknown strand is not a mismatch
+  CHECK_NOTHROW(check_same_coordinates(sqanti, chains));
+  sqanti.records[0].strand = Strand::kMinus;
+  REQUIRE_THROWS_WITH(check_same_coordinates(sqanti, chains), Catch::Contains("isoA: chr1/-"));
+  sqanti.records[0].strand = Strand::kPlus;
+  sqanti.records[0].chrom = "chr999";
+  REQUIRE_THROWS_WITH(check_same_coordinates(sqanti, chains), Catch::Contains("chr999/+ in the classification, chr1/+ in the isoform file"));
 }
 
 TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and marks them independent", "[adjudicator][chain]") {

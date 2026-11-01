@@ -13,6 +13,7 @@
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/sj_tab.hpp"
+#include "panisoguard/tsv.hpp"
 #include "panisoguard/variant_motif.hpp"
 #include "panisoguard/version.hpp"
 
@@ -101,6 +102,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   }
   std::fprintf(stderr, "read %zu caller isoform chains\n", chains.size());
   warn_unjoined(run.sqanti, chains, /*novel_only=*/false, "the caller isoform file");
+  check_same_coordinates(run.sqanti, chains);
 
   Catalog catalog;
   const Catalog* catalog_ptr = nullptr;
@@ -143,6 +145,9 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   }
   std::unique_ptr<BamReader> validation_bam;
   if (!c.validation_bam.empty()) {
+    if (!c.bam_path.empty() && same_file(c.bam_path, c.validation_bam))
+      throw std::runtime_error("--validation-bam " + c.validation_bam + " is the same file as --bam; the caller's own "
+                               "reads are not an independent library (drop --validation-bam to count them as the caller's)");
     validation_bam = std::make_unique<BamReader>(c.validation_bam, c.reference);
     std::fprintf(stderr, "opened validation BAM for whole-chain read support (independent library): %s\n",
                  c.validation_bam.c_str());

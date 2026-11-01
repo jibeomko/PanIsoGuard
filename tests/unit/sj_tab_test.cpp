@@ -69,3 +69,20 @@ TEST_CASE("SJ lookup is strand-aware (no cross-strand corroboration)", "[sj_tab]
   CHECK(t.find_exact("chr1", Strand::kMinus, Junction{700, 800}) != nullptr);
   CHECK(t.find_exact("chr1", Strand::kPlus, Junction{700, 800}) == nullptr);
 }
+
+TEST_CASE("SjTable: any_in_span sees a spliced read anywhere in a span, on the strand or unstranded", "[sj_tab]") {
+  SjTable t;
+  t.add(SjRecord{"chr1", {100, 200}, Strand::kPlus, 1, false, 3, 0, 20});
+  t.add(SjRecord{"chr1", {1000, 5000}, Strand::kMinus, 1, false, 3, 0, 20});     // long intron on the other strand
+  t.add(SjRecord{"chr1", {7000, 7100}, Strand::kUnknown, 0, false, 1, 0, 20});   // STAR strand 0
+  CHECK(t.any_in_span("chr1", Strand::kPlus, 150, 160));
+  CHECK(t.any_in_span("chr1", Strand::kPlus, 0, 101));
+  CHECK_FALSE(t.any_in_span("chr1", Strand::kPlus, 200, 300));        // half-open: the intron ends at 200
+  CHECK_FALSE(t.any_in_span("chr1", Strand::kPlus, 2000, 2100));      // only the minus-strand intron spans it
+  CHECK(t.any_in_span("chr1", Strand::kMinus, 2000, 2100));
+  CHECK(t.any_in_span("chr1", Strand::kUnknown, 2000, 2100));
+  CHECK(t.any_in_span("chr1", Strand::kMinus, 7050, 7060));           // an unstranded junction counts for either strand
+  CHECK_FALSE(t.any_in_span("chr2", Strand::kPlus, 150, 160));
+  t.add(SjRecord{"chr2", {150, 160}, Strand::kPlus, 1, false, 3, 0, 20});   // the index is rebuilt after a later add
+  CHECK(t.any_in_span("chr2", Strand::kPlus, 100, 200));
+}
