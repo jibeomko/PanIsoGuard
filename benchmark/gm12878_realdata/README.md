@@ -25,8 +25,9 @@ BAM-evaluable novel junctions each signal flags at the shipped 0.5 gate:
 
 Two things this shows:
 
-- The soft-clip gate was right to be off. ONT direct-RNA reads carry terminal soft-clips
-  (adapter / poly-A) on 98 % of junction-spanning reads. Had the gate shipped on (it did,
+- The soft-clip gate was right to be off. At 187 of 191 evaluable junctions (98 %) more than
+  half of the spanning ONT direct-RNA reads carry a terminal soft-clip (adapter / poly-A).
+  Had the gate shipped on (it did,
   briefly, before the code review), it would have demoted nearly every novel call on real
   ONT data, because the feature was a terminal soft-clip anywhere on the read, not near the
   junction. It was off by default through 0.0.7 and the fraction was removed in 0.0.8; this

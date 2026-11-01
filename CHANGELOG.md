@@ -58,7 +58,10 @@ Found by a code audit on 2026-10-31; each has a regression test.
   setting. Old class names in the synthetic_axes table and in benchmark script docstrings
   replaced. `docs/validation.md` rows corrected: bam_axis (false mean 0.129 after the
   spanning-read gate; 0.350 before it) and refbias_3way (verdict-level 12 of 32 and 21 of 39
-  next to the rule-level counts).
+  next to the rule-level counts). The bam_axis envelope note and manifest row carry the run's
+  own numbers (genuine max 0.1905, false mean 0.1289) with the pre-gate 0.350 marked as such;
+  the GM12878 soft-clip figure is 98 % of junctions, not of reads; `score_merge.py` writes
+  n/a when no chain reaches a consensus level instead of failing on an empty range.
 - Benchmark tooling: the cohort aggregator (`benchmark/refbias_cohort/analyze.py`) counted
   candidate junctions as rescued and dropped the negatives at other coordinates from the
   false-rescue count (recounting the original results gives the same 40 + 46 rescued, 0
