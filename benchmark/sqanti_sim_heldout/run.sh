@@ -2,9 +2,9 @@
 # Held-out chromosome: the chr22 protocol (../sqanti_sim + ../sqanti3_filter_h2h) repeated unchanged on
 # another chromosome, with PanIsoGuard's thresholds left exactly as set on chr22. Two short-read
 # settings, the two of the main text: none, and 1 M wgsim pairs -> STAR 2-pass.
-# Usage: bash run.sh chr20 [/mnt/Data/pig_sqantisim_chr20]      then emit_heldout.py over the runs
+# Usage: bash run.sh chr20 [/mnt/Data/PanIsoGuard_bench/pig_sqantisim_chr20]      then emit_heldout.py over the runs
 set -euo pipefail
-CHROM=$1; ROOT=${2:-/mnt/Data/pig_sqantisim_$CHROM}
+CHROM=$1; ROOT=${2:-/mnt/Data/PanIsoGuard_bench/pig_sqantisim_$CHROM}
 SQSIM=$HOME/SQANTI-SIM; SQSIM_BIN=$HOME/miniconda3/envs/sqsim/bin; FLAIR_BIN=$HOME/miniconda3/envs/flair/bin
 SQANTI3_BIN=$HOME/miniconda3/envs/sqanti3/bin; STAR=$HOME/miniconda3/envs/star274/bin/STAR; PY=$SQSIM_BIN/python
 PIG=$HOME/PanIsoGuard/build/panisoguard

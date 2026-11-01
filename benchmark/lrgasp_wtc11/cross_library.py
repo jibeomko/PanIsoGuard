@@ -4,7 +4,7 @@ isoforms adjudicated with the ONT cDNA BAM as --validation-bam, and the reverse 
 different library and platform). Compares, per isoform, the same-library count (adj_<s>) with
 the independent one (adjx_<s>), for the validated targets and genome-wide.
 
-Usage: cross_library.py --work /mnt/Data/pig_lrgasp [--emit-metrics ../results/lrgasp_wtc11/metrics.json]
+Usage: cross_library.py --work /mnt/Data/PanIsoGuard_bench/pig_lrgasp [--emit-metrics ../results/lrgasp_wtc11/metrics.json]
 """
 import argparse, collections, csv, datetime, json, sys
 

@@ -10,7 +10,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PIG="${PIG:-$HERE/../../build/panisoguard}"
 SAMPLE="${SAMPLE:-hg03516}"
-DATA="${DATA:-/mnt/Data/pig_$SAMPLE}"            # dl.sh / geno.sh / rna.sh / isoquant.sh outputs
+DATA="${DATA:-/mnt/Data/PanIsoGuard_bench/pig_$SAMPLE}"            # dl.sh / geno.sh / rna.sh / isoquant.sh outputs
 WORK="${WORK:-$DATA/refbias_3way}"
 GRCH38="${GRCH38:-/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa}"
 REFGTF="${REFGTF:-/mnt/Data/LR-RNAseq/reference/gencode.v49.annotation.gtf}"

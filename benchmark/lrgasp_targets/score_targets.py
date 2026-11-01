@@ -3,7 +3,7 @@
 short-read setting, what PanIsoGuard and SQANTI3's default rules filter do with the amplicon-supported
 chains (positives) and the unsupported ones (negatives), restricted to chains novel against GENCODE v49.
 
-Usage: score_targets.py --lrgasp /mnt/Data/pig_lrgasp [--emit-metrics m.json]
+Usage: score_targets.py --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp [--emit-metrics m.json]
 """
 import argparse, collections, csv, datetime, json, os, sys
 
@@ -56,7 +56,7 @@ def main():
                                   "Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF "
                                   "(benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, "
                                   "with and without the Illumina SJ.tab. No private data.",
-               "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/pig_lrgasp --emit-metrics ...",
+               "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp --emit-metrics ...",
                "metrics": res,
                "notes": "Targets novel against GENCODE v49 (SQANTI3 NIC/NNC, not KNOWN) by amplicon validation: supported (positives), unsupported "
                         "(negatives), likely. Independent of any caller's reconstruction: the chains are adjudicated as would-be isoforms, so the "

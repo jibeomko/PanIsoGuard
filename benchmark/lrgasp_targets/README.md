@@ -10,8 +10,8 @@ reported it. For the chains novel against v49: supported = positives, unsupporte
 SQANTI3's default rules filter runs on the same classification.
 
 ```
-bash run.sh /mnt/Data/pig_lrgasp                      # -> /mnt/Data/pig_lrgasp/targets_run
-score_targets.py --lrgasp /mnt/Data/pig_lrgasp --emit-metrics ../results/lrgasp_targets/metrics.json
+bash run.sh /mnt/Data/PanIsoGuard_bench/pig_lrgasp                      # -> /mnt/Data/PanIsoGuard_bench/pig_lrgasp/targets_run
+score_targets.py --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp --emit-metrics ../results/lrgasp_targets/metrics.json
 ```
 
 Envelope: `benchmark/results/lrgasp_targets/metrics.json`.
