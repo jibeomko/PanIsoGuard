@@ -11,6 +11,10 @@ Four labelled isoform categories, one test intron each:
 | C mapping-artifact | canonical | none | low-MAPQ spanning | = ref | `ARTIFACT` (mapping) — needs `--bam` |
 | D reference-bias | non-canonical | none | clean | canonical (SNV) | `REFERENCE_BIAS` — needs `--reference-haplotype` |
 
+"none" means no short read at the test intron; every locus carries one spliced short-read
+junction elsewhere in the isoform's span, so the test intron is absent from a covered locus
+(an uncovered locus is held `UNRESOLVED`, reason `no_coverage`, not called an artifact).
+
 ## Run
 
 ```bash

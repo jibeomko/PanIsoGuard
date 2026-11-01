@@ -25,6 +25,31 @@ void SjTable::add(SjRecord rec) {
   }
   records_.push_back(std::move(rec));
   by_coord_.emplace(k, records_.size() - 1);
+  span_indexed_ = false;
+}
+
+bool SjTable::any_in_span(const std::string& chrom, Strand strand, int64_t start, int64_t end) const {
+  if (!span_indexed_) {
+    by_chrom_.clear();
+    longest_.clear();
+    for (const SjRecord& r : records_) {
+      by_chrom_[r.chrom].push_back({r.intron.start, r.intron.end, r.strand});
+      longest_[r.chrom] = std::max(longest_[r.chrom], r.intron.end - r.intron.start);
+    }
+    for (auto& kv : by_chrom_)
+      std::sort(kv.second.begin(), kv.second.end(), [](const Span& a, const Span& b) { return a.start < b.start; });
+    span_indexed_ = true;
+  }
+  const auto it = by_chrom_.find(chrom);
+  if (it == by_chrom_.end()) return false;
+  const std::vector<Span>& v = it->second;
+  // A junction overlapping [start, end) starts after start - longest intron and before end.
+  auto s = std::lower_bound(v.begin(), v.end(), start - longest_.at(chrom),
+                            [](const Span& e, int64_t x) { return e.start < x; });
+  for (; s != v.end() && s->start < end; ++s) {
+    if (s->end > start && (s->strand == Strand::kUnknown || strand == Strand::kUnknown || s->strand == strand)) return true;
+  }
+  return false;
 }
 
 const SjRecord* SjTable::find_exact(const std::string& chrom, Strand strand,

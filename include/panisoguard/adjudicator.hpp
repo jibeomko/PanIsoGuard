@@ -60,6 +60,12 @@ struct JunctionRow {
   bool bam_evaluable = false;  JunctionBamFeatures bam;
 };
 
+// The classification and the isoform file must describe the same isoforms. Evidence is looked
+// up at the chain's coordinates while the output row carries the record's, so a record whose
+// chromosome or strand differs from its chain's belongs to another run. Throws on the first
+// mismatch found (unknown strands are not compared).
+void check_same_coordinates(const SqantiTable& sqanti, const std::map<std::string, IntronChain>& chains);
+
 // Adjudicate every SQANTI record: assemble its EvidenceVector (joining the caller
 // chain, classifying novel junctions vs the catalog, and corroborating them
 // against short-read SJ.tab) and apply the rule engine. If `junctions` is given it

@@ -329,11 +329,15 @@ NoveltySupport support_axis(const EvidenceVector& ev, Verdict& v, std::string& u
   if (ev.n_novel_jx_sr_supported == 0) {
     // Absence of reads at the novel junctions is evidence against them only if the locus is
     // covered at all: when none of the isoform's KNOWN junctions has short-read support
-    // either, the sample is too shallow there and the support stays UNKNOWN.
-    if (ev.n_known_junctions > 0 && ev.n_known_jx_sr_supported == 0) {
+    // either, or no short-read junction splices anywhere within the isoform's span, the
+    // sample is too shallow there and the support stays UNKNOWN.
+    const bool known_uncovered = ev.n_known_junctions > 0 && ev.n_known_jx_sr_supported == 0;
+    if (known_uncovered || ev.sj_no_junction_in_span) {
       unknown_reason = "no_coverage";
-      trace(v, "sj_support=0/" + n + " but 0/" + std::to_string(ev.n_known_junctions) +
-                   " known junctions supported either -> no coverage, not absence: UNKNOWN reason=no_coverage");
+      trace(v, "sj_support=0/" + n + " but " +
+                   (known_uncovered ? "0/" + std::to_string(ev.n_known_junctions) + " known junctions supported either"
+                                    : std::string("no short-read junction within the isoform's span")) +
+                   " -> no coverage, not absence: UNKNOWN reason=no_coverage");
       return NoveltySupport::kUnknown;
     }
     trace(v, "sj_support=0/" + n + " -> UNSUPPORTED" +

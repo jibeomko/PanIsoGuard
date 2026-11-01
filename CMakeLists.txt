@@ -143,6 +143,9 @@ if(PANISOGUARD_BUILD_TESTS)
   add_test(NAME integration_write_kept
     COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/write_kept' && cd '${CMAKE_SOURCE_DIR}/examples/tiny' && '$<TARGET_FILE:panisoguard>' adjudicate --classification data/classification.tsv --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --sj-tab data/short_read.SJ.tab --out-prefix '${CMAKE_BINARY_DIR}/write_kept/sample' --write-kept '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' >/dev/null 2>&1 && grep -q 'transcript_id \"iso_novel_supported\"' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && grep -q 'transcript_id \"iso_known\"' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && ! grep -q 'iso_novel_artifact' '${CMAKE_BINARY_DIR}/write_kept/kept.gtf' && grep -q '^kept_verdicts' '${CMAKE_BINARY_DIR}/write_kept/sample.provenance.log'")
 
+  add_test(NAME integration_validation_bam_same_file
+    COMMAND bash -c "rm -rf '${CMAKE_BINARY_DIR}/vbam' && mkdir -p '${CMAKE_BINARY_DIR}/vbam' && cd '${CMAKE_SOURCE_DIR}/examples/tiny' && ! '$<TARGET_FILE:panisoguard>' adjudicate --classification data/classification.tsv --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --validation-bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out-prefix '${CMAKE_BINARY_DIR}/vbam/sample' 2>'${CMAKE_BINARY_DIR}/vbam/err.txt' && grep -q 'same file as --bam' '${CMAKE_BINARY_DIR}/vbam/err.txt' && ! test -e '${CMAKE_BINARY_DIR}/vbam/sample.adjudicated.tsv'")
+
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,
   # and assert the verdicts are correct. controlled_truth is pure text; the

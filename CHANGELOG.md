@@ -52,6 +52,15 @@ Found by a code audit on 2026-10-31; each has a regression test.
   (`ln -s result.adjudicated.tsv kept.gtf`, then `--out-prefix result --write-kept kept.gtf`)
   passed the output check and the verdict table was overwritten by the GTF. A final symlink
   is now followed to its target before outputs are compared.
+- Fifth audit pass (2026-11-01): an isoform whose junctions are all novel had no known
+  junction to gauge coverage with, so an `SJ.tab` that splices nowhere near it (the audit used
+  one holding only other chromosomes) still made its 0 of N `UNSUPPORTED`, and with a sign
+  `ARTIFACT`. The support now stays `UNKNOWN` (`no_coverage`) unless a short-read junction
+  splices within the isoform's span on its strand or unstranded. A classification whose
+  chromosome or strand differs from the isoform file's for the same id was joined without a
+  word, so evidence at one place was reported for another; it is refused as not from the
+  same run. `--validation-bam` naming the same file as `--bam` was recorded as an independent
+  library; it is refused.
 - Benchmark write-ups: the merge comparison said the consensus precision was the same under
   every matcher; it is similar at ≥ 3 callers (0.975–0.980) and differs at ≥ 2 (0.836–0.933).
   The bam_axis and GM12878 write-ups described the removed soft-clip gate as a current

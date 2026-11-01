@@ -27,11 +27,12 @@ on two axes; the binned pair is projected to one confidence class.
   isoform's novel junctions): `SUPPORTED` / `PARTIAL` / `UNSUPPORTED`, or `UNKNOWN`
   when the axis is not evaluable. `UNSUPPORTED` (0 of N novel junctions corroborated)
   counts as evidence *against* only when the locus is covered: if none of the isoform's
-  known junctions has short-read support either, the sample is too shallow there and
-  the support stays `UNKNOWN` (reason `no_coverage`; since 0.0.6). An isoform whose
-  junctions are all novel has no known junction to gauge coverage with, so its 0 of N is
-  `UNSUPPORTED`; an `SJ.tab` with no junctions at all leaves the axis not evaluable rather
-  than marking every junction unsupported. When short-read
+  known junctions has short-read support either, or no short-read junction splices
+  anywhere within the isoform's span (same strand or unstranded), the sample is too
+  shallow there and the support stays `UNKNOWN` (reason `no_coverage`). The span test is
+  what an isoform whose junctions are all novel is gauged by; an `SJ.tab` with no
+  junctions at all leaves the axis not evaluable rather than marking every junction
+  unsupported. When short-read
   corroboration is `UNKNOWN`, multi-caller consensus (`--caller-support`, from a
   `panisoguard combine` matrix) can stand in as a *weaker, methodological* form of
   support: a novel chain independently recovered by ≥ `consensus_min_callers` callers

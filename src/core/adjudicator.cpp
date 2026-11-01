@@ -195,6 +195,8 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       ev.sj_evaluable = true;
       ev.n_novel_jx_sr_supported = n_supported;
       ev.n_known_jx_sr_supported = n_known_supported;
+      ev.sj_no_junction_in_span = !chain.introns.empty() &&
+          !sj->any_in_span(chain.chrom, chain.strand, chain.introns.front().start, chain.introns.back().end);
     }
     ev.bam_evaluable = (bam != nullptr) && any_bam_eval;
     ev.bam_n_junctions_gated = n_bam_gated;
@@ -228,6 +230,24 @@ EvidenceVector build_evidence(const SqantiRecord& r,
 }
 
 }  // namespace
+
+void check_same_coordinates(const SqantiTable& sqanti, const std::map<std::string, IntronChain>& chains) {
+  std::size_t n = 0;
+  std::string example;
+  for (const SqantiRecord& r : sqanti.records) {
+    const auto it = chains.find(r.isoform);
+    if (it == chains.end()) continue;
+    const IntronChain& c = it->second;
+    const bool strand_differs = r.strand != Strand::kUnknown && c.strand != Strand::kUnknown && r.strand != c.strand;
+    if ((r.chrom.empty() || r.chrom == c.chrom) && !strand_differs) continue;
+    if (n++ == 0)
+      example = r.isoform + ": " + r.chrom + "/" + strand_char(r.strand) + " in the classification, " + c.chrom + "/" +
+                strand_char(c.strand) + " in the isoform file";
+  }
+  if (n > 0)
+    throw std::runtime_error(std::to_string(n) + " isoform(s) differ in chromosome or strand between the classification "
+                             "and the isoform file (e.g. " + example + "); the two files are not from the same run");
+}
 
 std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const RuleEngine& engine,
                                            std::vector<JunctionRow>* junctions) {
