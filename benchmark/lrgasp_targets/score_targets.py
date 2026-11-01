@@ -39,7 +39,8 @@ def main():
                 sel = [t for t in adj if tid.get(t) and cat.get(tid[t]) == val and sq[t]["structural_category"] in NOVEL and adj[t]["confidence_class"] != "KNOWN"]
                 summ[val] = {"novel_targets": len(sel), "class_counts": dict(collections.Counter(adj[t]["confidence_class"] for t in sel)),
                              "panisoguard_confident": sum(adj[t]["confidence_class"] in CONF for t in sel), "panisoguard_artifact": sum(adj[t]["confidence_class"] == "ARTIFACT" for t in sel),
-                             "sqanti3_rules_keeps": sum(rules.get(t) == "Isoform" for t in sel), "whole_chain_reads_ge3": sum((full.get(t) or 0) >= 3 for t in sel)}
+                             "sqanti3_rules_keeps": sum(rules.get(t) == "Isoform" for t in sel), "whole_chain_reads_ge3": sum((full.get(t) or 0) >= 3 for t in sel),
+                             "panisoguard_artifact_also_sqanti3_discarded": sum(adj[t]["confidence_class"] == "ARTIFACT" and rules.get(t) != "Isoform" for t in sel)}
                 for t in sel:
                     rows.append({"platform": p, "short_reads": s, "set": tid[t][0], "target": tid[t][1], "validation": val, "sqanti3_category": sq[t]["structural_category"],
                                  "class": adj[t]["confidence_class"], "reason": adj[t]["verdict_reason"], "whole_chain_reads": full.get(t), "sqanti3_rules": rules.get(t)})
