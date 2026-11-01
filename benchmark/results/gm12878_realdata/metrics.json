@@ -5,19 +5,15 @@
     "bam_signal_fire_rate_on_real_ONT": {
       "indel_near_gt_0.5": [
         128,
-        191
+        190
       ],
       "low_mapq_gt_0.5": [
         9,
-        191
-      ],
-      "softclip_gt_0.5": [
-        134,
-        191
+        190
       ],
       "supplementary_gt_0.5": [
         3,
-        191
+        190
       ]
     },
     "chain_support_on_real_ONT": {
@@ -29,15 +25,15 @@
           "n": 31
         },
         "single_caller": {
-          "NOVEL_PROBABLE": 126,
-          "chain_full_ge3": 133,
+          "NOVEL_PROBABLE": 125,
+          "chain_full_ge3": 132,
           "mapping_sign_held": 9,
           "n": 254
         }
       },
       "chain_full_reads_median": 3,
-      "chains_full_ge1": 268,
-      "chains_full_ge3": 155,
+      "chains_full_ge1": 267,
+      "chains_full_ge3": 154,
       "splice_site_tolerance": {
         "by_tolerance_bp": {
           "0": {
@@ -99,18 +95,18 @@
       }
     },
     "classes_hifi_preset": {
-      "NOVEL_PROBABLE": 53,
+      "NOVEL_PROBABLE": 52,
       "UNCONFIRMED": 129,
-      "UNRESOLVED": 103
+      "UNRESOLVED": 104
     },
     "classes_ont_preset": {
-      "NOVEL_PROBABLE": 148,
+      "NOVEL_PROBABLE": 147,
       "UNCONFIRMED": 9,
-      "UNRESOLVED": 128
+      "UNRESOLVED": 129
     },
     "indel_near_mean_by_consensus": {
       "ge2_caller": 0.667,
-      "single_caller": 0.629
+      "single_caller": 0.63
     },
     "mapping_sign_rate_by_consensus": {
       "ge2_caller": [
@@ -122,17 +118,17 @@
         254
       ]
     },
-    "n_bam_spanning_evaluable": 191,
+    "n_bam_spanning_evaluable": 190,
     "n_novel_chains": 285,
     "reference_bias_rescue": {
       "created_reference_bias": 0,
       "novel_junctions_scanned": 1364
     }
   },
-  "notes": "Real-data robustness of the optional BAM mapping axis. (1) The terminal soft-clip fraction, measured until 0.0.7 and never a default gate, fired on 187/191 (98%) of junctions on real ONT dRNA (adapter/poly-A read ends); it is no longer computed. (2) The HiFi-calibrated 0.5 gates are chemistry-dependent: ONT's indel error makes indel_near fire on 175/191 (92%) and barely discriminates single (0.925) vs >=2-caller (0.732); the low_mapq/supplementary signals barely fire (11/191, 4/191). The mapping axis is opt-in (--bam) and its thresholds need re-calibration per chemistry. (3) The sequence-level consensus axis separates the same data independently of chemistry (254 single vs 31 reproducible). (4) The reference-bias rescue fires 0/1364: GM12878=NA12878 is GIAB reference-grade, so the base rate is ~0; the rescue's value lies with divergent / non-reference genomes (cf. giab_cohort_rescue: 137 across 4 personalized genomes). Small-N caveat on >=2-caller (31). (5) 0.0.7 whole-chain read support works on real ONT dRNA with exact coordinates: 94.5% of splice sites among near-matching reads are exact, 155/285 chains have >= 3 exact full-chain reads (a +-5 bp tolerance would add 20), 71% of >=2-caller chains vs 52% of single-caller ones; no tolerance is needed. With --platform ont the indel-near gate is off and these chains become NOVEL_PROBABLE (148) instead of being held UNCONFIRMED by the mapping sign (129 under the HiFi defaults; ARTIFACT before ruleset 0.0.5). No truth here: this is robustness, not accuracy.",
+  "notes": "Real-data robustness of the optional BAM mapping axis. (1) The terminal soft-clip fraction, never a default gate and removed in 0.0.8, fired on 134/191 (70%) of junctions on real ONT dRNA in the last run that measured it (adapter/poly-A read ends). (2) The HiFi-calibrated 0.5 gates are chemistry-dependent: ONT's intrinsic indel error makes indel_near fire on 128/190 (67%) and it does not separate single (0.63) from >=2-caller (0.667) chains; the older low_mapq/supplementary signals barely fire (9/190, 3/190). The mapping axis is opt-in (--bam) and its thresholds need re-calibration per chemistry. (3) The sequence-level consensus axis separates the same data independently of chemistry (254 single vs 31 reproducible). (4) Reference-bias rescue fires 0/1364: GM12878=NA12878 is GIAB reference-grade, so the base rate is ~0; the rescue's value lies with divergent / non-reference genomes (cf. giab_cohort_rescue: 137 across 4 personalized genomes). Small-N caveat on >=2-caller (31). (5) 0.0.7 whole-chain read support works on real ONT dRNA with exact coordinates: 94.5% of splice sites among near-matching reads are exact, 154/285 chains have >= 3 exact full-chain reads on the isoform's strand (chain_wobble.py counts 155 without the strand check; a +-5 bp tolerance would add about 20), 71% of >=2-caller chains vs 52% of single-caller ones; no tolerance is needed. With --platform ont the indel-near gate is off and these chains become NOVEL_PROBABLE (147) instead of being held UNCONFIRMED by the mapping sign (129 under the HiFi defaults; ARTIFACT before ruleset 0.0.5). No truth here: this is robustness, not accuracy.",
   "protocol": "gm12878_realdata",
-  "ruleset_version": "builtin-0.0.5",
+  "ruleset_version": "builtin-0.0.6",
   "scope": "gm12878_ont_drna_real",
   "status": "tracked",
-  "tool_version": "0.0.6"
+  "tool_version": "0.0.7"
 }

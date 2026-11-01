@@ -13,20 +13,21 @@ against NA12878's own genome (GM12878 = NA12878 = GIAB HG001).
 
 ## 1. The BAM mapping thresholds are chemistry-dependent
 
-Running the mapping axis (`--bam`) on the real ONT reads, fraction of the 191
-BAM-evaluable novel junctions each signal flags at the shipped 0.5 gate:
+Running the mapping axis (`--bam`) on the real ONT reads, fraction of the 190
+BAM-evaluable novel junctions (at least one spanning read) each signal flags at the shipped
+0.5 gate, from the envelope:
 
 | BAM signal | Fires on real ONT (frac > 0.5) | status |
 |------------|:------------------------------:|--------|
-| soft-clip (measured until 0.0.7, removed in 0.0.8) | 187 / 191 (98 %) | never a default gate |
-| indel-near | 175 / 191 (92 %) | default-on (HiFi-calibrated) |
-| low-MAPQ | 11 / 191 (6 %) | default-on |
-| supplementary | 4 / 191 (2 %) | default-on |
+| soft-clip (removed in 0.0.8) | 134 / 191 (70 %) in the last run that measured it | never a default gate |
+| indel-near | 128 / 190 (67 %) | default-on (HiFi-calibrated) |
+| low-MAPQ | 9 / 190 (5 %) | default-on |
+| supplementary | 3 / 190 (2 %) | default-on |
 
 Two things this shows:
 
-- The soft-clip gate was right to be off. At 187 of 191 evaluable junctions (98 %) more than
-  half of the spanning ONT direct-RNA reads carry a terminal soft-clip (adapter / poly-A).
+- The soft-clip gate was right to be off. At 134 of 191 evaluable junctions (70 %) more than
+  half of the spanning ONT direct-RNA reads carried a terminal soft-clip (adapter / poly-A).
   Had the gate shipped on (it did,
   briefly, before the code review), it would have demoted nearly every novel call on real
   ONT data, because the feature was a terminal soft-clip anywhere on the read, not near the
@@ -34,10 +35,10 @@ Two things this shows:
   run is the evidence.
 - The HiFi-calibrated `indel_near` gate over-flags on ONT. ONT's intrinsic indel error
   rate makes "indel adjacent to junction" pervasive, so the 0.5 gate (genuine max 0.19
-  on clean HiFi — see [bam_axis](../bam_axis)) fires on 92 % of ONT junctions and barely
-  separates single-caller (mean 0.925) from ≥ 2-caller (mean 0.732) novels
+  on clean HiFi — see [bam_axis](../bam_axis)) fires on 67 % of ONT junctions and does not
+  separate single-caller (mean 0.63) from ≥ 2-caller (mean 0.67) novels
   (the mapping sign fires on 17 / 31 = 55 % of ≥ 2-caller vs 112 / 254 = 44 % of single-caller chains). Meanwhile the *older* low-MAPQ / supplementary
-  signals barely fire (6 % / 2 %). The BAM mapping axis is opt-in (`--bam`) and its
+  signals barely fire (5 % / 2 %). The BAM mapping axis is opt-in (`--bam`) and its
   thresholds need re-calibration per chemistry; the shipped defaults are
   HiFi-tuned. (Making `indel_near` rate-normalized for noisy chemistries is future work.)
 
@@ -70,7 +71,7 @@ test of whether the axis is usable on ONT at all. On the 285 real novel chains
 
 | per-site tolerance | chains with ≥ 1 full-chain read | chains with ≥ 3 |
 |---|---:|---:|
-| Exact (what PanIsoGuard counts) | 268 / 285 | 155 / 285 |
+| Exact (`chain_wobble.py`) | 268 / 285 | 155 / 285 |
 | ± 1 bp | 269 | 155 |
 | ± 2 bp | 271 | 155 |
 | ± 5 bp | 281 | 175 |
@@ -81,16 +82,18 @@ offsets are rare (0.1 %), the rest sit at 3–7 bp. These are caller chains buil
 from the same splice-aware alignment (`minimap2 -ax splice -uf`), so the aligner has already
 placed the sites consistently; a tolerance of ± 1–2 bp would change nothing, ± 5 bp would add
 20 chains at the cost of accepting neighbouring alternative sites. No tolerance is shipped.
-Exact full-chain support is more frequent among the ≥ 2-caller chains (22 / 31, 71 %) than
-the single-caller ones (133 / 254, 52 %), the same direction as the consensus signal.
+PanIsoGuard itself counts 267 and 154 chains: it also requires the read's strand to agree
+with the isoform's, which drops one chain. Exact full-chain support is more frequent among
+the ≥ 2-caller chains (22 / 31, 71 %) than the single-caller ones (133 / 254, 52 %), the
+same direction as the consensus signal.
 
 What the two presets do with it (no short reads exist for this sample, so every call is
 `UNKNOWN` support):
 
 | preset | UNCONFIRMED (`mapping_without_short_reads`) | NOVEL_PROBABLE | UNRESOLVED |
 |---|---:|---:|---:|
-| `--platform hifi` (default; indel-near gate on) | 129 | 53 | 103 |
-| `--platform ont` (indel-near gate off) | 9 | 148 | 128 |
+| `--platform hifi` (default; indel-near gate on) | 129 | 52 | 104 |
+| `--platform ont` (indel-near gate off) | 9 | 147 | 129 |
 
 Under the HiFi defaults the over-firing indel-near gate (section 1) holds most chain-supported
 isoforms `UNCONFIRMED` (before ruleset 0.0.5 they were `ARTIFACT`; this dataset is one reason

@@ -1,7 +1,7 @@
 {
   "command": "benchmark/rts_sensitivity/rts_sensitivity.py --sqsim-work ... --h2h ... --e2e ... --lrgasp ... --threeway ... --gm12878 ... --emit-metrics",
   "data_provenance": "the adjudicated.tsv files of the tracked runs (SQANTI-SIM h2h 1M/none + BAM, end2end, LRGASP WTC11 pb/ont sr/nosr, refbias_3way arm C wgs, gm12878 ONT preset)",
-  "generated_utc": "2026-11-01T05:54:10Z",
+  "generated_utc": "2026-11-01T08:01:38Z",
   "metrics": {
     "end2end": {
       "false": 0,
@@ -47,7 +47,7 @@
     },
     "refbias_3way_hg02717": {
       "known_fragment_rts_sign": 171,
-      "novel_probable_total": 8368,
+      "novel_probable_total": 8363,
       "rt_lifts": 1357,
       "sqanti3_filter": {
         "Artifact": 1357
@@ -55,10 +55,10 @@
     },
     "refbias_3way_hg03516": {
       "known_fragment_rts_sign": 311,
-      "novel_probable_total": 7081,
-      "rt_lifts": 1297,
+      "novel_probable_total": 7067,
+      "rt_lifts": 1293,
       "sqanti3_filter": {
-        "Artifact": 1297
+        "Artifact": 1293
       }
     },
     "sqanti_sim_none_bam": {
