@@ -172,6 +172,8 @@ def main():
           f"(genuine lost: {genuine_lost})", file=sys.stderr)
 
     if a.emit_metrics:
+        disc_g_max = metrics['discrimination_indel_near']['genuine']['max']
+        disc_f_mean = metrics['discrimination_indel_near']['false']['mean']
         out = {
             "protocol": "bam_axis",
             "scope": "gencode_v49_chr22_flair",
@@ -187,17 +189,18 @@ def main():
                        "[--config cfg_off.toml]; benchmark/bam_axis/score_bam_axis.py --off OFF --on ON",
             "metrics": metrics,
             "notes": "BAM read-level mapping axis: the indel-near / soft-clip fractions were measured by the "
-                     "BAM reader but never fed the verdict before v0.0.4. indel_near cleanly separates genuine "
-                     "(max 0.190) from false (mean 0.350) novel junctions; wiring it as a 4th mapping-artifact "
-                     "trigger (default frac > 0.5) catches false novel junctions at 100% precision (genuine max "
-                     "0.190 < 0.5, so 0 genuine are ever flagged). Since the PARTIAL-never-promotes fix the "
+                     "BAM reader but never fed the verdict before v0.0.4. indel_near separates genuine "
+                     f"(max {disc_g_max}) from false (mean {disc_f_mean}, over junctions with >= min_spanning reads; "
+                     "0.350 over every junction with >= 1 read before the 0.0.6 gate) novel junctions; wiring it as a "
+                     "4th mapping-artifact trigger (default frac > 0.5) catches false novel junctions at 100% precision "
+                     f"(genuine max {disc_g_max} < 0.5, so 0 genuine are ever flagged). Since the PARTIAL-never-promotes fix the "
                      "3 false novels it used to demote are already non-confident, so it no longer changes "
                      "operating-point specificity here (ON == OFF); it relabels "
                      f"{sum(metrics['impact']['false_transitions_off_to_on'].values())} false novels "
                      "(UNCONFIRMED -> ARTIFACT) with an explicit mapping mechanism. Since 0.0.6 a junction "
                      "feeds the gate only with >= min_spanning (3) reads, which is why fewer are caught than "
-                     "the 41/124 reported for 0.0.4. Soft-clip is ~0 on clean HiFi (data-dependent yield); it is wired as the "
-                     "same mapping mechanism for noisy reads but its yield is not claimed on this set.",
+                     "the 41/124 reported for 0.0.4. Soft-clip was ~0 on clean HiFi; it was never a default gate "
+                     "and the fraction was removed in 0.0.8.",
         }
         json.dump(out, open(a.emit_metrics, "w"), indent=2, sort_keys=True)
         print(f"\nwrote {a.emit_metrics}", file=sys.stderr)

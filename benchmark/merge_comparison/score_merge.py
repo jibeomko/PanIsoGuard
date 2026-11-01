@@ -295,8 +295,9 @@ def main():
     split_text = "; ".join(f"{name} {s} of {r} upgraded" for name, (s, r) in splits.items()) or "n/a"
 
     def precision_range(k):
-        ps = [pt['precision'] for m in methods.values() for pt in m['curve'] if pt['min_callers'] == k]
-        return f"{min(ps):.3f}-{max(ps):.3f}"
+        ps = [pt['precision'] for m in methods.values() for pt in m['curve']
+              if pt['min_callers'] == k and pt['precision'] == pt['precision']]   # drop NaN (no chain at that level)
+        return f"{min(ps):.3f}-{max(ps):.3f}" if ps else "n/a"
 
     if args.emit_metrics:
         out = dict(

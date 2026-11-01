@@ -28,10 +28,10 @@ Adjudicating the chr22 SQANTI-SIM FLAIR output with `--bam` and stratifying
 
 | novel-junction set | n | mean indel_near | max / p90 |
 |--------------------|--:|----------------:|----------:|
-| genuine | 430 | 0.032 | max 0.190 |
+| genuine | 430 | 0.032 | max 0.191 |
 | false   | 124 | 0.129 | 11 % above 0.5 |
 
-Genuine junctions top out at 0.190; a false junction with ≥ 3 spanning reads has an
+Genuine junctions top out at 0.191; a false junction with ≥ 3 spanning reads has an
 indel next to it on every read 11 % of the time. (Before 0.0.6 the fraction was taken over
 every junction with ≥ 1 read, which gave a false mean of 0.350 and 33 % above 0.5: most of
 that came from 1–2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
@@ -50,7 +50,7 @@ that still sets them is rejected.
 
 ## The operating point (zero genuine cost)
 
-Because genuine `indel_near` never exceeds 0.190, any gate in [0.20, 0.80] flags zero
+Because genuine `indel_near` never exceeds 0.191, any gate in [0.20, 0.80] flags zero
 genuine junctions. At the shipped default 0.5 (matching the low-MAPQ / supplementary
 gates):
 
