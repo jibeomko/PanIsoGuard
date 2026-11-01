@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/sqanti_sim_heldout/run.sh <chrom>; benchmark/sqanti_sim_heldout/emit_heldout.py CHROM=ROOT ... --emit-metrics ...",
   "data_provenance": "SQANTI-SIM on GENCODE v49, one chromosome at a time (chr20, chr19), the chr22 protocol of benchmark/sqanti_sim + benchmark/sqanti3_filter_h2h repeated unchanged (design equal -nt 1500, NIC 300, NNC 300, ISM 200, 100,000 PBSIM3 reads, seed 1; FLAIR; SQANTI3 6.0.1; short reads none or 1 M wgsim pairs -> STAR 2-pass). Public/simulated.",
-  "generated_utc": "2026-10-22T12:44:16Z",
+  "generated_utc": "2026-11-01T05:18:48Z",
   "metrics": {
     "chr19": {
       "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
@@ -21,7 +21,7 @@
             0.005
           ],
           "PIG+bam": [
-            -0.008,
+            -0.009,
             0.007
           ]
         }
@@ -79,8 +79,8 @@
         "PIG": {
           "FP": 6,
           "TP": 382,
-          "auprc": 0.974,
-          "coverage": 0.507,
+          "auprc": 0.973,
+          "coverage": 0.506,
           "f1": 0.66,
           "prec": 0.985,
           "rec": 0.496,
@@ -89,12 +89,12 @@
         },
         "PIG+bam": {
           "FP": 7,
-          "TP": 574,
+          "TP": 577,
           "auprc": 0.976,
-          "coverage": 0.729,
-          "f1": 0.85,
+          "coverage": 0.731,
+          "f1": 0.852,
           "prec": 0.988,
-          "rec": 0.745,
+          "rec": 0.749,
           "selective_risk": 0.012,
           "spec": 0.941
         },
@@ -159,11 +159,11 @@
         "sr_1000000": {
           "PIG": [
             -0.004,
-            0.012
+            0.013
           ],
           "PIG+bam": [
             -0.003,
-            0.012
+            0.013
           ]
         }
       },
@@ -230,13 +230,13 @@
         },
         "PIG+bam": {
           "FP": 8,
-          "TP": 568,
-          "auprc": 0.978,
-          "coverage": 0.759,
-          "f1": 0.867,
+          "TP": 580,
+          "auprc": 0.979,
+          "coverage": 0.773,
+          "f1": 0.877,
           "prec": 0.986,
-          "rec": 0.774,
-          "selective_risk": 0.013,
+          "rec": 0.79,
+          "selective_risk": 0.012,
           "spec": 0.926
         },
         "SQ3ml": {
@@ -288,7 +288,7 @@
   },
   "notes": "Held-out test of the thresholds set on chr22 (chain_min_full_reads 3, mapping gates, support axis): nothing was re-tuned. Per chromosome and short-read setting, non-FSM genuine-vs-false metrics per method as in sqanti3_filter_h2h, with the same bootstrap CIs.",
   "protocol": "sqanti_sim_heldout",
-  "ruleset_version": "builtin-0.0.5",
+  "ruleset_version": "builtin-0.0.6",
   "scope": "gencode_v49_heldout_chromosomes_sqanti_sim",
   "source": null,
   "status": "tracked",

@@ -148,6 +148,18 @@ Found by a code audit on 2026-10-31; each has a regression test.
   0.95 on NDR 0.5); on TALON's unfiltered output PanIsoGuard (0.353) is below TALON's own filter
   (0.396) and stacks on it (0.716). A measured runtime table replaces the README estimates
   (0.5 s to 5.9 min per genome-wide run, ≤ 0.6 GB).
+- Tracked envelopes re-run with the current binary after the coverage rule above (2026-11-01):
+  sqanti3_filter_h2h, sqanti_sim_heldout, end2end, chain_support (the decoy tables and the
+  SIRV section regenerated too), caller_filters, lrgasp_wtc11 (with the cross-library runs),
+  lrgasp_targets, tusco_negatives and rts_sensitivity. The rule moves isoforms whose span has
+  no spliced short read from `UNSUPPORTED` to `no_coverage`: on chr22 at 1 M pairs with the
+  BAM 5 more genuine isoforms are kept (recall 0.745 → 0.752, precision 0.993 unchanged, AUPRC
+  0.974 → 0.975), on chr20 and chr19 recall rises by 0.004 and 0.016, end2end holds 3 more false
+  novels instead of rejecting them (239 of 249 rejected, 10 held), and on LRGASP WTC11 51 PacBio
+  and 30 ONT isoforms of 78,256 and 39,542 change class with short reads. The oracle short-read
+  settings, the SIRV runs and the decoy tables are unchanged. The envelopes of the protocols that
+  take no short-read junctions (the reference-bias, GM12878, pangenome and multi-caller runs)
+  were not re-run; they predate the strand-aware read counting of this release.
 
 ## [0.0.7] - 2026-10-18
 

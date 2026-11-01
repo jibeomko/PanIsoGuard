@@ -41,8 +41,8 @@ Methods:
 | sr_1M | SQ3rules | 0.918 | 0.890 | 0.904 | 0.909 |
 | sr_1M | SQ3strict | 0.978 | 0.840 | 0.903 | 0.955 |
 | sr_1M | allSJ3 | 0.976 | 0.945 | 0.960 | 0.968 |
-| sr_1M | PIG | 0.990 | 0.545 | 0.703 | 0.969 |
-| sr_1M | PIG+bam | 0.993 | 0.745 | 0.851 | 0.974 |
+| sr_1M | PIG | 0.990 | 0.545 | 0.703 | 0.970 |
+| sr_1M | PIG+bam | 0.993 | 0.752 | 0.856 | 0.975 |
 | oracle | allSJ3 | 0.976 | 1.000 | 0.988 | 0.976 |
 | oracle | PIG | 0.989 | 0.589 | 0.738 | 0.971 |
 | oracle | PIG+bam | 0.991 | 0.782 | 0.874 | 0.977 |
@@ -55,8 +55,8 @@ AUPRC difference vs `allSJ3`, bootstrap 95 % CI (2000 resamples):
 
 | | oracle | sr_250k | sr_1M | sr_4M |
 |---|---|---|---|---|
-| PIG | [−0.015, +0.005] | [−0.008, +0.013] | [−0.010, +0.010] | [−0.010, +0.010] |
-| PIG+bam | [−0.009, +0.011] | [−0.002, +0.019] | [−0.004, +0.016] | [−0.004, +0.016] |
+| PIG | [−0.015, +0.005] | [−0.008, +0.014] | [−0.010, +0.011] | [−0.010, +0.011] |
+| PIG+bam | [−0.009, +0.011] | [−0.001, +0.020] | [−0.003, +0.017] | [−0.004, +0.017] |
 
 With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam [+0.029, +0.061]
 (better, since the 0.0.7 whole-chain read support). Before 0.0.6 the BAM gain with short
@@ -74,8 +74,8 @@ Coverage = share of the 870 isoforms given a decisive class (`NOVEL_CONFIRMED`,
 | SQ3rules | 1.000 | 0.159 |
 | SQ3strict | 1.000 | 0.151 |
 | allSJ3 | 1.000 | 0.066 |
-| PIG | 0.545 | 0.017 |
-| PIG+bam | 0.734 | 0.019 |
+| PIG | 0.544 | 0.015 |
+| PIG+bam | 0.737 | 0.014 |
 | PIG+bam, no short reads | 0.632 | 0.007 |
 
 Every setting's point is in the envelope (`coverage`, `selective_risk` per method).
@@ -88,7 +88,7 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
   Without the BAM it holds nearly all NIC isoforms `UNRESOLVED` (no individually-novel
   junction to corroborate) and all ISM isoforms `UNCONFIRMED`, so it recalls ~0.55 against
   `allSJ3`'s ~0.94. With the BAM (0.0.7), NIC isoforms whose whole intron chain is carried
-  by ≥ 3 long reads become `NOVEL_PROBABLE`: recall 0.75, 146 genuine gained, 0 false
+  by ≥ 3 long reads become `NOVEL_PROBABLE`: recall 0.75, 151 genuine gained, 0 false
   ([../chain_support](../chain_support)). ISM carried end to end becomes `KNOWN_FRAGMENT`,
   which is not a novel call. On NNC it has the same TP/FP
   counts as `allSJ3`.

@@ -16,11 +16,11 @@ coverage column here, so it is the perc_A + RTS rules.
 
 | caller (novel isoforms, genuine) | none, P | SQANTI3 rules, P / R | PanIsoGuard + BAM, P / R (coverage / risk) | + 1 M short-read pairs, P / R |
 |---|---:|---:|---:|---:|
-| FLAIR (870, 730) | 0.839 | 0.918 / 0.886 | 0.993 / 0.748 (0.63 / 0.007) | 0.993 / 0.745 |
-| IsoQuant (618, 607) | 0.982 | 0.982 / 0.886 | 0.991 / 0.708 (0.70 / 0.009) | 0.991 / 0.708 |
-| Bambu NDR 0.5 (552, 409) | 0.741 | 0.734 / 0.875 | 0.764 / 0.951 (0.92 / 0.236) | 0.748 / 0.951 |
-| ESPRESSO (573, 555) | 0.969 | 0.966 / 0.868 | 0.987 / 0.939 (0.92 / 0.013) | 0.987 / 0.935 |
-| TALON, filtered (1,760, 697) | 0.396 | 0.406 / 0.897 | 0.716 / 0.709 (0.39 / 0.284) | 0.709 / 0.697 |
+| FLAIR (870, 730) | 0.839 | 0.918 / 0.886 | 0.993 / 0.748 (0.63 / 0.007) | 0.993 / 0.752 |
+| IsoQuant (618, 607) | 0.982 | 0.982 / 0.886 | 0.991 / 0.708 (0.70 / 0.009) | 0.991 / 0.717 |
+| Bambu NDR 0.5 (552, 409) | 0.741 | 0.734 / 0.875 | 0.764 / 0.951 (0.92 / 0.236) | 0.750 / 0.961 |
+| ESPRESSO (573, 555) | 0.969 | 0.966 / 0.868 | 0.987 / 0.939 (0.92 / 0.013) | 0.987 / 0.944 |
+| TALON, filtered (1,760, 697) | 0.396 | 0.406 / 0.897 | 0.716 / 0.709 (0.39 / 0.284) | 0.712 / 0.704 |
 
 - Without short reads SQANTI3's rules filter does not add precision to four of the five
   callers (± 0.01) and costs 10–13 % of their genuine isoforms; FLAIR is the exception (+0.08).

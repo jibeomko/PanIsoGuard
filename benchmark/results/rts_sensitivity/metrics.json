@@ -1,7 +1,7 @@
 {
   "command": "benchmark/rts_sensitivity/rts_sensitivity.py --sqsim-work ... --h2h ... --e2e ... --lrgasp ... --threeway ... --gm12878 ... --emit-metrics",
   "data_provenance": "the adjudicated.tsv files of the tracked runs (SQANTI-SIM h2h 1M/none + BAM, end2end, LRGASP WTC11 pb/ont sr/nosr, refbias_3way arm C wgs, gm12878 ONT preset)",
-  "generated_utc": "2026-10-18T04:26:34Z",
+  "generated_utc": "2026-11-01T05:54:10Z",
   "metrics": {
     "end2end": {
       "false": 0,
@@ -24,7 +24,7 @@
     },
     "lrgasp_ont_sr": {
       "known_fragment_rts_sign": 52,
-      "rt_lifts": 121,
+      "rt_lifts": 122,
       "validated_targets_among_them": [
         "MTHFS+1",
         "USF1+1"
@@ -40,7 +40,7 @@
     },
     "lrgasp_pb_sr": {
       "known_fragment_rts_sign": 222,
-      "rt_lifts": 910,
+      "rt_lifts": 912,
       "validated_targets_among_them": [
         "MTHFS+1"
       ]
@@ -79,16 +79,16 @@
     },
     "sqanti_sim_sr_1000000_bam": {
       "annotate": {
-        "auprc": 0.974,
+        "auprc": 0.975,
         "prec": 0.993,
-        "rec": 0.745
+        "rec": 0.752
       },
       "false": 0,
       "genuine": 26,
       "hold": {
-        "auprc": 0.972,
+        "auprc": 0.973,
         "prec": 0.992,
-        "rec": 0.71
+        "rec": 0.716
       },
       "known_fragment_rts_sign": 8,
       "rt_lifts": 26
@@ -96,9 +96,9 @@
   },
   "notes": "Ruleset 0.0.5 lets a whole-chain / consensus lift stand when SQANTI3's RTS_stage is TRUE (reason ;rt_switch_sign). 'hold' is the 0.0.4 alternative (UNCONFIRMED). On SQANTI-SIM every such lift is genuine, but the simulator produces no RT switching, so this measures only the flag's false-sign side; the real-data columns show how many calls the choice moves (all of them SQANTI3-filter Artifacts) and which validated LRGASP isoforms it keeps.",
   "protocol": "rts_sensitivity",
-  "ruleset_version": "builtin-0.0.5",
+  "ruleset_version": "builtin-0.0.6",
   "scope": "all_tracked_runs",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.6"
+  "tool_version": "0.0.7"
 }

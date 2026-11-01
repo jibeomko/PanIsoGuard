@@ -17,15 +17,15 @@ short-read pairs (`sr1M`) and with none (`nosr`). Positive = `NOVEL_CONFIRMED` /
 
 | caller | short reads | n (genuine) | precision OFF → ON | recall OFF → ON | lifted to confident: genuine / false | selective risk @ coverage, OFF → ON |
 |---|---|---:|---|---|---:|---|
-| FLAIR | 1 M | 870 (730) | 0.990 → 0.993 | 0.545 → 0.745 | 146 / 0 | 0.024 @ 0.57 → 0.019 @ 0.73 |
+| FLAIR | 1 M | 870 (730) | 0.990 → 0.993 | 0.545 → 0.752 | 151 / 0 | 0.018 @ 0.56 → 0.014 @ 0.74 |
 | FLAIR | none | 870 (730) | — → 0.993 | 0.000 → 0.748 | 546 / 4 | — @ 0.00 → 0.007 @ 0.63 |
-| IsoQuant | 1 M | 618 (607) | 0.988 → 0.991 | 0.526 → 0.708 | 111 / 0 | 0.018 @ 0.53 → 0.014 @ 0.71 |
+| IsoQuant | 1 M | 618 (607) | 0.988 → 0.991 | 0.526 → 0.717 | 116 / 0 | 0.015 @ 0.53 → 0.011 @ 0.72 |
 | IsoQuant | none | 618 (607) | — → 0.991 | 0.000 → 0.708 | 430 / 4 | — @ 0.00 → 0.009 @ 0.70 |
-| ESPRESSO | 1 M | 573 (555) | 0.985 → 0.987 | 0.697 → 0.935 | 132 / 1 | 0.025 @ 0.70 → 0.021 @ 0.93 |
+| ESPRESSO | 1 M | 573 (555) | 0.985 → 0.987 | 0.697 → 0.944 | 137 / 1 | 0.020 @ 0.69 → 0.017 @ 0.93 |
 | ESPRESSO | none | 573 (555) | — → 0.987 | 0.000 → 0.939 | 521 / 7 | — @ 0.00 → 0.013 @ 0.92 |
-| Bambu | 1 M | 552 (409) | 0.725 → 0.748 | 0.748 → 0.951 | 83 / 15 | 0.281 @ 0.78 → 0.257 @ 0.96 |
+| Bambu | 1 M | 552 (409) | 0.725 → 0.750 | 0.748 → 0.961 | 87 / 15 | 0.276 @ 0.78 → 0.251 @ 0.96 |
 | Bambu | none | 552 (409) | — → 0.764 | 0.000 → 0.951 | 389 / 120 | — @ 0.00 → 0.236 @ 0.92 |
-| TALON | 1 M | 1,760 (697) | 0.700 → 0.709 | 0.485 → 0.697 | 148 / 54 | 0.299 @ 0.29 → 0.290 @ 0.40 |
+| TALON | 1 M | 1,760 (697) | 0.700 → 0.712 | 0.485 → 0.704 | 153 / 54 | 0.298 @ 0.29 → 0.287 @ 0.40 |
 | TALON | none | 1,760 (697) | — → 0.716 | 0.000 → 0.709 | 494 / 196 | — @ 0.00 → 0.284 @ 0.39 |
 
 Coverage = fraction of non-FSM isoforms that received a decisive class (`NOVEL_CONFIRMED`,
@@ -36,11 +36,11 @@ them. Full numbers, including every OFF→ON transition by truth label, in
 ## Reading
 
 - Where the recall was. With 1 M short-read pairs, FLAIR's recall goes from 0.545 to
-  0.745 at precision 0.993: 146 genuine isoforms lifted, 0 false. They are the NIC isoforms
+  0.752 at precision 0.993: 151 genuine isoforms lifted, 0 false. They are the NIC isoforms
   whose junctions are all individually known, which the short-read axis cannot test (26 of
   them carry SQANTI3's RT-switch sign, which ruleset 0.0.5 no longer lets demote the lift;
-  the 4 with an intra-priming sign stay `UNCONFIRMED`). The same for IsoQuant (111 / 0) and
-  ESPRESSO (132 / 1).
+  the 4 with an intra-priming sign stay `UNCONFIRMED`). The same for IsoQuant (116 / 0) and
+  ESPRESSO (137 / 1).
 - Without short reads PanIsoGuard confirms nothing (and, since ruleset 0.0.5, rejects
   nothing either: the BAM-only `ARTIFACT` calls it used to make were 36 % wrong). With chain
   support it decides 63–92 % of the isoforms at 0.7–1.3 % risk for FLAIR, IsoQuant and
@@ -115,7 +115,7 @@ summarizes the runs and, on SQANTI-SIM, splits the decoys by the truth.
 | LRGASP WTC11 PacBio cDNA (GENCODE v49) | 139,003 | 3,415 (2.5 %) | 1,872 / 4,323 (43 %) | 21,638 / 153,588 (14 %) |
 | LRGASP WTC11 ONT cDNA | 139,003 | 848 (0.6 %) | 411 / 1,259 (33 %) | 8,205 (5 %) |
 | HG03516 Kinnex Iso-Seq | 139,003 | 1,996 (1.4 %) | 976 / 2,106 (46 %) | 12,825 (8 %) |
-| HG02717 Kinnex Iso-Seq | 139,003 | 4,043 (2.9 %) | 2,308 / 5,516 (42 %) | 22,729 (15 %) |
+| HG02717 Kinnex Iso-Seq | 139,003 | 4,043 (2.9 %) | 2,308 / 5,516 (42 %) | 22,728 (15 %) |
 | GM12878 ONT direct RNA | 139,003 | 7 (0.01 %) | 0 / 5 | 884 (0.6 %) |
 
 On the reduced SQANTI-SIM annotation the truth tells the two kinds of decoy apart: 31 of the 35

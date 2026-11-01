@@ -1,7 +1,7 @@
 {
   "command": "benchmark/tusco_negatives/score_tusco.py --tusco data/tusco_human.tsv --run LABEL=CLS,ADJ,RULES ... --emit-metrics",
   "data_provenance": "TUSCO human universal single-isoform genes (46; Pardo-Palacios et al. 2026, list from ConesaLab/SQANTI3) applied to IsoQuant isoforms on LRGASP WTC11 PacBio / ONT cDNA (ENCODE) and HPRC R2 HG03516 / HG02717 Kinnex Iso-Seq; PanIsoGuard runs of benchmark/lrgasp_wtc11 (adj_sr / adj_nosr) and benchmark/refbias_3way (arm C, wgs); SQANTI3 6.0.1 rules filter on the same classifications. Public data.",
-  "generated_utc": "2026-10-19T12:15:55Z",
+  "generated_utc": "2026-11-01T06:18:17Z",
   "metrics": {
     "n_tusco_genes": 46,
     "runs": {

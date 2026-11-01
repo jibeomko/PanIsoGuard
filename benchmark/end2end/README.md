@@ -44,13 +44,13 @@ FLAIR produced 397 isoforms (5019/6000 reads aligned). On the SQANTI-novel
 ```
             pred_genuine  pred_false  abstain
 genuine           19           0          1
-false              0         242          7
+false              0         239         10
 
 precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisive) = 1.000
 ```
 
-- PanIsoGuard rejected 242/249 (97%) of FLAIR's false-novel artifacts and abstained on
-  the other 7 — on real, messy caller output it removes nearly all spurious novelty.
+- PanIsoGuard rejected 239/249 (96%) of FLAIR's false-novel artifacts and abstained on
+  the other 10 — on real, messy caller output it removes nearly all spurious novelty.
 - No genuine novel was wrongly rejected (0 false negatives) and **no artifact was called
   genuine** (0 false positives).
 - 19/20 genuine novels are `NOVEL_PROBABLE` through whole-chain long-read support: they

@@ -9,11 +9,11 @@ decision without a direct real-data test, is spelled out below.
 
 | run | lifts carrying the RTS sign | truth / external view | annotate → hold |
 |---|---:|---|---|
-| SQANTI-SIM chr22, 1 M pairs + BAM | 26 | 26 genuine / 0 false | P 0.993 / R 0.745 / AUPRC 0.974 → 0.992 / 0.710 / 0.972 |
+| SQANTI-SIM chr22, 1 M pairs + BAM | 26 | 26 genuine / 0 false | P 0.993 / R 0.752 / AUPRC 0.975 → 0.992 / 0.716 / 0.973 |
 | SQANTI-SIM chr22, no short reads + BAM | 57 | 57 / 0 | 0.993 / 0.748 / 0.953 → 0.992 / 0.670 / 0.939 |
 | end2end chr22 | 4 | 4 / 0 | genuine `NOVEL_PROBABLE` 19/20 → 15/20 |
-| LRGASP WTC11 PacBio, + Illumina / none | 910 / 1,321 | validated targets among them: MTHFS; CENPK, MTHFS | the held ones would be `UNCONFIRMED`, never `ARTIFACT` |
-| LRGASP WTC11 ONT, + Illumina / none | 121 / 222 | MTHFS, USF1; CENPK, MTHFS, RND2, USF1 | |
+| LRGASP WTC11 PacBio, + Illumina / none | 912 / 1,321 | validated targets among them: MTHFS; CENPK, MTHFS | the held ones would be `UNCONFIRMED`, never `ARTIFACT` |
+| LRGASP WTC11 ONT, + Illumina / none | 122 / 222 | MTHFS, USF1; CENPK, MTHFS, RND2, USF1 | |
 | HG03516 Kinnex (arm C) | 1,297 of 7,081 `NOVEL_PROBABLE` | All 1,297 are SQANTI3-filter `Artifact`s | |
 | HG02717 Kinnex (arm C) | 1,357 of 8,368 | All `Artifact`s | |
 | GM12878 ONT direct RNA | 0 | | |
