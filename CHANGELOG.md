@@ -168,7 +168,9 @@ Found by a code audit on 2026-10-31; each has a regression test.
   genome and the GIAB cohort (identical: 1, 33 and 137 rescued, 0 false), refbias_3way arm C
   (rescue counts identical; the strand check moves 16 HG03516 and 8 HG02717 isoforms of 68,011
   and 69,228 to `UNRESOLVED`, so `NOVEL_PROBABLE` is 7,067 and 8,363), verdict_distribution,
-  tusco_negatives (identical) and rts_sensitivity. The GM12878 write-up had cited BAM
+  tusco_negatives (identical) and rts_sensitivity; the lrgasp_targets envelope now also records how
+  many of the target chains PanIsoGuard calls `ARTIFACT` SQANTI3's rules filter discards too. The
+  GM12878 write-up had cited BAM
   fire rates (175 of 191 indel-near, 187 of 191 soft-clip, 11 and 4 of 191) and means (0.925 vs
   0.732) that its envelope has not held since 0.0.6; it now carries the envelope's numbers
   (128 of 190, 134 of 191 in the last run that measured soft-clip, 9 and 3 of 190, 0.63 vs 0.67)
