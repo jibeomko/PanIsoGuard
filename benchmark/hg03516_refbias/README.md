@@ -20,7 +20,7 @@ HiFi assembly (pat + mat) ── minimap2 asm5 + paftools.js call vs GRCh38 ─�
   → adjudicate the variant axis: --haplotype-provenance wgs (rescue) and unknown (firewall)
 ```
 
-## Result (independently adversarially audited)
+## Result (audited independently)
 
 | | HG03516 (divergent, ESN) | GM12878 (reference-grade) |
 |---|:---:|:---:|

@@ -140,7 +140,7 @@ run on the Lexogen SIRV-Set4 spike-in reference — a denser, multi-contig trans
 | ≥ 2                | 1.000 |
 
 Single-caller novels are again overwhelmingly artifacts (precision 0.04, mirroring the 0.012
-on chr22), and ≥ 2-caller agreement is perfectly precise. So "agreement = confidence" is a
+on chr22), and ≥ 2-caller agreement has precision 1.000. So "agreement = confidence" is a
 property of multi-caller data, not of one reference or simulator. Recorded in
 [../results/sirv_multicaller](../results/sirv_multicaller).
 

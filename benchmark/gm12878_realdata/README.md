@@ -77,7 +77,7 @@ test of whether the axis is usable on ONT at all. On the 285 real novel chains
 | ± 10 bp | 282 | 188 |
 
 Among reads that match a chain within 10 bp, 94.5 % of the splice sites are exact; 1–2 bp
-offsets are essentially absent (0.1 %), the rest sit at 3–7 bp. These are caller chains built
+offsets are rare (0.1 %), the rest sit at 3–7 bp. These are caller chains built
 from the same splice-aware alignment (`minimap2 -ax splice -uf`), so the aligner has already
 placed the sites consistently; a tolerance of ± 1–2 bp would change nothing, ± 5 bp would add
 20 chains at the cost of accepting neighbouring alternative sites. No tolerance is shipped.
