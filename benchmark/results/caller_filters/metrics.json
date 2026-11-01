@@ -1,7 +1,7 @@
 {
   "command": "benchmark/caller_filters/run.sh; score_filters.py --work ... --pig-dir ... --caller ... --family ... --emit-metrics",
   "data_provenance": "chr22 SQANTI-SIM truth set (benchmark/sqanti_sim) called by FLAIR, IsoQuant, Bambu (NDR 0.5), ESPRESSO and TALON (filtered) on one alignment (benchmark/multicaller); SQANTI3 6.0.1 per caller; PanIsoGuard runs of benchmark/chain_support (ruleset 0.0.5); Bambu NDR 0.3/0.2/0.1 and TALON before talon_filter_transcripts re-run for the caller-knob comparison. Public/simulated.",
-  "generated_utc": "2026-10-19T12:32:03Z",
+  "generated_utc": "2026-11-01T05:29:47Z",
   "metrics": {
     "caller_own_knob": {
       "bambu": {
@@ -24,9 +24,9 @@
             },
             "panisoguard_bam_sr1M": {
               "FP": 131,
-              "TP": 389,
-              "prec": 0.748,
-              "rec": 0.951
+              "TP": 393,
+              "prec": 0.75,
+              "rec": 0.961
             },
             "sqanti3_rules": {
               "FP": 130,
@@ -84,9 +84,9 @@
             },
             "panisoguard_bam_sr1M": {
               "FP": 199,
-              "TP": 486,
-              "prec": 0.709,
-              "rec": 0.639
+              "TP": 491,
+              "prec": 0.712,
+              "rec": 0.645
             },
             "sqanti3_rules": {
               "FP": 915,
@@ -110,10 +110,10 @@
               "rec": 0.712
             },
             "panisoguard_bam_sr1M": {
-              "FP": 1010,
-              "TP": 541,
-              "prec": 0.349,
-              "rec": 0.711
+              "FP": 1011,
+              "TP": 546,
+              "prec": 0.351,
+              "rec": 0.717
             },
             "sqanti3_rules": {
               "FP": 5069,
@@ -145,11 +145,11 @@
         },
         "panisoguard_bam_sr1M": {
           "FP": 131,
-          "TP": 389,
-          "coverage": 0.958,
-          "prec": 0.748,
-          "rec": 0.951,
-          "selective_risk": 0.257
+          "TP": 393,
+          "coverage": 0.96,
+          "prec": 0.75,
+          "rec": 0.961,
+          "selective_risk": 0.251
         },
         "sqanti3_rules": {
           "FP": 130,
@@ -177,11 +177,11 @@
         },
         "panisoguard_bam_sr1M": {
           "FP": 7,
-          "TP": 519,
-          "coverage": 0.927,
+          "TP": 524,
+          "coverage": 0.932,
           "prec": 0.987,
-          "rec": 0.935,
-          "selective_risk": 0.021
+          "rec": 0.944,
+          "selective_risk": 0.017
         },
         "sqanti3_rules": {
           "FP": 17,
@@ -209,11 +209,11 @@
         },
         "panisoguard_bam_sr1M": {
           "FP": 4,
-          "TP": 544,
-          "coverage": 0.734,
+          "TP": 549,
+          "coverage": 0.737,
           "prec": 0.993,
-          "rec": 0.745,
-          "selective_risk": 0.019
+          "rec": 0.752,
+          "selective_risk": 0.014
         },
         "sqanti3_rules": {
           "FP": 58,
@@ -241,11 +241,11 @@
         },
         "panisoguard_bam_sr1M": {
           "FP": 4,
-          "TP": 430,
-          "coverage": 0.71,
+          "TP": 435,
+          "coverage": 0.717,
           "prec": 0.991,
-          "rec": 0.708,
-          "selective_risk": 0.014
+          "rec": 0.717,
+          "selective_risk": 0.011
         },
         "sqanti3_rules": {
           "FP": 10,
@@ -273,11 +273,11 @@
         },
         "panisoguard_bam_sr1M": {
           "FP": 199,
-          "TP": 486,
-          "coverage": 0.402,
-          "prec": 0.709,
-          "rec": 0.697,
-          "selective_risk": 0.29
+          "TP": 491,
+          "coverage": 0.404,
+          "prec": 0.712,
+          "rec": 0.704,
+          "selective_risk": 0.287
         },
         "sqanti3_rules": {
           "FP": 915,
@@ -286,28 +286,13 @@
           "rec": 0.897
         }
       }
-    },
-    "sqanti3_ml_truth_cv": {
-      "talon": {
-        "FP": 127,
-        "TP": 361,
-        "auprc": 0.737,
-        "f1": 0.609,
-        "folds": 2,
-        "n_genuine": 697,
-        "n_scored": 1760,
-        "prec": 0.74,
-        "rec": 0.518,
-        "seed": 1,
-        "spec": 0.881
-      }
     }
   },
-  "notes": "Three post-caller filters on the same output: none, SQANTI3 rules (no short-read coverage column, so its perc_A + RTS rules), PanIsoGuard + BAM without and with 1 M short-read pairs. Recall is relative to the caller's own genuine novel isoforms (the caller's recall is outside the comparison). The caller-knob section tightens Bambu's NDR and applies TALON's own filter, with recall relative to the permissive setting's genuine chains, against PanIsoGuard applied to the permissive output. [sqanti3_ml_truth_cv] SQANTI3's ML filter trained on the simulated truth itself (genuine = TP, false = TN) in two-fold cross-validation and scored on the held-out fold: the supervised ceiling of SQANTI3's own features. Only TALON's output has the >= 250 false isoforms the filter requires per class.",
+  "notes": "Three post-caller filters on the same output: none, SQANTI3 rules (no short-read coverage column, so its perc_A + RTS rules), PanIsoGuard + BAM without and with 1 M short-read pairs. Recall is relative to the caller's own genuine novel isoforms (the caller's recall is outside the comparison). The caller-knob section tightens Bambu's NDR and applies TALON's own filter, with recall relative to the permissive setting's genuine chains, against PanIsoGuard applied to the permissive output.",
   "protocol": "caller_filters",
-  "ruleset_version": "default-0.0.5",
+  "ruleset_version": "default-0.0.6",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.6"
+  "tool_version": "0.0.7"
 }

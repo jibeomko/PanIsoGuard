@@ -156,7 +156,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        consistent with it). These are the caller's own reads, so like consensus it is
        methodological support and never reaches `NOVEL_CONFIRMED`; it never overrides a
        short-read verdict (`UNSUPPORTED`, `PARTIAL`). On SQANTI-SIM chr22 it lifts
-       146 genuine and 0 false FLAIR isoforms with 1 M short-read pairs (546 / 4 without), but the false
+       151 genuine and 0 false FLAIR isoforms with 1 M short-read pairs (546 / 4 without), but the false
        chains of Bambu, ESPRESSO and TALON are read-supported too (alignment-level
        artifacts), so it separates caller-level from alignment-level false chains only
        ([benchmark/chain_support](../benchmark/chain_support)). Coordinates are exact: on

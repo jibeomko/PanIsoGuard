@@ -1,7 +1,7 @@
 {
-  "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/pig_lrgasp --emit-metrics ...",
+  "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp --emit-metrics ...",
   "data_provenance": "real public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF (benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, with and without the Illumina SJ.tab. No private data.",
-  "generated_utc": "2026-10-22T13:07:26Z",
+  "generated_utc": "2026-11-01T05:54:18Z",
   "metrics": {
     "ont_nosr": {
       "likely": {
@@ -17,14 +17,13 @@
       "supported": {
         "class_counts": {
           "NOVEL_PROBABLE": 25,
-          "UNCONFIRMED": 1,
-          "UNRESOLVED": 38
+          "UNRESOLVED": 39
         },
         "novel_targets": 64,
         "panisoguard_artifact": 0,
         "panisoguard_confident": 25,
         "sqanti3_rules_keeps": 48,
-        "whole_chain_reads_ge3": 26
+        "whole_chain_reads_ge3": 25
       },
       "unsupported": {
         "class_counts": {
@@ -53,26 +52,26 @@
       },
       "supported": {
         "class_counts": {
-          "ARTIFACT": 6,
+          "ARTIFACT": 5,
           "NOVEL_CONFIRMED": 13,
           "NOVEL_PROBABLE": 10,
           "UNCONFIRMED": 18,
-          "UNRESOLVED": 17
+          "UNRESOLVED": 18
         },
         "novel_targets": 64,
-        "panisoguard_artifact": 6,
+        "panisoguard_artifact": 5,
         "panisoguard_confident": 23,
         "sqanti3_rules_keeps": 48,
-        "whole_chain_reads_ge3": 26
+        "whole_chain_reads_ge3": 25
       },
       "unsupported": {
         "class_counts": {
-          "ARTIFACT": 7,
+          "ARTIFACT": 3,
           "UNCONFIRMED": 9,
-          "UNRESOLVED": 10
+          "UNRESOLVED": 14
         },
         "novel_targets": 26,
-        "panisoguard_artifact": 7,
+        "panisoguard_artifact": 3,
         "panisoguard_confident": 0,
         "sqanti3_rules_keeps": 18,
         "whole_chain_reads_ge3": 3
@@ -128,26 +127,26 @@
       },
       "supported": {
         "class_counts": {
-          "ARTIFACT": 7,
+          "ARTIFACT": 6,
           "NOVEL_CONFIRMED": 13,
           "NOVEL_PROBABLE": 11,
           "UNCONFIRMED": 17,
-          "UNRESOLVED": 16
+          "UNRESOLVED": 17
         },
         "novel_targets": 64,
-        "panisoguard_artifact": 7,
+        "panisoguard_artifact": 6,
         "panisoguard_confident": 24,
         "sqanti3_rules_keeps": 48,
         "whole_chain_reads_ge3": 28
       },
       "unsupported": {
         "class_counts": {
-          "ARTIFACT": 7,
+          "ARTIFACT": 3,
           "UNCONFIRMED": 9,
-          "UNRESOLVED": 10
+          "UNRESOLVED": 14
         },
         "novel_targets": 26,
-        "panisoguard_artifact": 7,
+        "panisoguard_artifact": 3,
         "panisoguard_confident": 0,
         "sqanti3_rules_keeps": 18,
         "whole_chain_reads_ge3": 0
@@ -156,7 +155,7 @@
   },
   "notes": "Targets novel against GENCODE v49 (SQANTI3 NIC/NNC, not KNOWN) by amplicon validation: supported (positives), unsupported (negatives), likely. Independent of any caller's reconstruction: the chains are adjudicated as would-be isoforms, so the negatives test whether whole-chain reads or short reads would make PanIsoGuard confirm a chain the amplicons did not support.",
   "protocol": "lrgasp_targets",
-  "ruleset_version": "builtin-0.0.5",
+  "ruleset_version": "builtin-0.0.6",
   "scope": "lrgasp_wtc11_validation_targets_as_would_be_isoforms",
   "source": null,
   "status": "tracked",

@@ -429,14 +429,14 @@ Full tables, bootstrap confidence intervals and caveats are in
 | none | PanIsoGuard + BAM | 0.993 | 0.748 | 0.853 | 0.953 |
 | 1M | SQANTI3 rules filter | 0.918 | 0.890 | 0.904 | 0.909 |
 | 1M | Every junction ≥ 3 short reads | 0.976 | 0.945 | 0.960 | 0.968 |
-| 1M | PanIsoGuard | 0.990 | 0.545 | 0.703 | 0.969 |
-| 1M | PanIsoGuard + BAM | 0.993 | 0.745 | 0.851 | 0.974 |
+| 1M | PanIsoGuard | 0.990 | 0.545 | 0.703 | 0.970 |
+| 1M | PanIsoGuard + BAM | 0.993 | 0.752 | 0.856 | 0.975 |
 
 - PanIsoGuard is the most precise, but it keeps fewer of the real isoforms (lower recall).
   With short reads alone it holds back on NIC isoforms that only combine known junctions
   (there is no new junction to confirm) and on ISM isoforms. With the BAM (0.0.7), NIC
   isoforms whose whole intron chain is carried by at least 3 long reads are kept as
-  `NOVEL_PROBABLE`; that is the recall difference between the last two rows (146 real
+  `NOVEL_PROBABLE`; that is the recall difference between the last two rows (151 real
   isoforms gained, 0 false).
 - For ranking (AUPRC) it ties the one-line short-read rule, with or without the BAM
   (every difference is within the bootstrap interval).
@@ -453,7 +453,7 @@ Full tables, bootstrap confidence intervals and caveats are in
   0.32 on TALON, where SQANTI3's rules filter adds nothing; it is not a substitute for a caller's
   own read-count filter but stacks on it ([benchmark/caller_filters](benchmark/caller_filters)).
 - It decides fewer isoforms and is wrong less often on those it decides: at 1 M pairs with
-  the BAM it gives a decisive class to 73 % of the isoforms and 1.9 % of those are wrong;
+  the BAM it gives a decisive class to 74 % of the isoforms and 1.4 % of those are wrong;
   the one-line rule decides all of them and 6.6 % are wrong
   ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), risk–coverage).
 - On real data with experimentally validated isoforms (LRGASP WTC11, PacBio and ONT), none
