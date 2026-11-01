@@ -14,8 +14,8 @@ decision without a direct real-data test, is spelled out below.
 | end2end chr22 | 4 | 4 / 0 | genuine `NOVEL_PROBABLE` 19/20 → 15/20 |
 | LRGASP WTC11 PacBio, + Illumina / none | 912 / 1,321 | validated targets among them: MTHFS; CENPK, MTHFS | the held ones would be `UNCONFIRMED`, never `ARTIFACT` |
 | LRGASP WTC11 ONT, + Illumina / none | 122 / 222 | MTHFS, USF1; CENPK, MTHFS, RND2, USF1 | |
-| HG03516 Kinnex (arm C) | 1,297 of 7,081 `NOVEL_PROBABLE` | All 1,297 are SQANTI3-filter `Artifact`s | |
-| HG02717 Kinnex (arm C) | 1,357 of 8,368 | All `Artifact`s | |
+| HG03516 Kinnex (arm C) | 1,293 of 7,067 `NOVEL_PROBABLE` | All 1,293 are SQANTI3-filter `Artifact`s | |
+| HG02717 Kinnex (arm C) | 1,357 of 8,363 | All `Artifact`s | |
 | GM12878 ONT direct RNA | 0 | | |
 
 `KNOWN_FRAGMENT` has the same annotation for ISM (`ism_chain_support;rts_sign`): 8 on
@@ -47,8 +47,8 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
   ones. What remains unmeasured is how often a real RT-switching chimera that ≥ 3 reads carry
   end to end is flagged, which is what "hold" would protect against. Template switching is
   sequence-driven, so it can recur across molecules; read count alone does not rule it out.
-- What the choice moves. On real Iso-Seq about one `NOVEL_PROBABLE` in six (1,297 / 7,081;
-  1,357 / 8,368) rests on it, and every one of those is an isoform SQANTI3's rules filter
+- What the choice moves. On real Iso-Seq about one `NOVEL_PROBABLE` in six (1,293 / 7,067;
+  1,357 / 8,363) rests on it, and every one of those is an isoform SQANTI3's rules filter
   discards. Under "hold" they are `UNCONFIRMED` (review), not `ARTIFACT`.
 - The trade, and why annotate. The one real-data number is the false-sign rate: the flag
   is wrong about one time in six on isoforms known to exist, and a sign that weak should not

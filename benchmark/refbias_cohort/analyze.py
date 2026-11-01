@@ -144,7 +144,7 @@ if EMIT:
         "protocol": "refbias_cohort", "scope": "hprc_r2_west_african_cohort_real_longread",
         "status": "tracked", "tool_version": _versions(PAIRS[0][1])[0], "ruleset_version": _versions(PAIRS[0][1])[1],
         "data_provenance": "real public HPRC Release 2 long-read RNA (PacBio Kinnex Iso-Seq) + HiFi de-novo "
-            "phased assemblies for the SAME individuals: HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, "
+            "phased assemblies for the same individuals: HG03516 (ESN, Esan in Nigeria) and HG02717 (GWD, "
             "Gambian Mandinka) -- two independent West African individuals. Personal SNV-consensus haplotypes "
             "from assembly minimap2 asm5 + paftools.js call vs GRCh38 (SNVs only, length-matched). GENCODE v49. "
             "No private data. Reference-grade comparator GM12878=NA12878 (European) yields 0 -- see gm12878_realdata.",

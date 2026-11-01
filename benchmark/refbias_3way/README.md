@@ -199,9 +199,9 @@ SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated 
 and `Isoform` 9,253 (HG02717: 7,202 / 10,067). PanIsoGuard's `REFERENCE_BIAS` isoforms (18
 and 28) are all among the `Artifact`s in both individuals: without the rescue a user
 following the filter discards them. The rest (HG03516 / HG02717, ruleset 0.0.5):
-`NOVEL_PROBABLE` 7,081 / 8,368, every one with ≥ 3 whole-chain long reads (0.0.7 chain
+`NOVEL_PROBABLE` 7,067 / 8,363, every one with ≥ 3 whole-chain long reads (0.0.7 chain
 support; no short reads exist for these samples, so nothing is `CONFIRMED`): 5,784 / 7,011
-are SQANTI3 `Isoform`s and 1,297 / 1,357 are SQANTI3 `Artifact`s whose only sign is
+are SQANTI3 `Isoform`s and 1,293 / 1,357 are SQANTI3 `Artifact`s whose only sign is
 `RTS_stage` (`chain_support;rt_switch_sign`; held `UNCONFIRMED` before ruleset 0.0.5), which
 is the real-data size of the RT-switch decision; `KNOWN_FRAGMENT` 3,925 / 1,854 (ISM carried
 end to end with no intra-priming sign; 314 / 177 of them SQANTI3 `Artifact`s); `UNCONFIRMED`

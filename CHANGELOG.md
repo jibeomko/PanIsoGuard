@@ -158,8 +158,23 @@ Found by a code audit on 2026-10-31; each has a regression test.
   novels instead of rejecting them (239 of 249 rejected, 10 held), and on LRGASP WTC11 51 PacBio
   and 30 ONT isoforms of 78,256 and 39,542 change class with short reads. The oracle short-read
   settings, the SIRV runs and the decoy tables are unchanged. The envelopes of the protocols that
-  take no short-read junctions (the reference-bias, GM12878, pangenome and multi-caller runs)
-  were not re-run; they predate the strand-aware read counting of this release.
+  take no short-read junctions were re-run afterwards (below).
+- The remaining tracked runs re-done with the current binary (2026-11-01), so that every
+  envelope reflects the strand-aware read counting: bam_axis (false junctions with ≥ 3 spanning
+  reads 124 → 120, mean indel-near 0.129 → 0.133, still 14 caught and 0 genuine flagged),
+  gm12878_realdata (190 BAM-evaluable junctions instead of 191; 154 chains with ≥ 3 exact
+  full-chain reads instead of 155; `--platform ont` 147 `NOVEL_PROBABLE`), the HG03516 and
+  HG02717 haplotype scans, refbias_cohort and refbias_phasing (identical), hg002, the HG002 whole
+  genome and the GIAB cohort (identical: 1, 33 and 137 rescued, 0 false), refbias_3way arm C
+  (rescue counts identical; the strand check moves 16 HG03516 and 8 HG02717 isoforms of 68,011
+  and 69,228 to `UNRESOLVED`, so `NOVEL_PROBABLE` is 7,067 and 8,363), verdict_distribution,
+  tusco_negatives (identical) and rts_sensitivity. The GM12878 write-up had cited BAM
+  fire rates (175 of 191 indel-near, 187 of 191 soft-clip, 11 and 4 of 191) and means (0.925 vs
+  0.732) that its envelope has not held since 0.0.6; it now carries the envelope's numbers
+  (128 of 190, 134 of 191 in the last run that measured soft-clip, 9 and 3 of 190, 0.63 vs 0.67)
+  and the analyzer writes its notes from the metrics instead of a fixed text. Not re-run: the
+  multi-caller, merge-comparison and pangenome envelopes, which do not depend on `adjudicate`
+  output or take no BAM, and the oracle SQANTI-SIM sweep, whose verdicts were shown unchanged.
 
 ## [0.0.7] - 2026-10-18
 
