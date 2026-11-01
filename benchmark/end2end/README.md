@@ -50,7 +50,7 @@ precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisiv
 ```
 
 - PanIsoGuard rejected 242/249 (97%) of FLAIR's false-novel artifacts and abstained on
-  the other 7 — on real, messy caller output it removes essentially all spurious novelty.
+  the other 7 — on real, messy caller output it removes nearly all spurious novelty.
 - No genuine novel was wrongly rejected (0 false negatives) and **no artifact was called
   genuine** (0 false positives).
 - 19/20 genuine novels are `NOVEL_PROBABLE` through whole-chain long-read support: they
