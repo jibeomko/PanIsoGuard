@@ -64,7 +64,7 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
 
 ```bash
 ~/miniconda3/envs/sqsim/bin/python rts_sensitivity.py --sqsim-work /path/to/sqanti_sim/work \
-  --h2h /path/to/h2h_work --e2e /path/to/e2e_work --lrgasp /mnt/Data/pig_lrgasp \
+  --h2h /path/to/h2h_work --e2e /path/to/e2e_work --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp \
   --threeway hg03516=/path/to/pig_hg03516/refbias_3way hg02717=/path/to/pig_hg02717/refbias_3way \
   --gm12878 /path/to/gm12878/rb_ont.adjudicated.tsv --emit-metrics ../results/rts_sensitivity/metrics.json
 ```

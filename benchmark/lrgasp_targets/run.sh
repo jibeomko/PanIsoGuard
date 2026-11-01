@@ -4,9 +4,9 @@
 # GENCODE v49 and adjudicated by PanIsoGuard with the PacBio and the ONT library, with and without the
 # Illumina junctions, independently of whether a caller reconstructed the chain. Negatives = chains the
 # amplicons did not support; positives = the supported ones. Also SQANTI3's default rules filter.
-# Usage: bash run.sh [/mnt/Data/pig_lrgasp]
+# Usage: bash run.sh [/mnt/Data/PanIsoGuard_bench/pig_lrgasp]
 set -euo pipefail
-L=${1:-/mnt/Data/pig_lrgasp}; W=$L/targets_run; mkdir -p "$W"; cd "$W"
+L=${1:-/mnt/Data/PanIsoGuard_bench/pig_lrgasp}; W=$L/targets_run; mkdir -p "$W"; cd "$W"
 GRCH38=${GRCH38:-/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa}
 REFGTF=${REFGTF:-/mnt/Data/LR-RNAseq/reference/gencode.v49.annotation.gtf}
 SQANTI3_BIN=$HOME/miniconda3/envs/sqanti3/bin; PIG=$HOME/PanIsoGuard/build/panisoguard

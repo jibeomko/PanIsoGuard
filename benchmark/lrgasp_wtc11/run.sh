@@ -8,7 +8,7 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PIG="${PIG:-$HERE/../../build/panisoguard}"
-WORK="${WORK:-/mnt/Data/pig_lrgasp}"
+WORK="${WORK:-/mnt/Data/PanIsoGuard_bench/pig_lrgasp}"
 GRCH38="${GRCH38:-/mnt/Data/LR-RNAseq/reference/GRCh38.primary_assembly.genome.fa}"
 REFGTF="${REFGTF:-/mnt/Data/LR-RNAseq/reference/gencode.v49.annotation.gtf}"
 STAR_IDX="${STAR_IDX:-/mnt/Data/LR-RNAseq/reference/STAR_index_v49}"

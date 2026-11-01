@@ -10,9 +10,9 @@ PBSIM3 reads; seed 1), FLAIR, SQANTI3 6.0.1, and the two short-read settings of 
 head-to-head so the numbers are directly comparable.
 
 ```
-bash run.sh chr20          # -> /mnt/Data/pig_sqantisim_chr20/{work,h2h}
+bash run.sh chr20          # -> /mnt/Data/PanIsoGuard_bench/pig_sqantisim_chr20/{work,h2h}
 bash run.sh chr19
-emit_heldout.py chr20=/mnt/Data/pig_sqantisim_chr20 chr19=/mnt/Data/pig_sqantisim_chr19 \
+emit_heldout.py chr20=/mnt/Data/PanIsoGuard_bench/pig_sqantisim_chr20 chr19=/mnt/Data/PanIsoGuard_bench/pig_sqantisim_chr19 \
     --emit-metrics ../results/sqanti_sim_heldout/metrics.json
 ```
 
