@@ -473,6 +473,11 @@ Full tables, bootstrap confidence intervals and caveats are in
   without short reads AUPRC 0.962 and 0.957 against 0.946 and 0.928 for SQANTI3's rules filter,
   both bootstrap intervals above zero; with 1 M pairs a tie with the one-line rule
   ([benchmark/sqanti_sim_heldout](benchmark/sqanti_sim_heldout)).
+- The same thresholds on the same chr22 design re-simulated as ONT cDNA (NanoSim) keep the
+  ordering: without short reads precision 0.76 against 0.18 for SQANTI3's rules filter (AUPRC
+  0.549 vs 0.172), with 1 M pairs 0.88 and a tie with the one-line rule on AUPRC; the `hifi` and
+  `ont` presets give the same class to every isoform, because the indel-near sign is read in
+  excess of the reads' own indel rate ([benchmark/sqanti_sim_ont](benchmark/sqanti_sim_ont)).
 - On the other callers' output (IsoQuant, Bambu, ESPRESSO, TALON, same alignment, no short
   reads) it raises precision every time, by 0.01–0.02 where the caller is already strict and by
   0.32 on TALON, where SQANTI3's rules filter adds nothing; it is not a substitute for a caller's
@@ -507,7 +512,8 @@ AUPRC very little (0.970–0.971), and the default is within 0.0001 of the best
 ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)); the
 whole-chain read threshold is flat from 2 to 10 ([benchmark/chain_support](benchmark/chain_support)).
 The same thresholds, untouched, hold on chr20 and chr19
-([benchmark/sqanti_sim_heldout](benchmark/sqanti_sim_heldout)).
+([benchmark/sqanti_sim_heldout](benchmark/sqanti_sim_heldout)) and on the chr22 design re-simulated
+as ONT reads ([benchmark/sqanti_sim_ont](benchmark/sqanti_sim_ont)).
 
 **Pangenome.** The pangenome reference-bias check was tested on the real HPRC v1.1 chr22 graph
 (GATE-1): no false rescues on real FLAIR novel junctions, correct rescues on real population

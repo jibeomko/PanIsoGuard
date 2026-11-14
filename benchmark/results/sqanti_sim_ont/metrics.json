@@ -1,0 +1,206 @@
+{
+  "command": "bash benchmark/sqanti_sim_ont/run.sh; benchmark/sqanti_sim_ont/emit_ont.py ROOT --emit-metrics ...",
+  "data_provenance": "SQANTI-SIM on GENCODE v49 chr22, the design of benchmark/sqanti_sim reused unchanged (same reduced annotation, hidden transcripts and requested counts); reads re-simulated as ONT cDNA with NanoSim (SQANTI-SIM's pre-trained human WTC11 cDNA guppy model, 100,000 reads, seed 1); minimap2 -ax splice; FLAIR; SQANTI3 6.0.1; short reads none or 1 M wgsim pairs -> STAR 2-pass; SQANTI3 rules / ML / strict filters as in benchmark/sqanti3_filter_h2h. Public/simulated.",
+  "generated_utc": "2026-11-14T04:56:15Z",
+  "metrics": {
+    "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
+      "PIG": [
+        -0.12,
+        -0.092
+      ],
+      "PIG+bam": [
+        0.325,
+        0.43
+      ],
+      "PIG+bam(ont)": [
+        0.325,
+        0.43
+      ]
+    },
+    "bootstrap_auprc_diff_vs_allSJ3_95ci": {
+      "sr_1000000": {
+        "PIG": [
+          -0.205,
+          -0.08
+        ],
+        "PIG+bam": [
+          -0.069,
+          0.053
+        ],
+        "PIG+bam(ont)": [
+          -0.069,
+          0.053
+        ]
+      }
+    },
+    "hifi_vs_ont_preset": {
+      "none": {
+        "isoforms_with_a_different_class": 0
+      },
+      "sr_1000000": {
+        "isoforms_with_a_different_class": 0
+      }
+    },
+    "indel_near_gate": {
+      "none": {
+        "excess_over_gate": 0,
+        "gated_junctions": 635,
+        "mean_background": 0.699,
+        "raw_over_gate": 354
+      },
+      "sr_1000000": {
+        "excess_over_gate": 0,
+        "gated_junctions": 635,
+        "mean_background": 0.699,
+        "raw_over_gate": 354
+      }
+    },
+    "n_false": 3862,
+    "n_flair_isoforms": 4787,
+    "n_genuine": 320,
+    "n_non_fsm": 4182,
+    "none": {
+      "PIG": {
+        "FP": 0,
+        "TP": 0,
+        "auprc": 0.066,
+        "coverage": 0.0,
+        "f1": null,
+        "prec": null,
+        "rec": 0.0,
+        "selective_risk": null,
+        "spec": 1.0
+      },
+      "PIG+bam": {
+        "FP": 70,
+        "TP": 222,
+        "auprc": 0.549,
+        "coverage": 0.07,
+        "f1": 0.725,
+        "prec": 0.76,
+        "rec": 0.694,
+        "selective_risk": 0.24,
+        "spec": 0.982
+      },
+      "PIG+bam(ont)": {
+        "FP": 70,
+        "TP": 222,
+        "auprc": 0.549,
+        "coverage": 0.07,
+        "f1": 0.725,
+        "prec": 0.76,
+        "rec": 0.694,
+        "selective_risk": 0.24,
+        "spec": 0.982
+      },
+      "SQ3ml": {
+        "FP": 478,
+        "TP": 108,
+        "auprc": 0.136,
+        "coverage": 1.0,
+        "f1": 0.238,
+        "prec": 0.184,
+        "rec": 0.338,
+        "selective_risk": 0.165,
+        "spec": 0.876
+      },
+      "SQ3rules": {
+        "FP": 1275,
+        "TP": 286,
+        "auprc": 0.172,
+        "coverage": 1.0,
+        "f1": 0.304,
+        "prec": 0.183,
+        "rec": 0.894,
+        "selective_risk": 0.313,
+        "spec": 0.67
+      }
+    },
+    "sr_1000000": {
+      "PIG": {
+        "FP": 24,
+        "TP": 178,
+        "auprc": 0.538,
+        "coverage": 0.166,
+        "f1": 0.682,
+        "prec": 0.881,
+        "rec": 0.556,
+        "selective_risk": 0.037,
+        "spec": 0.994
+      },
+      "PIG+bam": {
+        "FP": 33,
+        "TP": 234,
+        "auprc": 0.673,
+        "coverage": 0.187,
+        "f1": 0.797,
+        "prec": 0.876,
+        "rec": 0.731,
+        "selective_risk": 0.047,
+        "spec": 0.991
+      },
+      "PIG+bam(ont)": {
+        "FP": 33,
+        "TP": 234,
+        "auprc": 0.673,
+        "coverage": 0.187,
+        "f1": 0.797,
+        "prec": 0.876,
+        "rec": 0.731,
+        "selective_risk": 0.047,
+        "spec": 0.991
+      },
+      "SQ3ml": {
+        "FP": 69,
+        "TP": 127,
+        "auprc": 0.541,
+        "coverage": 1.0,
+        "f1": 0.492,
+        "prec": 0.648,
+        "rec": 0.397,
+        "selective_risk": 0.063,
+        "spec": 0.982
+      },
+      "SQ3rules": {
+        "FP": 1275,
+        "TP": 288,
+        "auprc": 0.173,
+        "coverage": 1.0,
+        "f1": 0.306,
+        "prec": 0.184,
+        "rec": 0.9,
+        "selective_risk": 0.313,
+        "spec": 0.67
+      },
+      "SQ3strict": {
+        "FP": 98,
+        "TP": 269,
+        "auprc": 0.628,
+        "coverage": 1.0,
+        "f1": 0.783,
+        "prec": 0.733,
+        "rec": 0.841,
+        "selective_risk": 0.036,
+        "spec": 0.975
+      },
+      "allSJ3": {
+        "FP": 114,
+        "TP": 299,
+        "auprc": 0.681,
+        "coverage": 1.0,
+        "f1": 0.816,
+        "prec": 0.724,
+        "rec": 0.934,
+        "selective_risk": 0.032,
+        "spec": 0.97
+      }
+    }
+  },
+  "notes": "ONT counterpart of the chr22 truth set with the thresholds set on PacBio HiFi left untouched. Per short-read setting, non-FSM genuine-vs-false metrics per method as in sqanti3_filter_h2h (same bootstrap CIs), PanIsoGuard with the BAM under the default (hifi) preset and under --platform ont, the number of isoforms whose class differs between the presets, and, over the gated novel junctions, how many the raw indel-near fraction would flag against how many the excess over the reads' own indel rate flags (ruleset 0.0.7).",
+  "protocol": "sqanti_sim_ont",
+  "ruleset_version": "builtin-0.0.7",
+  "scope": "gencode_v49_chr22_ont_nanosim_sqanti_sim",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.1.0"
+}

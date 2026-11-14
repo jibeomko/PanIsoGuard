@@ -1,0 +1,85 @@
+{
+  "command": "bash benchmark/vcf_haplotypes/run.sh; benchmark/vcf_haplotypes/compare_routes.py LABEL:FASTA_PREFIX:VCF_PREFIX ... --emit-metrics ...",
+  "data_provenance": "The variant-axis runs already on disk, re-run with the haplotypes read from a VCF instead of consensus FASTAs: HG002 chr22 (GIAB v4.2.1 biallelic SNVs; FASTA = bcftools consensus -H 1 of the same file; benchmark/hg002) and every per-chromosome scan of HG03516 and HG02717 (paftools SNV calls per parental HPRC R2 assembly, consensus FASTA per haplotype; benchmark/hg03516_refbias). Public GIAB / HPRC / GENCODE v49.",
+  "generated_utc": "2026-11-14T04:54:45Z",
+  "metrics": {
+    "per_sample": {
+      "HG002": {
+        "differences": [],
+        "isoforms": 8,
+        "junctions": 8,
+        "non_snv_skipped": 0,
+        "phase": {
+          "NA": 5,
+          "phased": 3,
+          "unphased": 0
+        },
+        "reference_bias_fasta": 1,
+        "reference_bias_vcf": 1,
+        "runs": 1,
+        "same_class": 8,
+        "same_haplotype1_motif": 8,
+        "same_reason": 8,
+        "same_variant_call": 8,
+        "unphased_het_applied": 0,
+        "variant_evaluable_vcf": 8
+      },
+      "HG02717": {
+        "differences": [],
+        "isoforms": 347,
+        "junctions": 347,
+        "non_snv_skipped": 0,
+        "phase": {
+          "NA": 230,
+          "phased": 117,
+          "unphased": 0
+        },
+        "reference_bias_fasta": 63,
+        "reference_bias_vcf": 63,
+        "runs": 46,
+        "same_class": 347,
+        "same_haplotype1_motif": 347,
+        "same_reason": 347,
+        "same_variant_call": 347,
+        "unphased_het_applied": 0,
+        "variant_evaluable_vcf": 347
+      },
+      "HG03516": {
+        "differences": [],
+        "isoforms": 412,
+        "junctions": 412,
+        "non_snv_skipped": 0,
+        "phase": {
+          "NA": 230,
+          "phased": 182,
+          "unphased": 0
+        },
+        "reference_bias_fasta": 59,
+        "reference_bias_vcf": 59,
+        "runs": 46,
+        "same_class": 412,
+        "same_haplotype1_motif": 412,
+        "same_reason": 412,
+        "same_variant_call": 412,
+        "unphased_het_applied": 0,
+        "variant_evaluable_vcf": 412
+      }
+    },
+    "total": {
+      "isoforms": 767,
+      "junctions": 767,
+      "runs": 93,
+      "same_class": 767,
+      "same_haplotype1_motif": 767,
+      "same_reason": 767,
+      "same_variant_call": 767
+    }
+  },
+  "notes": "Equivalence of the two haplotype inputs: a run from an indexed VCF must give the verdicts and the per-junction motifs a run from the consensus FASTAs built from that VCF gives (haplotype 1 of the VCF = `bcftools consensus -H 1`). Only same-length substitutions are applied from the VCF; indels and symbolic alleles at a motif are skipped and counted (non_snv_skipped), unphased heterozygous alleles are applied by order and counted (unphased_het_applied) and the junction is marked unphased.",
+  "protocol": "vcf_haplotypes",
+  "ruleset_version": "builtin-0.0.7",
+  "scope": "hg002_chr22_giab_v4.2.1_and_hprc_r2_hg03516_hg02717_all_chromosomes",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.1.0"
+}

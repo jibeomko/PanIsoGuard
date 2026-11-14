@@ -53,6 +53,16 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   with `;independent_library`). The provenance log lists every library; a file given twice,
   or the `--bam` file, is refused.
 
+- Two tracked protocols for the new inputs. `benchmark/sqanti_sim_ont`: the chr22 SQANTI-SIM design
+  re-simulated as ONT cDNA (NanoSim, SQANTI-SIM's WTC11 cDNA model) with the PacBio-set thresholds
+  untouched; the ordering of the filters holds (without short reads PanIsoGuard with the BAM is the
+  more precise filter, precision 0.76 against 0.18 for SQANTI3's rules; with short reads it ties the
+  one-line rule on AUPRC), the hifi and ont presets give the same class to every isoform, and the raw
+  indel-near fraction would fire at 354 of 635 gated junctions where the excess fires at none.
+  `benchmark/vcf_haplotypes`: `--haplotype-vcf` against `--reference-haplotype` on every variant-axis
+  run on disk (HG002 chr22, HG03516 and HG02717 all chromosomes): 767 of 767 isoforms and junctions
+  agree.
+
 - `adjudicate --no-sqanti3`: the classification rows are computed instead of read. The
   structural category comes from the intron chain against the reference GTF (annotated chain,
   contiguous part of one, new combination of annotated introns, novel intron in an annotated
