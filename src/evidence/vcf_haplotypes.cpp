@@ -74,24 +74,27 @@ VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample)
       throw std::runtime_error("--vcf-sample " + sample + " is not in " + path);
     }
   } else if (impl_->n_samples > 1) {
+    const int n = impl_->n_samples;   // read before the Impl is freed
     bcf_sr_destroy(impl_->sr); delete impl_;
-    throw std::runtime_error("--haplotype-vcf " + path + " holds " + std::to_string(impl_->n_samples) +
-                             " samples; name one with --vcf-sample");
+    throw std::runtime_error("--haplotype-vcf " + path + " holds " + std::to_string(n) + " samples; name one with --vcf-sample");
   }
-  // The sample's ploidy, from the first record (a file without records keeps the default 2).
-  if (bcf_sr_next_line(impl_->sr)) {
+  // The sample's ploidy: the largest genotype among the first records (up to 10,000), so a
+  // haploid record at the top of the file (a male X, a mitochondrial contig) does not hide the
+  // second haplotype. A file without records keeps the default 2.
+  int ploidy = 0;
+  for (int n = 0; n < 10000 && bcf_sr_next_line(impl_->sr); ++n) {
     bcf1_t* rec = bcf_sr_get_line(impl_->sr, 0);
     const int ngt = bcf_get_genotypes(impl_->hdr, rec, &impl_->gt, &impl_->gt_cap);
-    if (ngt > 0) {
-      const int per = ngt / impl_->n_samples;
-      int p = 0;
-      for (int h = 0; h < per; ++h) {
-        if (impl_->gt[impl_->sample_idx * per + h] == bcf_int32_vector_end) break;
-        ++p;
-      }
-      if (p > 0) impl_->ploidy = p;
+    if (ngt <= 0) continue;
+    const int per = ngt / impl_->n_samples;
+    int p = 0;
+    for (int h = 0; h < per; ++h) {
+      if (impl_->gt[impl_->sample_idx * per + h] == bcf_int32_vector_end) break;
+      ++p;
     }
+    if (p > ploidy) ploidy = p;
   }
+  if (ploidy > 0) impl_->ploidy = ploidy;
 }
 
 VcfHaplotypes::~VcfHaplotypes() {

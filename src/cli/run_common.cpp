@@ -208,6 +208,10 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
       throw std::runtime_error("--reference (genome FASTA) is required with --haplotype-vcf");
     }
     if (!ref_fa) ref_fa = std::make_shared<FastaFetcher>(c.reference);
+    for (std::size_t i = 0; i < c.haplotype_vcfs.size(); ++i)
+      for (std::size_t j = 0; j < i; ++j)
+        if (same_file(c.haplotype_vcfs[j], c.haplotype_vcfs[i]))
+          throw std::runtime_error("--haplotype-vcf " + c.haplotype_vcfs[i] + " and " + c.haplotype_vcfs[j] + " are the same file");
     for (const auto& h : c.haplotype_vcfs) run.haplotype_vcfs.push_back(std::make_shared<VcfHaplotypes>(h, c.vcf_sample));
     haplo = std::make_unique<HaplotypeProvider>(ref_fa, run.haplotype_vcfs);
     std::fprintf(stderr, "variant axis: reference + %zu haplotype(s) from %zu VCF(s)%s%s, provenance=%s\n",

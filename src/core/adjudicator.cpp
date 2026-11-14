@@ -67,11 +67,19 @@ EvidenceVector build_evidence(const SqantiRecord& r,
   if (ev.chain_available && !it->second.monoexonic()) {
     if (!validation_bams.empty()) {
       ev.chain_independent = true;
+      // libraries are named by file name; when two share one, by the path given
+      std::vector<std::string> names;
+      bool clash = false;
       for (const BamReader* vb : validation_bams) {
-        const ChainBamSupport cs = vb->chain_support(it->second);
         const std::string& p = vb->path();
         const std::size_t cut = p.rfind('/');
-        ev.chain_full_by_library.emplace_back(cut == std::string::npos ? p : p.substr(cut + 1), cs.evaluated ? cs.n_full : -1);
+        names.push_back(cut == std::string::npos ? p : p.substr(cut + 1));
+        for (std::size_t k = 0; k + 1 < names.size(); ++k) if (names[k] == names.back()) clash = true;
+      }
+      for (std::size_t li = 0; li < validation_bams.size(); ++li) {
+        const BamReader* vb = validation_bams[li];
+        const ChainBamSupport cs = vb->chain_support(it->second);
+        ev.chain_full_by_library.emplace_back(clash ? vb->path() : names[li], cs.evaluated ? cs.n_full : -1);
         if (!cs.evaluated) continue;
         ev.chain_evaluable = true;
         if (cs.n_full >= cfg.chain_min_full_reads) ++ev.chain_n_libraries_supporting;

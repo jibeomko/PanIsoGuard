@@ -129,3 +129,22 @@ TEST_CASE("VcfHaplotypes refuses what it cannot read safely", "[vcf]") {
   std::remove(plain.c_str());
   REQUIRE_THROWS(VcfHaplotypes(tiny("does_not_exist.vcf.gz")));
 }
+
+// two_jx_edges.vcf.gz: a haploid first record (pos 5), an MNP over the first donor (21-22, 1|0), a `*`
+// allele (40) and a <DEL> (42) at motif positions, a multiallelic site whose second ALT is carried
+// (62, 2|0), a missing genotype (80, ./.) and two records at one position (100: C on haplotype 1, G on 2).
+TEST_CASE("VcfHaplotypes edge cases: ploidy from several records, MNPs, skipped alleles, missing and stacked genotypes", "[vcf]") {
+  VcfHaplotypes vcf(tiny("two_jx_edges.vcf.gz"));
+  CHECK(vcf.n_haplotypes() == 2);   // not the haploid first record's 1
+  bool unphased = false;
+  CHECK(vcf.overlay("chrT2", 20, 22, "GG", unphased) == std::vector<std::string>{"GT", "GG"});   // MNP applied base by base
+  CHECK(vcf.overlay("chrT2", 60, 62, "GG", unphased) == std::vector<std::string>{"GC", "GG"});   // allele 2 of a multiallelic site
+  CHECK(vcf.overlay("chrT2", 38, 40, "AG", unphased) == std::vector<std::string>{"AG", "AG"});   // `*` skipped
+  CHECK(vcf.n_non_snv_skipped() == 1);
+  CHECK(vcf.overlay("chrT2", 40, 42, "AA", unphased) == std::vector<std::string>{"AA", "AA"});   // <DEL> skipped
+  CHECK(vcf.n_non_snv_skipped() == 2);
+  CHECK(vcf.overlay("chrT2", 78, 80, "AG", unphased) == std::vector<std::string>{"AG", "AG"});   // ./. is reference
+  CHECK(vcf.overlay("chrT2", 99, 101, "AA", unphased) == std::vector<std::string>{"CA", "GA"});  // two records, one position
+  CHECK_FALSE(unphased);
+  CHECK(vcf.n_unphased_het_applied() == 0);
+}

@@ -88,6 +88,18 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a sanitizer build and an edge-case review of the 0.1.0 inputs on 2026-11-14:
+- `--haplotype-vcf` on a file with several samples and no `--vcf-sample` read freed memory while
+  composing its error message (AddressSanitizer: heap-use-after-free); the count is copied first.
+- The sample's ploidy was read from the first record alone, so a haploid record at the top of the
+  file (a male X, a mitochondrial contig) hid the second haplotype everywhere; it is now the
+  largest genotype among the first 10,000 records (fixture `two_jx_edges.vcf.gz`, which also
+  covers an MNP over a motif, `*` and `<DEL>` alleles, a carried second ALT, a missing genotype
+  and two records at one position).
+- Two `--validation-bam` files with the same file name in different directories shared one key
+  in `chain_full_reads_by_library`; such libraries are keyed by the path given.
+- The same file given twice to `--haplotype-vcf` is refused, as it is for `--validation-bam`.
+
 Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the
   path is now refused (same inode).
