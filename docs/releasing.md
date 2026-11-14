@@ -57,6 +57,11 @@ git push origin "v$V"
 sleep 10   # let the Release run register before watching it
 gh run watch "$(gh run list --workflow release.yml --limit 1 --json databaseId --jq '.[0].databaseId')"
 
+# 3b) attach the HPRC junction set (unchanged since 0.1.0; the README's download command and
+#     sha256 point at the current tag). The file lives next to the benchmark data.
+gh release upload "v$V" /mnt/Data/PanIsoGuard_bench/pig_pangenome/hprc_v1.1_mc_grch38_deletion_junctions_ge50bp.tsv.gz
+sed -i -E "s#releases/download/v[0-9.]+/hprc_#releases/download/v$V/hprc_#" README.md
+
 # 4) pin the sha256 the workflow computed into the recipe
 SHA=$(gh release download "v$V" -p bioconda-source.yaml -O - | awk '/sha256/{print $2}')
 sed -i -E "s/^(  sha256: )[0-9a-f]{64}/\1$SHA/" recipes/bioconda/meta.yaml

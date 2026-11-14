@@ -65,7 +65,8 @@ python3 gate1_check.py /path/to/panisoguard testdata/sample_junctions.tsv
 Extends the GATE-1 specificity from chr22 to whole-genome on **two independent,
 fully public** samples: GM12878 (NA12878) and K562 ONT direct-RNA from ENCODE
 (ENCSR368UNC, ENCSR917JIA), each classified with SQANTI3 vs GENCODE v49 and adjudicated
-against the whole-genome HPRC v1.1 deletion junctions (`vg deconstruct` of all GRCh38
+against the whole-genome HPRC v1.1 deletion junctions (distributed with each release since
+0.1.0; `vg deconstruct` of all GRCh38
 chr1-22/X/Y paths → 71,435 junctions). Both samples are out of the HPRC graph (non-circular).
 
 ```text

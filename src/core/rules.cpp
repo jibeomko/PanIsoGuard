@@ -114,9 +114,9 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
 void RuleEngine::apply_platform_preset(const std::string& platform) {
   cfg_.platform = platform;
   if (platform == "ont") {
-    // The indel-near gate is calibrated on PacBio HiFi; on ONT it fires on ~90 % of junctions
-    // (benchmark/gm12878_realdata) because of the chemistry's indel error, so it is off. The
-    // low-MAPQ and supplementary gates do not depend on the error profile and stay on.
+    // Kept for compatibility. Since ruleset 0.0.7 the indel-near gate reads the excess over each
+    // read's own indel rate, and on ONT that excess cannot reach the gate (GM12878: 0 of 133
+    // gated isoforms, background 0.94), so turning it off changes nothing there.
     cfg_.bam_max_indel_near_frac = 1.01;
   }
 }

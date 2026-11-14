@@ -247,6 +247,19 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
+A ready-made junction set for GRCh38 ships with each release: the 71,435 splice junctions
+implied by deletions of 50 bp or more in the HPRC v1.1 Minigraph-Cactus graph (47 assemblies;
+`vg deconstruct` against the GRCh38 path, then `benchmark/pangenome/derive_junctions.py`; both
+strands listed, with the number of carrying haplotypes). It is population data, so
+`--pangenome-provenance population` applies, unless the sample is one of the 47 HPRC
+assemblies.
+
+```bash
+wget -O hprc_junctions.tsv.gz https://github.com/jibeomko/PanIsoGuard/releases/download/v0.1.0/hprc_v1.1_mc_grch38_deletion_junctions_ge50bp.tsv.gz
+echo "1503dda3e41e819bd68bc42b4c50241657f40bc82fb2c8514b7da1168cfa3241  hprc_junctions.tsv.gz" | sha256sum -c
+gunzip hprc_junctions.tsv.gz    # -> --pangenome-junctions hprc_junctions.tsv
+```
+
 **Several callers** (optional) — if you ran more than one caller, `combine` matches their
 isoforms by intron chain (the same chain of introns counts as the same isoform) and writes a
 table of which callers found each one. Give this table to `adjudicate` with `--caller-support`:

@@ -20,11 +20,20 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   spanning reads with an indel next to the junction in excess of the reads' own indel rate
   (per read, the chance of an indel inside the two windows, 1 − exp(−rate × 4 × window),
   averaged over the spanning reads). On HiFi the background is near 0 and the gate behaves as
-  before; on ONT, whose reads carry indels everywhere, the raw fraction fired on 67 % of
-  GM12878 junctions by chemistry alone. The JSONL gains `bam_frac_indel_near_excess`, the
+  before (bam_axis chr22: the same 14 of 120 false junctions caught, 0 genuine flagged); on
+  ONT, whose reads carry indels everywhere, the raw fraction fired on 67 % of GM12878
+  junctions by chemistry alone and the excess fires on none (background 0.94 per junction, so
+  the gate cannot reach 0.5 there; `--platform ont` is kept but changes nothing). The JSONL
+  gains `bam_frac_indel_near_excess`, the
   junction table `bam_indel_near_background`; the raw fraction stays. The worked-locus check
   and the replayed rulebook compute the same excess. The tracked benchmark envelopes still
   predate this ruleset; they are regenerated with the 0.1.0 release.
+
+- A whole-genome GRCh38 pangenome junction set is attached to each release: the 71,435 splice
+  junctions implied by deletions of 50 bp or more in the HPRC v1.1 Minigraph-Cactus graph
+  (`vg deconstruct` against the GRCh38 path, `benchmark/pangenome/derive_junctions.py`), with
+  the number of carrying haplotypes, for `--pangenome-junctions` with `population` provenance.
+  The README gives the download command and sha256.
 
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.

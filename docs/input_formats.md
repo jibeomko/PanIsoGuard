@@ -88,7 +88,9 @@ are not combined in one run.
 A tab-separated file (no header; `#` comment lines allowed) of splice junctions that
 are present on at least one haplotype path of a pangenome graph (e.g. HPRC),
 pre-extracted with `vg`/`rpvg`. PanIsoGuard does not traverse the graph itself; it
-adjudicates using this junction set. Columns:
+adjudicates using this junction set. A whole-genome GRCh38 set from HPRC v1.1 (deletions
+≥ 50 bp, 71,435 junctions) is attached to each release (see the README); `population`
+provenance applies to any sample outside the graph's 47 assemblies. Columns:
 
 ```text
 chrom   intron_start   intron_end   strand   [n_haplotypes]   [haplotype_ids]
