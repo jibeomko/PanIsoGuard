@@ -199,9 +199,11 @@ panisoguard adjudicate \
 
 **Reference-bias check with the sample's haplotypes** — a splice site can look non-canonical on
 the reference genome (for example GT…AC) but be canonical (GT…AG) in the sample, because of a
-variant. Give the sample's haplotype sequences with `--reference-haplotype` (once per
-haplotype), and PanIsoGuard reports such isoforms as reference bias instead of artifacts. Say
-where the haplotypes came from with `--haplotype-provenance`. Only `wgs` or `external` (built
+variant. Give the sample's genotypes as an indexed VCF or BCF with `--haplotype-vcf` (the two
+alleles of each genotype are the two haplotypes; several files add their haplotypes), or the
+haplotype sequences with `--reference-haplotype` (once per haplotype), and PanIsoGuard reports
+such isoforms as reference bias instead of artifacts. Say where the haplotypes came from with
+`--haplotype-provenance`. Only `wgs` or `external` (built
 from DNA sequencing or another independent source) can lead to the reference-bias verdict. With
 `rna_derived` or `unknown` the isoform is held as `UNRESOLVED`, because haplotypes built from the
 same RNA reads cannot independently explain those reads. This guard is called the circularity
@@ -213,11 +215,17 @@ panisoguard adjudicate \
   --isoforms-bed   isoforms.bed \
   --ref-gtf        annotation.gtf \
   --reference      genome.fa \
-  --reference-haplotype haplotype1.fa \
-  --reference-haplotype haplotype2.fa \
+  --haplotype-vcf  sample.phased.vcf.gz \
   --haplotype-provenance wgs \
   --out-prefix     out/sample
 ```
+
+From the VCF only same-length substitutions reach the splice motifs; indels are skipped and
+counted in the provenance log. An unphased heterozygous genotype is applied by allele order,
+as `bcftools consensus -H 1` and `-H 2` would, and the junction table marks it `unphased`, so
+a rescue that needs two junctions on one haplotype can be weighed. Haplotype FASTAs give the
+same verdicts when they are built from SNVs only; a consensus that also applied indels shifts
+every downstream coordinate and reads the wrong bases.
 
 **Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22) — instead of the sample's
 own haplotypes, give splice junctions taken from a pangenome graph such as HPRC (extracted
@@ -333,7 +341,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 | Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). The defaults suit PacBio HiFi; ONT reads need different thresholds. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
 | Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | With the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
-| Sample's genome | `--reference` and `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |
+| Sample's genome | `--reference` with `--haplotype-vcf` or `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |
 | Pangenome | `--pangenome-junctions` | optional | whether every novel junction is found in a pangenome (reference bias; tested on HPRC v1.1 chr22) |
 
 ### All commands

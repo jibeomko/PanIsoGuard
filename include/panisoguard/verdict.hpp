@@ -81,6 +81,7 @@ struct EvidenceVector {
   // variant (reference-bias) axis: a novel junction that is non-canonical on the
   // reference but canonical on a personalized haplotype FASTA.
   bool variant_evaluable = false;
+  int n_novel_jx_phase_uncertain = 0;  // created junctions whose haplotype allele was unphased (VCF input)
   bool variant_rescue = false;            // all novel junctions variant-created on one common haplotype
   int n_novel_jx_variant_created = 0;     // how many are created on >= 1 haplotype (per-junction view)
   bool haplotype_consistent = false;      // one haplotype carries the canonical motif at every

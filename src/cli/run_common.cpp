@@ -36,6 +36,8 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--validation-bam")     { c.validation_bam = next("--validation-bam"); return true; }
   if (a == "--reference")          { c.reference = next("--reference"); return true; }
   if (a == "--reference-haplotype"){ c.reference_haplotypes.push_back(next("--reference-haplotype")); return true; }
+  if (a == "--haplotype-vcf")      { c.haplotype_vcfs.push_back(next("--haplotype-vcf")); return true; }
+  if (a == "--vcf-sample")         { c.vcf_sample = next("--vcf-sample"); return true; }
   if (a == "--haplotype-provenance"){ c.haplotype_provenance = next("--haplotype-provenance"); return true; }
   if (a == "--pangenome-junctions"){ c.pangenome_junctions = next("--pangenome-junctions"); return true; }
   if (a == "--pangenome-provenance"){ c.pangenome_provenance = next("--pangenome-provenance"); return true; }
@@ -49,6 +51,7 @@ std::vector<std::string> input_paths(const CommonArgs& c) {
   std::vector<std::string> v = {c.classification, c.isoforms_bed, c.isoforms_gtf, c.ref_gtf, c.sj_tab, c.bam_path,
                                 c.validation_bam, c.reference, c.pangenome_junctions, c.caller_support, c.config};
   v.insert(v.end(), c.reference_haplotypes.begin(), c.reference_haplotypes.end());
+  v.insert(v.end(), c.haplotype_vcfs.begin(), c.haplotype_vcfs.end());
   return v;
 }
 
@@ -64,6 +67,14 @@ bool common_args_ok(const CommonArgs& c, std::string& err) {
   }
   if (!c.isoforms_bed.empty() && !c.isoforms_gtf.empty()) {
     err = "--isoforms-bed and --isoforms-gtf are mutually exclusive; supply exactly one";
+    return false;
+  }
+  if (!c.haplotype_vcfs.empty() && !c.reference_haplotypes.empty()) {
+    err = "--haplotype-vcf and --reference-haplotype describe the same haplotypes two ways; supply one of them";
+    return false;
+  }
+  if (!c.vcf_sample.empty() && c.haplotype_vcfs.empty()) {
+    err = "--vcf-sample needs --haplotype-vcf";
     return false;
   }
   return true;
@@ -116,7 +127,8 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     // UNKNOWN/UNRESOLVED and the short-read/BAM/variant/pangenome axes contribute
     // NOTHING even when their inputs are supplied. Warn loudly rather than fail soft.
     const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() || !c.validation_bam.empty() ||
-                                     !c.reference_haplotypes.empty() || !c.pangenome_junctions.empty();
+                                     !c.reference_haplotypes.empty() || !c.haplotype_vcfs.empty() ||
+                                     !c.pangenome_junctions.empty();
     std::fprintf(stderr,
         "WARNING: --ref-gtf not supplied: novel-junction classification is disabled; "
         "every novel isoform is held UNRESOLVED%s.\n",
@@ -165,6 +177,16 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     haplo = std::make_unique<HaplotypeProvider>(ref_fa, hap_fas);
     std::fprintf(stderr, "variant axis: reference + %zu haplotype FASTA(s), provenance=%s\n",
                  hap_fas.size(), c.haplotype_provenance.c_str());
+  } else if (!c.haplotype_vcfs.empty()) {
+    if (c.reference.empty()) {
+      throw std::runtime_error("--reference (genome FASTA) is required with --haplotype-vcf");
+    }
+    ref_fa = std::make_shared<FastaFetcher>(c.reference);
+    for (const auto& h : c.haplotype_vcfs) run.haplotype_vcfs.push_back(std::make_shared<VcfHaplotypes>(h, c.vcf_sample));
+    haplo = std::make_unique<HaplotypeProvider>(ref_fa, run.haplotype_vcfs);
+    std::fprintf(stderr, "variant axis: reference + %zu haplotype(s) from %zu VCF(s)%s%s, provenance=%s\n",
+                 haplo->n_haplotypes(), run.haplotype_vcfs.size(), c.vcf_sample.empty() ? "" : " sample ",
+                 c.vcf_sample.c_str(), c.haplotype_provenance.c_str());
   }
 
   PangenomeJunctions pangenome;
@@ -219,8 +241,14 @@ RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
   prov.caller_support_path = c.caller_support;
   prov.reference_path = c.reference;
   prov.reference_haplotype_paths = c.reference_haplotypes;
+  prov.haplotype_vcf_paths = c.haplotype_vcfs;
+  prov.haplotype_vcf_sample = c.vcf_sample;
+  for (const auto& v : run.haplotype_vcfs) {
+    prov.haplotype_vcf_unphased_het += v->n_unphased_het_applied();
+    prov.haplotype_vcf_non_snv += v->n_non_snv_skipped();
+  }
   prov.pangenome_path = c.pangenome_junctions;
-  prov.variant_axis_on = !c.reference_haplotypes.empty();
+  prov.variant_axis_on = !c.reference_haplotypes.empty() || !c.haplotype_vcfs.empty();
   prov.variant_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
   prov.pangenome_axis_on = !c.pangenome_junctions.empty();
   prov.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);

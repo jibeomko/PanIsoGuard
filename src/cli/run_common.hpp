@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "panisoguard/adjudicator.hpp"
+#include "panisoguard/variant_motif.hpp"
 #include "panisoguard/result_writer.hpp"
 #include "panisoguard/rules.hpp"
 #include "panisoguard/sqanti.hpp"
@@ -21,6 +23,8 @@ struct CommonArgs {
   std::string validation_bam;                     // a second, independent library: whole-chain reads come from it
   std::string reference;                          // genome FASTA (variant axis + CRAM decode)
   std::vector<std::string> reference_haplotypes;  // personalized FASTAs (variant axis)
+  std::vector<std::string> haplotype_vcfs;        // or indexed VCF/BCF files of the sample (variant axis)
+  std::string vcf_sample;                         // the sample to read in them ("" = the only one)
   std::string haplotype_provenance = "unknown";   // rna_derived|wgs|external|unknown
   std::string pangenome_junctions;                // graph-supported junction file (pangenome axis)
   std::string pangenome_provenance = "unknown";   // population|external|sample_derived|unknown
@@ -56,6 +60,7 @@ struct LoadedRun {
   std::vector<AdjudicationResult> results;
   std::vector<JunctionRow> junctions;  // one row per junction of the adjudicated isoforms
   RuleEngine engine;
+  std::vector<std::shared_ptr<VcfHaplotypes>> haplotype_vcfs;  // kept for the provenance counters
 };
 
 // Read every supplied input and run adjudication. Throws std::exception on I/O

@@ -81,6 +81,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
         << "\"n_novel_jx_variant_disrupted\":" << e.n_novel_jx_variant_disrupted << ","
         << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
+        << "\"n_novel_jx_phase_uncertain\":" << e.n_novel_jx_phase_uncertain << ","
         << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
         << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
         << "\"pangenome_rescue\":" << (e.pangenome_rescue ? "true" : "false") << ","
@@ -136,6 +137,12 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
       << (prov.caller_support_path.empty() ? "<none>" : prov.caller_support_path) << '\n';
   out << "reference\t" << (prov.reference_path.empty() ? "<none>" : prov.reference_path) << '\n';
   for (const auto& h : prov.reference_haplotype_paths) out << "reference_haplotype\t" << h << '\n';
+  for (const auto& h : prov.haplotype_vcf_paths) out << "haplotype_vcf\t" << h << '\n';
+  if (!prov.haplotype_vcf_paths.empty()) {
+    out << "haplotype_vcf_sample\t" << (prov.haplotype_vcf_sample.empty() ? "<the only sample>" : prov.haplotype_vcf_sample) << '\n';
+    out << "haplotype_vcf_unphased_het_applied_at_motifs\t" << prov.haplotype_vcf_unphased_het << '\n';
+    out << "haplotype_vcf_non_snv_skipped_at_motifs\t" << prov.haplotype_vcf_non_snv << '\n';
+  }
   out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
   if (!prov.kept_path.empty()) {
     out << "kept_isoforms\t" << prov.kept_path << '\n';
@@ -156,6 +163,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   ident("caller_support", prov.caller_support_path);
   ident("reference", prov.reference_path);
   for (const auto& h : prov.reference_haplotype_paths) ident("reference_haplotype", h);
+  for (const auto& h : prov.haplotype_vcf_paths) ident("haplotype_vcf", h);
   ident("pangenome_junctions", prov.pangenome_path);
   ident("config", prov.config_path);
   // Evidence-axis capabilities for this run.
@@ -202,7 +210,7 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
   };
   auto yn = [](bool evaluable, bool v) { return evaluable ? (v ? "true" : "false") : "NA"; };
   out << "chrom\tstart\tend\tstrand\tn_isoforms\tisoforms\tknown\tsr_n_uniq\tsr_supported\tref_motif\thap_motifs\t"
-         "variant\tcanonical_on_haplotypes\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
+         "variant\tcanonical_on_haplotypes\tvariant_phase\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
          "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\treference_bias\n";
   for (const auto& j : rows) {
     std::string rb;
@@ -212,7 +220,7 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
         << j.isoforms.size() << '\t' << join(j.isoforms) << '\t' << (j.known ? "true" : "false") << '\t'
         << (j.sj_evaluable ? std::to_string(j.sj_n_uniq) : "NA") << '\t' << yn(j.sj_evaluable, j.sr_supported) << '\t'
         << (j.variant_evaluable ? j.ref_motif : "NA") << '\t' << (j.variant_evaluable ? join(j.hap_motifs) : "NA") << '\t'
-        << j.variant << '\t' << (j.variant_evaluable ? join(j.canonical_on) : "NA") << '\t'
+        << j.variant << '\t' << (j.variant_evaluable ? join(j.canonical_on) : "NA") << '\t' << j.variant_phase << '\t'
         << (j.pangenome_evaluable ? std::to_string(j.pangenome_n_haplotypes) : "NA") << '\t'
         << (j.pangenome_evaluable ? join(j.pangenome_paths) : "NA") << '\t' << yn(j.pangenome_evaluable, j.pangenome_supported) << '\t';
     if (j.bam_evaluable) {

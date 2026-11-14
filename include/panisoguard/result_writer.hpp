@@ -22,10 +22,14 @@ struct RunProvenance {
   std::string caller_support_path;  // "" if none
   std::string reference_path;       // "" if none (genome FASTA)
   std::vector<std::string> reference_haplotype_paths;  // personalized FASTAs (variant axis)
+  std::vector<std::string> haplotype_vcf_paths;        // or the sample's VCF/BCF files (variant axis)
+  std::string haplotype_vcf_sample;                    // --vcf-sample, "" = the file's only sample
+  long haplotype_vcf_unphased_het = 0;                 // unphased heterozygous alleles applied at motifs
+  long haplotype_vcf_non_snv = 0;                      // indel / symbolic alleles skipped at motifs
   std::string pangenome_path;       // "" if none
   std::string kept_path;            // "" if none (--write-kept: the isoform file filtered to kept verdicts)
   std::string kept_verdicts;        // the --keep-verdicts list that selected them
-  bool variant_axis_on = false;     // a haplotype FASTA was supplied
+  bool variant_axis_on = false;     // a haplotype FASTA or VCF was supplied
   bool variant_circular = false;    // haplotype provenance is circular-risk
   bool pangenome_axis_on = false;   // a pangenome junction file was supplied
   bool pangenome_circular = false;  // pangenome junction-set provenance is circular-risk

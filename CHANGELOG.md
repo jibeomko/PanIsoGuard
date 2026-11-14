@@ -5,6 +5,18 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 
 ## [Unreleased]
 
+### Added
+- `adjudicate --haplotype-vcf PATH` (repeatable) with `--vcf-sample NAME`: the variant axis
+  reads the sample's haplotypes from an indexed VCF or BCF instead of consensus FASTAs. The
+  genotype's first and second alleles are haplotypes 1 and 2, as `bcftools consensus -H 1` and
+  `-H 2` build them; same-length substitutions are applied at the splice dinucleotides, indels
+  and symbolic alleles are skipped and counted, unphased heterozygous genotypes are applied by
+  allele order, counted, and marked in the new `variant_phase` column of the junction table
+  and in the rule trace of a rescue that rests on them (`n_novel_jx_phase_uncertain` in the
+  JSONL). On HG002 chr22 and on both HG03516 haplotypes the verdicts and motifs equal the
+  FASTA route's; a consensus FASTA that also applied indels was shifted by 50 bp on chr22 and
+  read wrong bases at 7 junctions, which the VCF route cannot do.
+
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the

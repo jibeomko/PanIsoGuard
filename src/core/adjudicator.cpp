@@ -79,7 +79,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bp.min_mapq = cfg.bam_min_mapq;
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
-    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0;
+    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0, n_phase_uncertain = 0;
     int n_known = 0, n_known_supported = 0, n_bam_gated = 0;
     bool any_bam_eval = false;
     bool any_variant_eval = false;
@@ -131,6 +131,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           }
           jr->variant = vv == VariantVerdict::kCreated ? "created" : vv == VariantVerdict::kDisrupted ? "disrupted"
                       : vv == VariantVerdict::kNone ? "none" : "NA";
+          jr->variant_phase = jm.phase == MotifPhase::kPhased ? "phased" : jm.phase == MotifPhase::kUnphased ? "unphased" : "NA";
         }
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
         if (vv == VariantVerdict::kDisrupted) ++n_variant_disrupted;
@@ -139,6 +140,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         // haplotype) is a non-canonical sign for the mechanism axis (rules.cpp).
         if (vv == VariantVerdict::kCreated) {
           ++n_variant_created;
+          if (jm.phase == MotifPhase::kUnphased) ++n_phase_uncertain;
           for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
         }
       }
@@ -201,6 +203,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.bam_evaluable = (bam != nullptr) && any_bam_eval;
     ev.bam_n_junctions_gated = n_bam_gated;
     ev.variant_evaluable = (haplotype != nullptr) && any_variant_eval;
+    ev.n_novel_jx_phase_uncertain = n_phase_uncertain;
     ev.n_novel_jx_variant_created = n_variant_created;
     ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
     ev.haplotype_consistent = n_variant_created > 0 &&

@@ -66,6 +66,23 @@ haplotype, `disrupted` needs every haplotype readable. Set
 `--haplotype-provenance {wgs|external}` for independent genomic data (promotes the
 rescue) vs `{rna_derived|unknown}` (held under the circularity firewall).
 
+## Sample VCF/BCF (`--haplotype-vcf`, optional; repeatable)
+
+An indexed VCF (`bgzip` + `tabix`) or BCF (`bcftools index`) with a genotype column, plus
+`--reference`. The alleles of the sample's genotype are the haplotypes: the first allele
+builds haplotype 1 and the second haplotype 2, as `bcftools consensus -H 1` and `-H 2` do, so
+a run from the VCF gives the verdicts of a run from those FASTAs. Several files add their
+haplotypes in order (two haploid assembly-derived VCFs give two haplotypes). With more than
+one sample in the file, name one with `--vcf-sample`. Only same-length substitutions (SNVs,
+MNPs) are applied at the splice dinucleotides; indels and symbolic alleles are skipped and
+counted (`haplotype_vcf_non_snv_skipped_at_motifs` in the provenance log). An unphased
+heterozygous genotype is applied by allele order and counted
+(`haplotype_vcf_unphased_het_applied_at_motifs`); the junction table's `variant_phase` column
+says `phased` (phased or homozygous), `unphased`, or `NA`, and the rule trace of a rescue that
+rests on an unphased allele says so. A contig missing from the VCF header is not evaluable;
+a contig present without records is reference. `--haplotype-vcf` and `--reference-haplotype`
+are not combined in one run.
+
 ## Pangenome graph junctions (`--pangenome-junctions`, optional)
 
 A tab-separated file (no header; `#` comment lines allowed) of splice junctions that

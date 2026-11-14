@@ -53,6 +53,8 @@ benchmark/**/data/
 !tests/data/tiny/mini.bam.bai
 !tests/data/tiny/*.fa
 !tests/data/tiny/*.fai
+!tests/data/tiny/*.vcf.gz
+!tests/data/tiny/*.vcf.gz.tbi
 
 # ...and the worked locus' toy data (tiny; rebuilt by examples/worked_locus/data/build_toy.sh)
 !examples/worked_locus/data/*.fa

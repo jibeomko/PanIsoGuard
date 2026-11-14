@@ -83,10 +83,13 @@ bool is_acgt(const std::string& s) {
 
 SpliceMotif splice_motif(const FastaFetcher& fa, const std::string& chrom, const Junction& intron,
                          Strand strand) {
+  return splice_motif_from(fa.fetch(chrom, intron.start, intron.start + 2),   // genomic 5' of intron
+                           fa.fetch(chrom, intron.end - 2, intron.end), strand);  // genomic 3' of intron
+}
+
+SpliceMotif splice_motif_from(const std::string& left, const std::string& right, Strand strand) {
   SpliceMotif m;
   if (strand == Strand::kUnknown) return m;  // donor and acceptor cannot be told apart: not evaluable
-  const std::string left = fa.fetch(chrom, intron.start, intron.start + 2);   // genomic 5' of intron
-  const std::string right = fa.fetch(chrom, intron.end - 2, intron.end);      // genomic 3' of intron
   if (left.size() != 2 || right.size() != 2 || !is_acgt(left) || !is_acgt(right)) return m;  // missing or ambiguous
   m.evaluable = true;
 
@@ -108,12 +111,40 @@ HaplotypeProvider::HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
                                      std::vector<std::shared_ptr<FastaFetcher>> haplotypes)
     : ref_(std::move(reference)), haps_(std::move(haplotypes)) {}
 
+HaplotypeProvider::HaplotypeProvider(std::shared_ptr<FastaFetcher> reference,
+                                     std::vector<std::shared_ptr<VcfHaplotypes>> vcfs)
+    : ref_(std::move(reference)), vcfs_(std::move(vcfs)) {}
+
+std::size_t HaplotypeProvider::n_haplotypes() const {
+  std::size_t n = haps_.size();
+  for (const auto& v : vcfs_) n += v->n_haplotypes();
+  return n;
+}
+
 JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junction& intron,
                                          Strand strand) const {
   JunctionMotifs m;
-  m.ref = splice_motif(*ref_, chrom, intron, strand);
-  m.haps.reserve(haps_.size());
+  const std::string left = ref_->fetch(chrom, intron.start, intron.start + 2);
+  const std::string right = ref_->fetch(chrom, intron.end - 2, intron.end);
+  m.ref = splice_motif_from(left, right, strand);
+  m.haps.reserve(n_haplotypes());
   for (const auto& hap : haps_) m.haps.push_back(splice_motif(*hap, chrom, intron, strand));
+  for (const auto& vcf : vcfs_) {
+    bool unphased = false;
+    const std::vector<std::string> lefts = left.size() == 2 ? vcf->overlay(chrom, intron.start, intron.start + 2, left, unphased) : std::vector<std::string>{};
+    const std::vector<std::string> rights = right.size() == 2 ? vcf->overlay(chrom, intron.end - 2, intron.end, right, unphased) : std::vector<std::string>{};
+    if (lefts.size() != vcf->n_haplotypes() || rights.size() != vcf->n_haplotypes()) {
+      m.haps.insert(m.haps.end(), vcf->n_haplotypes(), SpliceMotif{});   // contig unknown to the VCF: not evaluable
+      continue;
+    }
+    for (std::size_t h = 0; h < lefts.size(); ++h) m.haps.push_back(splice_motif_from(lefts[h], rights[h], strand));
+    const bool changed = [&] {
+      for (std::size_t h = 0; h < lefts.size(); ++h) if (lefts[h] != left || rights[h] != right) return true;
+      return false;
+    }();
+    if (unphased) m.phase = MotifPhase::kUnphased;
+    else if (changed && m.phase == MotifPhase::kUnknown) m.phase = MotifPhase::kPhased;
+  }
   if (!m.ref.evaluable || m.haps.empty()) return m;
   bool all_hap_evaluable = true, any_hap_canonical = false;
   for (const auto& h : m.haps) {

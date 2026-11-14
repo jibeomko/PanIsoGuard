@@ -265,7 +265,10 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
   if (var_rescue && !ev.variant_circular) {
     v.primary_mechanism = Mechanism::kVariant;
     trace(v, "variant creates canonical splice motif on haplotype, non-canonical on reference -> "
-             "REFERENCE_BIAS (reference bias)" + mapping_trace);
+             "REFERENCE_BIAS (reference bias)" + mapping_trace +
+             (ev.n_novel_jx_phase_uncertain > 0
+                  ? "; " + std::to_string(ev.n_novel_jx_phase_uncertain) + " junction(s) rest on an unphased allele assigned by order"
+                  : ""));
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "haplotype_variant" + mapping_note);
     return true;
   }

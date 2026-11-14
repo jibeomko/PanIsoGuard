@@ -61,6 +61,7 @@ add_library(panisoguard_core OBJECT
   src/core/decoys.cpp
   src/evidence/bam_features.cpp
   src/evidence/variant_motif.cpp
+  src/evidence/vcf_haplotypes.cpp
   src/io/sj_tab_reader.cpp
   src/io/pangenome_reader.cpp
   src/io/gtf_reader.cpp
@@ -118,6 +119,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/adjudicator_test.cpp
     tests/unit/bam_features_test.cpp
     tests/unit/variant_motif_test.cpp
+    tests/unit/vcf_haplotypes_test.cpp
     tests/unit/decoys_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
