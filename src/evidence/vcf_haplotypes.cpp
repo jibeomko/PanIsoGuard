@@ -143,19 +143,21 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     }
     const int per = ngt / impl_->n_samples;
     const int* g = impl_->gt + impl_->sample_idx * per;
-    bool applied = false, het = false, phased = true, ended = false;
-    int first_allele = -1;
+    bool applied = false, het = false, phased = true, ended = false, wrote_n = false;
+    int first_allele = -1, n_known = 0, n_missing_here = 0;
     for (int h = 0; h < static_cast<int>(haps.size()); ++h) {
       if (h >= per || g[h] == bcf_int32_vector_end) ended = true;
+      if (!ended && h > 0 && !bcf_gt_is_phased(g[h])) phased = false;   // the separator before a missing allele counts too
       if (ended || bcf_gt_is_missing(g[h])) {
         // no allele for this haplotype at a motif base: unknown, not reference
-        for (int64_t pos = k0; pos < k1; ++pos) haps[h][static_cast<std::size_t>(pos - start)] = 'N';
+        ++n_missing_here;
+        for (int64_t pos = k0; pos < k1; ++pos) { haps[h][static_cast<std::size_t>(pos - start)] = 'N'; wrote_n = true; }
         if (k1 > k0) { phase.missing = true; ++impl_->n_missing; }
         continue;
       }
+      ++n_known;
       const int a = bcf_gt_allele(g[h]);
       if (first_allele < 0) first_allele = a; else if (a != first_allele) het = true;
-      if (h > 0 && !bcf_gt_is_phased(g[h])) phased = false;
       if (a <= 0 || a >= rec->n_allele) continue;
       const char* alt = rec->d.allele[a];
       const int altlen = static_cast<int>(std::strlen(alt));
@@ -165,9 +167,12 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
         applied = true;
       }
     }
-    if (applied && het) {
-      // a heterozygous substitution inside a motif window: which haplotype got the ALT matters, and
-      // when two such records meet, whether they are phased together (a skipped indel shapes no base)
+    // A record whose haplotypes did not all receive the same known allele (heterozygous, or partly
+    // missing) places its alleles by haplotype index; when two such records shape one motif, the
+    // composition is an observation only if they are phased together. A record that changed no base
+    // and left no base unknown (a skipped indel) places nothing.
+    const bool index_dependent = n_known >= 1 && (het || n_missing_here >= 1);
+    if (index_dependent && (applied || wrote_n)) {
       ++phase.n_het;
       if (!phased) { ++impl_->n_unphased; phase.unphased = true; }
       else {

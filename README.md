@@ -228,8 +228,9 @@ panisoguard adjudicate \
 From the VCF only same-length substitutions reach the splice motifs; indels are skipped and
 counted in the provenance log. A missing allele (`.`, or a genotype shorter than the sample's
 ploidy, or a record with no `GT`) leaves that haplotype's base unknown, so the motif there is
-not evaluable rather than reference. Two heterozygous variants inside one motif are combined
-only when they are phased into one phase set. An unphased heterozygous genotype is applied by allele order, as `bcftools consensus
+not evaluable rather than reference. Two variants inside one motif that place alleles by
+haplotype index (heterozygous or partly missing) are combined only when they are phased into
+one phase set. An unphased heterozygous genotype is applied by allele order, as `bcftools consensus
 -H 1` and `-H 2` would, and the junction table marks it `unphased`. A rescue that needs two or
 more junctions on one haplotype requires their alleles to be phased in one phase set (`PS`);
 when they are unphased or in different sets the call is held (`haplotype_phase_unknown`), since

@@ -104,11 +104,13 @@ counted (`haplotype_vcf_non_snv_skipped_at_motifs` in the provenance log). A mis
 read once when the file is opened. An unphased heterozygous genotype is applied by allele
 order and counted (`haplotype_vcf_unphased_het_applied_at_motifs`); the junction table's
 `variant_phase` column says `phased` (phased or homozygous), `unphased`, or `NA`. One created
-junction is rescued whichever haplotype carries the allele. Two heterozygous records inside
-one motif (a donor and an acceptor variant, or two bases of one dinucleotide) are combined
+junction is rescued whichever haplotype carries the allele. Two records inside one motif (a
+donor and an acceptor variant, or two bases of one dinucleotide) that place alleles by
+haplotype index, heterozygous ones and partly missing ones such as `1|.` or `0|.`, are combined
 only when they are phased into one phase set (FORMAT `PS`; phased genotypes without `PS` form
-one default set); otherwise no haplotype's motif at that junction is known and the junction
-table says `unlinked`. Two or more created junctions that rest on heterozygous alleles are
+one default set; a `/` before a missing allele is unphased); otherwise no haplotype's motif at
+that junction is known and the junction table says `unlinked`. A homozygous record places the
+same base on every haplotype and needs no linkage. Two or more created junctions that rest on heterozygous alleles are
 rescued only when those alleles share one phase set: unphased alleles, or alleles in different
 sets, do not establish a common haplotype and the isoform is held with reason
 `haplotype_phase_unknown` (`haplotype_phase_unknown` in the JSONL). In both cases the call is

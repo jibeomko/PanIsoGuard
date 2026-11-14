@@ -106,7 +106,24 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
-Found by a second external review (of 5bac4a4) on 2026-11-14; each has a regression test:
+Found by a third external review (of c74850e) on 2026-11-14, with a regression test:
+- A partly missing genotype (`1|.`, `0|.`, `1/.`) placed its known allele by haplotype index
+  without entering the phase bookkeeping, so two such records in different phase sets, or one
+  of them next to a heterozygous record, composed a canonical motif the file does not support,
+  and the call changed with the order the alleles were written in. Such records now count like
+  heterozygous ones: two or more that shape a motif need one phase set (`unlinked` otherwise),
+  a `/` before a missing allele is unphased, and a single partly missing record stays certain.
+- `compare_routes.py` tallied the new `unlinked` phase state as `NA`.
+- New CTest `integration_vcf_phase_matrix` (`tests/vcf_phase_matrix.py`): on a junction whose
+  canonical motif needs a donor and an acceptor variant, every pair of diploid genotypes
+  (including partly and fully missing ones) in one phase set, in two sets and unphased, 243
+  inputs plus the swapped writings; the verdict must be `REFERENCE_BIAS` exactly when a
+  canonical haplotype is guaranteed under every completion and orientation, and the same for
+  either writing of the alleles. Needs bgzip and tabix; skipped where they are absent.
+
+Found by a second external review (of 5bac4a4) on 2026-11-14; each has a regression test
+(the replayed-rulebook branch is checked against the binary's output on a constructed case,
+not by a CTest):
 - Two heterozygous variants inside one splice motif (a donor and an acceptor variant) were
   combined by their position in the genotype even when their phase sets differed or they were
   unphased, so a canonical motif was composed that no read supports, and the call changed with

@@ -48,7 +48,8 @@ constexpr long kDefaultPhaseSet = -2;
 struct WindowPhase {
   bool unphased = false;
   bool missing = false;
-  int n_het = 0;                 // heterozygous records touching the windows: two or more need one phase set
+  int n_het = 0;                 // records that place alleles by haplotype index (heterozygous or partly missing)
+                                 // and shaped a window base: two or more need one phase set
   long phase_set = kNoPhaseSet;
   bool mixed_sets = false;
   void add_set(long ps) { if (phase_set == kNoPhaseSet) phase_set = ps; else if (phase_set != ps) mixed_sets = true; }

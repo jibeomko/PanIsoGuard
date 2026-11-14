@@ -35,7 +35,7 @@ def main():
                                    "junctions": 0, "same_variant_call": 0, "same_haplotype1_motif": 0, "variant_evaluable_vcf": 0,
                                    "isoforms_missing_in_vcf_run": 0, "isoforms_only_in_vcf_run": 0,
                                    "junctions_missing_in_vcf_run": 0, "junctions_only_in_vcf_run": 0,
-                                   "phase": {"phased": 0, "unphased": 0, "NA": 0}, "unphased_het_applied": 0, "non_snv_skipped": 0, "missing_alleles": 0,
+                                   "phase": {"phased": 0, "unphased": 0, "unlinked": 0, "NA": 0}, "unphased_het_applied": 0, "non_snv_skipped": 0, "missing_alleles": 0,
                                    "differences": []})
         fa_iso = {r["isoform_id"]: r for r in table(fa + ".adjudicated.tsv")}; vc_iso = {r["isoform_id"]: r for r in table(vc + ".adjudicated.tsv")}
         p["runs"] += 1; p["isoforms"] += len(fa_iso)   # the FASTA route's rows are the denominator

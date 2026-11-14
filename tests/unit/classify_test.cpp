@@ -161,7 +161,7 @@ TEST_CASE("classify_isoforms: a 3' window with fewer than half its bases known i
   const std::string fa = scratch("classify_partial_n.fa");
   std::string seq(400, 'A');
   for (int i = 100; i < 112; ++i) seq[i] = 'N';    // 12 N + 8 A after a 3' end at 100: NA
-  for (int i = 200; i < 209; ++i) seq[i] = 'N';    // 9 N + 11 A after a 3' end at 200: 100 % over the 11
+  for (int i = 200; i < 210; ++i) seq[i] = 'N';    // 10 N + 10 A after a 3' end at 200: exactly half known, computed over the 10
   { std::ofstream(fa) << ">chrP\n" << seq << "\n"; }
   FastaFetcher ref(fa);
   Catalog empty;

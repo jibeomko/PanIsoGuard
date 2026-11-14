@@ -271,3 +271,36 @@ TEST_CASE("a record without GT at a motif base is unknown, not reference", "[vcf
   HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny("two_jx_nogt.vcf.gz"))});
   CHECK(p.motifs("chrT2", {20, 40}, Strand::kPlus).verdict == VariantVerdict::kNotEvaluable);
 }
+
+// two_jx_partial_*.vcf.gz: partly missing genotypes. 1|. places its known ALT on haplotype 1 only by the
+// writing, so two such records (or one with a fully heterozygous one) need one phase set like any two
+// heterozygous records; alone, a 1|. is certain (the ALT exists on a haplotype); 1/. is unphased.
+TEST_CASE("partly missing genotypes place alleles by index and need one phase set too", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  auto motifs = [&](const char* vcf, Junction j) {
+    HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny(vcf))});
+    return p.motifs("chrT2", j, Strand::kPlus);
+  };
+  // donor 1|.:1 (G>T) and acceptor 0|.:2 (A>C, haplotype 1 keeps A): GT-AG on haplotype 1 by writing only
+  for (const char* f : {"two_jx_partial_sets.vcf.gz", "two_jx_partial_unphased.vcf.gz"}) {
+    const JunctionMotifs m = motifs(f, {60, 80});
+    CHECK(m.phase_unlinked);
+    CHECK(m.verdict == VariantVerdict::kNotEvaluable);
+  }
+  const JunctionMotifs same = motifs("two_jx_partial_sameps.vcf.gz", {60, 80});   // one phase set: the ALT and the REF are linked
+  CHECK_FALSE(same.phase_unlinked);
+  CHECK(same.haps[0].motif == "GT-AG");
+  CHECK(same.verdict == VariantVerdict::kCreated);
+  // a reference allele placed by a partly missing record (0|.:1) next to a heterozygous one (1|0:2)
+  const JunctionMotifs ref_sets = motifs("two_jx_partial_ref.vcf.gz", {20, 40});
+  CHECK(ref_sets.phase_unlinked);
+  CHECK(ref_sets.verdict == VariantVerdict::kNotEvaluable);
+  const JunctionMotifs ref_same = motifs("two_jx_partial_ref_sameps.vcf.gz", {20, 40});
+  CHECK_FALSE(ref_same.phase_unlinked);
+  CHECK(ref_same.haps[0].motif == "GT-AG");
+  CHECK(ref_same.verdict == VariantVerdict::kCreated);
+  // a single 1|. is certain on its own
+  const JunctionMotifs single = motifs("two_jx_partial_single.vcf.gz", {60, 80});
+  CHECK_FALSE(single.phase_unlinked);
+  CHECK(single.verdict == VariantVerdict::kCreated);
+}
