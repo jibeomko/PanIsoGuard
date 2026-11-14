@@ -86,6 +86,18 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
   them; a GENCODE v49 run otherwise takes about half the memory it did at 0.1.0's first build
   (the catalog with transcripts is what the runtime table measured at 0.85–1.0 GB).
+- **Ruleset `builtin-0.0.6`.** The two reference-bias fixes above (independent rescue on
+  either axis first; ambiguous or unreadable splice sites not evaluable) change verdicts only
+  in those cases. On the worked locus and on SQANTI-SIM chr22 with short reads, BAM and
+  reference every class and reason is unchanged; the strand-aware read counting moved the
+  whole-chain count of 5 and the spanning-read count of 4 of 1,579 isoforms without changing
+  a verdict.
+- **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
+  Korean study notes are gone from the repository; what they verified stays: the toy data, the
+  stdlib recomputation of every verdict (`check_worked_locus.py`, CTest `integration_worked_locus`)
+  and, new as a file of its own, the Python replay of the rulebook (`rules_replay.py`,
+  CTest `integration_rules_replay`). `panisoguard example worked_locus` replaces `notes-data`.
+
 
 ### Deprecated
 - `--platform ont`. Since ruleset 0.0.7 the indel-near gate reads the excess over each read's
@@ -189,19 +201,6 @@ Found by a code audit on 2026-10-31; each has a regression test.
   reports `firewall_held_all` only when no row is missing; the cross-validation cache key
   includes the contents of the classification, GTF and truth files, the TP/TN labels and
   the filter program.
-
-### Changed
-- **Ruleset `builtin-0.0.6`.** The two reference-bias fixes above (independent rescue on
-  either axis first; ambiguous or unreadable splice sites not evaluable) change verdicts only
-  in those cases. On the worked locus and on SQANTI-SIM chr22 with short reads, BAM and
-  reference every class and reason is unchanged; the strand-aware read counting moved the
-  whole-chain count of 5 and the spanning-read count of 4 of 1,579 isoforms without changing
-  a verdict.
-- **The toy locus moved to [examples/worked_locus](examples/worked_locus/README.md).** The nine
-  Korean study notes are gone from the repository; what they verified stays: the toy data, the
-  stdlib recomputation of every verdict (`check_worked_locus.py`, CTest `integration_worked_locus`)
-  and, new as a file of its own, the 42-line Python replay of the rulebook (`rules_replay.py`,
-  CTest `integration_rules_replay`). `panisoguard example worked_locus` replaces `notes-data`.
 
 ### Removed
 - **Everything that was not the adjudicator.** The Python PDF report tool (`python/`,
