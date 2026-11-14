@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The rulebook of RuleEngine::evaluate() in 42 lines of Python (evaluate() below), replayed on the
+"""The rulebook of RuleEngine::evaluate() in 44 lines of Python (evaluate() below), replayed on the
 worked locus and compared, isoform by isoform, with the verdicts the binary writes. The six runs add
 one input at a time (reference GTF, short-read junctions, long-read BAM, haplotypes, provenance).
 CTest runs this as `integration_rules_replay`.
@@ -29,8 +29,10 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
     if rescues:                                                # reference-bias rescue first: independent evidence
         return "REFERENCE_BIAS" if not all(rescues) else "UNRESOLVED"   # on either axis promotes, else held
     n, k = e["n_novel_junctions"], e["n_novel_jx_sr_supported"]
-    if not (e["sj_evaluable"] and e["chain_available"]) or n == 0:
+    if not (e["sj_evaluable"] and e["chain_available"] and e["catalog_evaluable"]) or n == 0:
         sup = "UNKNOWN"
+    elif k == 0 and ((e["n_known_junctions"] > 0 and e["n_known_jx_sr_supported"] == 0) or e["sj_no_junction_in_span"]):
+        sup = "UNKNOWN"                                           # no coverage at the locus is not absence
     else:
         sup = "SUPPORTED" if k == n else "UNSUPPORTED" if k == 0 else "PARTIAL"
     if e["bam_evaluable"] and e["bam_n_spanning"] > 0 and any(e[f] > t for f, t in MAP_GATES.items()):
@@ -47,9 +49,10 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
         weak = mech in ("none", "rt_switch")                     # the RT-switch sign does not demote a lift
         if mech == "mapping_or_repeat":
             return "UNCONFIRMED"                                 # held, not rejected, without short reads
-        if e["consensus_evaluable"] and e["n_callers"] >= min_callers:
+        examined = e["chain_available"] and e["catalog_evaluable"]        # agreement and reads corroborate an examined chain only
+        if e["consensus_evaluable"] and e["n_callers"] >= min_callers and examined:
             return "NOVEL_PROBABLE" if weak else "UNCONFIRMED"
-        if e["chain_evaluable"] and e["chain_n_full_reads"] >= min_chain:   # whole-chain long reads
+        if e["chain_evaluable"] and e["chain_n_full_reads"] >= min_chain and examined:   # whole-chain long reads
             return "NOVEL_PROBABLE" if weak else "UNCONFIRMED"
         return "UNRESOLVED"
     if sup == "SUPPORTED":

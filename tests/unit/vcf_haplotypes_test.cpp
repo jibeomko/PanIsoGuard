@@ -148,3 +148,14 @@ TEST_CASE("VcfHaplotypes edge cases: ploidy from several records, MNPs, skipped 
   CHECK_FALSE(unphased);
   CHECK(vcf.n_unphased_het_applied() == 0);
 }
+
+TEST_CASE("a VCF without the junction's contig leaves the variant axis not evaluable", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("mini_ref.fa"));   // chr1; the VCF header names chrT2 only
+  HaplotypeProvider from_vcf(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny("two_jx_split.vcf.gz"))});
+  const JunctionMotifs m = from_vcf.motifs("chr1", {200, 300}, Strand::kPlus);
+  REQUIRE(m.haps.size() == 2);
+  CHECK_FALSE(m.haps[0].evaluable);
+  CHECK_FALSE(m.haps[1].evaluable);
+  CHECK(m.verdict == VariantVerdict::kNotEvaluable);
+  CHECK(m.phase == MotifPhase::kUnknown);
+}

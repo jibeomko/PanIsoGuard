@@ -77,6 +77,12 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   benchmark/no_sqanti3, a new tracked protocol).
 
 ### Changed
+- `attribution.jsonl` carries two inputs the rules read that it did not record: `catalog_evaluable`
+  (a reference GTF was given, so junctions could be told known from novel) and
+  `sj_no_junction_in_span` (short reads were given but none splices within the isoform's span).
+  With them the replayed rulebook (`examples/worked_locus/rules_replay.py`, now 44 lines) decides
+  every record from the JSONL alone, including the coverage rule and the "examined chain" gate on
+  caller agreement and whole-chain reads.
 - The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
   them; a GENCODE v49 run otherwise takes about half the memory it did at 0.1.0's first build
   (the catalog with transcripts is what the runtime table measured at 0.85–1.0 GB).

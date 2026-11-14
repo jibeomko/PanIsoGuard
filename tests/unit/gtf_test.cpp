@@ -55,3 +55,8 @@ TEST_CASE("A catalog without transcripts answers chains and introns only", "[gtf
   CHECK_FALSE(slim.has_intron_start("chr1", Strand::kPlus, 200));   // the site sets belong to the transcript index
   CHECK(full.has_intron_start("chr1", Strand::kPlus, 200));
 }
+
+TEST_CASE("GTF attribute extraction reads an unquoted value", "[gtf]") {
+  CHECK(extract_gtf_attr("gene_id \"G1\"; exon_number 2; transcript_id \"T1\";", "exon_number") == "2");
+  CHECK(extract_gtf_attr("gene_id \"G1\"; exon_number 7", "exon_number") == "7");
+}

@@ -337,3 +337,15 @@ TEST_CASE("rules: a config value of the wrong type or outside its range is an er
   // the informational sections older configs carried are still accepted
   CHECK_NOTHROW(with_toml("[axis_artifact.rt_switch]\n[confidence]\nclasses = [\"KNOWN\"]\n"));
 }
+
+TEST_CASE("a high perc_A with a polyA motif upstream is not intra-priming", "[rules]") {
+  RuleEngine eng;
+  EvidenceVector e = novel_ev(2, 0, false, false, /*percA=*/70.0);   // UNSUPPORTED, A-rich 3' end
+  e.polyA_motif_evaluable = true; e.polyA_motif_found = true;
+  const Verdict v = eng.evaluate(e);
+  CHECK(v.primary_mechanism == Mechanism::kNone);
+  CHECK(v.confidence == ConfidenceClass::kUnconfirmed);                // no sign: held, not an artifact
+  bool noted = false;
+  for (const auto& t : v.rule_trace) if (t.find("polyA motif is found upstream") != std::string::npos) noted = true;
+  CHECK(noted);
+}

@@ -402,7 +402,7 @@ isoforms, with every input a run can take. Adding the inputs one at a time chang
 junction is canonical on the sample's haplotype, with independent provenance). Two scripts check the
 example and run in CI: `check_worked_locus.py` recomputes every verdict with the Python
 standard library and compares it with the binary, and `rules_replay.py` is the whole rulebook of
-`RuleEngine::evaluate()` in 42 lines of Python, replayed against the binary's `attribution.jsonl`.
+`RuleEngine::evaluate()` in 44 lines of Python, replayed against the binary's `attribution.jsonl`.
 
 ## When to use PanIsoGuard
 

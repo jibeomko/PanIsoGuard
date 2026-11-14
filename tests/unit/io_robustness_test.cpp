@@ -6,10 +6,12 @@
 #include <string>
 
 #include "panisoguard/bed12.hpp"
+#include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
 #include "panisoguard/result_writer.hpp"
 #include "panisoguard/sj_tab.hpp"
+#include "panisoguard/sqanti.hpp"
 #include "panisoguard/tsv.hpp"
 #include "test_util.hpp"
 
@@ -169,4 +171,32 @@ TEST_CASE("BED12: a block outside chromStart..chromEnd or out of order is reject
   CHECK(throws_containing([&] { read_bed12(overlap.path); }, {"BED12 line 1", "block 2"}));
   TempFile ok("chr1\t100\t300\tiso\t0\t+\t100\t300\t0\t2\t50,50,\t0,150,\n");
   CHECK(read_bed12(ok.path).size() == 1);
+}
+
+TEST_CASE("readers reject the wrong column count and a matrix that is not from combine", "[io][robustness]") {
+  TempFile sj("chr1\t100\t200\t1\t1\t0\n");
+  CHECK(throws_containing([&] { read_sj_tab(sj.path); }, {"SJ.tab", "expected 9 columns"}));
+  TempFile pg("chr1\t100\t200\n");
+  CHECK(throws_containing([&] { read_pangenome_junctions(pg.path); }, {"pangenome junctions", "expected >= 4 columns"}));
+  TempFile bed("chr1\t100\t500\tiso\t0\t+\t100\t500\t0\t2\t50,50\n");
+  CHECK(throws_containing([&] { read_bed12(bed.path); }, {"BED12", "expected 12 columns"}));
+  TempFile blocks("chr1\t100\t500\tiso\t0\t+\t100\t500\t0\t2\t50,50,50\t0,100\n");
+  CHECK(throws_containing([&] { read_bed12(blocks.path); }, {"BED12", "blockCount"}));
+  TempFile not_matrix("isoform\tsomething\nx\ty\n");
+  CHECK(throws_containing([&] { read_caller_support(not_matrix.path); }, {"caller-support matrix", "panisoguard combine"}));
+  TempFile bad_fp("pig_id\tchrom\tstrand\tn_introns\tn_callers\tn_isoforms\tcallers\tnovelty\tnative_ids\tfingerprint\n"
+                  "PIG1\tchr1\t+\t1\t1\t1\tflair\tnovel\tflair:a\tnot-a-number\n");
+  CHECK(throws_containing([&] { read_caller_support(bad_fp.path); }, {"caller-support matrix", "fingerprint"}));
+}
+
+TEST_CASE("SQANTI3 classification: empty file, missing isoform column, and a non-numeric value", "[io][robustness]") {
+  TempFile empty("");
+  CHECK(throws_containing([&] { read_sqanti_classification(empty.path); }, {"empty SQANTI3 classification"}));
+  TempFile no_iso("chrom\tstrand\tstructural_category\nchr1\t+\tfull-splice_match\n");
+  CHECK(throws_containing([&] { read_sqanti_classification(no_iso.path); }, {"isoform"}));
+  TempFile garbage("isoform\tchrom\tstrand\tstructural_category\tperc_A_downstream_TTS\n"
+                   "iso1\tchr1\t+\tnovel_not_in_catalog\tabc\n");
+  const SqantiTable t = read_sqanti_classification(garbage.path);   // warns, keeps the row with NA
+  REQUIRE(t.records.size() == 1);
+  CHECK(sqanti_is_na(t.records[0].perc_A_downstream_TTS));
 }
