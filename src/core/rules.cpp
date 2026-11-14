@@ -114,9 +114,10 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
 void RuleEngine::apply_platform_preset(const std::string& platform) {
   cfg_.platform = platform;
   if (platform == "ont") {
-    // Kept for compatibility. Since ruleset 0.0.7 the indel-near gate reads the excess over each
-    // read's own indel rate, and on ONT that excess cannot reach the gate (GM12878: 0 of 133
-    // gated isoforms, background 0.94), so turning it off changes nothing there.
+    // Deprecated, removed in 0.2. Since ruleset 0.0.7 the indel-near gate reads the excess over
+    // each read's own indel rate, and on ONT that excess does not reach the gate (GM12878: 0 of 133
+    // gated isoforms, background 0.94; the chr22 ONT re-simulation: 0 of 635 junctions), so turning
+    // it off changes nothing there.
     cfg_.bam_max_indel_near_frac = 1.01;
   }
 }

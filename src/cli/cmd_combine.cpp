@@ -111,7 +111,7 @@ int cmd_combine(int argc, char** argv) {
   const Catalog* catalog_ptr = nullptr;
   if (!ref_gtf.empty()) {
     std::fprintf(stderr, "  reading reference catalog: %s\n", ref_gtf.c_str());
-    catalog = build_catalog_from_gtf(ref_gtf);
+    catalog = build_catalog_from_gtf(ref_gtf, /*with_transcripts=*/false);   // known / novel needs the chains only
     catalog_ptr = &catalog;
   }
 

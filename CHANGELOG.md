@@ -76,6 +76,17 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   which this mode adjudicates (FLAIR recall 0.748 → 0.778 at precision 0.993;
   benchmark/no_sqanti3, a new tracked protocol).
 
+### Changed
+- The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
+  them; a GENCODE v49 run otherwise takes about half the memory it did at 0.1.0's first build
+  (the catalog with transcripts is what the runtime table measured at 0.85–1.0 GB).
+
+### Deprecated
+- `--platform ont`. Since ruleset 0.0.7 the indel-near gate reads the excess over each read's
+  own indel rate, and on ONT reads (GM12878 direct RNA, the chr22 design re-simulated as ONT
+  cDNA) the preset no longer changes a single verdict; it still turns the gate off, prints a
+  warning, and will be removed in 0.2.
+
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the

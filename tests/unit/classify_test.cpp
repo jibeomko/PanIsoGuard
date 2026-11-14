@@ -125,3 +125,9 @@ TEST_CASE("classify_isoforms reads splice motifs and the 3' A content from the g
   }
   std::remove(gtf.c_str()); std::remove(fa.c_str()); std::remove((fa + ".fai").c_str());
 }
+
+TEST_CASE("classify_isoforms refuses a catalog built without its transcripts", "[classify]") {
+  const std::string gtf = write_gtf();
+  const Catalog slim = build_catalog_from_gtf(gtf, /*with_transcripts=*/false);
+  CHECK_THROWS_AS(classify_isoforms({}, slim, nullptr), std::logic_error);
+}

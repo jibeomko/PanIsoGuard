@@ -43,3 +43,15 @@ TEST_CASE("Catalog records known chains and introns", "[gtf][catalog]") {
   CHECK_FALSE(cat.has_intron("chr1", Strand::kPlus, Junction{200, 400}));  // novel combination
   CHECK_FALSE(cat.has_intron("chr1", Strand::kMinus, Junction{200, 300}));  // strand-aware
 }
+
+TEST_CASE("A catalog without transcripts answers chains and introns only", "[gtf][catalog]") {
+  const Catalog slim = build_catalog_from_gtf(tiny("mini.gtf"), /*with_transcripts=*/false);
+  const Catalog full = build_catalog_from_gtf(tiny("mini.gtf"));
+  CHECK_FALSE(slim.has_transcripts());
+  CHECK(full.has_transcripts());
+  for (const auto& t : read_gtf_transcripts(tiny("mini.gtf"))) CHECK(slim.has_chain(fingerprint_intron_chain(t.chain)));
+  CHECK(slim.has_intron("chr1", Strand::kPlus, Junction{200, 300}));
+  CHECK_FALSE(slim.has_intron("chr1", Strand::kPlus, Junction{200, 400}));
+  CHECK_FALSE(slim.has_intron_start("chr1", Strand::kPlus, 200));   // the site sets belong to the transcript index
+  CHECK(full.has_intron_start("chr1", Strand::kPlus, 200));
+}

@@ -32,9 +32,14 @@ std::string extract_gtf_attr(const std::string& attrs, const std::string& key);
 
 // Reference annotation model: the known intron chains (by fingerprint; `combine` marks a
 // chain known or novel with it) and the known introns (the adjudicator classifies each
-// junction of a caller chain as known or novel with it). Both strand-aware.
+// junction of a caller chain as known or novel with it). Both strand-aware. With
+// `with_transcripts` the catalog also keeps every transcript with its span and exons and the
+// splice-site sets, which only `classify_isoforms` (--no-sqanti3) reads; without them a
+// GENCODE-scale catalog takes half the memory.
 class Catalog {
  public:
+  explicit Catalog(bool with_transcripts = true) : with_transcripts_(with_transcripts) {}
+  bool has_transcripts() const { return with_transcripts_; }
   void add_transcript(const Transcript& t);
 
   bool has_chain(Fingerprint fp) const { return chains_.count(fp) != 0; }
@@ -48,7 +53,7 @@ class Catalog {
   // An annotated transcript on the same chromosome and strand carries `chain` as a
   // contiguous part of its intron chain, and none of its other introns lies inside
   // [start, end) (a retained intron makes the isoform novel-in-catalog, as in SQANTI3).
-  bool has_subchain(const IntronChain& chain, int64_t start, int64_t end) const;
+  bool has_subchain(const IntronChain& chain, int64_t start, int64_t end) const;   // these four need with_transcripts
   // Mono-exonic isoform [start, end) against the annotated exons on `strand`: "fsm" when
   // inside an exon of a mono-exonic transcript, "ism" inside an exon of a multi-exonic one,
   // "genic" overlapping an exon otherwise, "genic_intron" inside a transcript span only, "".
@@ -58,6 +63,7 @@ class Catalog {
   bool overlaps_any_strand(const std::string& chrom, int64_t start, int64_t end) const;
 
  private:
+  bool with_transcripts_ = true;
   std::unordered_set<Fingerprint> chains_;
   std::unordered_set<std::string> introns_;
   std::unordered_set<std::string> intron_starts_, intron_ends_;           // "chrom|strand:pos"
@@ -66,6 +72,6 @@ class Catalog {
   std::unordered_map<std::string, std::vector<std::size_t>> txs_by_locus_;      // "chrom|strand" -> txs_ indices
 };
 
-Catalog build_catalog_from_gtf(const std::string& path);
+Catalog build_catalog_from_gtf(const std::string& path, bool with_transcripts = true);
 
 }  // namespace panisoguard

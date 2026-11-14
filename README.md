@@ -187,8 +187,9 @@ panisoguard adjudicate \
 alignments (`--bam`). These two are what let PanIsoGuard confirm or reject a novel isoform.
 `--reference`, the genome FASTA, is needed only for CRAM input and for the haplotype check
 below. The indel-near check is measured in excess of each read's own indel rate, so ONT
-reads do not trip it by their chemistry alone; the thresholds were set on PacBio HiFi, and
-`--platform ont` turns the indel-near check off entirely:
+reads do not trip it by their chemistry alone; the thresholds were set on PacBio HiFi and hold
+on ONT reads as they are (`--platform ont`, which turned the indel-near check off, is deprecated
+and changes no verdict):
 
 ```bash
 panisoguard adjudicate \

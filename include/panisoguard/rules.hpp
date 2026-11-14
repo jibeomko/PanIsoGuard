@@ -19,7 +19,7 @@ struct RuleConfig {
   int bam_min_mapq = 20;
   int bam_min_spanning = 3;                 // a novel junction's read fractions count only with >= this many
                                             // spanning reads; below it the mapping axis is not evaluated there
-  std::string platform = "hifi";            // "hifi" (defaults) or "ont" (indel-near gate off; see apply_platform_preset)
+  std::string platform = "hifi";            // "hifi" (defaults) or "ont" (deprecated; see apply_platform_preset)
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
@@ -50,7 +50,8 @@ class RuleEngine {
   std::string thresholds_summary() const;
 
   // Sequencing-platform preset applied after the config: "hifi" keeps the defaults, "ont"
-  // disables the indel-near mapping gate (HiFi-calibrated; fires on ~90 % of ONT junctions).
+  // disables the indel-near mapping gate. Deprecated: since ruleset 0.0.7 the gate reads the excess
+  // over each read's own indel rate and does not fire on ONT reads by chemistry; removed in 0.2.
   void apply_platform_preset(const std::string& platform);
 
   // Map an assembled EvidenceVector to a Verdict (2-axis evaluation + projection).

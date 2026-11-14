@@ -125,13 +125,17 @@ std::string site_key(const std::string& chrom, Strand strand, int64_t pos) { ret
 }  // namespace
 
 void Catalog::add_transcript(const Transcript& t) {
-  txs_.push_back(t);
-  const std::size_t idx = txs_.size() - 1;
-  if (t.end > t.start) txs_by_locus_[locus_key(t.chain.chrom, t.chain.strand)].push_back(idx);
+  std::size_t idx = 0;
+  if (with_transcripts_) {
+    txs_.push_back(t);
+    idx = txs_.size() - 1;
+    if (t.end > t.start) txs_by_locus_[locus_key(t.chain.chrom, t.chain.strand)].push_back(idx);
+  }
   if (t.chain.monoexonic()) return;
   chains_.insert(fingerprint_intron_chain(t.chain));
   for (const auto& j : t.chain.introns) {
     introns_.insert(junction_key(t.chain.chrom, t.chain.strand, j));
+    if (!with_transcripts_) continue;
     intron_starts_.insert(site_key(t.chain.chrom, t.chain.strand, j.start));
     intron_ends_.insert(site_key(t.chain.chrom, t.chain.strand, j.end));
     txs_by_intron_[junction_key(t.chain.chrom, t.chain.strand, j)].push_back(idx);
@@ -198,8 +202,8 @@ bool Catalog::overlaps_any_strand(const std::string& chrom, int64_t start, int64
          overlaps(chrom, Strand::kUnknown, start, end);
 }
 
-Catalog build_catalog_from_gtf(const std::string& path) {
-  Catalog cat;
+Catalog build_catalog_from_gtf(const std::string& path, bool with_transcripts) {
+  Catalog cat(with_transcripts);
   for (const auto& t : read_gtf_transcripts(path)) {
     cat.add_transcript(t);
   }

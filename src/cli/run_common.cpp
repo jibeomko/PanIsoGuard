@@ -123,7 +123,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   const Catalog* catalog_ptr = nullptr;
   if (!c.ref_gtf.empty()) {
     std::fprintf(stderr, "building reference catalog...\n");
-    catalog = build_catalog_from_gtf(c.ref_gtf);
+    catalog = build_catalog_from_gtf(c.ref_gtf, /*with_transcripts=*/c.no_sqanti3);   // only the classifier reads the transcripts
     catalog_ptr = &catalog;
   }
 
@@ -236,6 +236,11 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
 
   run.engine = c.config.empty() ? RuleEngine() : RuleEngine::from_toml(c.config);
   run.engine.apply_platform_preset(c.platform);
+  if (c.platform == "ont") {
+    std::fprintf(stderr, "warning: --platform ont is deprecated and will be removed in 0.2: since ruleset 0.0.7 the indel-near "
+                         "gate reads the excess over each read's own indel rate and the preset has not changed a verdict on ONT "
+                         "data; it still turns that gate off in this run\n");
+  }
 
   AdjudicateInputs in;
   in.sqanti = &run.sqanti;

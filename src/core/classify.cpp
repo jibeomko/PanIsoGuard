@@ -1,6 +1,7 @@
 #include "panisoguard/classify.hpp"
 
 #include <cstdio>
+#include <stdexcept>
 
 #include "panisoguard/fingerprint.hpp"
 
@@ -54,6 +55,7 @@ double perc_a_of(const CallerIsoform& iso, const FastaFetcher& ref) {
 
 SqantiTable classify_isoforms(const std::vector<CallerIsoform>& isoforms, const Catalog& catalog,
                               const FastaFetcher* reference) {
+  if (!catalog.has_transcripts()) throw std::logic_error("classify_isoforms needs a catalog built with its transcripts");
   SqantiTable table;
   table.n_columns = 8;
   table.records.reserve(isoforms.size());
