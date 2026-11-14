@@ -54,6 +54,7 @@ struct BamFeatureParams {
 class BamReader {
  public:
   explicit BamReader(const std::string& path, const std::string& reference = "");
+  const std::string& path() const;
   ~BamReader();
   BamReader(const BamReader&) = delete;
   BamReader& operator=(const BamReader&) = delete;

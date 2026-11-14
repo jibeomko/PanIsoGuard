@@ -15,7 +15,7 @@ namespace {
 EvidenceVector build_evidence(const SqantiRecord& r,
                               const std::map<std::string, IntronChain>& chains,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
-                              const BamReader* validation_bam,
+                              const std::vector<const BamReader*>& validation_bams,
                               const HaplotypeProvider* haplotype, bool haplotype_circular,
                               const PangenomeJunctions* pangenome, bool pangenome_circular,
                               const CallerSupport* caller_support,
@@ -60,15 +60,36 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     }
   }
 
-  // Whole-chain long-read support: reads carrying every intron of the caller's chain. From
-  // --validation-bam when given (an independent library), else from the caller's own BAM.
-  const BamReader* chain_bam = validation_bam != nullptr ? validation_bam : bam;
-  if (chain_bam != nullptr && ev.chain_available && !it->second.monoexonic()) {
-    const ChainBamSupport cs = chain_bam->chain_support(it->second);
-    ev.chain_evaluable = cs.evaluated;
-    ev.chain_independent = validation_bam != nullptr;
-    ev.chain_n_full_reads = cs.n_full;
-    ev.chain_n_partial_reads = cs.n_partial;
+  // Whole-chain long-read support: reads carrying every intron of the caller's chain. From the
+  // --validation-bam libraries when given (each counted on its own; the largest count is the
+  // isoform's, and a library supports the chain when it reaches chain_min_full_reads alone),
+  // else from the caller's own BAM.
+  if (ev.chain_available && !it->second.monoexonic()) {
+    if (!validation_bams.empty()) {
+      ev.chain_independent = true;
+      for (const BamReader* vb : validation_bams) {
+        const ChainBamSupport cs = vb->chain_support(it->second);
+        const std::string& p = vb->path();
+        const std::size_t cut = p.rfind('/');
+        ev.chain_full_by_library.emplace_back(cut == std::string::npos ? p : p.substr(cut + 1), cs.evaluated ? cs.n_full : -1);
+        if (!cs.evaluated) continue;
+        ev.chain_evaluable = true;
+        if (cs.n_full >= cfg.chain_min_full_reads) ++ev.chain_n_libraries_supporting;
+        if (cs.n_full > ev.chain_n_full_reads || (cs.n_full == ev.chain_n_full_reads && cs.n_partial > ev.chain_n_partial_reads)) {
+          ev.chain_n_full_reads = cs.n_full;
+          ev.chain_n_partial_reads = cs.n_partial;
+        }
+      }
+      if (bam != nullptr) {
+        const ChainBamSupport own = bam->chain_support(it->second);
+        if (own.evaluated) ev.chain_n_full_reads_own = own.n_full;
+      }
+    } else if (bam != nullptr) {
+      const ChainBamSupport cs = bam->chain_support(it->second);
+      ev.chain_evaluable = cs.evaluated;
+      ev.chain_n_full_reads = cs.n_full;
+      ev.chain_n_partial_reads = cs.n_partial;
+    }
   }
 
   // Novel-junction axes (short-read corroboration + BAM mapping features) require
@@ -269,7 +290,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.chrom = r.chrom;
     res.strand = r.strand;
     res.structural_category = r.structural_category;
-    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.validation_bam, in.haplotype,
+    res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.validation_bams, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
                                   in.caller_support, engine.config(), bam_cache,
                                   junctions != nullptr ? &jrows : nullptr);

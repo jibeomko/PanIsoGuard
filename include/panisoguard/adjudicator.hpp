@@ -33,7 +33,7 @@ struct AdjudicateInputs {
   const Catalog* catalog = nullptr;                          // optional (needed for novel-junction axes)
   const SjTable* sj = nullptr;                               // optional (short-read corroboration)
   const BamReader* bam = nullptr;                            // optional (mapping axis + whole-chain reads)
-  const BamReader* validation_bam = nullptr;                 // optional: an independent library; whole-chain reads come from it instead
+  std::vector<const BamReader*> validation_bams;             // optional: independent libraries; whole-chain reads come from them instead
   const HaplotypeProvider* haplotype = nullptr;              // optional (variant/reference-bias axis)
   bool haplotype_circular = false;                           // true if haplotype provenance is RNA-derived/unknown
   const PangenomeJunctions* pangenome = nullptr;             // optional (pangenome reference-bias axis)

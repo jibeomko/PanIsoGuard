@@ -33,7 +33,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--ref-gtf")            { c.ref_gtf = next("--ref-gtf"); return true; }
   if (a == "--sj-tab")             { c.sj_tab = next("--sj-tab"); return true; }
   if (a == "--bam")                { c.bam_path = next("--bam"); return true; }
-  if (a == "--validation-bam")     { c.validation_bam = next("--validation-bam"); return true; }
+  if (a == "--validation-bam")     { c.validation_bams.push_back(next("--validation-bam")); return true; }
   if (a == "--reference")          { c.reference = next("--reference"); return true; }
   if (a == "--reference-haplotype"){ c.reference_haplotypes.push_back(next("--reference-haplotype")); return true; }
   if (a == "--haplotype-vcf")      { c.haplotype_vcfs.push_back(next("--haplotype-vcf")); return true; }
@@ -49,7 +49,8 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
 
 std::vector<std::string> input_paths(const CommonArgs& c) {
   std::vector<std::string> v = {c.classification, c.isoforms_bed, c.isoforms_gtf, c.ref_gtf, c.sj_tab, c.bam_path,
-                                c.validation_bam, c.reference, c.pangenome_junctions, c.caller_support, c.config};
+                                c.reference, c.pangenome_junctions, c.caller_support, c.config};
+  v.insert(v.end(), c.validation_bams.begin(), c.validation_bams.end());
   v.insert(v.end(), c.reference_haplotypes.begin(), c.reference_haplotypes.end());
   v.insert(v.end(), c.haplotype_vcfs.begin(), c.haplotype_vcfs.end());
   return v;
@@ -126,7 +127,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     // so the whole novel-junction block is skipped: every novel isoform is held
     // UNKNOWN/UNRESOLVED and the short-read/BAM/variant/pangenome axes contribute
     // NOTHING even when their inputs are supplied. Warn loudly rather than fail soft.
-    const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() || !c.validation_bam.empty() ||
+    const bool novel_axes_supplied = !c.sj_tab.empty() || !c.bam_path.empty() || !c.validation_bams.empty() ||
                                      !c.reference_haplotypes.empty() || !c.haplotype_vcfs.empty() ||
                                      !c.pangenome_junctions.empty();
     std::fprintf(stderr,
@@ -155,14 +156,18 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     bam = std::make_unique<BamReader>(c.bam_path, c.reference);
     std::fprintf(stderr, "opened BAM for mapping axis: %s\n", c.bam_path.c_str());
   }
-  std::unique_ptr<BamReader> validation_bam;
-  if (!c.validation_bam.empty()) {
-    if (!c.bam_path.empty() && same_file(c.bam_path, c.validation_bam))
-      throw std::runtime_error("--validation-bam " + c.validation_bam + " is the same file as --bam; the caller's own "
+  std::vector<std::unique_ptr<BamReader>> validation_bams;
+  for (std::size_t i = 0; i < c.validation_bams.size(); ++i) {
+    const std::string& vb = c.validation_bams[i];
+    if (!c.bam_path.empty() && same_file(c.bam_path, vb))
+      throw std::runtime_error("--validation-bam " + vb + " is the same file as --bam; the caller's own "
                                "reads are not an independent library (drop --validation-bam to count them as the caller's)");
-    validation_bam = std::make_unique<BamReader>(c.validation_bam, c.reference);
-    std::fprintf(stderr, "opened validation BAM for whole-chain read support (independent library): %s\n",
-                 c.validation_bam.c_str());
+    for (std::size_t j = 0; j < i; ++j)
+      if (same_file(c.validation_bams[j], vb))
+        throw std::runtime_error("--validation-bam " + vb + " and " + c.validation_bams[j] + " are the same file");
+    validation_bams.push_back(std::make_unique<BamReader>(vb, c.reference));
+    std::fprintf(stderr, "opened validation BAM %zu/%zu for whole-chain read support (independent library): %s\n",
+                 i + 1, c.validation_bams.size(), vb.c_str());
   }
 
   std::shared_ptr<FastaFetcher> ref_fa;
@@ -217,7 +222,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.catalog = catalog_ptr;
   in.sj = sj_ptr;
   in.bam = bam.get();
-  in.validation_bam = validation_bam.get();
+  for (const auto& vb : validation_bams) in.validation_bams.push_back(vb.get());
   in.haplotype = haplo.get();
   in.haplotype_circular = haplotype_provenance_is_circular(c.haplotype_provenance);
   in.pangenome = pangenome_ptr;
@@ -237,7 +242,7 @@ RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
   prov.ref_gtf_path = c.ref_gtf;
   prov.sj_tab_path = c.sj_tab;
   prov.bam_path = c.bam_path;
-  prov.validation_bam_path = c.validation_bam;
+  prov.validation_bam_paths = c.validation_bams;
   prov.caller_support_path = c.caller_support;
   prov.reference_path = c.reference;
   prov.reference_haplotype_paths = c.reference_haplotypes;

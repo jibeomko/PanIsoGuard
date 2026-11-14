@@ -105,6 +105,8 @@ void check_read(int ret, const std::string& path, const std::string& chrom) {
 
 }  // namespace
 
+const std::string& BamReader::path() const { return impl_->path; }
+
 JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, const Junction& intron,
                                                     Strand strand, const BamFeatureParams& p) const {
   JunctionBamFeatures f;

@@ -95,8 +95,21 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"chain_evaluable\":" << (e.chain_evaluable ? "true" : "false") << ","
         << "\"chain_independent\":" << (e.chain_independent ? "true" : "false") << ","
         << "\"chain_n_full_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_full_reads) : "null") << ","
-        << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null")
-        << "},";
+        << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null") << ","
+        << "\"chain_n_full_reads_own\":" << (e.chain_n_full_reads_own >= 0 ? std::to_string(e.chain_n_full_reads_own) : "null") << ","
+        << "\"chain_full_reads_by_library\":";
+    if (e.chain_full_by_library.empty()) {
+      out << "null";
+    } else {
+      out << "{";
+      for (std::size_t i = 0; i < e.chain_full_by_library.size(); ++i) {
+        if (i) out << ",";
+        out << "\"" << json_escape(e.chain_full_by_library[i].first) << "\":"
+            << (e.chain_full_by_library[i].second >= 0 ? std::to_string(e.chain_full_by_library[i].second) : "null");
+      }
+      out << "}";
+    }
+    out << "},";
     out << "\"rule_trace\":[";
     for (std::size_t i = 0; i < r.verdict.rule_trace.size(); ++i) {
       if (i) out << ',';
@@ -133,7 +146,8 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "ref_gtf\t" << (prov.ref_gtf_path.empty() ? "<none>" : prov.ref_gtf_path) << '\n';
   out << "sj_tab\t" << (prov.sj_tab_path.empty() ? "<none>" : prov.sj_tab_path) << '\n';
   out << "bam\t" << (prov.bam_path.empty() ? "<none>" : prov.bam_path) << '\n';
-  out << "validation_bam\t" << (prov.validation_bam_path.empty() ? "<none>" : prov.validation_bam_path) << '\n';
+  if (prov.validation_bam_paths.empty()) out << "validation_bam\t<none>\n";
+  for (const auto& p : prov.validation_bam_paths) out << "validation_bam\t" << p << '\n';
   out << "caller_support\t"
       << (prov.caller_support_path.empty() ? "<none>" : prov.caller_support_path) << '\n';
   out << "reference\t" << (prov.reference_path.empty() ? "<none>" : prov.reference_path) << '\n';
@@ -160,7 +174,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   ident("ref_gtf", prov.ref_gtf_path);
   ident("sj_tab", prov.sj_tab_path);
   ident("bam", prov.bam_path);
-  ident("validation_bam", prov.validation_bam_path);
+  for (const auto& p : prov.validation_bam_paths) ident("validation_bam", p);
   ident("caller_support", prov.caller_support_path);
   ident("reference", prov.reference_path);
   for (const auto& h : prov.reference_haplotype_paths) ident("reference_haplotype", h);
@@ -182,7 +196,9 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
       << '\n';
   out << "axis.consensus\t" << (prov.consensus_axis_on ? "on" : "not_evaluable") << '\n';
   out << "axis.chain\t"
-      << (!prov.validation_bam_path.empty() ? "on (independent library: --validation-bam)"
+      << (!prov.validation_bam_paths.empty()
+              ? "on (" + std::to_string(prov.validation_bam_paths.size()) + " independent librar" +
+                    (prov.validation_bam_paths.size() == 1 ? "y" : "ies") + ": --validation-bam)"
           : prov.bam_path.empty() ? "not_evaluable" : "on (same reads as the caller)") << '\n';
 
   std::map<std::string, std::size_t> class_counts, verdict_counts;

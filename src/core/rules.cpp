@@ -445,7 +445,11 @@ Call project_unknown(const RuleConfig& cfg, const EvidenceVector& ev, Mechanism 
     // PROBABLE, never CONFIRMED.
     trace(v, "whole-chain long-read support: " + std::to_string(ev.chain_n_full_reads) +
                  " read(s) carry the entire intron chain (>= " + std::to_string(cfg.chain_min_full_reads) +
-                 (ev.chain_independent ? "; independent library" : "; same reads as the caller") + ") -> chain-supported");
+                 (ev.chain_independent
+                      ? "; " + std::to_string(ev.chain_n_libraries_supporting) + " of " + std::to_string(ev.chain_full_by_library.size()) +
+                            " independent librar" + (ev.chain_full_by_library.size() == 1 ? "y" : "ies") + " reach it alone" +
+                            (ev.chain_n_full_reads_own >= 0 ? ", the caller's own BAM has " + std::to_string(ev.chain_n_full_reads_own) : "")
+                      : "; same reads as the caller") + ") -> chain-supported");
     const std::string src = ev.chain_independent ? ";independent_library" : "";
     if (mech == Mechanism::kNone || weak_sign) return {ConfidenceClass::kNovelProbable, "confirmed", "chain_support" + sign_note + src};
     return {ConfidenceClass::kUnconfirmed, "unconfirmed", "chain_support_with_" + mc + src};

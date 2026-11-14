@@ -53,6 +53,14 @@ counts for either. A read error in the file (for example a truncated BAM) stops 
 instead of counting as a junction with no reads. Note: a per-sample BAM gives
 sample-specific coverage; for a merged isoform set, use a merged BAM for full coverage.
 
+`--validation-bam PATH` (repeatable) names libraries the caller did not use: other
+replicates, the other platform, a second run. Whole-chain reads are then counted in each of
+them separately; the isoform's count is the largest, a library supports the chain when it
+reaches `chain_min_full_reads` on its own, and the JSONL records the count per library
+(`chain_full_reads_by_library`) next to the caller's own BAM count
+(`chain_n_full_reads_own`, when `--bam` is also given). The same file given twice, or the
+`--bam` file, is refused. The junction-level mapping features still come from `--bam`.
+
 ## Personalized haplotype FASTA (`--reference-haplotype`, optional; repeatable)
 
 A `faidx`-indexed personalized genome FASTA (e.g. from `bcftools consensus` on a

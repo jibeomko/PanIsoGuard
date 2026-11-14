@@ -460,7 +460,7 @@ TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and mark
   in.sqanti = &sqanti;
   in.chains = &chains;
   in.catalog = &cat;
-  in.validation_bam = &vbam;   // no --bam at all: the mapping axis stays off, chain reads come from here
+  in.validation_bams = {&vbam};   // no --bam at all: the mapping axis stays off, chain reads come from here
   const auto out = adjudicate(in, RuleEngine());
   REQUIRE(out.size() == 1);
   CHECK_FALSE(out[0].evidence.bam_evaluable);
@@ -469,6 +469,45 @@ TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and mark
   CHECK(out[0].evidence.chain_n_full_reads == 4);
   CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
   CHECK(out[0].verdict.verdict_reason == "chain_support;independent_library");
+  REQUIRE(out[0].evidence.chain_full_by_library.size() == 1);
+  CHECK(out[0].evidence.chain_full_by_library[0] == std::make_pair(std::string("mini.bam"), 4));
+  CHECK(out[0].evidence.chain_n_libraries_supporting == 1);
+  CHECK(out[0].evidence.chain_n_full_reads_own == -1);
+}
+
+TEST_CASE("adjudicator: several --validation-bam libraries are counted one by one", "[adjudicator][chain]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  BamReader mini(tiny("mini.bam")), strandbam(tiny("strand.bam"));
+  SqantiTable sqanti;
+  sqanti.records.push_back(rec("isoMini", "novel_not_in_catalog", "canonical"));
+  SqantiRecord minus = rec("isoStrand", "novel_not_in_catalog", "canonical"); minus.strand = Strand::kMinus;
+  sqanti.records.push_back(minus);
+  std::map<std::string, IntronChain> chains;
+  chains["isoMini"] = chain({{2000, 3000}});                 // 4 whole-chain reads in mini.bam, none in strand.bam
+  IntronChain s = chain({{1000, 1100}}); s.strand = Strand::kMinus;
+  chains["isoStrand"] = s;                                   // strand.bam: xs_minus_1/2, ts_plus_rev (flipped), untagged = 4
+  AdjudicateInputs in;
+  in.sqanti = &sqanti; in.chains = &chains; in.catalog = &cat;
+  in.bam = &mini;                                            // the caller's own library, for the own count
+  in.validation_bams = {&mini, &strandbam};                  // two libraries (mini doubles as a stand-in replicate here)
+  const auto out = adjudicate(in, RuleEngine());
+  const AdjudicationResult* a = find(out, "isoMini");
+  REQUIRE(a != nullptr);
+  CHECK(a->evidence.chain_full_by_library == std::vector<std::pair<std::string, int>>{{"mini.bam", 4}, {"strand.bam", 0}});
+  CHECK(a->evidence.chain_n_full_reads == 4);
+  CHECK(a->evidence.chain_n_libraries_supporting == 1);
+  CHECK(a->evidence.chain_n_full_reads_own == 4);
+  CHECK(a->verdict.verdict_reason == "chain_support;independent_library");
+  const AdjudicationResult* b = find(out, "isoStrand");
+  REQUIRE(b != nullptr);
+  CHECK(b->evidence.chain_full_by_library == std::vector<std::pair<std::string, int>>{{"mini.bam", 0}, {"strand.bam", 4}});
+  CHECK(b->evidence.chain_n_full_reads == 4);
+  CHECK(b->evidence.chain_n_libraries_supporting == 1);
+  CHECK(b->evidence.chain_n_full_reads_own == 0);
+  CHECK(b->verdict.confidence == ConfidenceClass::kNovelProbable);
+  bool found = false;
+  for (const auto& t : b->verdict.rule_trace) if (t.find("1 of 2 independent libraries reach it alone") != std::string::npos) found = true;
+  CHECK(found);
 }
 
 TEST_CASE("adjudicator: disjoint pangenome paths are a contradiction even when another junction has no path ids", "[adjudicator]") {

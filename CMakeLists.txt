@@ -148,6 +148,9 @@ if(PANISOGUARD_BUILD_TESTS)
   add_test(NAME integration_validation_bam_same_file
     COMMAND bash -c "rm -rf '${CMAKE_BINARY_DIR}/vbam' && mkdir -p '${CMAKE_BINARY_DIR}/vbam' && cd '${CMAKE_SOURCE_DIR}/examples/tiny' && ! '$<TARGET_FILE:panisoguard>' adjudicate --classification data/classification.tsv --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --validation-bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out-prefix '${CMAKE_BINARY_DIR}/vbam/sample' 2>'${CMAKE_BINARY_DIR}/vbam/err.txt' && grep -q 'same file as --bam' '${CMAKE_BINARY_DIR}/vbam/err.txt' && ! test -e '${CMAKE_BINARY_DIR}/vbam/sample.adjudicated.tsv'")
 
+  add_test(NAME integration_validation_bams_duplicate
+    COMMAND bash -c "cd '${CMAKE_SOURCE_DIR}/examples/tiny' && ! '$<TARGET_FILE:panisoguard>' adjudicate --classification data/classification.tsv --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --validation-bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --validation-bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out-prefix '${CMAKE_BINARY_DIR}/vbam/dup' 2>'${CMAKE_BINARY_DIR}/vbam/dup.err' && grep -q 'are the same file' '${CMAKE_BINARY_DIR}/vbam/dup.err'")
+
   # --- Truth-based integration tests (drive the built binary) ----------------
   # Self-contained Python drivers: synthesize a labelled truth set, adjudicate it,
   # and assert the verdicts are correct. controlled_truth is pure text; the

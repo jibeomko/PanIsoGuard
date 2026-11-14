@@ -35,6 +35,15 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   the number of carrying haplotypes, for `--pangenome-junctions` with `population` provenance.
   The README gives the download command and sha256.
 
+- `--validation-bam` is repeatable. Whole-chain reads are counted in each independent
+  library on its own; the isoform's count is the largest, a library supports the chain when
+  it reaches `chain_min_full_reads` alone, and the attribution JSONL carries the count per
+  library (`chain_full_reads_by_library`) and the caller's own BAM count
+  (`chain_n_full_reads_own`) when `--bam` is also given, so same-library and independent
+  support are read from one run. The class a lift reaches is unchanged (`NOVEL_PROBABLE`
+  with `;independent_library`). The provenance log lists every library; a file given twice,
+  or the `--bam` file, is refused.
+
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the
