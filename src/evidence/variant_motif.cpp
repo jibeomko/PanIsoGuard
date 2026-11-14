@@ -137,6 +137,14 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
       m.haps.insert(m.haps.end(), vcf->n_haplotypes(), SpliceMotif{});   // contig unknown to the VCF: not evaluable
       continue;
     }
+    if (wp.n_het >= 2 && (wp.unphased || wp.mixed_sets)) {
+      // two heterozygous records shape this motif and the file does not say they lie on the same
+      // haplotype: the per-haplotype motifs are compositions by allele order, not observations
+      m.haps.insert(m.haps.end(), vcf->n_haplotypes(), SpliceMotif{});
+      m.phase_unlinked = true;
+      m.phase = MotifPhase::kUnphased;
+      continue;
+    }
     for (std::size_t h = 0; h < lefts.size(); ++h) m.haps.push_back(splice_motif_from(lefts[h], rights[h], strand));
     const bool changed = [&] {
       for (std::size_t h = 0; h < lefts.size(); ++h) if (lefts[h] != left || rights[h] != right) return true;

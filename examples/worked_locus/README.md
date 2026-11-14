@@ -24,7 +24,7 @@ Two scripts check this folder, and both run in CI:
   combinations with the Python standard library only (readers, junction classification, short-read
   support, BAM features, splice motifs, fingerprints, the rules) and compares them with the binary
   (CTest `integration_worked_locus`).
-- `rules_replay.py` is the rulebook of `RuleEngine::evaluate()` in 49 lines of Python, replayed on the
+- `rules_replay.py` is the rulebook of `RuleEngine::evaluate()` in 50 lines of Python, replayed on the
   six runs above against the binary's `attribution.jsonl` (CTest `integration_rules_replay`).
 
 ```

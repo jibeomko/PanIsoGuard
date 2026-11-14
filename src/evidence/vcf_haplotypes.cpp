@@ -132,12 +132,17 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     bcf_unpack(rec, BCF_UN_STR);
     const int reflen = static_cast<int>(std::strlen(rec->d.allele[0]));
     if (rec->pos + reflen <= start) continue;   // ends before the window
-    const int ngt = bcf_get_genotypes(impl_->hdr, rec, &impl_->gt, &impl_->gt_cap);
-    if (ngt <= 0) continue;
-    const int per = ngt / impl_->n_samples;
-    const int* g = impl_->gt + impl_->sample_idx * per;
     // the window bases this record covers (an MNP may start before the window)
     const int64_t k0 = std::max<int64_t>(start, rec->pos), k1 = std::min<int64_t>(end, rec->pos + reflen);
+    const int ngt = bcf_get_genotypes(impl_->hdr, rec, &impl_->gt, &impl_->gt_cap);
+    if (ngt <= 0) {
+      // a record with no GT says a variant may be here but not which haplotype carries it: unknown bases
+      for (auto& h : haps) for (int64_t pos = k0; pos < k1; ++pos) h[static_cast<std::size_t>(pos - start)] = 'N';
+      if (k1 > k0) { phase.missing = true; impl_->n_missing += static_cast<long>(haps.size()); }
+      continue;
+    }
+    const int per = ngt / impl_->n_samples;
+    const int* g = impl_->gt + impl_->sample_idx * per;
     bool applied = false, het = false, phased = true, ended = false;
     int first_allele = -1;
     for (int h = 0; h < static_cast<int>(haps.size()); ++h) {
@@ -161,7 +166,10 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
       }
     }
     if (applied && het) {
-      if (!phased) { phase.unphased = true; ++impl_->n_unphased; }
+      // a heterozygous substitution inside a motif window: which haplotype got the ALT matters, and
+      // when two such records meet, whether they are phased together (a skipped indel shapes no base)
+      ++phase.n_het;
+      if (!phased) { ++impl_->n_unphased; phase.unphased = true; }
       else {
         // the phase set of this genotype: FORMAT PS, else the file's default set
         long set = kDefaultPhaseSet;

@@ -80,7 +80,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - `attribution.jsonl` carries two inputs the rules read that it did not record: `catalog_evaluable`
   (a reference GTF was given, so junctions could be told known from novel) and
   `sj_no_junction_in_span` (short reads were given but none splices within the isoform's span).
-  With them the replayed rulebook (`examples/worked_locus/rules_replay.py`, now 49 lines) decides
+  With them the replayed rulebook (`examples/worked_locus/rules_replay.py`, now 50 lines) decides
   every record from the JSONL alone, including the coverage rule and the "examined chain" gate on
   caller agreement and whole-chain reads.
 - The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
@@ -106,6 +106,22 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a second external review (of 5bac4a4) on 2026-11-14; each has a regression test:
+- Two heterozygous variants inside one splice motif (a donor and an acceptor variant) were
+  combined by their position in the genotype even when their phase sets differed or they were
+  unphased, so a canonical motif was composed that no read supports, and the call changed with
+  the order the alleles were written in. Such a motif is now not evaluable on every haplotype
+  (`unlinked` in the junction table) unless the records share one phase set; a single
+  heterozygous variant is certain on its own, whichever haplotype carries it.
+- A record with no `GT` field (a variant named without a genotype) was read as the reference
+  base; its bases are unknown on every haplotype now, counted with the missing alleles.
+- `--no-sqanti3`: a 3′ window with fewer than half of its 20 bases known is `NA` (one A among
+  19 N read as 100 % A).
+- `compare_routes.py` counted `REFERENCE_BIAS` over the isoforms present in both routes only,
+  and its `ROUTES DIFFER` line ignored a changed reason or motif; both are over every row now.
+- The replayed rulebook lacked the hold for novel junctions that lie on pangenome paths no
+  single path carries (`path_inconsistent`); it is in, as the binary decides it.
+
 Found by an external review of 688530b on 2026-11-14 (VCF input and `--no-sqanti3`); each has a
 regression test:
 - A missing allele (`.`) at a splice motif, or a genotype shorter than the sample's ploidy, was

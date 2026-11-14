@@ -39,6 +39,8 @@ def main():
                                    "differences": []})
         fa_iso = {r["isoform_id"]: r for r in table(fa + ".adjudicated.tsv")}; vc_iso = {r["isoform_id"]: r for r in table(vc + ".adjudicated.tsv")}
         p["runs"] += 1; p["isoforms"] += len(fa_iso)   # the FASTA route's rows are the denominator
+        p["reference_bias_fasta"] += sum(1 for r in fa_iso.values() if r["confidence_class"] == "REFERENCE_BIAS")   # over every row of each route
+        p["reference_bias_vcf"] += sum(1 for r in vc_iso.values() if r["confidence_class"] == "REFERENCE_BIAS")
         extra = [i for i in vc_iso if i not in fa_iso]
         p["isoforms_only_in_vcf_run"] += len(extra)
         for i in extra[:5]: p["differences"].append(f"{label} {i}: only in the VCF run")
@@ -50,7 +52,6 @@ def main():
                 continue
             p["same_class"] += r["confidence_class"] == q["confidence_class"]
             p["same_reason"] += r["verdict_reason"] == q["verdict_reason"]
-            p["reference_bias_fasta"] += r["confidence_class"] == "REFERENCE_BIAS"; p["reference_bias_vcf"] += q["confidence_class"] == "REFERENCE_BIAS"
             if r["confidence_class"] != q["confidence_class"] and len(p["differences"]) < 20:
                 p["differences"].append(f"{label} {i}: {r['confidence_class']} ({r['verdict_reason']}) vs {q['confidence_class']} ({q['verdict_reason']})")
         key = lambda r: (r["chrom"], r["start"], r["end"], r["strand"])
@@ -81,7 +82,8 @@ def main():
               f"non-SNV skipped {p['non_snv_skipped']}  missing alleles {p['missing_alleles']}")
         for d in p["differences"]: print("   ", d)
     print("total", total)
-    if total["isoforms"] != total["same_class"] or total["junctions"] != total["same_variant_call"] or total["isoforms_only_in_vcf_run"] or total["junctions_only_in_vcf_run"]:
+    if (total["isoforms"] != total["same_class"] or total["isoforms"] != total["same_reason"] or total["junctions"] != total["same_variant_call"]
+            or total["junctions"] != total["same_haplotype1_motif"] or total["isoforms_only_in_vcf_run"] or total["junctions_only_in_vcf_run"]):
         print("ROUTES DIFFER", file=sys.stderr)
     env = {"protocol": "vcf_haplotypes", "scope": "hg002_chr22_giab_v4.2.1_and_hprc_r2_hg03516_hg02717_all_chromosomes", "status": "tracked",
            "tool_version": prov.get("tool_version"), "ruleset_version": prov.get("ruleset_version"),

@@ -54,7 +54,7 @@ struct JunctionRow {
   // novel junctions only (the axes below classify novelty vs the reference):
   bool variant_evaluable = false;  std::string ref_motif;  std::vector<std::string> hap_motifs;
   std::string variant = "NA";           // created | disrupted | none | NA
-  std::string variant_phase = "NA";     // phased | unphased | NA (FASTA input, or no variant at the motif)
+  std::string variant_phase = "NA";     // phased | unphased | unlinked (two heterozygous records not phased together) | NA
   std::vector<int> canonical_on;         // 1-based haplotype indices whose motif is canonical
   bool pangenome_evaluable = false;  bool pangenome_supported = false;
   int pangenome_n_haplotypes = 0;  std::vector<std::string> pangenome_paths;

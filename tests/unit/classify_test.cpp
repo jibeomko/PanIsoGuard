@@ -156,3 +156,19 @@ TEST_CASE("classify_isoforms: a certain non-canonical motif outweighs an unreada
   CHECK(t.records[1].perc_A_downstream_TTS == 90.0);          // 18 A and the CC donor among the 20 bases after 300
   std::remove(fa.c_str()); std::remove((fa + ".fai").c_str());
 }
+
+TEST_CASE("classify_isoforms: a 3' window with fewer than half its bases known is NA", "[classify]") {
+  const std::string fa = scratch("classify_partial_n.fa");
+  std::string seq(400, 'A');
+  for (int i = 100; i < 112; ++i) seq[i] = 'N';    // 12 N + 8 A after a 3' end at 100: NA
+  for (int i = 200; i < 209; ++i) seq[i] = 'N';    // 9 N + 11 A after a 3' end at 200: 100 % over the 11
+  { std::ofstream(fa) << ">chrP\n" << seq << "\n"; }
+  FastaFetcher ref(fa);
+  Catalog empty;
+  CallerIsoform a; a.id = "mostly_n"; a.chain.chrom = "chrP"; a.chain.strand = Strand::kPlus; a.chain.introns = {{20, 40}}; a.start = 0; a.end = 100;
+  CallerIsoform b; b.id = "some_n"; b.chain.chrom = "chrP"; b.chain.strand = Strand::kPlus; b.chain.introns = {{20, 40}}; b.start = 0; b.end = 200;
+  const SqantiTable t = classify_isoforms({a, b}, empty, &ref);
+  CHECK(sqanti_is_na(t.records[0].perc_A_downstream_TTS));
+  CHECK(t.records[1].perc_A_downstream_TTS == 100.0);
+  std::remove(fa.c_str()); std::remove((fa + ".fai").c_str());
+}

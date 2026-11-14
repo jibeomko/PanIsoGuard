@@ -48,6 +48,7 @@ constexpr long kDefaultPhaseSet = -2;
 struct WindowPhase {
   bool unphased = false;
   bool missing = false;
+  int n_het = 0;                 // heterozygous records touching the windows: two or more need one phase set
   long phase_set = kNoPhaseSet;
   bool mixed_sets = false;
   void add_set(long ps) { if (phase_set == kNoPhaseSet) phase_set = ps; else if (phase_set != ps) mixed_sets = true; }
@@ -119,6 +120,8 @@ struct JunctionMotifs {
   MotifPhase phase = MotifPhase::kUnknown;
   long phase_set = kNoPhaseSet;
   bool phase_mixed = false;
+  bool phase_unlinked = false;    // the motif's bases come from >= 2 heterozygous records the file does not
+                                  // phase together (unphased, or different sets): no haplotype's motif is known
 };
 
 class HaplotypeProvider {

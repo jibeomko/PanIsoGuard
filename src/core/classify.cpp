@@ -40,7 +40,8 @@ std::string all_canonical_of(const CallerIsoform& iso, const FastaFetcher& ref) 
 }
 
 // Percent A in the 20 genomic bases downstream of the 3' end, read on the transcript strand
-// (SQANTI3's perc_A_downstream_TTS with its default window).
+// (SQANTI3's perc_A_downstream_TTS with its default window). N is no information: the percentage
+// is over the A/C/G/T bases, and a window with fewer than half of them known is NA.
 double perc_a_of(const CallerIsoform& iso, const FastaFetcher& ref) {
   constexpr int64_t kWindow = 20;
   if (iso.end <= iso.start || iso.chain.strand == Strand::kUnknown) return SqantiRecord::kNaN;
@@ -54,7 +55,7 @@ double perc_a_of(const CallerIsoform& iso, const FastaFetcher& ref) {
     ++known;
     if (ch == base) ++n;
   }
-  if (known == 0) return SqantiRecord::kNaN;
+  if (known < kWindow / 2) return SqantiRecord::kNaN;
   return 100.0 * n / static_cast<double>(known);
 }
 

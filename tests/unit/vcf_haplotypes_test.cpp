@@ -233,3 +233,41 @@ TEST_CASE("adjudicator with --haplotype-vcf: a common haplotype needs one phase 
   const AdjudicationResult no_ps = run("two_jx_joint.vcf.gz");                 // phased, no PS: one default set
   CHECK(no_ps.verdict.confidence == ConfidenceClass::kReferenceBias);
 }
+
+// two_jx_twohet_*.vcf.gz: the second intron {60,80} (reference GG-AG) gets a donor G>T (62) and an acceptor
+// A>C (79), both heterozygous. In phase sets 1 and 2 the file does not say which haplotype carries both,
+// so no haplotype's motif is known, whichever way the alleles are written; in one set it does.
+TEST_CASE("two heterozygous records inside one motif need one phase set", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  auto motifs = [&](const char* vcf) {
+    HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny(vcf))});
+    return p.motifs("chrT2", {60, 80}, Strand::kPlus);
+  };
+  for (const char* f : {"two_jx_twohet_sets.vcf.gz", "two_jx_twohet_flip.vcf.gz", "two_jx_twohet_unphased.vcf.gz"}) {
+    const JunctionMotifs m = motifs(f);
+    CHECK(m.phase_unlinked);
+    CHECK_FALSE(m.haps[0].evaluable); CHECK_FALSE(m.haps[1].evaluable);
+    CHECK(m.verdict == VariantVerdict::kNotEvaluable);
+  }
+  const JunctionMotifs one_set = motifs("two_jx_twohet_sameps.vcf.gz");   // 1|0 and 0|1 in set 1: haplotype 1 is GT-AG
+  CHECK_FALSE(one_set.phase_unlinked);
+  CHECK(one_set.haps[0].motif == "GT-AG"); CHECK(one_set.haps[1].motif == "GG-CG");
+  CHECK(one_set.verdict == VariantVerdict::kCreated);
+  // a single heterozygous record is certain on its own, whichever haplotype carries it
+  const JunctionMotifs single = motifs("two_jx_unphased.vcf.gz");
+  CHECK_FALSE(single.phase_unlinked);
+  CHECK(single.verdict == VariantVerdict::kCreated);
+}
+
+// two_jx_nogt.vcf.gz: the first donor base has a record without GT (FORMAT DP only), the second a 0|1.
+// A record that names a variant but no genotype leaves the base unknown on every haplotype.
+TEST_CASE("a record without GT at a motif base is unknown, not reference", "[vcf][variant]") {
+  VcfHaplotypes vcf(tiny("two_jx_nogt.vcf.gz"));
+  WindowPhase wp;
+  CHECK(vcf.overlay("chrT2", 20, 22, "GG", wp) == std::vector<std::string>{"NG", "NT"});
+  CHECK(wp.missing);
+  CHECK(vcf.n_missing_alleles() == 2);
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny("two_jx_nogt.vcf.gz"))});
+  CHECK(p.motifs("chrT2", {20, 40}, Strand::kPlus).verdict == VariantVerdict::kNotEvaluable);
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The rulebook of RuleEngine::evaluate() in 49 lines of Python (evaluate() below), replayed on the
+"""The rulebook of RuleEngine::evaluate() in 50 lines of Python (evaluate() below), replayed on the
 worked locus and compared, isoform by isoform, with the verdicts the binary writes. The six runs add
 one input at a time (reference GTF, short-read junctions, long-read BAM, haplotypes, provenance).
 CTest runs this as `integration_rules_replay`.
@@ -32,8 +32,9 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
         return "REFERENCE_BIAS"
     if var_all and not e["variant_circular"] and e["variant_rescue"] and not e.get("haplotype_phase_unknown", False):
         return "REFERENCE_BIAS"                                # one haplotype carries every created junction, in one phase set
-    if pan or var_all:
-        return "UNRESOLVED"                                    # circular-risk, phase unknown, or no common haplotype: held
+    pan_all = e["pangenome_evaluable"] and n > 0 and e["n_novel_jx_pangenome"] == n
+    if pan or var_all or (pan_all and e.get("pangenome_path_consistent") is False):
+        return "UNRESOLVED"                                    # circular-risk, phase unknown, no common haplotype or path: held
     if not (e["sj_evaluable"] and e["chain_available"] and e["catalog_evaluable"]) or n == 0:
         sup = "UNKNOWN"
     elif k == 0 and ((e["n_known_junctions"] > 0 and e["n_known_jx_sr_supported"] == 0) or e["sj_no_junction_in_span"]):

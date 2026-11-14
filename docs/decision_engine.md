@@ -88,10 +88,13 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
      evaluable*: `created` needs one readable canonical haplotype, while `disrupted`
      and `none` are statements about every haplotype and need every haplotype readable.
      With `--haplotype-vcf` a missing allele leaves the base unknown (not evaluable, never
-     reference), and a rescue of two or more created junctions that rest on heterozygous
-     alleles needs those alleles phased into one phase set (`PS`); unphased alleles or
+     reference), two heterozygous variants inside one motif are combined only when they are
+     phased into one phase set (`PS`; otherwise the motif is not evaluable on any haplotype,
+     `unlinked` in the junction table), and a rescue of two or more created junctions that
+     rest on heterozygous alleles needs those alleles in one phase set; unphased alleles or
      different sets do not establish a common haplotype, so the call is held
-     (`haplotype_phase_unknown`), whichever haplotype index the alleles are written on.
+     (`haplotype_phase_unknown`). In every case the call is the same whichever haplotype
+     index the alleles are written on.
 
    Independent evidence on either axis promotes. A circular-risk rescue holds the call only
    when neither axis offers an independent one (so an unknown-provenance pangenome file

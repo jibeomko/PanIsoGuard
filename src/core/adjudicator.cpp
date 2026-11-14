@@ -163,7 +163,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           }
           jr->variant = vv == VariantVerdict::kCreated ? "created" : vv == VariantVerdict::kDisrupted ? "disrupted"
                       : vv == VariantVerdict::kNone ? "none" : "NA";
-          jr->variant_phase = jm.phase == MotifPhase::kPhased ? "phased" : jm.phase == MotifPhase::kUnphased ? "unphased" : "NA";
+          jr->variant_phase = jm.phase_unlinked ? "unlinked" : jm.phase == MotifPhase::kPhased ? "phased" : jm.phase == MotifPhase::kUnphased ? "unphased" : "NA";
         }
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
         if (vv == VariantVerdict::kDisrupted) ++n_variant_disrupted;
