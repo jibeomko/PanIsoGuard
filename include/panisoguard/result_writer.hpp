@@ -13,7 +13,8 @@ struct RunProvenance {
   std::string tool_version;
   std::string ruleset_version;
   std::string sqanti3_version_target;
-  std::string classification_path;
+  std::string classification_path;  // "" with --no-sqanti3
+  bool classification_computed = false;  // --no-sqanti3: the rows were classified here
   std::string isoforms_path;
   std::string ref_gtf_path;   // "" if none
   std::string sj_tab_path;    // "" if none

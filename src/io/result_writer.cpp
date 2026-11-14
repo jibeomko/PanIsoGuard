@@ -141,7 +141,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   out << "sqanti3_version_target\t" << prov.sqanti3_version_target << '\n';
   out << "config\t" << (prov.config_path.empty() ? "<built-in defaults>" : prov.config_path) << '\n';
   if (!prov.thresholds.empty()) out << "thresholds\t" << prov.thresholds << '\n';
-  out << "classification\t" << prov.classification_path << '\n';
+  out << "classification\t" << (prov.classification_computed ? "<computed from the isoforms and the reference GTF (--no-sqanti3)>" : prov.classification_path) << '\n';
   out << "isoforms\t" << prov.isoforms_path << '\n';
   out << "ref_gtf\t" << (prov.ref_gtf_path.empty() ? "<none>" : prov.ref_gtf_path) << '\n';
   out << "sj_tab\t" << (prov.sj_tab_path.empty() ? "<none>" : prov.sj_tab_path) << '\n';

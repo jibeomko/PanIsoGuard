@@ -17,7 +17,10 @@ void usage() {
   std::fprintf(stderr,
       "Usage: panisoguard adjudicate [options] --out-prefix PREFIX\n"
       "\n"
-      "  --classification PATH   SQANTI3 *_classification.txt (required)\n"
+      "  --classification PATH   SQANTI3 *_classification.txt (required unless --no-sqanti3)\n"
+      "  --no-sqanti3            classify the isoforms here from the intron chains and --ref-gtf (FSM /\n"
+      "                          ISM / NIC / NNC; splice motifs and the 3' A content from --reference);\n"
+      "                          SQANTI3's RT-switch flag is then not evaluable\n"
       "  --isoforms-bed PATH     caller isoform BED12 (provide this or --isoforms-gtf)\n"
       "  --isoforms-gtf PATH     caller isoform GTF\n"
       "  --ref-gtf PATH          reference GTF; enables novel-junction classification (recommended)\n"

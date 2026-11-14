@@ -47,6 +47,8 @@ std::vector<Bed12Record> read_bed12(const std::string& path) {
     }
     const int64_t span = chrom_end - chrom_start;  // both non-negative: no overflow
     rec.name = f[3];
+    rec.start = chrom_start;
+    rec.end = chrom_end;
 
     rec.chain.chrom = chrom;
     rec.chain.strand = parse_strand(f[5].empty() ? '.' : f[5][0]);

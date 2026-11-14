@@ -59,6 +59,7 @@ add_library(panisoguard_core OBJECT
   src/core/rules.cpp
   src/core/adjudicator.cpp
   src/core/decoys.cpp
+  src/core/classify.cpp
   src/evidence/bam_features.cpp
   src/evidence/variant_motif.cpp
   src/evidence/vcf_haplotypes.cpp
@@ -120,6 +121,7 @@ if(PANISOGUARD_BUILD_TESTS)
     tests/unit/bam_features_test.cpp
     tests/unit/variant_motif_test.cpp
     tests/unit/vcf_haplotypes_test.cpp
+    tests/unit/classify_test.cpp
     tests/unit/decoys_test.cpp
   )
   target_link_libraries(panisoguard_tests PRIVATE panisoguard_core)
@@ -192,6 +194,10 @@ if(PANISOGUARD_BUILD_TESTS)
               $<TARGET_FILE:panisoguard>)
     # `panisoguard decoys` end to end: two transcripts of one gene that share an intron give
     # one decoy; both output files are written and the JSON counts it.
+    # --no-sqanti3 on the tiny example: the computed structural categories equal SQANTI3's for every
+    # isoform the example classifies, and the run writes its outputs.
+    add_test(NAME integration_no_sqanti3
+      COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/nosq' && cd '${CMAKE_SOURCE_DIR}/examples/tiny' && '$<TARGET_FILE:panisoguard>' adjudicate --no-sqanti3 --isoforms-gtf data/caller.gtf --ref-gtf data/reference.gtf --sj-tab data/short_read.SJ.tab --out-prefix '${CMAKE_BINARY_DIR}/nosq/sample' >/dev/null 2>&1 && '${Python3_EXECUTABLE}' -c \"import csv,sys; sq={r['isoform']: r['structural_category'] for r in csv.DictReader(open('data/classification.tsv'), delimiter='\\t')}; got={r['isoform_id']: r['structural_category'] for r in csv.DictReader(open('${CMAKE_BINARY_DIR}/nosq/sample.adjudicated.tsv'), delimiter='\\t')}; bad=[(k, sq[k], got.get(k)) for k in sq if got.get(k) != sq[k]]; print(bad); sys.exit(1 if bad or not got else 0)\"")
     add_test(NAME integration_decoys
       COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/decoys' && '$<TARGET_FILE:panisoguard>' decoys --ref-gtf '${CMAKE_SOURCE_DIR}/tests/data/tiny/decoys.gtf' --bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out '${CMAKE_BINARY_DIR}/decoys/toy' >/dev/null 2>&1 && test \"$(wc -l < '${CMAKE_BINARY_DIR}/decoys/toy.decoys.tsv')\" -ge 2 && '${Python3_EXECUTABLE}' -c \"import json,sys; d=json.load(open('${CMAKE_BINARY_DIR}/decoys/toy.decoys.json')); sys.exit(0 if d['decoys']['n'] >= 1 and d['parents']['n'] == 2 else 1)\"")
   else()

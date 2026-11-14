@@ -13,6 +13,8 @@ namespace panisoguard {
 struct Bed12Record {
   std::string name;
   IntronChain chain;
+  int64_t start = 0;   // chromStart .. chromEnd, 0-based half-open
+  int64_t end = 0;
 };
 
 // Parse a BED12 file. Throws std::runtime_error on open failure / malformed rows.

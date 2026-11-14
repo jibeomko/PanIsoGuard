@@ -2,7 +2,9 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "panisoguard/fingerprint.hpp"
@@ -15,6 +17,8 @@ struct Transcript {
   std::string id;
   IntronChain chain;
   std::string gene_id;  // GTF gene_id ("" when the source has none, e.g. BED12)
+  int64_t start = 0;    // transcript span, 0-based half-open (first exon start .. last exon end)
+  int64_t end = 0;
 };
 
 // Parse a GTF into transcripts (groups `exon` lines by transcript_id, derives the
@@ -36,10 +40,19 @@ class Catalog {
   bool has_intron(const std::string& chrom, Strand strand, const Junction& j) const {
     return introns_.count(junction_key(chrom, strand, j)) != 0;
   }
+  // An annotated transcript on the same chromosome and strand carries `chain` as a
+  // contiguous part of its intron chain (the incomplete-splice-match test).
+  bool has_subchain(const IntronChain& chain) const;
+  // An annotated transcript span overlaps [start, end) on `strand`, or on either strand.
+  bool overlaps(const std::string& chrom, Strand strand, int64_t start, int64_t end) const;
+  bool overlaps_any_strand(const std::string& chrom, int64_t start, int64_t end) const;
 
  private:
   std::unordered_set<Fingerprint> chains_;
   std::unordered_set<std::string> introns_;
+  std::vector<IntronChain> chain_list_;                                   // annotated multi-exon chains
+  std::unordered_map<std::string, std::vector<std::size_t>> chains_by_intron_;   // junction key -> chain_list_ indices
+  std::unordered_map<std::string, std::vector<std::pair<int64_t, int64_t>>> spans_;  // "chrom|strand" -> transcript spans
 };
 
 Catalog build_catalog_from_gtf(const std::string& path);

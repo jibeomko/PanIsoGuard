@@ -8,7 +8,7 @@ is what makes fingerprint matching and short-read corroboration exact:
 - GTF exons (1-based); intron between exon_i and exon_{i+1} → `{exon_i.end, exon_{i+1}.start-1}`
 - BED12 blocks (0-based); intron between blocks → `{block_i.end, block_{i+1}.start}`
 
-## SQANTI3 classification (`--classification`, required)
+## SQANTI3 classification (`--classification`, required unless `--no-sqanti3`)
 
 Tab-separated, with a header. The only mandatory column is `isoform`; everything
 else is read by name (tolerant of column reordering and appended columns).
@@ -17,6 +17,18 @@ Read (as priors, never recomputed): `chrom`, `strand`, `structural_category`, `R
 other column is ignored. Category strings are the
 SQANTI3 spelling (`full-splice_match`, `incomplete-splice_match`,
 `novel_in_catalog`, `novel_not_in_catalog`, …).
+
+`--no-sqanti3` replaces the file. The structural category is derived from the intron chain
+against `--ref-gtf`: an annotated chain is `full-splice_match`, a contiguous part of one
+`incomplete-splice_match`, a new combination of annotated introns `novel_in_catalog`, a
+chain with a novel intron in an annotated locus on its strand `novel_not_in_catalog`, one
+whose locus is annotated only on the other strand `antisense`, one in an unannotated region
+`intergenic`; a mono-exonic isoform is `mono-exon` and not adjudicated. With `--reference`,
+`all_canonical` reads every intron's dinucleotides (GT-AG, GC-AG, AT-AC) and
+`perc_A_downstream_TTS` the A content of the 20 bases after the 3′ end on the transcript
+strand, SQANTI3's definitions; without it both are NA. `RTS_stage` and `polyA_motif_found`
+are NA. The provenance log says the rows were computed. On the chr22 five-caller set the
+categories agree with SQANTI3's for the isoforms it classifies (benchmark/no_sqanti3).
 
 ## Caller isoforms (`--isoforms-bed` or `--isoforms-gtf`, required)
 

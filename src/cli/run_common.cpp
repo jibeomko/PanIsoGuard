@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "panisoguard/bed12.hpp"
+#include "panisoguard/classify.hpp"
 #include "panisoguard/consensus.hpp"
 #include "panisoguard/gtf.hpp"
 #include "panisoguard/pangenome.hpp"
@@ -44,6 +45,7 @@ bool consume_common_arg(const std::string& a, int& i, int argc, char** argv, Com
   if (a == "--caller-support")     { c.caller_support = next("--caller-support"); return true; }
   if (a == "--config")             { c.config = next("--config"); return true; }
   if (a == "--platform")           { c.platform = next("--platform"); return true; }
+  if (a == "--no-sqanti3")         { c.no_sqanti3 = true; return true; }
   return false;
 }
 
@@ -57,7 +59,12 @@ std::vector<std::string> input_paths(const CommonArgs& c) {
 }
 
 bool common_args_ok(const CommonArgs& c, std::string& err) {
-  if (c.classification.empty()) { err = "--classification is required"; return false; }
+  if (c.no_sqanti3 && !c.classification.empty()) {
+    err = "--no-sqanti3 computes the classification; drop --classification or drop the flag";
+    return false;
+  }
+  if (c.no_sqanti3 && c.ref_gtf.empty()) { err = "--no-sqanti3 needs --ref-gtf to classify the isoforms"; return false; }
+  if (!c.no_sqanti3 && c.classification.empty()) { err = "--classification is required (or --no-sqanti3)"; return false; }
   if (c.platform != "hifi" && c.platform != "ont") {
     err = "--platform must be hifi or ont (got '" + c.platform + "')";
     return false;
@@ -102,19 +109,15 @@ void warn_unjoined(const SqantiTable& sqanti, const Map& by_id, bool novel_only,
 
 LoadedRun load_and_adjudicate(const CommonArgs& c) {
   LoadedRun run;
-  run.sqanti = read_sqanti_classification(c.classification);
-  std::fprintf(stderr, "read %zu SQANTI records (%zu cols)\n", run.sqanti.records.size(),
-               run.sqanti.n_columns);
-
-  std::map<std::string, IntronChain> chains;
+  std::vector<CallerIsoform> isoforms;
   if (!c.isoforms_bed.empty()) {
-    for (auto& r : read_bed12(c.isoforms_bed)) chains.emplace(r.name, std::move(r.chain));
+    for (auto& r : read_bed12(c.isoforms_bed)) isoforms.push_back({r.name, std::move(r.chain), r.start, r.end});
   } else {
-    for (auto& t : read_gtf_transcripts(c.isoforms_gtf)) chains.emplace(t.id, std::move(t.chain));
+    for (auto& t : read_gtf_transcripts(c.isoforms_gtf)) isoforms.push_back({t.id, std::move(t.chain), t.start, t.end});
   }
+  std::map<std::string, IntronChain> chains;
+  for (const auto& iso : isoforms) chains.emplace(iso.id, iso.chain);
   std::fprintf(stderr, "read %zu caller isoform chains\n", chains.size());
-  warn_unjoined(run.sqanti, chains, /*novel_only=*/false, "the caller isoform file");
-  check_same_coordinates(run.sqanti, chains);
 
   Catalog catalog;
   const Catalog* catalog_ptr = nullptr;
@@ -122,7 +125,26 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     std::fprintf(stderr, "building reference catalog...\n");
     catalog = build_catalog_from_gtf(c.ref_gtf);
     catalog_ptr = &catalog;
+  }
+
+  std::shared_ptr<FastaFetcher> ref_fa;
+  if (c.no_sqanti3) {
+    if (!c.reference.empty()) ref_fa = std::make_shared<FastaFetcher>(c.reference);
+    run.sqanti = classify_isoforms(isoforms, catalog, ref_fa.get());
+    std::map<std::string, std::size_t> by_cat;
+    for (const auto& r : run.sqanti.records) ++by_cat[r.structural_category];
+    std::string summary;
+    for (const auto& kv : by_cat) summary += (summary.empty() ? "" : ", ") + kv.first + " " + std::to_string(kv.second);
+    std::fprintf(stderr, "classified %zu isoforms without SQANTI3 (%s)%s\n", run.sqanti.records.size(), summary.c_str(),
+                 ref_fa ? "" : "; no --reference: splice motifs and the 3' A content are not evaluable");
   } else {
+    run.sqanti = read_sqanti_classification(c.classification);
+    std::fprintf(stderr, "read %zu SQANTI records (%zu cols)\n", run.sqanti.records.size(), run.sqanti.n_columns);
+    warn_unjoined(run.sqanti, chains, /*novel_only=*/false, "the caller isoform file");
+    check_same_coordinates(run.sqanti, chains);
+  }
+
+  if (catalog_ptr == nullptr) {
     // Without a reference catalog there is no way to tell which junctions are novel,
     // so the whole novel-junction block is skipped: every novel isoform is held
     // UNKNOWN/UNRESOLVED and the short-read/BAM/variant/pangenome axes contribute
@@ -170,14 +192,13 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
                  i + 1, c.validation_bams.size(), vb.c_str());
   }
 
-  std::shared_ptr<FastaFetcher> ref_fa;
   std::vector<std::shared_ptr<FastaFetcher>> hap_fas;
   std::unique_ptr<HaplotypeProvider> haplo;
   if (!c.reference_haplotypes.empty()) {
     if (c.reference.empty()) {
       throw std::runtime_error("--reference (genome FASTA) is required with --reference-haplotype");
     }
-    ref_fa = std::make_shared<FastaFetcher>(c.reference);
+    if (!ref_fa) ref_fa = std::make_shared<FastaFetcher>(c.reference);
     for (const auto& h : c.reference_haplotypes) hap_fas.push_back(std::make_shared<FastaFetcher>(h));
     haplo = std::make_unique<HaplotypeProvider>(ref_fa, hap_fas);
     std::fprintf(stderr, "variant axis: reference + %zu haplotype FASTA(s), provenance=%s\n",
@@ -186,7 +207,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
     if (c.reference.empty()) {
       throw std::runtime_error("--reference (genome FASTA) is required with --haplotype-vcf");
     }
-    ref_fa = std::make_shared<FastaFetcher>(c.reference);
+    if (!ref_fa) ref_fa = std::make_shared<FastaFetcher>(c.reference);
     for (const auto& h : c.haplotype_vcfs) run.haplotype_vcfs.push_back(std::make_shared<VcfHaplotypes>(h, c.vcf_sample));
     haplo = std::make_unique<HaplotypeProvider>(ref_fa, run.haplotype_vcfs);
     std::fprintf(stderr, "variant axis: reference + %zu haplotype(s) from %zu VCF(s)%s%s, provenance=%s\n",
@@ -238,6 +259,7 @@ RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
   prov.ruleset_version = run.engine.config().ruleset_version;
   prov.sqanti3_version_target = run.engine.config().sqanti3_version_target;
   prov.classification_path = c.classification;
+  prov.classification_computed = c.no_sqanti3;
   prov.isoforms_path = c.isoforms_bed.empty() ? c.isoforms_gtf : c.isoforms_bed;
   prov.ref_gtf_path = c.ref_gtf;
   prov.sj_tab_path = c.sj_tab;

@@ -31,6 +31,7 @@ struct CommonArgs {
   std::string caller_support;                     // `combine` matrix (multi-caller consensus axis)
   std::string config;
   std::string platform = "hifi";                  // hifi|ont: threshold preset for the BAM axis
+  bool no_sqanti3 = false;                        // classify the isoforms here instead of reading --classification
 };
 
 // A haplotype provenance is "circular-risk" unless it is independent genomic data.

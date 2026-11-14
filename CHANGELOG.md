@@ -44,6 +44,15 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   with `;independent_library`). The provenance log lists every library; a file given twice,
   or the `--bam` file, is refused.
 
+- `adjudicate --no-sqanti3`: the classification rows are computed instead of read. The
+  structural category comes from the intron chain against the reference GTF (annotated chain,
+  contiguous part of one, new combination of annotated introns, novel intron in an annotated
+  locus, antisense, intergenic; mono-exonic isoforms are not adjudicated), the splice motif
+  and the 3′ A content from `--reference` with SQANTI3's definitions; the RT-switch flag and
+  the polyA motif are not evaluable. The caller's isoform file now carries each transcript's
+  span, and the reference catalog answers sub-chain and locus-overlap questions. The
+  provenance log records that the rows were computed.
+
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the

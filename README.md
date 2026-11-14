@@ -33,7 +33,10 @@ a log of the inputs that were used.
 ## In one screen
 
 **You need three files** from the step before: the SQANTI3 classification, the caller's
-isoforms (GTF or BED12), and the annotation you gave SQANTI3. Short-read junctions and the
+isoforms (GTF or BED12), and the annotation you gave SQANTI3. Without a SQANTI3 run,
+`--no-sqanti3` classifies the isoforms itself from the chains and the annotation (and reads
+splice motifs and the 3′ A content from `--reference`); only SQANTI3's RT-switch flag is then
+missing. Short-read junctions and the
 long-read BAM are optional and make the verdicts stronger.
 
 ```bash
@@ -350,7 +353,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 
 | Evidence | Input | Needed? | What PanIsoGuard checks |
 |---|---|---|---|
-| SQANTI3 QC | `--classification` | Required | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end |
+| SQANTI3 QC | `--classification`, or `--no-sqanti3` | Required (one of the two) | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end. With `--no-sqanti3` the category, the motif and the A content are computed from the chains, the annotation and `--reference`; the RT-switch flag is not evaluable |
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
 | Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction beyond what the reads' own indel rate predicts). The defaults were set on PacBio HiFi. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |

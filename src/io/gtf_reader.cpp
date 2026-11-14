@@ -104,15 +104,54 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
   std::vector<Transcript> out;
   out.reserve(order.size());
   for (const auto& tid : order) {
-    out.push_back(Transcript{tid, chain_from_exons(acc[tid]), acc[tid].gene_id});
+    Transcript t{tid, chain_from_exons(acc[tid]), acc[tid].gene_id};
+    for (const auto& e : acc[tid].exons) {
+      if (t.end == 0 || e.first - 1 < t.start) t.start = e.first - 1;   // 1-based inclusive exon -> 0-based half-open span
+      if (e.second > t.end) t.end = e.second;
+    }
+    out.push_back(std::move(t));
   }
   return out;
 }
 
 void Catalog::add_transcript(const Transcript& t) {
+  if (t.end > t.start) spans_[t.chain.chrom + '|' + strand_char(t.chain.strand)].emplace_back(t.start, t.end);
   if (t.chain.monoexonic()) return;
   chains_.insert(fingerprint_intron_chain(t.chain));
   for (const auto& j : t.chain.introns) introns_.insert(junction_key(t.chain.chrom, t.chain.strand, j));
+  chain_list_.push_back(t.chain);
+  for (const auto& j : t.chain.introns) chains_by_intron_[junction_key(t.chain.chrom, t.chain.strand, j)].push_back(chain_list_.size() - 1);
+}
+
+bool Catalog::has_subchain(const IntronChain& chain) const {
+  if (chain.monoexonic()) return false;
+  const auto it = chains_by_intron_.find(junction_key(chain.chrom, chain.strand, chain.introns.front()));
+  if (it == chains_by_intron_.end()) return false;
+  for (const std::size_t i : it->second)
+    if (contiguous_subchain(chain.introns, chain_list_[i].introns)) return true;
+  return false;
+}
+
+namespace {
+bool any_overlap(const std::vector<std::pair<int64_t, int64_t>>* spans, int64_t start, int64_t end) {
+  if (spans == nullptr) return false;
+  for (const auto& s : *spans)
+    if (s.first < end && s.second > start) return true;
+  return false;
+}
+}  // namespace
+
+bool Catalog::overlaps(const std::string& chrom, Strand strand, int64_t start, int64_t end) const {
+  const auto it = spans_.find(chrom + '|' + strand_char(strand));
+  return any_overlap(it == spans_.end() ? nullptr : &it->second, start, end);
+}
+
+bool Catalog::overlaps_any_strand(const std::string& chrom, int64_t start, int64_t end) const {
+  for (const char* s : {"+", "-", "."}) {
+    const auto it = spans_.find(chrom + '|' + s);
+    if (any_overlap(it == spans_.end() ? nullptr : &it->second, start, end)) return true;
+  }
+  return false;
 }
 
 Catalog build_catalog_from_gtf(const std::string& path) {
