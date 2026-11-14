@@ -183,8 +183,9 @@ panisoguard adjudicate \
 **Recommended** — add the short-read junctions from STAR (`--sj-tab`) and the long-read
 alignments (`--bam`). These two are what let PanIsoGuard confirm or reject a novel isoform.
 `--reference`, the genome FASTA, is needed only for CRAM input and for the haplotype check
-below. The BAM thresholds are calibrated on PacBio HiFi; for ONT reads add `--platform ont`
-(it turns the indel-near check off):
+below. The indel-near check is measured in excess of each read's own indel rate, so ONT
+reads do not trip it by their chemistry alone; the thresholds were set on PacBio HiFi, and
+`--platform ont` turns the indel-near check off entirely:
 
 ```bash
 panisoguard adjudicate \
@@ -338,7 +339,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 |---|---|---|---|
 | SQANTI3 QC | `--classification` | Required | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end |
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
-| Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction). The defaults suit PacBio HiFi; ONT reads need different thresholds. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
+| Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction beyond what the reads' own indel rate predicts). The defaults were set on PacBio HiFi. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
 | Whole-chain reads | `--bam` (same file as above) or `--validation-bam` | With the BAM | how many long reads carry the isoform's entire intron chain; used only when short-read support cannot be checked, and it never confirms. With `--validation-bam` (a library the caller did not use) the count comes from there and the reason carries `;independent_library` |
 | Sample's genome | `--reference` with `--haplotype-vcf` or `--reference-haplotype` | optional | whether a variant makes a non-canonical splice site canonical in the sample (reference bias) |

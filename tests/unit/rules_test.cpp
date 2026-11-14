@@ -106,7 +106,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
   indel.bam_evaluable = true;
   indel.bam_n_junctions_gated = 1;
   indel.bam_n_spanning_total = 20;
-  indel.bam_max_frac_indel_near = 0.8;  // > default 0.5
+  indel.bam_max_frac_indel_near = 0.8; indel.bam_max_frac_indel_near_excess = 0.8;  // > default 0.5
   Verdict vi = eng.evaluate(indel);
   CHECK(vi.primary_mechanism == Mechanism::kMapping);
   CHECK(vi.confidence == ConfidenceClass::kArtifact);
@@ -117,7 +117,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
   sup.bam_evaluable = true;
   sup.bam_n_junctions_gated = 1;
   sup.bam_n_spanning_total = 20;
-  sup.bam_max_frac_indel_near = 0.8;
+  sup.bam_max_frac_indel_near = 0.8; sup.bam_max_frac_indel_near_excess = 0.8;
   Verdict vsup = eng.evaluate(sup);
   CHECK(vsup.primary_mechanism == Mechanism::kMapping);
   CHECK(vsup.confidence == ConfidenceClass::kNovelProbable);
@@ -128,7 +128,7 @@ TEST_CASE("rules: indel-near is a mapping-artifact trigger", "[rules]") {
   ok.bam_evaluable = true;
   ok.bam_n_junctions_gated = 1;
   ok.bam_n_spanning_total = 20;
-  ok.bam_max_frac_indel_near = 0.19;
+  ok.bam_max_frac_indel_near = 0.19; ok.bam_max_frac_indel_near_excess = 0.19;
   Verdict vo = eng.evaluate(ok);
   CHECK(vo.primary_mechanism == Mechanism::kNone);
   CHECK(vo.confidence == ConfidenceClass::kNovelConfirmed);

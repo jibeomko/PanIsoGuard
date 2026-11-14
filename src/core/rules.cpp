@@ -181,7 +181,7 @@ Signs read_signs(const RuleConfig& cfg, const EvidenceVector& ev) {
   const bool mapping_gated = ev.bam_evaluable && ev.bam_n_junctions_gated > 0;
   s.mapping_sign = mapping_gated && (ev.bam_max_frac_low_mapq > cfg.bam_max_low_mapq_frac ||
                                      ev.bam_max_frac_supplementary > cfg.bam_max_supplementary_frac ||
-                                     ev.bam_max_frac_indel_near > cfg.bam_max_indel_near_frac);
+                                     ev.bam_max_frac_indel_near_excess > cfg.bam_max_indel_near_frac);
   s.disrupted_sign = ev.variant_evaluable &&
                      ev.n_novel_jx_variant_disrupted > 0 && !ev.variant_circular;
   return s;
@@ -361,7 +361,8 @@ Mechanism mechanism_axis(const RuleConfig& cfg, const EvidenceVector& ev, const 
   if (s.mapping_sign) {
     trace(v, "bam mapping artifact (low_mapq_frac=" + std::to_string(ev.bam_max_frac_low_mapq) +
                  ", supplementary_frac=" + std::to_string(ev.bam_max_frac_supplementary) +
-                 ", indel_near_frac=" + std::to_string(ev.bam_max_frac_indel_near) +
+                 ", indel_near_excess=" + std::to_string(ev.bam_max_frac_indel_near_excess) +
+                 " (raw " + std::to_string(ev.bam_max_frac_indel_near) + ")" +
                  ", over " + std::to_string(ev.bam_n_junctions_gated) + " junction(s) with >= " +
                  std::to_string(cfg.bam_min_spanning) + " reads) -> mechanism=mapping_or_repeat");
     return Mechanism::kMapping;

@@ -187,6 +187,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
             if (f.frac_low_mapq() > ev.bam_max_frac_low_mapq) ev.bam_max_frac_low_mapq = f.frac_low_mapq();
             if (f.frac_supplementary() > ev.bam_max_frac_supplementary) ev.bam_max_frac_supplementary = f.frac_supplementary();
             if (f.frac_indel_near() > ev.bam_max_frac_indel_near) ev.bam_max_frac_indel_near = f.frac_indel_near();
+            if (f.frac_indel_near_excess() > ev.bam_max_frac_indel_near_excess) ev.bam_max_frac_indel_near_excess = f.frac_indel_near_excess();
           }
         }
       }

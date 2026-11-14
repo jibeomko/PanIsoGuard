@@ -20,10 +20,16 @@ struct JunctionBamFeatures {
   int n_low_mapq = 0;
   int n_supplementary = 0;    // SECONDARY or SUPPLEMENTARY flagged
   int n_indel_near = 0;       // I/D within junction_window_bp of either boundary
+  // The share of spanning reads expected to carry an indel in the two windows by chance: for
+  // each read, 1 - exp(-rate * 4 * window) with rate = its indel ops per aligned reference
+  // base, averaged over the spanning reads. Near 0 on HiFi, large on ONT.
+  double indel_near_background = 0.0;
 
   double frac_low_mapq() const     { return n_spanning ? double(n_low_mapq) / n_spanning : 0.0; }
   double frac_supplementary() const{ return n_spanning ? double(n_supplementary) / n_spanning : 0.0; }
   double frac_indel_near() const   { return n_spanning ? double(n_indel_near) / n_spanning : 0.0; }
+  // The indel-near fraction above what the reads' own indel rate explains; the gate reads this.
+  double frac_indel_near_excess() const { const double x = frac_indel_near() - indel_near_background; return x > 0.0 ? x : 0.0; }
 };
 
 // Reads carrying an isoform's whole intron chain: the chain appears as a contiguous run

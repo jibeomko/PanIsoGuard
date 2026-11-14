@@ -77,6 +77,7 @@ struct EvidenceVector {
   double bam_max_frac_low_mapq = 0.0;
   double bam_max_frac_supplementary = 0.0;
   double bam_max_frac_indel_near = 0.0;
+  double bam_max_frac_indel_near_excess = 0.0;  // above the reads' own indel rate; the gate reads this
 
   // variant (reference-bias) axis: a novel junction that is non-canonical on the
   // reference but canonical on a personalized haplotype FASTA.

@@ -10,6 +10,7 @@ the numbers quoted in README.md. CTest runs it as `integration_worked_locus`.
 
     python3 check_worked_locus.py [path/to/panisoguard]      # default: ../../build/panisoguard
 """
+import math
 import os
 import re
 import struct
@@ -74,12 +75,16 @@ def read_classification(path):
 
 # ---------------------------------------------------------------- evidence
 def bam_features(reads, jx):
+    """Counts per spanning read; indel_near is returned net of the reads' own indel rate (the
+    chance of an indel inside the two windows by chance, 1 - exp(-rate * 4 * window) per read)."""
     n = low = supp = indel = 0
+    background = 0.0
     near = lambda p: abs(p - jx[0]) <= CFG["window"] or abs(p - jx[1]) <= CFG["window"]
     for flag, pos, mapq, cig in reads:
         if flag & 4:
             continue
         span = d = False
+        ops = aligned = 0
         for ln, op in cig:
             ln = int(ln)
             if op == "N":
@@ -87,17 +92,23 @@ def bam_features(reads, jx):
                 pos += ln
             elif op == "D":
                 d |= near(pos)
+                ops += 1
                 pos += ln
+                aligned += ln
             elif op == "I":
                 d |= near(pos)
+                ops += 1
             elif op in "M=X":
                 pos += ln
+                aligned += ln
         if span:
             n += 1
             low += mapq < CFG["min_mapq"]
             supp += bool(flag & (256 | 2048))
             indel += d
-    return n, {"low_mapq": low, "supplementary": supp, "indel_near": indel}
+            background += 1.0 - math.exp(-(ops / aligned if aligned else 0.0) * 4 * CFG["window"])
+    excess = max(0.0, indel - background) if n else 0.0   # as a count, so hits[k] / n is the excess fraction
+    return n, {"low_mapq": low, "supplementary": supp, "indel_near": excess}
 
 
 def chain_full_reads(reads, introns):

@@ -13,7 +13,7 @@
 # to <prefix>.provenance.log.
 
 [meta]
-ruleset_version        = "default-0.0.6"   # bump together with the built-in in rules.hpp
+ruleset_version        = "default-0.0.7"   # bump together with the built-in in rules.hpp
 sqanti3_version_target = "6.0"   # QC-prior reconciliation target; pin & cite
 
 # --- Axis A: novelty support (engine-read) -----------------------------------
@@ -45,9 +45,12 @@ min_spanning           = 3          # a junction's read fractions count only wit
 junction_window_bp     = 10         # indel proximity window around each splice boundary
 max_low_mapq_frac      = 0.5        # > this fraction of low-MAPQ spanning reads -> mapping artifact
 max_supplementary_frac = 0.5        # > this fraction supplementary/secondary -> mapping artifact
-max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to the junction -> mapping artifact
-                                    #   (an alignment-ambiguous indel mis-rendered as an intron; junction-proximal,
-                                    #    catches 14/124 false novel junctions at 100% precision with min_spanning=3 -- benchmark/bam_axis)
+max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to the junction, in excess of what the
+                                    #   reads' own indel rate gives by chance (1 - exp(-rate * 4 * window) per read,
+                                    #   averaged) -> mapping artifact (an alignment-ambiguous indel mis-rendered as an
+                                    #   intron; junction-proximal; catches 14/120 false novel junctions at 100%
+                                    #   precision with min_spanning=3 -- benchmark/bam_axis). The excess is ~the raw
+                                    #   fraction on HiFi and much smaller on ONT, whose reads carry indels everywhere.
 # Mapping mechanism = OR of low_mapq / supplementary / indel_near.
 
 # --- Whole-chain long-read support (engine-read; only when --bam supplied) ----------------

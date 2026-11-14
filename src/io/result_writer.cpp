@@ -76,6 +76,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"bam_frac_low_mapq\":" << e.bam_max_frac_low_mapq << ","
         << "\"bam_frac_supplementary\":" << e.bam_max_frac_supplementary << ","
         << "\"bam_frac_indel_near\":" << e.bam_max_frac_indel_near << ","
+        << "\"bam_frac_indel_near_excess\":" << e.bam_max_frac_indel_near_excess << ","
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
         << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
@@ -211,7 +212,7 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
   auto yn = [](bool evaluable, bool v) { return evaluable ? (v ? "true" : "false") : "NA"; };
   out << "chrom\tstart\tend\tstrand\tn_isoforms\tisoforms\tknown\tsr_n_uniq\tsr_supported\tref_motif\thap_motifs\t"
          "variant\tcanonical_on_haplotypes\tvariant_phase\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
-         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\treference_bias\n";
+         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\tbam_indel_near_background\treference_bias\n";
   for (const auto& j : rows) {
     std::string rb;
     if (j.variant == "created") rb += "haplotype_variant";
@@ -225,9 +226,9 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
         << (j.pangenome_evaluable ? join(j.pangenome_paths) : "NA") << '\t' << yn(j.pangenome_evaluable, j.pangenome_supported) << '\t';
     if (j.bam_evaluable) {
       out << j.bam.n_spanning << '\t' << j.bam.frac_low_mapq() << '\t' << j.bam.frac_supplementary() << '\t'
-          << j.bam.frac_indel_near();
+          << j.bam.frac_indel_near() << '\t' << j.bam.indel_near_background;
     } else {
-      out << "NA\tNA\tNA\tNA";
+      out << "NA\tNA\tNA\tNA\tNA";
     }
     out << '\t' << (rb.empty() ? "-" : rb) << '\n';
   }

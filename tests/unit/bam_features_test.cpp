@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 
+#include <cmath>
 #include <cstdio>
 #include <fstream>
 
@@ -30,6 +31,28 @@ TEST_CASE("BAM features at a junction count spanning reads and artifact signatur
   // A contig absent from the header is not_evaluable.
   const JunctionBamFeatures absent = r.features_at_junction("chrZ", Junction{2000, 3000}, Strand::kPlus, p);
   CHECK_FALSE(absent.evaluated);
+}
+
+TEST_CASE("indel-near is counted in excess of the reads' own indel rate", "[bam]") {
+  BamFeatureParams p;
+  // noisy.bam: three reads with an indel every ~7 bases (6 ops over 40 aligned bases) and one
+  // clean read, all spanning [2000,3000). The noisy reads each have an indel next to the
+  // junction, but at their own rate the chance of one inside the two 20-bp windows is ~1, so
+  // the excess over background is ~0 and the gate does not fire.
+  BamReader noisy(tiny("noisy.bam"));
+  const JunctionBamFeatures f = noisy.features_at_junction("chr1", Junction{2000, 3000}, Strand::kPlus, p);
+  REQUIRE(f.evaluated);
+  CHECK(f.n_spanning == 4);
+  CHECK(f.n_indel_near == 3);
+  CHECK(f.frac_indel_near() == Approx(0.75));
+  CHECK(f.indel_near_background == Approx(0.75 * (1.0 - std::exp(-6.0))).margin(1e-6));   // 3 reads at rate 6/40, 1 at 0
+  CHECK(f.frac_indel_near_excess() < 0.01);
+  // mini.bam: clean reads with one indel in one read; the background stays small and the
+  // excess is the raw fraction minus it.
+  BamReader hifi(tiny("mini.bam"));
+  const JunctionBamFeatures g = hifi.features_at_junction("chr1", Junction{2000, 3000}, Strand::kPlus, p);
+  CHECK(g.indel_near_background < 0.1);
+  CHECK(g.frac_indel_near_excess() == Approx(g.frac_indel_near() - g.indel_near_background));
 }
 
 TEST_CASE("BAM reader throws on a missing file", "[bam]") {

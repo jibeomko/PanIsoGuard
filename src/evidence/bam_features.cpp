@@ -1,5 +1,6 @@
 #include "panisoguard/bam_features.hpp"
 
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
@@ -115,6 +116,7 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
   const Itr itr = query(impl_->idx, impl_->path, tid, beg, end);
   const Rec rec = new_record();
   bam1_t* b = rec.get();
+  double background_sum = 0.0;
   int ret;
   while ((ret = sam_itr_next(impl_->fp, itr.get(), b)) >= 0) {
     if (b->core.flag & BAM_FUNMAP) continue;
@@ -124,6 +126,8 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
     const int ncig = b->core.n_cigar;
     int64_t rpos = b->core.pos;  // 0-based leftmost reference coordinate
     bool spanning = false, indel_near = false;
+    int n_indel_ops = 0;         // every I and D op of the alignment, for the read's own rate
+    int64_t aligned_ref = 0;     // reference bases aligned (M/=/X/D), introns excluded
 
     for (int i = 0; i < ncig; ++i) {
       const int op = bam_cigar_op(cig[i]);
@@ -135,15 +139,19 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
           break;
         case BAM_CDEL:
           if (near(rpos, intron, p.junction_window_bp)) indel_near = true;
+          ++n_indel_ops;
           rpos += len;
+          aligned_ref += len;
           break;
         case BAM_CINS:
           if (near(rpos, intron, p.junction_window_bp)) indel_near = true;
+          ++n_indel_ops;
           break;  // insertion consumes no reference
         case BAM_CMATCH:
         case BAM_CEQUAL:
         case BAM_CDIFF:
           rpos += len;
+          aligned_ref += len;
           break;
         default:  // soft/hard clip and pad consume no reference
           break;
@@ -155,8 +163,13 @@ JunctionBamFeatures BamReader::features_at_junction(const std::string& chrom, co
     if (b->core.qual < p.min_mapq) ++f.n_low_mapq;
     if (b->core.flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) ++f.n_supplementary;
     if (indel_near) ++f.n_indel_near;
+    // Chance of >= 1 indel inside the two windows (4 * window reference bases) at this read's
+    // own indel rate: the part of "indel near the junction" the chemistry alone would give.
+    const double rate = aligned_ref > 0 ? double(n_indel_ops) / double(aligned_ref) : 0.0;
+    background_sum += 1.0 - std::exp(-rate * 4.0 * p.junction_window_bp);
   }
   check_read(ret, impl_->path, chrom);
+  f.indel_near_background = f.n_spanning ? background_sum / f.n_spanning : 0.0;
   f.evaluated = true;
   return f;
 }

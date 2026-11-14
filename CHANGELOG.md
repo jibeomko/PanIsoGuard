@@ -16,6 +16,15 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   JSONL). On HG002 chr22 and on both HG03516 haplotypes the verdicts and motifs equal the
   FASTA route's; a consensus FASTA that also applied indels was shifted by 50 bp on chr22 and
   read wrong bases at 7 junctions, which the VCF route cannot do.
+- Ruleset `builtin-0.0.7` (TOML `default-0.0.7`): the indel-near gate reads the fraction of
+  spanning reads with an indel next to the junction in excess of the reads' own indel rate
+  (per read, the chance of an indel inside the two windows, 1 − exp(−rate × 4 × window),
+  averaged over the spanning reads). On HiFi the background is near 0 and the gate behaves as
+  before; on ONT, whose reads carry indels everywhere, the raw fraction fired on 67 % of
+  GM12878 junctions by chemistry alone. The JSONL gains `bam_frac_indel_near_excess`, the
+  junction table `bam_indel_near_background`; the raw fraction stays. The worked-locus check
+  and the replayed rulebook compute the same excess. The tracked benchmark envelopes still
+  predate this ruleset; they are regenerated with the 0.1.0 release.
 
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.

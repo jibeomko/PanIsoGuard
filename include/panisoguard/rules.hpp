@@ -23,7 +23,7 @@ struct RuleConfig {
   int bam_junction_window_bp = 10;
   double bam_max_low_mapq_frac = 0.5;       // > this fraction of low-MAPQ spanning reads -> mapping artifact
   double bam_max_supplementary_frac = 0.5;  // > this fraction supplementary/secondary -> mapping artifact
-  double bam_max_indel_near_frac = 0.5;     // > this fraction of spanning reads with an indel adjacent to the
+  double bam_max_indel_near_frac = 0.5;     // > this excess fraction (over the reads' own indel rate) with an indel adjacent to the
                                             // junction -> mapping artifact (an alignment-ambiguous indel, not a real
                                             // intron). Junction-proximal (bam_junction_window_bp); validated on chr22.
   // Pangenome (reference-bias) axis
@@ -33,7 +33,7 @@ struct RuleConfig {
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes; the history is in CHANGELOG.md.
-  std::string ruleset_version = "builtin-0.0.6";
+  std::string ruleset_version = "builtin-0.0.7";
 };
 
 class RuleEngine {
