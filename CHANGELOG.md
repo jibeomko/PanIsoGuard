@@ -106,6 +106,12 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a fourth external review (of 97c4477) on 2026-11-14, with a regression test:
+- A single MNP covering both windows of a junction was read once per window and counted as two
+  records, so an unphased MNP that creates a canonical motif on its own was held as `unlinked`
+  (the phased writing and the same sequence as a FASTA were rescued). A record is counted once
+  per junction; its bases are still applied in both windows.
+
 Found by a third external review (of c74850e) on 2026-11-14, with a regression test:
 - A partly missing genotype (`1|.`, `0|.`, `1/.`) placed its known allele by haplotype index
   without entering the phase bookkeeping, so two such records in different phase sets, or one

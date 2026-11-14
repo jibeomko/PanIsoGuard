@@ -304,3 +304,17 @@ TEST_CASE("partly missing genotypes place alleles by index and need one phase se
   CHECK_FALSE(single.phase_unlinked);
   CHECK(single.verdict == VariantVerdict::kCreated);
 }
+
+// two_jx_mnp_span*.vcf.gz: one 20-base MNP over the whole second intron {60,80}, changing the donor GG to GT
+// and nothing else; it is read once per window but is one record, so an unphased 0/1 is a single variant
+// (certain on its own), not two unlinked ones.
+TEST_CASE("an MNP spanning both motif windows is one record, phased or not", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  for (const char* f : {"two_jx_mnp_span.vcf.gz", "two_jx_mnp_span_phased.vcf.gz"}) {
+    HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny(f))});
+    const JunctionMotifs m = p.motifs("chrT2", {60, 80}, Strand::kPlus);
+    CHECK_FALSE(m.phase_unlinked);
+    CHECK(m.haps[1].motif == "GT-AG");
+    CHECK(m.verdict == VariantVerdict::kCreated);
+  }
+}

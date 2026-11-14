@@ -172,7 +172,9 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     // composition is an observation only if they are phased together. A record that changed no base
     // and left no base unknown (a skipped indel) places nothing.
     const bool index_dependent = n_known >= 1 && (het || n_missing_here >= 1);
-    if (index_dependent && (applied || wrote_n)) {
+    const bool counted_before = std::find(phase.counted.begin(), phase.counted.end(), rec->pos) != phase.counted.end();
+    if (index_dependent && (applied || wrote_n) && !counted_before) {
+      phase.counted.push_back(rec->pos);   // a record spanning both windows of a junction is read twice but is one record
       ++phase.n_het;
       if (!phased) { ++impl_->n_unphased; phase.unphased = true; }
       else {
