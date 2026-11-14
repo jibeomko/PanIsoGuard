@@ -39,7 +39,7 @@ Tools (each typically its own conda env): `pbsim3`, `minimap2`, `samtools`,
 ## Result (GENCODE v49 chr22; 150 transcripts, 30 hidden; 6000 PBSIM3 reads)
 
 FLAIR produced 397 isoforms (5019/6000 reads aligned). On the SQANTI-novel
-(NIC/NNC) set, scored by intron-chain truth (0.0.7 binary, ruleset 0.0.5, with the BAM):
+(NIC/NNC) set, scored by intron-chain truth (0.1.0 binary, ruleset 0.0.7, with the BAM):
 
 ```
             pred_genuine  pred_false  abstain
@@ -53,10 +53,16 @@ precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisiv
   the other 10 — on real, messy caller output it removes nearly all spurious novelty.
 - No genuine novel was wrongly rejected (0 false negatives) and **no artifact was called
   genuine** (0 false positives).
-- 19/20 genuine novels are `NOVEL_PROBABLE` through whole-chain long-read support: they
-  are NIC-like, every junction already in the reduced annotation, so the short-read axis has
-  nothing to test; before 0.0.7 they were held `UNRESOLVED` (16/20) or `UNCONFIRMED`. The
-  remaining one has fewer than 3 whole-chain reads and stays `UNRESOLVED`.
+- 19/20 genuine novels are confirmed: 16 `NOVEL_PROBABLE` through whole-chain long-read
+  support (NIC-like, every junction already in the reduced annotation, so the short-read axis
+  has nothing to test; before 0.0.7 they were held `UNRESOLVED` or `UNCONFIRMED`) and 3
+  `NOVEL_CONFIRMED` (a novel junction the short reads support, with no sign). The remaining
+  one has fewer than 3 whole-chain reads and stays `UNRESOLVED`.
+- Ruleset 0.0.7 reads the indel-near fraction in excess of each read's own indel rate. On
+  these PBSIM3 reads that moved 14 isoforms out of the mapping sign: the 3 genuine novels
+  above went from `NOVEL_PROBABLE` (supported, with a sign) to `NOVEL_CONFIRMED`, and 11
+  false novels went from `ARTIFACT` to `UNCONFIRMED`, still rejected (152 `ARTIFACT`, 87
+  `UNCONFIRMED`), so precision and specificity are unchanged.
 
 This validates PanIsoGuard end-to-end on real FLAIR/SQANTI3 output; the clean
 per-axis correctness is established in the sibling controlled benchmarks.

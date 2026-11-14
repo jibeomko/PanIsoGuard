@@ -74,7 +74,9 @@ chr1-22/X/Y paths → 71,435 junctions). Both samples are out of the HPRC graph 
 GM12878                    13,017                  0                          0
 K562                       62,723                  0                          2  (of 139,469 introns; chance level)
 combined                   75,740                  0                          ~chance
-GM12878 BAM mapping axis: 390 novel isoforms flagged as mapping artifacts.
+GM12878 BAM mapping axis: no isoform is called a mapping artifact (without short reads a sign
+                           holds an isoform UNCONFIRMED, and with ruleset 0.0.7 the indel-near
+                           sign does not fire on ONT reads; 390 were ARTIFACT under 0.0.3).
 ```
 
 Zero false rescues across 75,740 novel isoforms (two samples)

@@ -1,7 +1,7 @@
 {
   "command": "benchmark/caller_filters/run.sh; score_filters.py --work ... --pig-dir ... --caller ... --family ... --emit-metrics",
   "data_provenance": "chr22 SQANTI-SIM truth set (benchmark/sqanti_sim) called by FLAIR, IsoQuant, Bambu (NDR 0.5), ESPRESSO and TALON (filtered) on one alignment (benchmark/multicaller); SQANTI3 6.0.1 per caller; PanIsoGuard runs of benchmark/chain_support (ruleset 0.0.5); Bambu NDR 0.3/0.2/0.1 and TALON before talon_filter_transcripts re-run for the caller-knob comparison. Public/simulated.",
-  "generated_utc": "2026-11-01T05:29:47Z",
+  "generated_utc": "2026-11-14T03:30:25Z",
   "metrics": {
     "caller_own_knob": {
       "bambu": {
@@ -290,9 +290,9 @@
   },
   "notes": "Three post-caller filters on the same output: none, SQANTI3 rules (no short-read coverage column, so its perc_A + RTS rules), PanIsoGuard + BAM without and with 1 M short-read pairs. Recall is relative to the caller's own genuine novel isoforms (the caller's recall is outside the comparison). The caller-knob section tightens Bambu's NDR and applies TALON's own filter, with recall relative to the permissive setting's genuine chains, against PanIsoGuard applied to the permissive output.",
   "protocol": "caller_filters",
-  "ruleset_version": "default-0.0.6",
+  "ruleset_version": "default-0.0.7",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

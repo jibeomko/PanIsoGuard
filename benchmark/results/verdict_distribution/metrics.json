@@ -1,7 +1,7 @@
 {
   "command": "benchmark/verdict_distribution/score_distribution.py --run LABEL=x.adjudicated.tsv ... --emit-metrics benchmark/results/verdict_distribution/metrics.json",
   "data_provenance": "real public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, no short reads). No private data.",
-  "generated_utc": "2026-11-01T08:01:35Z",
+  "generated_utc": "2026-11-14T03:47:33Z",
   "metrics": {
     "hg02717_kinnex": {
       "all": {
@@ -9,9 +9,9 @@
         "KNOWN": 44288,
         "KNOWN_FRAGMENT": 1854,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 8363,
+        "NOVEL_PROBABLE": 8364,
         "REFERENCE_BIAS": 28,
-        "UNCONFIRMED": 5726,
+        "UNCONFIRMED": 5725,
         "UNRESOLVED": 8969
       },
       "n_isoforms": 69228,
@@ -20,17 +20,17 @@
         "KNOWN": 0,
         "KNOWN_FRAGMENT": 0,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 8363,
+        "NOVEL_PROBABLE": 8364,
         "REFERENCE_BIAS": 28,
-        "UNCONFIRMED": 3328,
+        "UNCONFIRMED": 3327,
         "UNRESOLVED": 5550
       },
       "novel_nic_nnc": 17269,
       "novel_probable_with_rts_sign": 1357,
       "novel_unconfirmed_reasons": {
         "chain_support_with_degradation": 1978,
-        "chain_support_with_noncanonical": 746,
-        "mapping_without_short_reads": 604
+        "chain_support_with_noncanonical": 748,
+        "mapping_without_short_reads": 601
       },
       "novel_unresolved_reasons": {
         "no_short_reads": 5549,
@@ -43,9 +43,9 @@
         "KNOWN": 30452,
         "KNOWN_FRAGMENT": 3925,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 7067,
+        "NOVEL_PROBABLE": 7068,
         "REFERENCE_BIAS": 18,
-        "UNCONFIRMED": 11135,
+        "UNCONFIRMED": 11134,
         "UNRESOLVED": 15414
       },
       "n_isoforms": 68011,
@@ -54,18 +54,18 @@
         "KNOWN": 0,
         "KNOWN_FRAGMENT": 0,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 7067,
+        "NOVEL_PROBABLE": 7068,
         "REFERENCE_BIAS": 18,
-        "UNCONFIRMED": 4261,
+        "UNCONFIRMED": 4260,
         "UNRESOLVED": 7793
       },
       "novel_nic_nnc": 19139,
       "novel_probable_with_rts_sign": 1293,
       "novel_unconfirmed_reasons": {
-        "chain_support_with_degradation": 2891,
+        "chain_support_with_degradation": 2892,
         "chain_support_with_noncanonical": 629,
         "chain_support_with_noncanonical;haplotype_disrupted": 1,
-        "mapping_without_short_reads": 740
+        "mapping_without_short_reads": 738
       },
       "novel_unresolved_reasons": {
         "no_short_reads": 7786,
@@ -150,10 +150,10 @@
         "KNOWN": 59704,
         "KNOWN_FRAGMENT": 2132,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 8168,
+        "NOVEL_PROBABLE": 8194,
         "REFERENCE_BIAS": 0,
-        "UNCONFIRMED": 909,
-        "UNRESOLVED": 7343
+        "UNCONFIRMED": 863,
+        "UNRESOLVED": 7363
       },
       "n_isoforms": 78256,
       "novel": {
@@ -161,68 +161,68 @@
         "KNOWN": 0,
         "KNOWN_FRAGMENT": 0,
         "NOVEL_CONFIRMED": 0,
-        "NOVEL_PROBABLE": 8168,
+        "NOVEL_PROBABLE": 8194,
         "REFERENCE_BIAS": 0,
-        "UNCONFIRMED": 658,
-        "UNRESOLVED": 3623
+        "UNCONFIRMED": 612,
+        "UNRESOLVED": 3643
       },
       "novel_nic_nnc": 12449,
-      "novel_probable_with_rts_sign": 1321,
+      "novel_probable_with_rts_sign": 1324,
       "novel_unconfirmed_reasons": {
         "chain_support_with_degradation": 46,
         "chain_support_with_noncanonical": 346,
-        "mapping_without_short_reads": 266
+        "mapping_without_short_reads": 220
       },
       "novel_unresolved_reasons": {
-        "no_short_reads": 3623
+        "no_short_reads": 3643
       }
     },
     "lrgasp_pb_sr": {
       "all": {
-        "ARTIFACT": 1210,
+        "ARTIFACT": 1186,
         "KNOWN": 59704,
         "KNOWN_FRAGMENT": 2132,
-        "NOVEL_CONFIRMED": 1387,
-        "NOVEL_PROBABLE": 5067,
+        "NOVEL_CONFIRMED": 1393,
+        "NOVEL_PROBABLE": 5063,
         "REFERENCE_BIAS": 0,
-        "UNCONFIRMED": 3183,
-        "UNRESOLVED": 5573
+        "UNCONFIRMED": 3204,
+        "UNRESOLVED": 5574
       },
       "n_isoforms": 78256,
       "novel": {
-        "ARTIFACT": 1210,
+        "ARTIFACT": 1186,
         "KNOWN": 0,
         "KNOWN_FRAGMENT": 0,
-        "NOVEL_CONFIRMED": 1387,
-        "NOVEL_PROBABLE": 5067,
+        "NOVEL_CONFIRMED": 1393,
+        "NOVEL_PROBABLE": 5063,
         "REFERENCE_BIAS": 0,
-        "UNCONFIRMED": 2932,
-        "UNRESOLVED": 1853
+        "UNCONFIRMED": 2953,
+        "UNRESOLVED": 1854
       },
       "novel_nic_nnc": 12449,
       "novel_probable_with_rts_sign": 912,
       "novel_unconfirmed_reasons": {
         "chain_support_with_degradation": 29,
         "chain_support_with_noncanonical": 18,
-        "mapping_without_short_reads": 19,
-        "partial_support": 210,
+        "mapping_without_short_reads": 16,
+        "partial_support": 212,
         "partial_support_with_degradation": 1,
-        "partial_support_with_mapping_or_repeat": 20,
+        "partial_support_with_mapping_or_repeat": 18,
         "partial_support_with_noncanonical": 25,
         "partial_support_with_rt_switch": 30,
-        "unsupported_no_sign": 2580
+        "unsupported_no_sign": 2604
       },
       "novel_unresolved_reasons": {
-        "no_coverage": 145,
+        "no_coverage": 146,
         "no_novel_junction": 1708
       }
     }
   },
   "notes": "Per run: confidence_class counts over all isoforms and over SQANTI3 NIC + NNC isoforms; how many NOVEL_PROBABLE calls carry the rt_switch_sign annotation; the verdict_reason behind UNCONFIRMED (held on a sign) and UNRESOLVED (undecided) novel calls. Descriptive: what a user sees after one run, not an accuracy claim.",
   "protocol": "verdict_distribution",
-  "ruleset_version": "builtin-0.0.6",
+  "ruleset_version": "builtin-0.0.7",
   "scope": "real_data_verdict_distribution_lrgasp_wtc11_hprc_kinnex",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

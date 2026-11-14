@@ -69,8 +69,8 @@ reverse (`cross_library.py`; `adjx_*` outputs).
 
 | caller library → independent library | validated novel targets with ≥ 3 / ≥ 1 independent reads | class without short reads | Same-library chain lifts (NIC/NNC) with ≥ 3 independent reads | expressed FSM (≥ 3 own reads) with ≥ 3 independent reads |
 |---|---:|---|---:|---:|
-| PacBio → ONT | 13 / 15 of 17 | 13 `NOVEL_PROBABLE` (`chain_support;independent_library`), 4 `UNRESOLVED` | 1,789 / 8,171 (22 %) | 11,919 / 28,574 (42 %) |
-| ONT → PacBio | 14 / 15 of 16 | 14 `NOVEL_PROBABLE`, 2 `UNRESOLVED` | 1,477 / 2,759 (54 %) | 11,792 / 15,007 (79 %) |
+| PacBio → ONT | 13 / 15 of 17 | 13 `NOVEL_PROBABLE` (`chain_support;independent_library`), 4 `UNRESOLVED` | 1,791 / 8,194 (22 %) | 11,918 / 28,570 (42 %) |
+| ONT → PacBio | 14 / 15 of 16 | 14 `NOVEL_PROBABLE`, 2 `UNRESOLVED` | 1,477 / 2,757 (54 %) | 11,791 / 15,007 (79 %) |
 
 The misses are depth, not disagreement: FBXL16 and XPO7 (0 ONT reads), SPRING1 (1), CNN1 (2);
 SAC3D1 (0 PacBio reads), USF1 (1). At matched caller-library depth the novel lifts reproduce

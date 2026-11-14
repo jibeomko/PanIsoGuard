@@ -14,13 +14,13 @@
       "baseline_confident_novel_recall": 0.0,
       "caller": "flair",
       "consensus_confident_novel_precision": 0.975,
-      "consensus_confident_novel_recall": 0.685,
-      "consensus_false_rejected_specificity": 0.912,
+      "consensus_confident_novel_recall": 0.763,
+      "consensus_false_rejected_specificity": 0.905,
       "flair_false_novel": 148,
       "flair_genuine_novel": 730,
       "n_callers_in_matrix": 5,
-      "promoted_unresolved_to_novel_probable": 513,
-      "promoted_unresolved_to_unconfirmed": 80,
+      "promoted_unresolved_to_novel_probable": 571,
+      "promoted_unresolved_to_unconfirmed": 22,
       "setting": "long_read_only_no_short_read_SJ"
     },
     "min_callers": 2,
@@ -141,9 +141,9 @@
   },
   "notes": "Caller-agnostic multi-caller integration over 5 callers. Single-caller novel calls are overwhelmingly artifacts (precision rises monotonically with the number of supporting callers); requiring >= min_callers raises novel-call precision sharply. The pr_curve sweeps the consensus threshold 1..n: the F1-optimal threshold scales with the number of callers (more callers -> require more agreement). engine_demo confirms the wired consensus axis reproduces this through `adjudicate --caller-support` on real caller output (long-read only, no short-read SJ): a single caller yields 0 confident novel calls (all UNRESOLVED), while consensus promotes the cross-caller-agreed novels. consensus_min_callers is configurable (TOML); the default is 2.",
   "protocol": "multicaller",
-  "ruleset_version": "builtin-0.0.3",
+  "ruleset_version": "builtin-0.0.7",
   "scope": "gencode_v49_chr22_5caller",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.6"
+  "tool_version": "0.1.0"
 }

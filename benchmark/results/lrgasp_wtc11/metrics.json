@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "real public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-11-01T05:55:44Z",
+  "generated_utc": "2026-11-14T03:47:28Z",
   "metrics": {
     "cross_library": {
       "ont_nosr": {
@@ -900,9 +900,9 @@
               "n": 387
             },
             "3-5": {
-              "frac": 0.232,
+              "frac": 0.231,
               "independent_ge3": 171,
-              "n": 738
+              "n": 740
             },
             "51-inf": {
               "frac": 0.78,
@@ -944,9 +944,9 @@
           },
           "lifts_nnc_plain_gene_covered": {
             "11-20": {
-              "frac": 0.497,
+              "frac": 0.494,
               "independent_ge3": 87,
-              "n": 175
+              "n": 176
             },
             "21-50": {
               "frac": 0.766,
@@ -954,9 +954,9 @@
               "n": 124
             },
             "3-5": {
-              "frac": 0.304,
-              "independent_ge3": 152,
-              "n": 500
+              "frac": 0.306,
+              "independent_ge3": 154,
+              "n": 503
             },
             "51-inf": {
               "frac": 0.845,
@@ -981,9 +981,9 @@
               "n": 12
             },
             "3-5": {
-              "frac": 0.111,
+              "frac": 0.11,
               "independent_ge3": 8,
-              "n": 72
+              "n": 73
             },
             "51-inf": {
               "frac": 0.778,
@@ -1000,7 +1000,7 @@
             "11-20": {
               "frac": 0.267,
               "independent_ge3": 324,
-              "n": 1212
+              "n": 1214
             },
             "21-50": {
               "frac": 0.401,
@@ -1009,8 +1009,8 @@
             },
             "3-5": {
               "frac": 0.126,
-              "independent_ge3": 323,
-              "n": 2563
+              "independent_ge3": 325,
+              "n": 2580
             },
             "51-inf": {
               "frac": 0.511,
@@ -1020,7 +1020,7 @@
             "6-10": {
               "frac": 0.201,
               "independent_ge3": 335,
-              "n": 1665
+              "n": 1669
             }
           },
           "lifts_rt_switch_sign": {
@@ -1035,9 +1035,9 @@
               "n": 177
             },
             "3-5": {
-              "frac": 0.045,
+              "frac": 0.044,
               "independent_ge3": 20,
-              "n": 448
+              "n": 451
             },
             "51-inf": {
               "frac": 0.407,
@@ -1060,27 +1060,27 @@
           "independent_ge3": 924,
           "n": 2132
         },
-        "lifts_kept_probable_with_independent_bam": 1789,
+        "lifts_kept_probable_with_independent_bam": 1791,
         "lifts_plain": {
           "frac": 0.235,
-          "independent_ge3": 1611,
-          "n": 6847
+          "independent_ge3": 1613,
+          "n": 6870
         },
         "lifts_rt_switch_sign": {
-          "frac": 0.135,
+          "frac": 0.134,
           "independent_ge3": 178,
-          "n": 1321
+          "n": 1324
         },
-        "lifts_with_independent_ge1": 3142,
-        "lifts_with_independent_ge3": 1789,
+        "lifts_with_independent_ge1": 3147,
+        "lifts_with_independent_ge3": 1791,
         "novel_class_transitions": {
-          "NOVEL_PROBABLE->UNRESOLVED": 6379,
+          "NOVEL_PROBABLE->UNRESOLVED": 6403,
           "UNCONFIRMED->UNRESOLVED": 361,
-          "UNRESOLVED->NOVEL_PROBABLE": 113,
+          "UNRESOLVED->NOVEL_PROBABLE": 114,
           "UNRESOLVED->UNCONFIRMED": 5
         },
         "novel_isoforms": 12449,
-        "same_library_chain_lifts": 8168,
+        "same_library_chain_lifts": 8194,
         "validated_targets": {
           "classes_with_independent_bam": {
             "NOVEL_PROBABLE": 13,
@@ -1417,7 +1417,7 @@
             "3-5": {
               "frac": 0.098,
               "independent_ge3": 116,
-              "n": 1180
+              "n": 1181
             },
             "51-inf": {
               "frac": 0.487,
@@ -1427,7 +1427,7 @@
             "6-10": {
               "frac": 0.168,
               "independent_ge3": 157,
-              "n": 933
+              "n": 934
             }
           },
           "lifts_rt_switch_sign": {
@@ -1471,22 +1471,22 @@
         "lifts_plain": {
           "frac": 0.225,
           "independent_ge3": 884,
-          "n": 3933
+          "n": 3935
         },
         "lifts_rt_switch_sign": {
           "frac": 0.152,
           "independent_ge3": 139,
           "n": 912
         },
-        "lifts_with_independent_ge1": 1819,
+        "lifts_with_independent_ge1": 1820,
         "lifts_with_independent_ge3": 1023,
         "novel_class_transitions": {
-          "NOVEL_PROBABLE->UNRESOLVED": 3822,
+          "NOVEL_PROBABLE->UNRESOLVED": 3824,
           "UNCONFIRMED->UNRESOLVED": 42,
           "UNRESOLVED->NOVEL_PROBABLE": 34
         },
         "novel_isoforms": 12449,
-        "same_library_chain_lifts": 4845,
+        "same_library_chain_lifts": 4847,
         "validated_targets": {
           "classes_with_independent_bam": {
             "NOVEL_CONFIRMED": 10,
@@ -2300,9 +2300,9 @@
   },
   "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
   "protocol": "lrgasp_wtc11",
-  "ruleset_version": "builtin-0.0.6",
+  "ruleset_version": "builtin-0.0.7",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

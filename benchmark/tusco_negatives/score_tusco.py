@@ -24,8 +24,15 @@ def main():
     res = {"n_tusco_genes": len(ids), "runs": {}}
     tot = collections.Counter()
     print(f"{'run':<16}{'TUSCO isoforms':>15}{'novel':>7}{'PIG confident':>15}{'PIG artifact':>13}{'SQ3 rules keeps':>16}")
+    versions = {"tool_version": set(), "ruleset_version": set()}   # from each run's provenance log
     for spec in a.run:
         label, files = spec.split("=", 1); f = files.split(",")
+        try:
+            for l in open(f[1].replace(".adjudicated.tsv", ".provenance.log")):
+                k, _, v = l.rstrip("\n").partition("\t")
+                if k in versions: versions[k].add(v.strip())
+        except OSError:
+            pass
         cls = {r["isoform"]: r for r in csv.DictReader(open(f[0]), delimiter="\t")}
         adj = {r["isoform_id"]: r for r in csv.DictReader(open(f[1]), delimiter="\t")}
         rules = {r["isoform"]: r["filter_result"] for r in csv.DictReader(open(f[2]), delimiter="\t")} if len(f) > 2 else None
@@ -49,7 +56,8 @@ def main():
     print(f"total without short reads (one run per data set): {tot['novel']} presumed-false novel isoforms; PanIsoGuard confident {tot['pig']}, artifact {tot['art']}; SQANTI3 rules keeps {tot['sq3']} / {tot['sq3_n']}")
     if a.emit_metrics:
         env = {"protocol": "tusco_negatives", "scope": "tusco_human_universal_46_genes_real_data", "status": "tracked",
-               "tool_version": "0.0.7", "ruleset_version": "builtin-0.0.5",
+               "tool_version": "/".join(sorted(versions["tool_version"])) or None,
+               "ruleset_version": "/".join(sorted(versions["ruleset_version"])) or None,
                "generated_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": None,
                "data_provenance": "TUSCO human universal single-isoform genes (46; Pardo-Palacios et al. 2026, list from ConesaLab/SQANTI3) "
                                   "applied to IsoQuant isoforms on LRGASP WTC11 PacBio / ONT cDNA (ENCODE) and HPRC R2 HG03516 / HG02717 "

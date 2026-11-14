@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_targets/run.sh; benchmark/lrgasp_targets/score_targets.py --lrgasp /mnt/Data/PanIsoGuard_bench/pig_lrgasp --emit-metrics ...",
   "data_provenance": "real public LRGASP WTC11 (ENCODE PacBio cDNA ENCSR507JOF, ONT cDNA ENCSR539ZXJ, Illumina ENCSR673UKZ) and LRGASP Supplementary Data 15 amplicon validation; every multi-exon target chain of both sheets written as a GTF (benchmark/lrgasp_wtc11/targets.py), SQANTI3 6.0.1 vs GENCODE v49, PanIsoGuard with the platform's BAM, with and without the Illumina SJ.tab. No private data.",
-  "generated_utc": "2026-11-01T09:05:11Z",
+  "generated_utc": "2026-11-14T03:36:06Z",
   "metrics": {
     "ont_nosr": {
       "likely": {
@@ -167,9 +167,9 @@
   },
   "notes": "Targets novel against GENCODE v49 (SQANTI3 NIC/NNC, not KNOWN) by amplicon validation: supported (positives), unsupported (negatives), likely. Independent of any caller's reconstruction: the chains are adjudicated as would-be isoforms, so the negatives test whether whole-chain reads or short reads would make PanIsoGuard confirm a chain the amplicons did not support.",
   "protocol": "lrgasp_targets",
-  "ruleset_version": "builtin-0.0.6",
+  "ruleset_version": "builtin-0.0.7",
   "scope": "lrgasp_wtc11_validation_targets_as_would_be_isoforms",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

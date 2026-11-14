@@ -68,11 +68,11 @@ isoforms long-read-only (no short-read `SJ.tab`), with vs without the 5-caller m
 | setting | confident-novel recall | precision |
 |---------|-----------------------:|----------:|
 | FLAIR alone (no cross-caller info) | 0.000 (all novel held `UNRESOLVED`) | — |
-| FLAIR + consensus | 0.685 | 0.975 |
+| FLAIR + consensus | 0.763 | 0.975 |
 
 Without orthogonal short-read evidence a single caller's novels are all `UNRESOLVED` (the
 engine refuses to guess). The consensus axis promotes the 593 novels that ≥ 2 callers
-agree on (513 → `NOVEL_PROBABLE`, 80 → `UNCONFIRMED`); that promoted set is
+agree on (571 → `NOVEL_PROBABLE`, 22 → `UNCONFIRMED`; ruleset 0.0.7); that promoted set is
 97.5 % precise against truth.
 
 ## Integration device (caller-agnostic merge)

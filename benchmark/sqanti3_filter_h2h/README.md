@@ -134,17 +134,17 @@ isoforms with no novel junction to test) is more precise than `UNCONFIRMED` at e
 | class | genuine | false | precision (no BAM) | genuine | false | precision (BAM) |
 |---|---:|---:|---:|---:|---:|---:|
 | NOVEL_CONFIRMED | 357 | 3 | 0.992 | 351 | 3 | 0.992 |
-| NOVEL_PROBABLE | 41 | 1 | 0.976 | 193 | 1 | 0.995 |
+| NOVEL_PROBABLE | 41 | 1 | 0.976 | 198 | 1 | 0.995 |
 | KNOWN_FRAGMENT | — | — | — | 153 | 11 | 0.933 |
-| UNRESOLVED | 152 | 7 | 0.956 | 0 | 6 | 0.000 |
-| UNCONFIRMED | 176 | 61 | 0.743 | 25 | 36 | 0.410 |
-| ARTIFACT | 4 | 68 | 0.056 | 8 | 83 | 0.088 |
+| UNRESOLVED | 160 | 7 | 0.958 | 0 | 6 | 0.000 |
+| UNCONFIRMED | 169 | 61 | 0.735 | 23 | 36 | 0.390 |
+| ARTIFACT | 3 | 68 | 0.042 | 5 | 83 | 0.057 |
 
 With the BAM (0.0.7), the genuine `UNRESOLVED` NIC isoforms move to `NOVEL_PROBABLE` through
-whole-chain read support (146 of the 193), the ISM isoforms carried end to end move to
+whole-chain read support (151 of the 198), the ISM isoforms carried end to end move to
 `KNOWN_FRAGMENT` (153 of the 154 genuine and 11 of the 13 false: the simulator does not model
 intra-priming, so the 3' sign cannot separate them here), and `UNRESOLVED` keeps the 6 false
 ones. Without the BAM `UNCONFIRMED` is two populations: ISM pass-through (154 / 13, 0.92) and
-novel isoforms with weak support (22 / 48, 0.31); with the BAM what remains is the weak-support
-novel set (25 / 36, 0.41), below the 0.83 base rate. Numbers from the 0.0.7 binary (ruleset
-`builtin-0.0.5`); `per_class_v007.txt` of `run.sh`'s work dir has every depth.
+novel isoforms with weak support (15 / 48, 0.24); with the BAM what remains is the weak-support
+novel set (23 / 36, 0.39), below the 0.83 base rate. Numbers from the 0.1.0 binary (ruleset
+`builtin-0.0.7`); `per_class_v010.txt` of `run.sh`'s work dir has every depth.

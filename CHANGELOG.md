@@ -26,8 +26,17 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   the gate cannot reach 0.5 there; `--platform ont` is kept but changes nothing). The JSONL
   gains `bam_frac_indel_near_excess`, the
   junction table `bam_indel_near_background`; the raw fraction stays. The worked-locus check
-  and the replayed rulebook compute the same excess. The tracked benchmark envelopes still
-  predate this ruleset; they are regenerated with the 0.1.0 release.
+  and the replayed rulebook compute the same excess. Every tracked benchmark envelope was
+  regenerated with the 0.1.0 binary; the change shows wherever the raw fraction used to fire
+  on noisier reads: end2end chr22 (PBSIM3) moves 14 isoforms out of the mapping sign (3
+  genuine `NOVEL_PROBABLE` → `NOVEL_CONFIRMED`, 11 false `ARTIFACT` → `UNCONFIRMED`; precision
+  and specificity unchanged), the SQANTI-SIM per-class table shifts by a few isoforms, the
+  SIRV-Set4 chain lifts become evaluable (3 genuine and 5 false lifted without short reads),
+  LRGASP PacBio loses 24 `ARTIFACT` calls to `UNCONFIRMED` and gains 6 `NOVEL_CONFIRMED`, and
+  on GM12878 ONT the hifi and ont presets now give the same verdicts (9 / 147 / 129). HiFi
+  envelopes (bam_axis, h2h, held-out, caller filters, reference-bias cohorts) are unchanged;
+  multicaller's engine demo, last emitted under ruleset 0.0.3, reads 0.763 recall (571 lifted
+  to `NOVEL_PROBABLE`, 22 to `UNCONFIRMED`) under the current rules.
 
 - A whole-genome GRCh38 pangenome junction set is attached to each release: the 71,435 splice
   junctions implied by deletions of 50 bp or more in the HPRC v1.1 Minigraph-Cactus graph

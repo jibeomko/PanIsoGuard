@@ -160,6 +160,16 @@ def main() -> int:
     if a.emit_metrics:
         import json
         ver = subprocess.run([a.pig, "version"], capture_output=True, text=True).stdout.splitlines()
+        # the ruleset the binary applies, read from the provenance log of a run on the tiny example
+        tiny = HERE.parent.parent / "examples" / "tiny" / "data"
+        ruleset = None
+        with tempfile.TemporaryDirectory() as t:
+            subprocess.run([a.pig, "adjudicate", "--classification", str(tiny / "classification.tsv"),
+                            "--isoforms-gtf", str(tiny / "caller.gtf"), "--out-prefix", f"{t}/p"], capture_output=True, text=True)
+            try:
+                ruleset = next(l.split("\t")[1].strip() for l in open(f"{t}/p.provenance.log") if l.startswith("ruleset_version\t"))
+            except (OSError, StopIteration):
+                pass
         env = {
             "command": "bash benchmark/sqanti_sim/run.sh && python3 benchmark/sqanti_sim/sweep.py "
                        "$PIG --work benchmark/sqanti_sim/work --emit-metrics benchmark/results/sqanti_sim/metrics.json",
@@ -170,8 +180,8 @@ def main() -> int:
                 "precision_genuine": op["precision_genuine"], "specificity_false": op["specificity_false"],
                 "recall_genuine": op["recall_genuine"], "nnc_recall": op["nnc_recall"],
             },
-            "notes": "Operating point = config/rules.default.toml (default-0.0.1). Full grid in sweep.tsv.",
-            "protocol": "sqanti_sim", "ruleset_version": "builtin-0.0.3", "scope": a.scope,
+            "notes": "Operating point = the built-in defaults (config/rules.default.toml is identical). Full grid in sweep.tsv.",
+            "protocol": "sqanti_sim", "ruleset_version": ruleset, "scope": a.scope,
             "source": None, "status": "tracked",
             "tool_version": ver[0].split()[-1] if ver else None,
         }

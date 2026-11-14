@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/sqanti_sim_heldout/run.sh <chrom>; benchmark/sqanti_sim_heldout/emit_heldout.py CHROM=ROOT ... --emit-metrics ...",
   "data_provenance": "SQANTI-SIM on GENCODE v49, one chromosome at a time (chr20, chr19), the chr22 protocol of benchmark/sqanti_sim + benchmark/sqanti3_filter_h2h repeated unchanged (design equal -nt 1500, NIC 300, NNC 300, ISM 200, 100,000 PBSIM3 reads, seed 1; FLAIR; SQANTI3 6.0.1; short reads none or 1 M wgsim pairs -> STAR 2-pass). Public/simulated.",
-  "generated_utc": "2026-11-01T05:18:48Z",
+  "generated_utc": "2026-11-14T03:05:44Z",
   "metrics": {
     "chr19": {
       "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
@@ -288,9 +288,9 @@
   },
   "notes": "Held-out test of the thresholds set on chr22 (chain_min_full_reads 3, mapping gates, support axis): nothing was re-tuned. Per chromosome and short-read setting, non-FSM genuine-vs-false metrics per method as in sqanti3_filter_h2h, with the same bootstrap CIs.",
   "protocol": "sqanti_sim_heldout",
-  "ruleset_version": "builtin-0.0.6",
+  "ruleset_version": "builtin-0.0.7",
   "scope": "gencode_v49_heldout_chromosomes_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

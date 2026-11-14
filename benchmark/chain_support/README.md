@@ -72,10 +72,14 @@ reduced annotation; `score_sirv_chain.py`):
 The separation replicates (medians 11.5 vs 1.0 reads for FLAIR). The engine-level ON/OFF
 comparison is not evaluable on SIRV: SQANTI3 puts 152 of FLAIR's 228 SIRV models, 7 of
 the 12 genuine ones among them, into `antisense` / `intergenic` (the SIRV annotation's strand
-against FLAIR's), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry
-mapping or non-canonical signs from the simulated reads. So on SIRV the rule lifts nothing
-either way (recorded as `sirv_set4` in the envelope); the evidence it rests on is the
-read-level table above.
+against FLAIR's), which PanIsoGuard does not adjudicate, and the adjudicated NNC carried
+mapping or non-canonical signs from the simulated reads, so through ruleset 0.0.6 the rule
+lifted nothing either way. Ruleset 0.0.7 reads the indel-near fraction in excess of the
+reads' own indel rate, which on these PBSIM3 reads removes most of the mapping signs: without
+short reads the rule now lifts 3 of the 4 adjudicated genuine chains and 5 false ones (8
+decisive calls, 3 right; 2 more false chains move to `UNCONFIRMED`), and with short reads it
+changes nothing (recorded as `sirv_set4` in the envelope). Too few isoforms to rank by; the
+evidence it rests on is the read-level table above.
 
 ## Why three reads
 

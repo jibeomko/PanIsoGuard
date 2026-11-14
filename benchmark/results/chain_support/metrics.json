@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
-  "generated_utc": "2026-11-01T06:24:14Z",
+  "generated_utc": "2026-11-14T03:47:31Z",
   "metrics": {
     "bambu": {
       "n_genuine": 409,
@@ -905,13 +905,13 @@
       "engine_flair": {
         "nosr": {
           "lifted_to_confident": {
-            "false": 0,
-            "genuine": 0
+            "false": 5,
+            "genuine": 3
           },
           "off": {
             "FP": 0,
             "TP": 0,
-            "auprc": 0.055,
+            "auprc": 0.063,
             "coverage": 0.0,
             "f1": null,
             "n_decisive": 0,
@@ -921,18 +921,22 @@
             "selective_risk": null
           },
           "on": {
-            "FP": 0,
-            "TP": 0,
-            "auprc": 0.055,
-            "coverage": 0.0,
-            "f1": null,
-            "n_decisive": 0,
-            "n_wrong": 0,
-            "prec": null,
-            "rec": 0.0,
-            "selective_risk": null
+            "FP": 5,
+            "TP": 3,
+            "auprc": 0.142,
+            "coverage": 0.042,
+            "f1": 0.3,
+            "n_decisive": 8,
+            "n_wrong": 5,
+            "prec": 0.375,
+            "rec": 0.25,
+            "selective_risk": 0.625
           },
-          "transitions_off_to_on": {}
+          "transitions_off_to_on": {
+            "false_novel:UNRESOLVED->NOVEL_PROBABLE": 5,
+            "false_novel:UNRESOLVED->UNCONFIRMED": 2,
+            "genuine_novel:UNRESOLVED->NOVEL_PROBABLE": 3
+          }
         },
         "sr": {
           "lifted_to_confident": {
@@ -942,26 +946,26 @@
           "off": {
             "FP": 1,
             "TP": 4,
-            "auprc": 0.325,
-            "coverage": 0.226,
+            "auprc": 0.313,
+            "coverage": 0.153,
             "f1": 0.471,
-            "n_decisive": 43,
+            "n_decisive": 29,
             "n_wrong": 1,
             "prec": 0.8,
             "rec": 0.333,
-            "selective_risk": 0.023
+            "selective_risk": 0.034
           },
           "on": {
             "FP": 1,
             "TP": 4,
-            "auprc": 0.325,
-            "coverage": 0.226,
+            "auprc": 0.313,
+            "coverage": 0.153,
             "f1": 0.471,
-            "n_decisive": 43,
+            "n_decisive": 29,
             "n_wrong": 1,
             "prec": 0.8,
             "rec": 0.333,
-            "selective_risk": 0.023
+            "selective_risk": 0.034
           },
           "transitions_off_to_on": {}
         }
@@ -1074,11 +1078,11 @@
       }
     }
   },
-  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them).",
+  "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them). SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF.",
   "protocol": "chain_support",
-  "ruleset_version": "default-0.0.6",
+  "ruleset_version": "default-0.0.7",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.0.7"
+  "tool_version": "0.1.0"
 }

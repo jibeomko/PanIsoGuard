@@ -329,11 +329,11 @@ pairs, with the BAM), the share of genuine isoforms in each class is:
 | Class | genuine | false | precision |
 |---|---:|---:|---:|
 | `NOVEL_CONFIRMED` | 351 | 3 | 0.992 |
-| `NOVEL_PROBABLE` | 193 | 1 | 0.995 (146 of them lifted by whole-chain reads) |
+| `NOVEL_PROBABLE` | 198 | 1 | 0.995 (151 of them lifted by whole-chain reads) |
 | `KNOWN_FRAGMENT` | 153 | 11 | 0.933 (ISM carried end to end by the reads; not a novel call) |
-| `UNRESOLVED` | 0 | 6 | 0.000 (without the BAM: 152 / 7, 0.956) |
-| `UNCONFIRMED` | 25 | 36 | 0.410 (without the BAM: 176 / 61, 0.743, mostly ISM) |
-| `ARTIFACT` | 8 | 83 | 0.088 |
+| `UNRESOLVED` | 0 | 6 | 0.000 (without the BAM: 160 / 7, 0.958) |
+| `UNCONFIRMED` | 23 | 36 | 0.390 (without the BAM: 169 / 61, 0.735, mostly ISM) |
+| `ARTIFACT` | 5 | 83 | 0.057 |
 
 Without the BAM, `UNRESOLVED` is mostly genuine: NIC isoforms with no novel junction to test.
 With the BAM (0.0.7), the ones whose whole intron chain is carried by at least 3 long reads

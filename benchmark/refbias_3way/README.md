@@ -198,17 +198,17 @@ acceptor chr6:130,022,220), all `same-noncanonical` in the person: candidate fal
 SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated novel models
 and `Isoform` 9,253 (HG02717: 7,202 / 10,067). PanIsoGuard's `REFERENCE_BIAS` isoforms (18
 and 28) are all among the `Artifact`s in both individuals: without the rescue a user
-following the filter discards them. The rest (HG03516 / HG02717, ruleset 0.0.5):
-`NOVEL_PROBABLE` 7,067 / 8,363, every one with ≥ 3 whole-chain long reads (0.0.7 chain
-support; no short reads exist for these samples, so nothing is `CONFIRMED`): 5,784 / 7,011
+following the filter discards them. The rest (HG03516 / HG02717, 0.1.0 binary, ruleset 0.0.7):
+`NOVEL_PROBABLE` 7,068 / 8,364, every one with ≥ 3 whole-chain long reads (0.0.7 chain
+support; no short reads exist for these samples, so nothing is `CONFIRMED`): 5,775 / 7,007
 are SQANTI3 `Isoform`s and 1,293 / 1,357 are SQANTI3 `Artifact`s whose only sign is
 `RTS_stage` (`chain_support;rt_switch_sign`; held `UNCONFIRMED` before ruleset 0.0.5), which
 is the real-data size of the RT-switch decision; `KNOWN_FRAGMENT` 3,925 / 1,854 (ISM carried
 end to end with no intra-priming sign; 314 / 177 of them SQANTI3 `Artifact`s); `UNCONFIRMED`
-11,137 / 5,729 (ISM with the intra-priming sign 6,612 / 2,273; chain-supported isoforms with
-an intra-priming sign 2,891 / 1,979 or a non-canonical motif 631 / 747, both still held; the
-mapping sign without short reads 741 / 605, `ARTIFACT` before 0.0.5); `UNRESOLVED` 15,398 /
-8,961; `ARTIFACT` 0 / 0, because no short reads were given.
+11,134 / 5,725 (ISM with the intra-priming sign 6,612 / 2,273; chain-supported isoforms with
+an intra-priming sign 2,892 / 1,978 or a non-canonical motif 630 / 748, both still held; the
+mapping sign without short reads 738 / 601, `ARTIFACT` before 0.0.5); `UNRESOLVED` 15,414 /
+8,969; `ARTIFACT` 0 / 0, because no short reads were given.
 
 Firewall: 18 and 28 rescued under `wgs` provenance, 0 under `unknown`, all held `UNRESOLVED`
 with `circularity_flag`.
@@ -230,7 +230,7 @@ with `circularity_flag`.
 | B2 | minimap2 splice:hq | 4 h 21 min | 38 GB | 3 h 32 min | 38 GB |
 | B2 | IsoQuant | 22 min (resumed after an OOM kill next to B1) | 5.9 GB | 1 h 37 min | 17 GB |
 | B2 | SQANTI3 | 8.9 min | 9.5 GB | 3.7 min | 9.4 GB |
-| C | `adjudicate` × 3 provenance runs, genome-wide with `--bam` | 9.7 min | 0.5 GB | 18.1 min | 0.5 GB |
+| C | `adjudicate` × 3 provenance runs, genome-wide with `--bam` | 10.3 min | 0.9 GB | 17.3 min | 0.9 GB |
 
 HG03516's B1 and B2 ran partly concurrently, so its walls are upper bounds; HG02717 ran
 sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7–12 h and

@@ -11,7 +11,7 @@ Section 4 (0.0.7) adds the whole-chain read support on the same reads. The input
 adjudicated with the real ONT BAM, plus a reference-bias scan of every novel junction
 against NA12878's own genome (GM12878 = NA12878 = GIAB HG001).
 
-## 1. The BAM mapping thresholds are chemistry-dependent
+## 1. The BAM mapping thresholds were chemistry-dependent; the indel-near excess removes that
 
 Running the mapping axis (`--bam`) on the real ONT reads, fraction of the 190
 BAM-evaluable novel junctions (at least one spanning read) each signal flags at the shipped
@@ -20,7 +20,7 @@ BAM-evaluable novel junctions (at least one spanning read) each signal flags at 
 | BAM signal | Fires on real ONT (frac > 0.5) | status |
 |------------|:------------------------------:|--------|
 | soft-clip (removed in 0.0.8) | 134 / 191 (70 %) in the last run that measured it | never a default gate |
-| indel-near | 128 / 190 (67 %) | default-on (HiFi-calibrated) |
+| indel-near, raw fraction | 128 / 190 (67 %) | the gate reads the excess over the reads' own indel rate since ruleset 0.0.7, which fires on 0 / 190 |
 | low-MAPQ | 9 / 190 (5 %) | default-on |
 | supplementary | 3 / 190 (2 %) | default-on |
 
@@ -33,14 +33,16 @@ Two things this shows:
   ONT data, because the feature was a terminal soft-clip anywhere on the read, not near the
   junction. It was off by default through 0.0.7 and the fraction was removed in 0.0.8; this
   run is the evidence.
-- The HiFi-calibrated `indel_near` gate over-flags on ONT. ONT's intrinsic indel error
-  rate makes "indel adjacent to junction" pervasive, so the 0.5 gate (genuine max 0.19
-  on clean HiFi — see [bam_axis](../bam_axis)) fires on 67 % of ONT junctions and does not
-  separate single-caller (mean 0.63) from ≥ 2-caller (mean 0.67) novels
-  (the mapping sign fires on 17 / 31 = 55 % of ≥ 2-caller vs 112 / 254 = 44 % of single-caller chains). Meanwhile the *older* low-MAPQ / supplementary
-  signals barely fire (5 % / 2 %). The BAM mapping axis is opt-in (`--bam`) and its
-  thresholds need re-calibration per chemistry; the shipped defaults are
-  HiFi-tuned. (Making `indel_near` rate-normalized for noisy chemistries is future work.)
+- The raw indel-near fraction over-flags on ONT. ONT's intrinsic indel error rate makes
+  "indel adjacent to junction" pervasive, so the raw fraction exceeds the HiFi-calibrated 0.5
+  gate (genuine max 0.19 on clean HiFi — see [bam_axis](../bam_axis)) at 67 % of ONT junctions
+  and does not separate single-caller (mean 0.63) from ≥ 2-caller (mean 0.67) novels; through
+  ruleset 0.0.6 the mapping sign fired on 17 / 31 = 55 % of ≥ 2-caller vs 112 / 254 = 44 % of
+  single-caller chains. Since ruleset 0.0.7 the gate reads the fraction in excess of what each
+  read's own indel rate predicts (the background is 0.94 per junction here), and it fires on
+  none of the 190 junctions: the mapping sign now rests on low-MAPQ / supplementary alone,
+  which barely fire (5 % / 2 %; the sign is on 0 / 31 ≥ 2-caller and 9 / 254 single-caller
+  chains). The `--platform ont` preset is kept for compatibility but changes nothing.
 
 ## 2. The consensus axis is the chemistry-independent signal
 
@@ -92,13 +94,15 @@ What the two presets do with it (no short reads exist for this sample, so every 
 
 | preset | UNCONFIRMED (`mapping_without_short_reads`) | NOVEL_PROBABLE | UNRESOLVED |
 |---|---:|---:|---:|
-| `--platform hifi` (default; indel-near gate on) | 129 | 52 | 104 |
-| `--platform ont` (indel-near gate off) | 9 | 147 | 129 |
+| `--platform hifi` (default) | 9 | 147 | 129 |
+| `--platform ont` | 9 | 147 | 129 |
 
-Under the HiFi defaults the over-firing indel-near gate (section 1) holds most chain-supported
-isoforms `UNCONFIRMED` (before ruleset 0.0.5 they were `ARTIFACT`; this dataset is one reason
-a mapping sign alone no longer rejects a call); under the ONT preset they become
-`NOVEL_PROBABLE`. There is no truth
+Since ruleset 0.0.7 the two presets give the same verdicts: the indel-near excess does not fire
+on these reads (section 1), so the 9 `UNCONFIRMED` rest on low-MAPQ or supplementary reads.
+Through ruleset 0.0.6 the HiFi default held 129 chain-supported isoforms `UNCONFIRMED` through
+the raw indel-near fraction (before ruleset 0.0.5 they were `ARTIFACT`; this dataset is one
+reason a mapping sign alone no longer rejects a call), and the ONT preset, which turned the
+gate off, gave the 9 / 147 / 129 row. There is no truth
 for these chains, so this section is about whether the axis functions on ONT (it does), not
 about accuracy.
 
