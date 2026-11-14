@@ -191,7 +191,11 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
       const int altlen = static_cast<int>(std::strlen(alt));
       if (altlen != reflen || alt[0] == '<' || alt[0] == '*') { ++impl_->n_non_snv; continue; }
       for (int64_t pos = k0; pos < k1; ++pos) {
-        haps[h][static_cast<std::size_t>(pos - start)] = static_cast<char>(std::toupper(static_cast<unsigned char>(alt[pos - rec->pos])));
+        char& base = haps[h][static_cast<std::size_t>(pos - start)];
+        // a base already unknown (a contradiction, a missing allele, a record without GT, a reference N)
+        // is not restored by a later record, whatever its genotype or allele
+        if (base == 'N') continue;
+        base = static_cast<char>(std::toupper(static_cast<unsigned char>(alt[pos - rec->pos])));
         applied = true;
       }
     }

@@ -343,7 +343,9 @@ TEST_CASE("two records at one position are two records, in either row order", "[
 // repeat is one record.
 TEST_CASE("a repeated site with another genotype is a contradiction, not two haplotypes", "[vcf][variant]") {
   auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
-  for (const char* f : {"two_jx_dup_conflict.vcf.gz", "two_jx_dup_conflict_swapped.vcf.gz"}) {
+  // both row orders; the first genotype written again after the contradiction; another ALT over the same base
+  for (const char* f : {"two_jx_dup_conflict.vcf.gz", "two_jx_dup_conflict_swapped.vcf.gz", "two_jx_dup_conflict_aba.vcf.gz",
+                        "two_jx_dup_conflict_otheralt.vcf.gz"}) {
     auto vcf = std::make_shared<VcfHaplotypes>(tiny(f));
     HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{vcf});
     const JunctionMotifs m = p.motifs("chrT2", {60, 80}, Strand::kPlus);

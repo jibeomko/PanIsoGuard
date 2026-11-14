@@ -113,7 +113,8 @@ that junction is known and the junction table says `unlinked`. A homozygous reco
 same base on every haplotype and needs no linkage. A site written twice with the same alleles
 and another genotype contradicts itself: its bases are unknown on every haplotype
 (`haplotype_vcf_conflicting_records_at_motifs` in the provenance log); an identical repeat is
-one record. Two or more created junctions that rest on heterozygous alleles are
+one record. A base once unknown stays unknown: a later record at that base, whatever its
+genotype or allele, does not restore it. Two or more created junctions that rest on heterozygous alleles are
 rescued only when those alleles share one phase set: unphased alleles, or alleles in different
 sets, do not establish a common haplotype and the isoform is held with reason
 `haplotype_phase_unknown` (`haplotype_phase_unknown` in the JSONL). In both cases the call is

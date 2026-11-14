@@ -106,6 +106,13 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a seventh external review (of e3c57e6) on 2026-11-14, with a regression test:
+- A base set unknown by a contradiction (or a missing allele, or a record without GT) was
+  restored when a later record wrote an allele over it, so the first genotype written again
+  after its contradiction, or another ALT at the same base, rescued a motif the file does not
+  support and the call depended on row order. An unknown base is never restored by a later
+  record.
+
 Found by a sixth external review (of fb60a4b) on 2026-11-14, with a regression test:
 - A site written twice with the same position and alleles but another genotype or phase set
   was counted once (the second record's phase was dropped while its alleles were applied), so
