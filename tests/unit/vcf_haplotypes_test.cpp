@@ -318,3 +318,22 @@ TEST_CASE("an MNP spanning both motif windows is one record, phased or not", "[v
     CHECK(m.verdict == VariantVerdict::kCreated);
   }
 }
+
+// two_jx_samepos*.vcf.gz: two records at one position of the second donor (G>T 1|0 and G>C 0|1); in different
+// phase sets they are two unlinked records whichever order the rows are in, in one set they are linked.
+TEST_CASE("two records at one position are two records, in either row order", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  auto motifs = [&](const char* vcf) {
+    HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny(vcf))});
+    return p.motifs("chrT2", {60, 80}, Strand::kPlus);
+  };
+  for (const char* f : {"two_jx_samepos_sets.vcf.gz", "two_jx_samepos_sets_swapped.vcf.gz"}) {
+    const JunctionMotifs m = motifs(f);
+    CHECK(m.phase_unlinked);
+    CHECK(m.verdict == VariantVerdict::kNotEvaluable);
+  }
+  const JunctionMotifs one_set = motifs("two_jx_samepos_sameps.vcf.gz");
+  CHECK_FALSE(one_set.phase_unlinked);
+  CHECK(one_set.haps[0].motif == "GT-AG");
+  CHECK(one_set.verdict == VariantVerdict::kCreated);
+}

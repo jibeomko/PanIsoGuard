@@ -106,6 +106,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a fifth external review (of 4ba3058) on 2026-11-14, with a regression test:
+- The once-per-junction record count told records apart by position alone, so two records at
+  one position (different ALT alleles, different phase sets) were counted as one and the call
+  depended on their row order. A record is its position and its alleles.
+
 Found by a fourth external review (of 97c4477) on 2026-11-14, with a regression test:
 - A single MNP covering both windows of a junction was read once per window and counted as two
   records, so an unphased MNP that creates a canonical motif on its own was held as `unlinked`

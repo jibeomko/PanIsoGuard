@@ -52,7 +52,8 @@ struct WindowPhase {
                                  // and shaped a window base: two or more need one phase set
   long phase_set = kNoPhaseSet;
   bool mixed_sets = false;
-  std::vector<int64_t> counted;   // start positions of the records already counted: one MNP over both windows is one record
+  std::vector<std::string> counted;   // records already counted (position, REF and ALT alleles): one MNP over both windows is one
+                                      // record, two records at one position are two
   void add_set(long ps) { if (phase_set == kNoPhaseSet) phase_set = ps; else if (phase_set != ps) mixed_sets = true; }
 };
 
