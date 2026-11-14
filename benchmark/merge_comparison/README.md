@@ -1,4 +1,4 @@
-# Merge-tool head-to-head — is the consensus claim a matcher artifact?
+# Merge-tool head-to-head: is the consensus claim a matcher artifact?
 
 The [multicaller](../multicaller) result rests on how caller agreement is counted.
 `panisoguard combine` groups isoforms by exact intron-chain fingerprint. Two objections:
@@ -6,16 +6,16 @@ The [multicaller](../multicaller) result rests on how caller agreement is counte
 1. "`combine` just re-derives `gffcompare -i`." Is it a novel algorithm or a
    re-implementation of the established N-way comparison?
 2. **"Exact matching splits true cross-caller agreements that a fuzzy merge (TAMA)
-   would keep — so the ≥k precision is an artifact of your matcher, not the data."**
+   would keep, so the ≥k precision is an artifact of your matcher, not the data."**
 
 This protocol answers both by putting every matcher on one footing: each produces
 caller-support groups over the same 5 chr22 caller GTFs (FLAIR + IsoQuant + Bambu +
 ESPRESSO + TALON), and we score each with the identical "≥ k callers" PR curve vs
 SQANTI-SIM truth. Matchers compared: `combine` (exact), gffcompare -i (the incumbent),
-TAMA merge (fuzzy, junction wobble 10 bp), and a controlled **exact→fuzzy wobble
+TAMA merge (fuzzy, junction wobble 10 bp), and a controlled **exact-to-fuzzy wobble
 sweep** (0–20 bp).
 
-## Result 1 — `combine` ≡ `gffcompare -i` (exactly)
+## Result 1: `combine` equals `gffcompare -i` (exactly)
 
 | matcher | novel chains | ≥2 P/R | ≥3 P/R | n_callers dist (1·2·3·4·5) |
 |---------|-------------:|:------:|:------:|:--------------------------:|
@@ -28,7 +28,7 @@ distribution, same PR curve). So `combine` is not a new merge algorithm; it is a
 re-implementation in htslib of the established intron-chain N-way comparison that feeds
 the adjudicator directly (no Perl, no GTF round trip, no extra dependency).
 
-## Result 2 — at ≥ 3 callers the precision is similar under every matcher
+## Result 2: at ≥ 3 callers the precision is similar under every matcher
 
 | matcher | ≥2 precision | ≥3 precision |
 |---------|:-----------:|:-----------:|
@@ -42,14 +42,14 @@ exact, gffcompare, TAMA and the whole wobble range. At ≥ 2 callers the matcher
 is a property of the data (the callers disagree on artifacts), not of PanIsoGuard's exact
 matcher.
 
-## Result 3 — exact matching does not lose agreements at the boundary that matters
+## Result 3: exact matching does not lose agreements at the boundary that matters
 
 The decisive metric: how many genuine novels does exact matching call *single-caller*
 that a fuzzy matcher merges into a *≥ 2 callers* group? Counted by the genuine chain's
 membership of the fuzzy group (a genuine chain merged into a group whose representative
 is a different, false chain still counts as merged).
 
-| fuzzy matcher | genuine novels crossing single → ≥2 | genuine upgraded (any amount) |
+| fuzzy matcher | genuine novels crossing from single to ≥2 | genuine upgraded (any amount) |
 |---------------|:----:|:----:|
 | gffcompare | 0 | 0 |
 | TAMA (10 bp) | 4 | 78 |
@@ -58,10 +58,10 @@ is a different, false chain still counts as merged).
 Of the 769 genuine novel chains in the truth (760 of them reported by at least one caller),
 4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
 boundary under a fuzzy matcher; the rest of the upgrades move within the multi-caller pile
-(for example 3 → 4 callers). So exact matching costs the consensus gate at most 4 genuine
+(for example 3 to 4 callers). So exact matching costs the consensus gate at most 4 genuine
 chains in 769 on this set, and the ≥ 3 precision (Result 2) is similar under every
 matcher. (TAMA's more aggressive merge collapses the call set to 974 novel chains and trades
-some recall at ≥ 3, 0.831 vs 0.910 — a different operating point, not a more accurate one.)
+some recall at ≥ 3, 0.831 vs 0.910, a different operating point, not a more accurate one.)
 
 Correction (2026-11-01). The scorer used to count this metric by each fuzzy group's
 representative chain, which missed a genuine chain merged into a group represented by a

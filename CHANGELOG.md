@@ -29,7 +29,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   and the replayed rulebook compute the same excess. Every tracked benchmark envelope was
   regenerated with the 0.1.0 binary; the change shows wherever the raw fraction used to fire
   on noisier reads: end2end chr22 (PBSIM3) moves 14 isoforms out of the mapping sign (3
-  genuine `NOVEL_PROBABLE` → `NOVEL_CONFIRMED`, 11 false `ARTIFACT` → `UNCONFIRMED`; precision
+  genuine `NOVEL_PROBABLE` to `NOVEL_CONFIRMED`, 11 false `ARTIFACT` to `UNCONFIRMED`; precision
   and specificity unchanged), the SQANTI-SIM per-class table shifts by a few isoforms, the
   SIRV-Set4 chain lifts become evaluable (3 genuine and 5 false lifted without short reads),
   LRGASP PacBio loses 24 `ARTIFACT` calls to `UNCONFIRMED` and gains 6 `NOVEL_CONFIRMED`, and
@@ -73,7 +73,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   provenance log records that the rows were computed. On the five chr22 callers the categories equal
   SQANTI3's for 98.6 % of 7726 multi-exon isoforms and the splice-motif prior wherever both
   evaluate it; the differing isoforms are retained-intron sub-chains SQANTI3 files under ISM,
-  which this mode adjudicates (FLAIR recall 0.748 → 0.778 at precision 0.993;
+  which this mode adjudicates (FLAIR recall 0.748 to 0.778 at precision 0.993;
   benchmark/no_sqanti3, a new tracked protocol).
 
 ### Changed
@@ -106,33 +106,25 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
-Found by a seventh external review (of e3c57e6) on 2026-11-14, with a regression test:
+Each entry has a regression test.
 - A base set unknown by a contradiction (or a missing allele, or a record without GT) was
   restored when a later record wrote an allele over it, so the first genotype written again
   after its contradiction, or another ALT at the same base, rescued a motif the file does not
   support and the call depended on row order. An unknown base is never restored by a later
   record.
-
-Found by a sixth external review (of fb60a4b) on 2026-11-14, with a regression test:
 - A site written twice with the same position and alleles but another genotype or phase set
   was counted once (the second record's phase was dropped while its alleles were applied), so
   a canonical motif the file does not support could be composed and the call depended on row
   order. Such a repeat is a contradiction: the bases are unknown on every haplotype and the
   provenance log counts it (`haplotype_vcf_conflicting_records_at_motifs`); an identical
   repeat is one record.
-
-Found by a fifth external review (of 4ba3058) on 2026-11-14, with a regression test:
 - The once-per-junction record count told records apart by position alone, so two records at
   one position (different ALT alleles, different phase sets) were counted as one and the call
   depended on their row order. A record is its position and its alleles.
-
-Found by a fourth external review (of 97c4477) on 2026-11-14, with a regression test:
 - A single MNP covering both windows of a junction was read once per window and counted as two
   records, so an unphased MNP that creates a canonical motif on its own was held as `unlinked`
   (the phased writing and the same sequence as a FASTA were rescued). A record is counted once
   per junction; its bases are still applied in both windows.
-
-Found by a third external review (of c74850e) on 2026-11-14, with a regression test:
 - A partly missing genotype (`1|.`, `0|.`, `1/.`) placed its known allele by haplotype index
   without entering the phase bookkeeping, so two such records in different phase sets, or one
   of them next to a heterozygous record, composed a canonical motif the file does not support,
@@ -146,10 +138,6 @@ Found by a third external review (of c74850e) on 2026-11-14, with a regression t
   inputs plus the swapped writings; the verdict must be `REFERENCE_BIAS` exactly when a
   canonical haplotype is guaranteed under every completion and orientation, and the same for
   either writing of the alleles. Needs bgzip and tabix; skipped where they are absent.
-
-Found by a second external review (of 5bac4a4) on 2026-11-14; each has a regression test
-(the replayed-rulebook branch is checked against the binary's output on a constructed case,
-not by a CTest):
 - Two heterozygous variants inside one splice motif (a donor and an acceptor variant) were
   combined by their position in the genotype even when their phase sets differed or they were
   unphased, so a canonical motif was composed that no read supports, and the call changed with
@@ -163,10 +151,8 @@ not by a CTest):
 - `compare_routes.py` counted `REFERENCE_BIAS` over the isoforms present in both routes only,
   and its `ROUTES DIFFER` line ignored a changed reason or motif; both are over every row now.
 - The replayed rulebook lacked the hold for novel junctions that lie on pangenome paths no
-  single path carries (`path_inconsistent`); it is in, as the binary decides it.
-
-Found by an external review of 688530b on 2026-11-14 (VCF input and `--no-sqanti3`); each has a
-regression test:
+  single path carries (`path_inconsistent`); it is in, as the binary decides it
+  (checked against the binary on a constructed case, not by a CTest).
 - A missing allele (`.`) at a splice motif, or a genotype shorter than the sample's ploidy, was
   read as the reference base, so an incomplete genotype could complete a canonical motif and
   rescue the junction. The base is unknown now (N): that haplotype's motif is not evaluable,
@@ -194,8 +180,6 @@ regression test:
   and count against agreement, and the script says `ROUTES DIFFER` when any is found.
 - The CTest `integration_validation_bams_duplicate` used a directory another test created and
   failed when run alone; it makes its own.
-
-Found by a sanitizer build and an edge-case review of the 0.1.0 inputs on 2026-11-14:
 - `--haplotype-vcf` on a file with several samples and no `--vcf-sample` read freed memory while
   composing its error message (AddressSanitizer: heap-use-after-free); the count is copied first.
 - The sample's ploidy was read from the first record alone, so a haploid record at the top of the
@@ -206,8 +190,6 @@ Found by a sanitizer build and an edge-case review of the 0.1.0 inputs on 2026-1
 - Two `--validation-bam` files with the same file name in different directories shared one key
   in `chain_full_reads_by_library`; such libraries are keyed by the path given.
 - The same file given twice to `--haplotype-vcf` is refused, as it is for `--validation-bam`.
-
-Found by a code audit on 2026-10-31; each has a regression test.
 - `--write-kept` pointed at the input isoform file truncated it and reported success; the
   path is now refused (same inode).
 - A write that did not reach the disk (full disk, closed pipe) left a truncated output file
@@ -239,7 +221,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   BED12 block outside `chromStart..chromEnd` (or overlapping its neighbour) was accepted;
   both are errors now.
 - `decoys` wrote file paths into its JSON unescaped.
-- Second audit pass (2026-11-01): any output of `adjudicate`, `combine` or `decoys` that is an
+- Any output of `adjudicate`, `combine` or `decoys` that is an
   input file (the reference GTF or classification given to `--write-kept`, a default output
   path symlinked to an input, two outputs on one file) is refused before anything is read;
   `--config` also rejects a section that is not a table and a key PanIsoGuard does not read
@@ -249,12 +231,12 @@ Found by a code audit on 2026-10-31; each has a regression test.
   junction listed path ids) next to `pangenome_path_consistent` (the listed ones agree); the
   BAM reader frees its iterator and record through RAII on every exit path; the decoys CTest
   runs on a fixture that yields a decoy.
-- Fourth audit pass (2026-11-01): an output that is a symlink to a file not written yet
+- An output that is a symlink to a file not written yet
   (`ln -s result.adjudicated.tsv kept.gtf`, then `--out-prefix result --write-kept kept.gtf`)
   passed the output check and the verdict table was overwritten by the GTF. A final symlink
   is now followed to its target before outputs are compared.
-- Fifth audit pass (2026-11-01): an isoform whose junctions are all novel had no known
-  junction to gauge coverage with, so an `SJ.tab` that splices nowhere near it (the audit used
+- An isoform whose junctions are all novel had no known
+  junction to gauge coverage with, so an `SJ.tab` that splices nowhere near it (for example
   one holding only other chromosomes) still made its 0 of N `UNSUPPORTED`, and with a sign
   `ARTIFACT`. The support now stays `UNKNOWN` (`no_coverage`) unless a short-read junction
   splices within the isoform's span on its strand or unstranded. A classification whose
@@ -322,16 +304,16 @@ Found by a code audit on 2026-10-31; each has a regression test.
   the experimentally validated novel isoforms, all for the `RTS_stage` flag; PanIsoGuard
   discards none.
 - [benchmark/chain_support](benchmark/chain_support): `sweep_min_full_reads.py`, the whole-chain
-  read threshold from 2 to 10 (no genuine lift lost in simulation, false lifts 6 → 3; the share of
-  real-data recombinant decoys accepted 46 % → 17 %). [benchmark/caller_filters](benchmark/caller_filters):
+  read threshold from 2 to 10 (no genuine lift lost in simulation, false lifts 6 to 3; the share of
+  real-data recombinant decoys accepted 46 % to 17 %). [benchmark/caller_filters](benchmark/caller_filters):
   SQANTI3's ML filter trained on the simulated truth (2-fold CV; only TALON has the ≥ 250 false
   isoforms it requires) P 0.740 / R 0.518 / AUPRC 0.737 against PanIsoGuard 0.716 / 0.709 /
   0.629, the supervised ceiling of SQANTI3's features on a permissive caller.
 - **New: [benchmark/caller_filters](benchmark/caller_filters).** Three post-caller filters on the
   same output (none / SQANTI3 rules / PanIsoGuard + BAM), five callers, no short reads: SQANTI3's
   rules filter adds no precision to four of the five callers and costs 10–13 % of their genuine
-  isoforms; PanIsoGuard raises precision on every caller (FLAIR 0.839 → 0.993 at recall 0.75,
-  TALON 0.396 → 0.716 at 0.71, strict callers +0.01–0.02). Each caller's own knob against it:
+  isoforms; PanIsoGuard raises precision on every caller (FLAIR 0.839 to 0.993 at recall 0.75,
+  TALON 0.396 to 0.716 at 0.71, strict callers +0.01 to 0.02). Each caller's own knob against it:
   Bambu's NDR buys precision faster at a steep recall price (0.82 at 0.58 vs PanIsoGuard 0.76 at
   0.95 on NDR 0.5); on TALON's unfiltered output PanIsoGuard (0.353) is below TALON's own filter
   (0.396) and stacks on it (0.716). A measured runtime table replaces the README estimates
@@ -341,15 +323,15 @@ Found by a code audit on 2026-10-31; each has a regression test.
   SIRV section regenerated too), caller_filters, lrgasp_wtc11 (with the cross-library runs),
   lrgasp_targets, tusco_negatives and rts_sensitivity. The rule moves isoforms whose span has
   no spliced short read from `UNSUPPORTED` to `no_coverage`: on chr22 at 1 M pairs with the
-  BAM 5 more genuine isoforms are kept (recall 0.745 → 0.752, precision 0.993 unchanged, AUPRC
-  0.974 → 0.975), on chr20 and chr19 recall rises by 0.004 and 0.016, end2end holds 3 more false
+  BAM 5 more genuine isoforms are kept (recall 0.745 to 0.752, precision 0.993 unchanged, AUPRC
+  0.974 to 0.975), on chr20 and chr19 recall rises by 0.004 and 0.016, end2end holds 3 more false
   novels instead of rejecting them (239 of 249 rejected, 10 held), and on LRGASP WTC11 51 PacBio
   and 30 ONT isoforms of 78,256 and 39,542 change class with short reads. The oracle short-read
   settings, the SIRV runs and the decoy tables are unchanged. The envelopes of the protocols that
   take no short-read junctions were re-run afterwards (below).
 - The remaining tracked runs re-done with the current binary (2026-11-01), so that every
   envelope reflects the strand-aware read counting: bam_axis (false junctions with ≥ 3 spanning
-  reads 124 → 120, mean indel-near 0.129 → 0.133, still 14 caught and 0 genuine flagged),
+  reads 124 to 120, mean indel-near 0.129 to 0.133, still 14 caught and 0 genuine flagged),
   gm12878_realdata (190 BAM-evaluable junctions instead of 191; 154 chains with ≥ 3 exact
   full-chain reads instead of 155; `--platform ont` 147 `NOVEL_PROBABLE`), the HG03516 and
   HG02717 haplotype scans, refbias_cohort and refbias_phasing (identical), hg002, the HG002 whole
@@ -384,7 +366,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   (`chain_support_with_<mechanism>`): the simulator does not model intra-priming, and on
   real Iso-Seq the sign marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's
   filter also rejects, so there is no evidence to lift them. Effect at 1 M pairs + BAM:
-  recall 0.710 → 0.745 at precision 0.993 (AUPRC 0.974); without short reads 489 / 4 →
+  recall 0.710 to 0.745 at precision 0.993 (AUPRC 0.974); without short reads 489 / 4 to
   546 genuine / 4 false (AUPRC 0.953 vs SQANTI3 rules 0.909, bootstrap CI [+0.029, +0.061]);
   end2end 19 of 20 genuine novels `NOVEL_PROBABLE`, 0 false. `panisoguard-report`'s rulebook
   and `notes/check_notes.py` follow.
@@ -417,7 +399,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   (`benchmark/chain_support/score_decoys.py`): wrong combinations reach 3 reads 0–0.1 % of the
   time, the genuine ones 100 % (31 / 31). On real PacBio / Kinnex data 33–46 % of the
   recombinants of two expressed isoforms are carried by ≥ 3 reads, with as many reads as
-  their parents and recur in an independent library (PacBio → ONT, one Kinnex individual →
+  their parents and recur in an independent library (PacBio to ONT, one Kinnex individual to
   the other) at 75–93 % when both parents are expressed in both, like the annotated
   transcripts (unannotated combinatorial isoforms rather than chimeras), so the rate is an
   upper bound on the false lift and a measure of annotation incompleteness
@@ -434,7 +416,7 @@ Found by a code audit on 2026-10-31; each has a regression test.
   (`evidence.chain_n_full_reads`, `chain_n_partial_reads`). When short-read support is
   `UNKNOWN` (no SJ.tab, or a NIC isoform whose junctions are all known) and no artifact
   sign is present, ≥ `chain_min_full_reads` (3) lifts the call to `NOVEL_PROBABLE`
-  (`chain_support`; `chain_support_with_<mechanism>` → `UNCONFIRMED`). The reads are the
+  (`chain_support`; `chain_support_with_<mechanism>` gives `UNCONFIRMED`). The reads are the
   caller's own, so it never reaches `NOVEL_CONFIRMED` and never overrides a short-read
   verdict. On SQANTI-SIM chr22 with 1 M short-read pairs it lifts FLAIR's recall from
   0.545 to 0.745 at precision 0.993 (146 genuine / 0 false isoforms), IsoQuant 111 / 0,
@@ -445,8 +427,8 @@ Found by a code audit on 2026-10-31; each has a regression test.
   reads are counted instead of the caller's own BAM (`evidence.chain_independent`, reason
   `chain_support;independent_library`; `provenance.log` records it). The class stays
   `NOVEL_PROBABLE`. Tested on LRGASP WTC11 with the other platform's library as the
-  independent one (`benchmark/lrgasp_wtc11/cross_library.py`): 13 / 17 (PacBio → ONT) and
-  14 / 16 (ONT → PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0–2
+  independent one (`benchmark/lrgasp_wtc11/cross_library.py`): 13 / 17 (PacBio to ONT) and
+  14 / 16 (ONT to PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0–2
   reads); genome-wide the novel lifts reproduce at 60–75 % of the expressed-FSM rate at
   matched depth from PacBio to ONT (like FSM within genes the ONT library covers) and at
   about the FSM rate from ONT to PacBio. Chains carrying SQANTI3's RT-switch sign reproduce
@@ -535,9 +517,9 @@ Found by a code audit on 2026-10-31; each has a regression test.
 
 ### Changed (breaking: output names and columns)
 - **Confidence classes renamed.** Names now say the verdict; the evidence is in the new
-  columns. `HIGH_CONF_KNOWN` → `KNOWN`, `HIGH_CONF_NOVEL` → `NOVEL_CONFIRMED`,
-  `MEDIUM_CONF_NOVEL` → `NOVEL_PROBABLE`, `LOW_CONF_PARTIAL` → `UNCONFIRMED`,
-  `AMBIGUOUS` → `UNRESOLVED`, `PAN_REF_RESCUED_FALSE_NOVEL` → `REFERENCE_BIAS` (the
+  columns. `HIGH_CONF_KNOWN` to `KNOWN`, `HIGH_CONF_NOVEL` to `NOVEL_CONFIRMED`,
+  `MEDIUM_CONF_NOVEL` to `NOVEL_PROBABLE`, `LOW_CONF_PARTIAL` to `UNCONFIRMED`,
+  `AMBIGUOUS` to `UNRESOLVED`, `PAN_REF_RESCUED_FALSE_NOVEL` to `REFERENCE_BIAS` (the
   rescued junction is real; what was false was the artifact flag, not the novelty: 77 of
   the 86 rescued HG03516/HG02717 junctions are novel on the personal genome too).
   `ARTIFACT` is unchanged. Class membership is unchanged except where the rules below say.
@@ -690,31 +672,31 @@ container, a large round of validation, a head-to-head against the SQANTI3 filte
 tool, not a more accurate filter (see README, "How it compares").
 
 ### Added
-- **BAM mapping axis — indel-near now feeds the verdict.** The read-level
+- **BAM mapping axis: indel-near now feeds the verdict.** The read-level
   `bam_frac_indel_near` and `bam_frac_softclip` fractions were measured at every junction
   but never acted on (only low-MAPQ / supplementary did). **`indel_near`** is now a
   `mapping_or_repeat` trigger (`max_indel_near_frac`, default 0.5). Validated on chr22
   SQANTI-SIM: it separates genuine novel junctions (max 0.190) from false (mean 0.350)
   and, gated at 0.5, catches **41/124 false at 100 % precision** with **0 genuine loss**.
-  (Its earlier specificity lift 0.946 → 0.966 came from 3 partially-supported false novels
+  (Its earlier specificity lift 0.946 to 0.966 came from 3 partially-supported false novels
   that the PARTIAL fix below now handles without the BAM; on this set it now only sharpens
-  attribution, 24 `LOW_CONF_PARTIAL → ARTIFACT`.)
+  attribution, 24 `LOW_CONF_PARTIAL` to `ARTIFACT`.)
   **`softclip`** is wired but **disabled by default** (`max_softclip_frac = 1.01`): the
   feature is a *terminal* soft-clip (not junction-proximal), so a default-on gate would
-  risk demoting genuine novels on noisy reads — opt-in only. New
+  risk demoting genuine novels on noisy reads; opt-in only. New
   [benchmark/bam_axis](benchmark/bam_axis) + unit test.
 - **Multi-caller consensus axis.** `adjudicate --caller-support <combine matrix>` feeds
   cross-caller agreement into the verdict: when short-read support is `UNKNOWN`, a novel
   chain recovered by ≥ `consensus_min_callers` (default 2) callers is promoted
-  `AMBIGUOUS → MEDIUM_CONF_NOVEL` (never `HIGH`; a mapping artifact still preempts).
+  `AMBIGUOUS` to `MEDIUM_CONF_NOVEL` (never `HIGH`; a mapping artifact still preempts).
   Ablate with `ablate --axes consensus`; emitted as `consensus_evaluable` / `n_callers`
   in `attribution.jsonl`.
-- **`panisoguard-report`** — an optional Python companion that renders a publication-grade,
+- **`panisoguard-report`**: an optional Python companion that renders a publication-grade,
   SQANTI3-style multi-page **PDF report** from adjudication output (`python/`). Console
   entry point + `pyproject.toml`; matplotlib is its only dependency.
-- **Container** — a multi-stage `Dockerfile` that builds the C++ binary from source and
+- **Container**: a multi-stage `Dockerfile` that builds the C++ binary from source and
   bundles `panisoguard-report` (works without waiting on the conda release).
-- **Quickstarts** — `examples/multi_caller/` (self-contained, offline, shows the consensus
+- **Quickstarts**: `examples/multi_caller/` (self-contained, offline, shows the consensus
   gradient) and `examples/report/` (an 8-page showcase PDF + generator).
 - **Validation benchmarks** (all git-tracked, schema-checked):
   `pangenome` (GATE-1 on the real HPRC v1.1 chr22 graph),
@@ -727,23 +709,23 @@ tool, not a more accurate filter (see README, "How it compares").
   cohort: 137/137, 0 false), `bam_axis` (wiring the indel-near / soft-clip read
   signals: 41/124 false caught, 0 genuine loss), and
   `gm12878_realdata` (the BAM axis on a real ONT dataset: soft-clip default-off
-  borne out — 98 % fire rate on ONT — and the mapping thresholds shown to
+  borne out (98 % fire rate on ONT) and the mapping thresholds shown to
   be chemistry-dependent; reference-bias rescue 0/1364 on the reference-grade sample), and
   `refbias_cohort` + `hg03516_refbias` (the **positive real-data application, replicated**:
   the reference-bias rescue fires on real PacBio Iso-Seq from **two** divergent West African
-  individuals — HG03516 (ESN) + HG02717 (GWD), HPRC R2 — **86 reference-bias novel junctions
+  individuals, HG03516 (ESN) + HG02717 (GWD), HPRC R2: **86 reference-bias novel junctions
   (77 novel vs GENCODE), 86/86 rescued, 0 false, firewall holds all 86**, with no false rescue in the scan
-  across both genomes, vs 0 on reference-grade GM12878; independently adversarially audited,
-  caveats stated — the reference-bias rescue firing on real divergent-genome RNA).
+  across both genomes, vs 0 on reference-grade GM12878; caveats stated: the
+  reference-bias rescue firing on real divergent-genome RNA).
 
 ### Fixed
 - **`PARTIAL` short-read support no longer promotes to `MEDIUM_CONF_NOVEL`.** An isoform
   with some but not all novel junctions corroborated was called a confident novel. The
   head-to-head against the SQANTI3 filter showed these were exactly PanIsoGuard's extra
   false positives. `PARTIAL` now always projects to `LOW_CONF_PARTIAL`. SQANTI-SIM:
-  precision 0.982 → 0.989, specificity 0.946 → 0.966, AUPRC 0.970 → 0.971, recall
+  precision 0.982 to 0.989, specificity 0.946 to 0.966, AUPRC 0.970 to 0.971, recall
   unchanged.
-- **`config/rules.default.toml` silently disabled the consensus axis** — `consensus_min_callers`
+- **`config/rules.default.toml` silently disabled the consensus axis**: `consensus_min_callers`
   was left as a `999` "reserved" sentinel after the axis was wired, so passing
   `--config config/rules.default.toml` turned consensus off. Set to the built-in default (2)
   and guarded by a new `integration_config_equivalence` regression test.
@@ -765,10 +747,10 @@ tool, not a more accurate filter (see README, "How it compares").
 - **Positioning** (after head-to-head benchmarking): `combine` is a
   re-implementation of `gffcompare -i` (not a novel merge), the ≥ 3-caller consensus precision is
   similar under every matcher, and the reference-bias rescue is a **high-specificity, high-sensitivity
-  check with a low base rate** (~1 in 18k introns genome-wide) — a correctness
+  check with a low base rate** (~1 in 18k introns genome-wide), a correctness
   check, not a high-yield discovery engine. New
   [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md).
-- **SQANTI3 attribution** — independence disclaimer + citation (Pardo-Palacios *et al.*,
+- **SQANTI3 attribution**: independence disclaimer + citation (Pardo-Palacios *et al.*,
   *Nat Methods* 2024) + the "rescue" name-clash disambiguation.
 - README: a Table of Contents + a "When to use PanIsoGuard" section.
 
@@ -781,6 +763,6 @@ tool, not a more accurate filter (see README, "How it compares").
 
 ## [0.0.3] / [0.0.2] / [0.0.1]
 
-Initial pre-release line — the C++ adjudicator (2-axis projection, reference-bias rescue +
+Initial pre-release line: the C++ adjudicator (2-axis projection, reference-bias rescue +
 circularity firewall), the `adjudicate` / `combine` / `benchmark` / `ablate` subcommands,
 and the first tracked benchmark suite. See the git history for details.

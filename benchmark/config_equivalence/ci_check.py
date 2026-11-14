@@ -98,7 +98,7 @@ def main():
         # (2) the consensus axis must actually fire (guards the silent-disable bug class)
         v = verdict_of(builtin, "isoX")
         if v != "NOVEL_PROBABLE":
-            sys.stderr.write(f"FAIL: consensus axis did not fire — isoX = {v}, expected "
+            sys.stderr.write(f"FAIL: consensus axis did not fire: isoX = {v}, expected "
                              "NOVEL_PROBABLE (>=2 callers, no short-read support).\n")
             return 1
         print(f"OK: shipped default config == built-in defaults; consensus fires (isoX -> {v})")

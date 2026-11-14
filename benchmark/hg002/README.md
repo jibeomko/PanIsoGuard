@@ -9,12 +9,12 @@ circularity firewall's `wgs` provenance).
 1. Download the GIAB HG002 v4.2.1 small-variant benchmark VCF (public, NIST FTP).
 2. Build a personalized haplotype FASTA with `bcftools consensus` using **strict
    1 bp biallelic SNVs only**, so it stays coordinate-aligned to GRCh38 (indels are
-   excluded — the documented coordinate-shift caveat).
+   excluded, the documented coordinate-shift caveat).
 3. Scan the reference annotation's introns for splice donor/acceptor dinucleotides
    that differ between GRCh38 and the HG002 haplotype:
-   - CREATED — non-canonical on GRCh38, canonical on HG002 = reference bias
-   - DISRUPTED — canonical on GRCh38, non-canonical on HG002
-   - CONTROL — canonical on both
+   - CREATED: non-canonical on GRCh38, canonical on HG002 = reference bias
+   - DISRUPTED: canonical on GRCh38, non-canonical on HG002
+   - CONTROL: canonical on both
 4. Build adjudicate inputs from these loci and run PanIsoGuard with
    `--reference-haplotype hap.fa --haplotype-provenance wgs`.
 
@@ -30,7 +30,7 @@ Needs `bcftools` (e.g. conda env with bcftools ≥1.18), `samtools`, and `paniso
 
 Of 13,496 unique chr22 introns, exactly 1 CREATED (reference-bias) and **2
 DISRUPTED** splice motifs are produced by real HG002 SNVs (annotated introns are
-overwhelmingly canonical on GRCh38, so motif-altering SNVs are rare — as expected).
+overwhelmingly canonical on GRCh38, so motif-altering SNVs are rare, as expected).
 
 ```
 label           verdict
@@ -40,8 +40,8 @@ CONTROL  ×5     UNRESOLVED                       (not falsely rescued)
 ```
 
 PanIsoGuard's variant axis, fed the real HG002 WGS-derived haplotype (non-circular),
-correctly rescued the single genuine reference-bias junction — a junction that looks
-non-canonical/suspect on GRCh38 but is a clean GT-AG on HG002's own genome — and
+correctly rescued the single genuine reference-bias junction, a junction that looks
+non-canonical/suspect on GRCh38 but is a clean GT-AG on HG002's own genome, and
 produced zero false rescues on the disrupted/control loci. This validates the
 mechanism on real human-genome variation.
 
@@ -49,7 +49,7 @@ mechanism on real human-genome variation.
 [../synthetic_axes](../synthetic_axes); for the short-read axis see
 [../controlled_truth](../controlled_truth).)
 
-## Whole-genome yield — how often does the rescue actually fire? ([run_wholegenome.sh](run_wholegenome.sh))
+## Whole-genome yield: how often does the rescue actually fire? ([run_wholegenome.sh](run_wholegenome.sh))
 
 The chr22 result above is one genuine case (N=1). Extending the **same annotation +
 variant scan to the whole genome** (HG002 v4.2.1, GENCODE v49, chr1–22; no RNA-seq, no
@@ -63,10 +63,10 @@ never fires?
 | false rescues (specificity) | 0 |
 | held by the circularity firewall under circular-risk provenance | 33 / 33 |
 
-Reference bias at splice junctions is rare but not zero — 33 cases
+Reference bias at splice junctions is rare but not zero: 33 cases
 across ~600k introns (~1 in 18,000). In this scan the axis rescued all 33 and none of the
 control junctions, and the firewall held all 33 under circular-risk provenance. So the
 reference-bias rescue is a check with a low base rate, not a discovery method. Its yield rises for samples from non-reference individuals or
-personalized-genome contexts. (DISRUPTED — 236 canonical→non-canonical junctions — is
+personalized-genome contexts. (DISRUPTED, 236 canonical-to-non-canonical junctions, is
 computed but intentionally not consumed by the engine, so it is correctly never rescued.)
 Recorded in [../results/hg002_wholegenome](../results/hg002_wholegenome).

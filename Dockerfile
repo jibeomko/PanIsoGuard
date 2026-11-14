@@ -4,7 +4,7 @@
 #             panisoguard adjudicate --classification cls.txt --isoforms-gtf iso.gtf --ref-gtf ref.gtf --out-prefix run
 #         docker run --rm panisoguard panisoguard --version
 # (-u runs as you so outputs can be written to the mounted folder; the image user cannot.)
-# (Pass the command through the default entrypoint — do NOT use --entrypoint, which would
+# (Pass the command through the default entrypoint; do not use --entrypoint, which would
 #  bypass the conda-env activation that puts htslib on the path.)
 #
 # --- stage 1: build the C++ binary against conda htslib ----------------------

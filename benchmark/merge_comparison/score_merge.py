@@ -12,7 +12,7 @@ GROUPS over the same 5 chr22 caller GTFs; we score each group against SQANTI-SIM
 overlay the identical ">= k callers" precision/recall curve.
 
 Each group is judged by its REPRESENTATIVE chain (the intron chain shared by the most
-constituents) — consistent across all matchers. novel = representative chain not in the
+constituents), consistent across all matchers. novel = representative chain not in the
 reference; genuine = representative chain is a deleted simulated transcript (truth).
 
 Usage:

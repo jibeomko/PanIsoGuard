@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assert the project version is identical across CMakeLists.txt and recipes/bioconda/meta.yaml.
 
-A version bump must move both together — otherwise the binary and the bioconda recipe drift
+A version bump must move both together; otherwise the binary and the bioconda recipe drift
 apart (and a stale recipe ships the wrong source). Wired into CI as a fast lint. Exit non-zero
 on mismatch / unparseable version.
 """

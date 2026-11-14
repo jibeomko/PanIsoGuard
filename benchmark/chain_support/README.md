@@ -15,22 +15,22 @@ short-read pairs (`sr1M`) and with none (`nosr`). Positive = `NOVEL_CONFIRMED` /
 
 ## Result
 
-| caller | short reads | n (genuine) | precision OFF → ON | recall OFF → ON | lifted to confident: genuine / false | selective risk @ coverage, OFF → ON |
+| caller | short reads | n (genuine) | precision, off to on | recall, off to on | lifted to confident: genuine / false | selective risk at coverage, off to on |
 |---|---|---:|---|---|---:|---|
-| FLAIR | 1 M | 870 (730) | 0.990 → 0.993 | 0.545 → 0.752 | 151 / 0 | 0.018 @ 0.56 → 0.014 @ 0.74 |
-| FLAIR | none | 870 (730) | — → 0.993 | 0.000 → 0.748 | 546 / 4 | — @ 0.00 → 0.007 @ 0.63 |
-| IsoQuant | 1 M | 618 (607) | 0.988 → 0.991 | 0.526 → 0.717 | 116 / 0 | 0.015 @ 0.53 → 0.011 @ 0.72 |
-| IsoQuant | none | 618 (607) | — → 0.991 | 0.000 → 0.708 | 430 / 4 | — @ 0.00 → 0.009 @ 0.70 |
-| ESPRESSO | 1 M | 573 (555) | 0.985 → 0.987 | 0.697 → 0.944 | 137 / 1 | 0.020 @ 0.69 → 0.017 @ 0.93 |
-| ESPRESSO | none | 573 (555) | — → 0.987 | 0.000 → 0.939 | 521 / 7 | — @ 0.00 → 0.013 @ 0.92 |
-| Bambu | 1 M | 552 (409) | 0.725 → 0.750 | 0.748 → 0.961 | 87 / 15 | 0.276 @ 0.78 → 0.251 @ 0.96 |
-| Bambu | none | 552 (409) | — → 0.764 | 0.000 → 0.951 | 389 / 120 | — @ 0.00 → 0.236 @ 0.92 |
-| TALON | 1 M | 1,760 (697) | 0.700 → 0.712 | 0.485 → 0.704 | 153 / 54 | 0.298 @ 0.29 → 0.287 @ 0.40 |
-| TALON | none | 1,760 (697) | — → 0.716 | 0.000 → 0.709 | 494 / 196 | — @ 0.00 → 0.284 @ 0.39 |
+| FLAIR | 1 M | 870 (730) | 0.990 to 0.993 | 0.545 to 0.752 | 151 / 0 | 0.018 at 0.56 to 0.014 at 0.74 |
+| FLAIR | none | 870 (730) | n/a to 0.993 | 0.000 to 0.748 | 546 / 4 | n/a at 0.00 to 0.007 at 0.63 |
+| IsoQuant | 1 M | 618 (607) | 0.988 to 0.991 | 0.526 to 0.717 | 116 / 0 | 0.015 at 0.53 to 0.011 at 0.72 |
+| IsoQuant | none | 618 (607) | n/a to 0.991 | 0.000 to 0.708 | 430 / 4 | n/a at 0.00 to 0.009 at 0.70 |
+| ESPRESSO | 1 M | 573 (555) | 0.985 to 0.987 | 0.697 to 0.944 | 137 / 1 | 0.020 at 0.69 to 0.017 at 0.93 |
+| ESPRESSO | none | 573 (555) | n/a to 0.987 | 0.000 to 0.939 | 521 / 7 | n/a at 0.00 to 0.013 at 0.92 |
+| Bambu | 1 M | 552 (409) | 0.725 to 0.750 | 0.748 to 0.961 | 87 / 15 | 0.276 at 0.78 to 0.251 at 0.96 |
+| Bambu | none | 552 (409) | n/a to 0.764 | 0.000 to 0.951 | 389 / 120 | n/a at 0.00 to 0.236 at 0.92 |
+| TALON | 1 M | 1,760 (697) | 0.700 to 0.712 | 0.485 to 0.704 | 153 / 54 | 0.298 at 0.29 to 0.287 at 0.40 |
+| TALON | none | 1,760 (697) | n/a to 0.716 | 0.000 to 0.709 | 494 / 196 | n/a at 0.00 to 0.284 at 0.39 |
 
 Coverage = fraction of non-FSM isoforms that received a decisive class (`NOVEL_CONFIRMED`,
 `NOVEL_PROBABLE`, `ARTIFACT`, `REFERENCE_BIAS`); selective risk = wrong decisive calls among
-them. Full numbers, including every OFF→ON transition by truth label, in
+them. Full numbers, including every off-to-on transition by truth label, in
 [../results/chain_support/metrics.json](../results/chain_support/metrics.json).
 
 ## Reading
@@ -111,7 +111,7 @@ junction is known, so these are exactly the NIC chains that only the chain axis 
 their whole-chain reads are counted with the same code the axis uses. `score_decoys.py`
 summarizes the runs and, on SQANTI-SIM, splits the decoys by the truth.
 
-| dataset (annotation) | decoys | ≥ 3 reads | Both parents ≥ 3 → ≥ 3 reads | annotated parents ≥ 3 |
+| dataset (annotation) | decoys | ≥ 3 reads | ≥ 3 reads with both parents ≥ 3 | annotated parents ≥ 3 |
 |---|---:|---:|---:|---:|
 | SQANTI-SIM chr22, reduced annotation (the truth set) | 3,045 | 35 (1.1 %) | 3 / 29 | 272 / 3,397 (8 %) |
 | same, every decoy (no cap) | 40,471 | 89 (0.2 %) | 6 / 214 | 581 / 6,278 (9 %) |

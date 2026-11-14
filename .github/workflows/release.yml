@@ -2,7 +2,7 @@ name: Release
 
 # On a version tag (vX.Y.Z), compute the sha256 of the GitHub-generated source
 # tarball and publish a GitHub Release whose notes contain a ready-to-paste
-# bioconda `source:` block — everything needed to open the bioconda-recipes PR.
+# bioconda `source:` block: everything needed to open the bioconda-recipes PR.
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
           for i in $(seq 1 12); do
             code=$(curl -sL -o src.tar.gz -w '%{http_code}' "$URL")
             if [ "$code" = "200" ] && [ -s src.tar.gz ]; then break; fi
-            echo "attempt $i: HTTP $code — waiting for the tarball"; sleep 5
+            echo "attempt $i: HTTP $code, waiting for the tarball"; sleep 5
           done
           if [ "$code" != "200" ] || [ ! -s src.tar.gz ]; then
             echo "tag archive not available after 12 attempts (last HTTP $code)"; exit 1
@@ -53,7 +53,7 @@ jobs:
           cat > notes.md <<EOF
           ## PanIsoGuard ${{ steps.sha.outputs.tag }}
 
-          **bioconda recipe \`source:\`** — paste into \`recipes/panisoguard/meta.yaml\`
+          **bioconda recipe \`source:\`**: paste into \`recipes/panisoguard/meta.yaml\`
           in your \`bioconda-recipes\` fork:
 
           \`\`\`yaml

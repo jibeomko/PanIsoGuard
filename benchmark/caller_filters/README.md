@@ -67,7 +67,7 @@ isoforms per class, which rules out every caller but TALON (697 genuine / 1,063 
 
 | TALON, no short reads | precision | recall | AUPRC |
 |---|---:|---:|---:|
-| SQANTI3 ML, default labels | 0.40 | 0.90 | – |
+| SQANTI3 ML, default labels | 0.40 | 0.90 | n/a |
 | SQANTI3 ML, trained on the truth (2-fold CV) | 0.740 | 0.518 | 0.737 |
 | PanIsoGuard + BAM, no training | 0.716 | 0.709 | 0.629 |
 

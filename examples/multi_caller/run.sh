@@ -8,7 +8,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd); cd "$SCRIPT_DIR"
 if   [[ -n "${PANISOGUARD:-}" ]]; then PIG="$PANISOGUARD"
 elif command -v panisoguard >/dev/null 2>&1; then PIG=panisoguard
 elif [[ -x ../../build/panisoguard ]]; then PIG=../../build/panisoguard
-else echo "error: panisoguard not found (set PANISOGUARD=… or build ../../build/panisoguard)" >&2; exit 1; fi
+else echo "error: panisoguard not found (set PANISOGUARD=<path> or build ../../build/panisoguard)" >&2; exit 1; fi
 
 OUT=${1:-output}; mkdir -p "$OUT"
 

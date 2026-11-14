@@ -4,7 +4,7 @@ The canonical controlled-novelty simulator [SQANTI-SIM](https://github.com/Cones
 generates a labelled truth set: a chosen set of real transcripts is deleted from the
 annotation the caller sees, so a caller must rediscover them as novel. This gives a
 ground-truth P/R + AUPRC for PanIsoGuard's novel-isoform adjudication on a *real* caller
-pipeline — complementing the in-house [controlled_truth](../controlled_truth) and
+pipeline, complementing the in-house [controlled_truth](../controlled_truth) and
 [end2end](../end2end) protocols with the standard tool.
 
 ## Pipeline (GENCODE v49 chr22)
@@ -57,24 +57,24 @@ same run read 4 false `NOVEL_PROBABLE`, precision 0.982, specificity 0.946, AUPR
 
 ## Interpretation
 
-- Precision 0.989, specificity 0.966, AUPRC 0.971 — when PanIsoGuard calls an isoform
+- Precision 0.989, specificity 0.966, AUPRC 0.971: when PanIsoGuard calls an isoform
   novel it is almost always right, and it rejects artifacts.
-- Zero genuine_novel → ARTIFACT: it never wrongly rejected a real novel isoform.
-- The moderate recall (0.589) is abstention, not misclassification — but it has a cost
+- Zero genuine_novel called ARTIFACT: it never wrongly rejected a real novel isoform.
+- The moderate recall (0.589) is abstention, not misclassification, but it has a cost
   (the SQANTI3 rules filter and the one-line short-read rule keep most of these isoforms at
   ~0.93–0.99 precision; see [sqanti3_filter_h2h](../sqanti3_filter_h2h)):
-  - NNC (novel-not-in-catalog) recall is 1.000 — these carry
+  - NNC (novel-not-in-catalog) recall is 1.000: these carry
     novel junctions that the short-read axis corroborates.
-  - NIC (novel-in-catalog) recall 0.477 — NIC novelty is a *combination* of known
+  - NIC (novel-in-catalog) recall 0.477: NIC novelty is a *combination* of known
     junctions; the isoforms with no individually-novel junction are held `UNRESOLVED`
-    (the engine has nothing to corroborate, so it does not guess — documented behavior).
-  - ISM (incomplete-splice_match) "recall" 0.000 — ISMs are truncations of known
+    (the engine has nothing to corroborate, so it does not guess; documented behavior).
+  - ISM (incomplete-splice_match) "recall" 0.000: ISMs are truncations of known
     transcripts *relative to the reduced annotation* and are assigned `UNCONFIRMED`,
-    not a confident novel call — yet each of these 154 chains exactly matches a deleted
+    not a confident novel call; yet each of these 154 chains exactly matches a deleted
     (genuine) transcript, so this is lost recall, not a labelling artifact.
 
-So SQANTI-SIM shows the design intent working — confirm what an orthogonal axis can
-verify (NNC), hold what it cannot (NIC-combinatorial / ISM-partial), distrust artifacts —
+So SQANTI-SIM shows the design intent working: confirm what an orthogonal axis can
+verify (NNC), hold what it cannot (NIC-combinatorial / ISM-partial), distrust artifacts,
 and also its price: the abstention costs recall that simpler filters keep.
 
 ## Reproduce

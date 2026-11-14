@@ -54,7 +54,7 @@ so a tracked metric and its pass/fail assertion share one code path.
 `sqanti_sim/sweep.tsv` is the template for the threshold sweep called out in
 `docs/validation.md` ("Calibration caveat"): one row per `config/rules.default.toml`
 threshold configuration, with its AUPRC and operating-point precision/specificity.
-Today it holds a single seed row — the shipped `default-0.0.1` config, transcribed
+Today it holds a single seed row: the shipped `default-0.0.1` config, transcribed
 from the published AUPRC 0.970. The sweep is automated by
 [`benchmark/sqanti_sim/sweep.py`](../sqanti_sim/sweep.py): the expensive half is
 producing the truth set once (`run.sh`); given those artifacts the harness re-runs

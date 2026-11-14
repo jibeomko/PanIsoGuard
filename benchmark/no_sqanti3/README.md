@@ -48,8 +48,8 @@ consecutive part of an annotated chain, but its terminal exon spans one more int
 transcript. SQANTI3 keeps some of these under ISM and others under NIC depending on the
 reference transcript it associates; the computed mode treats every retained intron as a
 novel structure. Those isoforms are then adjudicated instead of being held as fragments,
-which is where the computed mode's higher recall comes from (FLAIR 0.748 → 0.778, IsoQuant
-0.708 → 0.750, TALON 0.709 → 0.749 at a precision within 0.014 of the SQANTI3 mode). The
+which is where the computed mode's higher recall comes from (FLAIR 0.748 to 0.778, IsoQuant
+0.708 to 0.750, TALON 0.709 to 0.749 at a precision within 0.014 of the SQANTI3 mode). The
 few `genic`, `antisense` and `fusion` multi-exon isoforms SQANTI3 does not adjudicate become
 `novel_not_in_catalog` here when their locus is annotated on their strand, and are
 adjudicated.

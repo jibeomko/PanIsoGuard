@@ -1,6 +1,6 @@
 # Function / module I/O
 
-The main modules and their input → output contracts. Types are defined under
+The main modules and their input and output contracts. Types are defined under
 [`include/panisoguard/`](../include/panisoguard/).
 
 ## Input readers
@@ -8,7 +8,7 @@ The main modules and their input → output contracts. Types are defined under
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
 | SQANTI reader (`sqanti_reader.cpp`) | SQANTI3 `*_classification.txt` | `SqantiTable` (`SqantiRecord[]`) | Load structural category + QC priors (name-indexed columns). |
-| GTF/BED reader (`gtf_reader.cpp` / `bed12_reader.cpp`) | caller isoform GTF or BED12 | `isoform_id → IntronChain` | Convert transcript structures into normalized 0-based half-open intron chains. |
+| GTF/BED reader (`gtf_reader.cpp` / `bed12_reader.cpp`) | caller isoform GTF or BED12 | `isoform_id` to `IntronChain` map | Convert transcript structures into normalized 0-based half-open intron chains. |
 | Catalog builder (`gtf_reader.cpp`) | reference GTF | `Catalog` | Build the known-intron / known-transcript catalog (strand-aware `has_intron`). |
 | SJ.tab reader (`sj_tab_reader.cpp`) | STAR `SJ.out.tab` | `SjTable` | Short-read junction set with exact-coordinate lookup. |
 | Pangenome reader (`pangenome_reader.cpp`) | graph-junction TSV | `PangenomeJunctions` | Junctions present on a pangenome graph haplotype path. |
@@ -21,14 +21,14 @@ The main modules and their input → output contracts. Types are defined under
 |--------|-------|--------|---------|
 | Fingerprint (`fingerprint.cpp`) | `IntronChain` | 64-bit hash | FNV-1a over chrom+strand+sorted introns; caller-agnostic identity. |
 | Consensus / combine (`consensus.cpp`) | multiple callers' chains | `PIG.NNNNNN` ids + caller-support matrix | Integrate isoforms across callers by fingerprint. |
-| Adjudicator (`adjudicator.cpp`) | `SqantiTable`, `id→IntronChain`, optional `Catalog`/`SjTable`/`BamReader`/`HaplotypeProvider`/`PangenomeJunctions` | `AdjudicationResult[]` | Per isoform: detect novel junctions, assemble `EvidenceVector`, apply `RuleEngine`. |
-| RuleEngine (`rules.cpp`) | `EvidenceVector` | `Verdict` | Deterministic projection → confidence class + primary mechanism + circularity flag + `rule_trace`. |
+| Adjudicator (`adjudicator.cpp`) | `SqantiTable`, `id` to `IntronChain` map, optional `Catalog`/`SjTable`/`BamReader`/`HaplotypeProvider`/`PangenomeJunctions` | `AdjudicationResult[]` | Per isoform: detect novel junctions, assemble `EvidenceVector`, apply `RuleEngine`. |
+| RuleEngine (`rules.cpp`) | `EvidenceVector` | `Verdict` | Deterministic projection to confidence class + primary mechanism + circularity flag + `rule_trace`. |
 
 ## Analysis (reviewer-facing)
 
 | Module | Input | Output | Purpose |
 |--------|-------|--------|---------|
-| Decoy chains (`decoys.cpp`, `decoys`) | reference GTF transcripts (grouped by gene) + the long-read BAM | `Decoy[]` (novel-in-catalog recombinants of two annotated transcripts at a shared intron, never an annotated chain or a piece of one) → `<prefix>.decoys.tsv` / `.decoys.json` with each decoy's whole-chain read count | A per-dataset upper bound on the chain axis's false-lift rate (`BamReader::chain_support` on chains the annotation does not know). |
+| Decoy chains (`decoys.cpp`, `decoys`) | reference GTF transcripts (grouped by gene) + the long-read BAM | `Decoy[]` (novel-in-catalog recombinants of two annotated transcripts at a shared intron, never an annotated chain or a piece of one) written to `<prefix>.decoys.tsv` / `.decoys.json` with each decoy's whole-chain read count | A per-dataset upper bound on the chain axis's false-lift rate (`BamReader::chain_support` on chains the annotation does not know). |
 
 ## Output writer
 

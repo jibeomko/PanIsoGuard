@@ -39,9 +39,9 @@ p-values are in [../results/refbias_phasing/metrics.json](../results/refbias_pha
 
 ## The one contradiction
 
-HG03516 chr3:184709997-184735943 (+). GRCh38 reads GT…AC; the maternal haplotype AT…AC (canonical,
-U12 type), the paternal AC…AC. All 3 phased junction reads are paternal, and all 3 carry a 2-bp
-insertion 3 bp upstream of the donor (`57M2I3M25946N…`), so the junction coordinate looks like an
+HG03516 chr3:184709997-184735943 (+). GRCh38 reads GT-AC; the maternal haplotype AT-AC (canonical,
+U12 type), the paternal AC-AC. All 3 phased junction reads are paternal, and all 3 carry a 2-bp
+insertion 3 bp upstream of the donor (`57M2I3M25946N...`), so the junction coordinate looks like an
 alignment artifact rather than maternal splicing. PanIsoGuard's BAM axis would flag these reads
 (indel-near fraction 1.0 > 0.5), but the reference-bias rescue is checked before the mapping
 mechanism, so it is rescued anyway. Letting a mapping flag block the rescue is *not* a clean fix:

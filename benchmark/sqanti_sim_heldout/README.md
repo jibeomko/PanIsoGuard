@@ -6,7 +6,7 @@ SQANTI3 filters and a one-line short-read rule ([../sqanti3_filter_h2h](../sqant
 This protocol repeats both, unchanged, on other chromosomes of GENCODE v49 with nothing re-tuned:
 the same SQANTI-SIM design (`equal`, 1,500 deleted transcripts: 300 NIC, 300 NNC, 200 ISM; 100,000
 PBSIM3 reads; seed 1), FLAIR, SQANTI3 6.0.1, and the two short-read settings of the main text
-(none; 1 M wgsim pairs → STAR 2-pass). Scoring and bootstrap CIs are imported from the chr22
+(none; 1 M wgsim pairs through STAR 2-pass). Scoring and bootstrap CIs are imported from the chr22
 head-to-head so the numbers are directly comparable.
 
 ```

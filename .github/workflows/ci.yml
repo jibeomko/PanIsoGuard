@@ -2,7 +2,7 @@ name: CI
 
 # Build PanIsoGuard and run the unit suite on every push / PR to main, on Linux
 # and macOS. htslib (>= 1.18) and the C/C++ toolchain are installed from
-# conda-forge/bioconda via micromamba — the same dependency path users get with
+# conda-forge/bioconda via micromamba, the same dependency path users get with
 # `conda install`. A separate job lints the bioconda recipe.
 
 on:

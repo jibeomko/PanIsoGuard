@@ -9,7 +9,7 @@
 [![bioconda version](https://img.shields.io/conda/vn/bioconda/panisoguard.svg)](https://anaconda.org/bioconda/panisoguard)
 [![platforms](https://img.shields.io/conda/pn/bioconda/panisoguard.svg)](https://anaconda.org/bioconda/panisoguard/files)
 
-Long-read isoform callers (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON, …) report many *novel*
+Long-read isoform callers (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON and others) report many *novel*
 isoforms, and not all of them are real. Some come from alignment errors or library artifacts;
 others only look new because the sample's genome differs from the reference genome.
 PanIsoGuard runs after the caller and [SQANTI3](https://github.com/ConesaLab/SQANTI3). For each
@@ -172,7 +172,7 @@ optional; each one adds one more kind of evidence (see [Evidence it uses](#evide
 PanIsoGuard works with any caller and any organism. The file names below are placeholders for
 your own files.
 
-**Minimal** — SQANTI3 output only. With no read evidence, novel isoforms can be flagged or held
+**Minimal**: SQANTI3 output only. With no read evidence, novel isoforms can be flagged or held
 for review, but never confirmed:
 
 ```bash
@@ -183,7 +183,7 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
-**Recommended** — add the short-read junctions from STAR (`--sj-tab`) and the long-read
+**Recommended**: add the short-read junctions from STAR (`--sj-tab`) and the long-read
 alignments (`--bam`). These two are what let PanIsoGuard confirm or reject a novel isoform.
 `--reference`, the genome FASTA, is needed only for CRAM input and for the haplotype check
 below. The indel-near check is measured in excess of each read's own indel rate, so ONT
@@ -202,8 +202,8 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
-**Reference-bias check with the sample's haplotypes** — a splice site can look non-canonical on
-the reference genome (for example GT…AC) but be canonical (GT…AG) in the sample, because of a
+**Reference-bias check with the sample's haplotypes**: a splice site can look non-canonical on
+the reference genome (for example GT-AC) but be canonical (GT-AG) in the sample, because of a
 variant. Give the sample's genotypes as an indexed VCF or BCF with `--haplotype-vcf` (the two
 alleles of each genotype are the two haplotypes; several files add their haplotypes), or the
 haplotype sequences with `--reference-haplotype` (once per haplotype), and PanIsoGuard reports
@@ -239,7 +239,7 @@ are built from SNVs only; a consensus that also applied indels shifts every down
 and reads the wrong bases, and a consensus cannot carry phase sets, so with FASTAs the
 across-junction claim rests on how they were built.
 
-**Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22) — instead of the sample's
+**Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22): instead of the sample's
 own haplotypes, give splice junctions taken from a pangenome graph such as HPRC (extracted
 beforehand, for example with vg/rpvg). If every novel junction of an isoform is found on
 some haplotype of the pangenome, the isoform is reported as reference bias. This counts as
@@ -271,7 +271,7 @@ echo "1503dda3e41e819bd68bc42b4c50241657f40bc82fb2c8514b7da1168cfa3241  hprc_jun
 gunzip hprc_junctions.tsv.gz    # -> --pangenome-junctions hprc_junctions.tsv
 ```
 
-**Several callers** (optional) — if you ran more than one caller, `combine` matches their
+**Several callers** (optional): if you ran more than one caller, `combine` matches their
 isoforms by intron chain (the same chain of introns counts as the same isoform) and writes a
 table of which callers found each one. Give this table to `adjudicate` with `--caller-support`:
 
@@ -418,7 +418,7 @@ or not. If you only need a filtered GTF, the SQANTI3 rules filter (or keeping th
 junctions all have short-read support) is just as accurate and simpler; see
 [How it compares](#how-it-compares).
 
-- **You ran more than one caller** (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON, …) and they
+- **You ran more than one caller** (FLAIR, IsoQuant, Bambu, ESPRESSO, TALON and others) and they
   disagree about the novel isoforms. PanIsoGuard matches isoforms across callers by their
   intron chains and records how many callers found each one. Novel isoforms found by only one
   caller are mostly artifacts; agreement between callers is a strong sign that an isoform is
@@ -458,7 +458,7 @@ Full tables, bootstrap confidence intervals and caveats are in
 | short reads | method | precision | recall | F1 | AUPRC |
 |---|---|---:|---:|---:|---:|
 | none | SQANTI3 rules filter | 0.918 | 0.886 | 0.902 | 0.909 |
-| none | PanIsoGuard | — (0 calls) | 0.000 | — | 0.824 |
+| none | PanIsoGuard | n/a (0 calls) | 0.000 | n/a | 0.824 |
 | none | PanIsoGuard + BAM | 0.993 | 0.748 | 0.853 | 0.953 |
 | 1M | SQANTI3 rules filter | 0.918 | 0.890 | 0.904 | 0.909 |
 | 1M | Every junction ≥ 3 short reads | 0.976 | 0.945 | 0.960 | 0.968 |
@@ -556,7 +556,7 @@ PanIsoGuard itself is fast and needs no more memory than a laptop has.
 
 | Doc | Contents |
 |-----|----------|
-| [docs/architecture.md](docs/architecture.md) | How the code is organized: command line → file readers → data model → evidence → decision. |
+| [docs/architecture.md](docs/architecture.md) | How the code is organized: command line, file readers, data model, evidence, decision. |
 | [docs/design_notes.md](docs/design_notes.md) | What PanIsoGuard adds to SQANTI3's output and what it does not recompute; the independence and licensing note; the splice-graph reading of the rules. |
 | [docs/algorithm.md](docs/algorithm.md) | How one isoform is judged, step by step. |
 | [docs/function_io.md](docs/function_io.md) | What each module takes and returns, and the main data types. |

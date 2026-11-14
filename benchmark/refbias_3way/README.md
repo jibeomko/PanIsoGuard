@@ -108,7 +108,7 @@ empty: the firewall check.
 | `flnc.bam` (13.5 GB) | Kinnex Iso-Seq flnc, HPRC R2 | `dl.sh` |
 | `rna.aln.bam` | minimap2 `splice:hq` vs GRCh38; 11,342,107 primary alignments; 66 min wall / 17.4 CPU-h / 23 GB at 16 threads | `rna.sh` |
 | `isoquant_out/iq/iq.transcript_models.gtf` | IsoQuant 3.13; 47 min at 32 threads | `isoquant.sh` |
-| `mat.fa.gz`, `pat.fa.gz` | HPRC R2 v1.1.0 phased assembly (`HG03516#2#…`, `#1#…`) | `dl.sh` |
+| `mat.fa.gz`, `pat.fa.gz` | HPRC R2 v1.1.0 phased assembly (`HG03516#2#` and `#1#` prefixes) | `dl.sh` |
 | `{mat,pat}.vcf`, `.snv.vcf.gz` | paftools.js call vs GRCh38 (3.2 M SNVs, 0.4 M 1-bp indels, 0.6 M longer indels, 18 k SVs ≥ 50 bp per haplotype) | `geno.sh` |
 | `{mat,pat}_consensus.fa` | bcftools consensus, SNV only, length-matched to GRCh38 | `geno.sh` |
 | `scan/`, `refbias_unique.tsv` | the 40-junction rescue subset and its per-chromosome adjudicate inputs | `scan_refbias.sh` |
@@ -184,7 +184,7 @@ one (the rescue is allele-agnostic; [refbias_phasing](../refbias_phasing) found
 the same 1-in-10). Shifted-known junctions (indel / SV mapping shifts) are never caught: the
 method does not model them.
 
-The drop from `R_rule` to `R` (35 → 13 and 42 → 22) is not the criterion. Of the SNV-class
+The drop from `R_rule` to `R` (35 to 13 and 42 to 22) is not the criterion. Of the SNV-class
 junctions in `T_B1` without a rescue verdict (20 and 18): 15 and 10 sit in isoforms with
 another novel junction the haplotypes do not explain (the verdict needs all of them), 4 and
 6 are in isoforms outside NIC/NNC (not adjudicated), 1 and 2 are criterion misses. B2 adds
@@ -218,15 +218,15 @@ with `circularity_flag`.
 | arm | step | HG03516 wall | peak RSS | HG02717 wall | peak RSS |
 |---|---|---:|---:|---:|---:|
 | A | minimap2 splice:hq (existing) | 66 min | 23 GB | 2 h 8 min | 23 GB |
-| A | IsoQuant (existing) | 47 min | — | — | — |
+| A | IsoQuant (existing) | 47 min | n/a | n/a | n/a |
 | A | SQANTI3 + rules filter, all models | 5.8 min | 4.9 GB | 4.2 min | 4.9 GB |
-| B1 | build diploid SNV reference + GTF | 2.1 min | — | 1.1 min | — |
+| B1 | build diploid SNV reference + GTF | 2.1 min | n/a | 1.1 min | n/a |
 | B1 | minimap2 splice:hq, 6.2 Gb diploid | 2 h 13 min | 37 GB | 4 h 31 min | 37 GB |
 | B1 | IsoQuant | 8 h 55 min | 15 GB | 2 h 22 min | 15 GB |
 | B1 | SQANTI3 | 5.7 min | 9.6 GB | 8.0 min | 9.6 GB |
 | B2 | asm5 PAF × 2 haplotypes | 1 h 41 min | 27 GB | 32 min | 29 GB |
 | B2 | liftoff × 2 | 1 h 37 min | 78 GB | 1 h 8 min | 78 GB |
-| B2 | build diploid + GTF | 2.9 min | — | 1.1 min | — |
+| B2 | build diploid + GTF | 2.9 min | n/a | 1.1 min | n/a |
 | B2 | minimap2 splice:hq | 4 h 21 min | 38 GB | 3 h 32 min | 38 GB |
 | B2 | IsoQuant | 22 min (resumed after an OOM kill next to B1) | 5.9 GB | 1 h 37 min | 17 GB |
 | B2 | SQANTI3 | 8.9 min | 9.5 GB | 3.7 min | 9.4 GB |

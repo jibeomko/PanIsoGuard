@@ -33,8 +33,8 @@ Notes:
 
 - Novel-junction axes require the caller chain and the reference catalog; without
   them, novelty-support is `UNKNOWN` (held, never guessed).
-- A junction is matched by exact, strand-aware coordinates — no fuzzy/overlap
-  matching — so all readers must agree on the 0-based half-open convention (they do,
+- A junction is matched by exact, strand-aware coordinates (no fuzzy/overlap
+  matching), so all readers must agree on the 0-based half-open convention (they do,
   by normalizing at read time).
 - BAM features are memoized per `(chrom, strand, intron)` so junctions shared across
   isoforms are probed once.

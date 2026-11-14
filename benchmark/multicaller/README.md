@@ -1,9 +1,9 @@
-# Multi-caller consensus — caller-agnostic integration (5 callers)
+# Multi-caller consensus: caller-agnostic integration (5 callers)
 
 The core value of PanIsoGuard is that it sits above any single isoform caller.
 This protocol makes that concrete: it runs five long-read callers on the same
 alignment, integrates them by intron-chain fingerprint with `panisoguard combine`, and
-shows that multi-caller agreement is a strong, caller-agnostic confidence signal —
+shows that multi-caller agreement is a strong, caller-agnostic confidence signal,
 one a single-caller + SQANTI3 pipeline cannot produce.
 
 ## Why this matters
@@ -27,8 +27,8 @@ calls are the artifacts.
 ## The consensus result
 
 `combine` integrates the five caller sets into **1,982 unique novel multi-exon intron
-chains. Stratifying by how many callers** recovered each one — vs SQANTI-SIM ground
-truth — precision climbs steeply and monotonically with agreement:
+chains. Stratifying by how many callers** recovered each one, vs SQANTI-SIM ground
+truth, precision climbs steeply and monotonically with agreement:
 
 | # callers supporting a novel chain | genuine | false | precision |
 |-----------------------------------:|--------:|------:|----------:|
@@ -39,7 +39,7 @@ truth — precision climbs steeply and monotonically with agreement:
 | 5 (unanimous)                      | 329 |    3 | 0.991 |
 
 A novel chain seen by only one of five callers is almost always an artifact
-(precision 0.012 — 1,092 false vs 13 genuine). Agreement is the signal.
+(precision 0.012: 1,092 false vs 13 genuine). Agreement is the signal.
 
 ## Precision–recall curve over the consensus threshold
 
@@ -49,12 +49,12 @@ Requiring "≥ k callers" is a tunable gate. Sweeping k traces a clean PR curve:
 |-----------|--------:|------:|----------:|-------:|---:|
 | ≥ 1 caller  | 760 | 1222 | 0.383 | 0.988 | 0.553 |
 | ≥ 2 callers | 747 |  130 | 0.852 | 0.971 | 0.908 |
-| ≥ 3 callers | 700 | 14 | 0.980 | 0.910 | 0.944 ← max F1 |
+| ≥ 3 callers | 700 | 14 | 0.980 | 0.910 | 0.944 (max F1) |
 | ≥ 4 callers | 455 |    5 | 0.989 | 0.592 | 0.740 |
 | ≥ 5 callers | 329 |    3 | 0.991 | 0.428 | 0.598 |
 
 Key finding: the F1-optimal threshold scales with the number of callers. With five
-callers the best operating point is ≥ 3 (precision 0.98 at recall 0.91) — more
+callers the best operating point is ≥ 3 (precision 0.98 at recall 0.91); more
 callers means you should *require more agreement*. `consensus_min_callers` is a
 configurable rule threshold (TOML); this curve is exactly the calibration a user needs to
 pick it. (With three callers, ≥ 2 was already near-optimal.)
@@ -67,18 +67,18 @@ isoforms long-read-only (no short-read `SJ.tab`), with vs without the 5-caller m
 
 | setting | confident-novel recall | precision |
 |---------|-----------------------:|----------:|
-| FLAIR alone (no cross-caller info) | 0.000 (all novel held `UNRESOLVED`) | — |
+| FLAIR alone (no cross-caller info) | 0.000 (all novel held `UNRESOLVED`) | n/a |
 | FLAIR + consensus | 0.763 | 0.975 |
 
 Without orthogonal short-read evidence a single caller's novels are all `UNRESOLVED` (the
 engine refuses to guess). The consensus axis promotes the 593 novels that ≥ 2 callers
-agree on (571 → `NOVEL_PROBABLE`, 22 → `UNCONFIRMED`; ruleset 0.0.7); that promoted set is
+agree on (571 to `NOVEL_PROBABLE`, 22 to `UNCONFIRMED`; ruleset 0.0.7); that promoted set is
 97.5 % precise against truth.
 
 ## Integration device (caller-agnostic merge)
 
 The five callers use completely unrelated native ID schemes, yet `combine` collapses
-identical splice chains onto one stable `PIG.NNNNNN` id with every native ID preserved —
+identical splice chains onto one stable `PIG.NNNNNN` id with every native ID preserved;
 agreement is measured on the splice chain, not on names (since 0.0.6 the matrix also
 carries the chain `fingerprint`, which is what `adjudicate --caller-support` joins on):
 
@@ -107,10 +107,10 @@ shared minimap2 alignment (PBSIM3 reads, chr22)
   ├─ FLAIR collapse             ─┐
   ├─ IsoQuant transcript_models ─┤
   ├─ Bambu (novel BambuTx)      ─┼ panisoguard combine --gtf <caller:gtf>...
-  ├─ ESPRESSO (novel_isoform)   ─┤   --ref-gtf chr22_modified.gtf  →  caller-support matrix
+  ├─ ESPRESSO (novel_isoform)   ─┤   --ref-gtf chr22_modified.gtf  ->  caller-support matrix
   └─ TALON (filtered whitelist) ─┘        │
-        adjudicate --caller-support matrix  →  consensus-promoted verdicts
-        score_multicaller.py (vs SQANTI-SIM truth)  →  results/multicaller/metrics.json
+        adjudicate --caller-support matrix  ->  consensus-promoted verdicts
+        score_multicaller.py (vs SQANTI-SIM truth)  ->  results/multicaller/metrics.json
 ```
 
 See [run.sh](run.sh) for the exact commands and [score_multicaller.py](score_multicaller.py)
@@ -130,7 +130,7 @@ shim.
 ## Generalization to a second reference (SIRV-Set4)
 
 To check the consensus signal is not specific to GENCODE chr22, the same analysis was
-run on the Lexogen SIRV-Set4 spike-in reference — a denser, multi-contig transcriptome
+run on the Lexogen SIRV-Set4 spike-in reference, a denser, multi-contig transcriptome
 (7 loci, ~70 dense overlapping isoforms) with its own hidden-chain truth (FLAIR + IsoQuant
 + Bambu + ESPRESSO; [score_sirv.py](score_sirv.py)). The same pattern holds:
 
@@ -150,5 +150,5 @@ Validated for precision stratification on one controlled truth set (chr22, five
 callers). The consensus axis is deliberately a *weaker, methodological* signal than
 orthogonal short-read corroboration (it promotes to `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`); when a
 short-read `SJ.tab` is supplied it takes precedence. A whole-genome real-data extension
-(no truth → orthogonal canonical-motif validation) is the companion
+(no truth, so orthogonal canonical-motif validation) is the companion
 [wholegenome_multicaller](../wholegenome_multicaller) protocol.

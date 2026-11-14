@@ -1,7 +1,7 @@
-# Reference-bias rescue — cohort yield across four GIAB individuals
+# Reference-bias rescue: cohort yield across four GIAB individuals
 
 Extends the single-sample [hg002](../hg002) whole-genome rescue to a **four-individual
-GIAB cohort** — HG001 (NA12878), HG002 (NA24385), HG003 (NA24149), HG004 (NA24143) — to
+GIAB cohort**, HG001 (NA12878), HG002 (NA24385), HG003 (NA24149), HG004 (NA24143), to
 show that the reference-bias rescue behaves the same way across personalized human
 genomes, not only on one. Annotation + variant scan only (no RNA-seq,
 no caller runs); all GIAB v4.2.1 / GENCODE v49 data is public.
@@ -22,11 +22,11 @@ reference, canonical on that individual's haplotype), and adjudicate the variant
 | cohort | 137 | 137 / 137 (100 %) | 0 | 137 / 137 |
 
 Reading. Each personalized genome carries 31–37 genuine reference-bias splice
-junctions — junctions a *reference-only* pipeline would wrongly report as novel. PanIsoGuard's
+junctions: junctions a *reference-only* pipeline would wrongly report as novel. PanIsoGuard's
 variant axis exonerates every one (137/137, 100 % sensitivity) with 0 false rescues,
 and the circularity firewall holds all 137 when the provenance is circular-risk. So the
-rescue behaves consistently across individuals — a few dozen false-novel calls correctly
-reclassified per personalized genome, none falsely rescued in these scans — and its value
+rescue behaves consistently across individuals: a few dozen false-novel calls correctly
+reclassified per personalized genome, none falsely rescued in these scans, and its value
 rises with how far a sample diverges from the linear reference (non-reference individuals,
 personalized-genome / pangenome contexts).
 

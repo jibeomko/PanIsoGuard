@@ -94,7 +94,7 @@ B2_liftoff() {
 }
 B2_build() {
   [ -s armB2/diploid.gtf ] && [ -s armB2/diploid.fa.fai ] && return
-  cat armB2/mat.fa armB2/pat.fa > armB2/diploid.fa      # contig names are already HG…#1#/#2#-prefixed
+  cat armB2/mat.fa armB2/pat.fa > armB2/diploid.fa      # contig names are already HG03516#1#/#2#-prefixed
   $SAMTOOLS faidx armB2/diploid.fa
   for H in mat pat; do suffix_ids $H < armB2/gencode_$H.gtf; done > armB2/diploid.gtf
 }

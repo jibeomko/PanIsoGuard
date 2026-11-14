@@ -23,7 +23,7 @@ def _versions(work):
 WORK, GENCODE, BAM = sys.argv[1], sys.argv[2], sys.argv[3]
 EMIT = sys.argv[5] if len(sys.argv) > 5 and sys.argv[4] == "--emit-metrics" else None
 SAM = os.environ.get("SAMTOOLS", "samtools")
-# One hit excluded by the audit: a 4bp-displaced IsoQuant model coordinate with 0 exact
+# One hit excluded: a 4bp-displaced IsoQuant model coordinate with 0 exact
 # spanning reads (its reads splice 4bp away to an already-canonical GRCh38 site).
 DROP = ("chr17", 3681978, 3685514)
 

@@ -30,7 +30,7 @@ Tools (each typically its own conda env): `pbsim3`, `minimap2`, `samtools`,
 
 > FLAIR caveat: FLAIR 3.0.0's `bam2Bed12` entry point is broken on bioconda
 > (`ModuleNotFoundError: No module named 'flair.bam2Bed12'`); `bam2bed12.py` here is a
-> drop-in BAM→BED12 converter that bypasses it and feeds `flair collapse`.
+> drop-in BAM-to-BED12 converter that bypasses it and feeds `flair collapse`.
 >
 > Truth caveat: read-level truth bookkeeping is SQANTI-SIM's job; this
 > harness labels truth by intron-chain match to the hidden transcripts instead, which
@@ -50,7 +50,7 @@ precision(genuine) = 1.000   specificity(false) = 1.000   genuine-recall(decisiv
 ```
 
 - PanIsoGuard rejected 239/249 (96%) of FLAIR's false-novel artifacts and abstained on
-  the other 10 — on real, messy caller output it removes nearly all spurious novelty.
+  the other 10; on real, messy caller output it removes nearly all spurious novelty.
 - No genuine novel was wrongly rejected (0 false negatives) and **no artifact was called
   genuine** (0 false positives).
 - 19/20 genuine novels are confirmed: 16 `NOVEL_PROBABLE` through whole-chain long-read

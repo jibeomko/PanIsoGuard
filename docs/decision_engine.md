@@ -1,6 +1,6 @@
 # The PanIsoGuard decision engine
 
-This document describes the adjudication logic — the methodological contribution.
+This document describes the adjudication logic, the methodological contribution.
 It is intentionally readable so any verdict can be audited without reading C++:
 all thresholds live in [`config/rules.default.toml`](../config/rules.default.toml)
 and the engine emits a per-isoform `rule_trace`.
@@ -23,7 +23,7 @@ and the engine emits a per-isoform `rule_trace`.
 Each *novel* isoform (SQANTI `novel_in_catalog` / `novel_not_in_catalog`) is scored
 on two axes; the binned pair is projected to one confidence class.
 
-- **Axis A — novelty support** (from short-read `SJ.tab` corroboration of the
+- **Axis A, novelty support** (from short-read `SJ.tab` corroboration of the
   isoform's novel junctions): `SUPPORTED` / `PARTIAL` / `UNSUPPORTED`, or `UNKNOWN`
   when the axis is not evaluable. `UNSUPPORTED` (0 of N novel junctions corroborated)
   counts as evidence *against* only when the locus is covered: if none of the isoform's
@@ -38,16 +38,16 @@ on two axes; the binned pair is projected to one confidence class.
   support: a novel chain independently recovered by ≥ `consensus_min_callers` callers
   is corroborated, but only enough to reach `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`
   (caller agreement is not orthogonal experimental evidence).
-- **Axis B — artifact mechanism**: `none` / `mapping_or_repeat` / `noncanonical` /
+- **Axis B, artifact mechanism**: `none` / `mapping_or_repeat` / `noncanonical` /
   `rt_switch` / `degradation` / `variant_created`. An axis whose input is absent is
-  `not_evaluable` — a soft-skip, never silently counted for or against.
+  `not_evaluable`, a soft-skip, never silently counted for or against.
 
 ## Evidence axes and where they come from
 
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction — the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The indel-near fraction is taken in excess of its background: for each spanning read, the chance of an indel inside the two windows at the read's own indel rate (1 − exp(−rate × 4 × window)), averaged (since ruleset 0.0.7; the junction table reports the raw fraction and the background). `--platform ont`, which turns the indel-near gate off, is deprecated and removed in 0.2: with the excess the gate does not fire on ONT reads by chemistry (GM12878, the chr22 ONT re-simulation), so the two presets give the same verdicts. A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
+| mapping_or_repeat | BAM reads spanning the junction; the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The indel-near fraction is taken in excess of its background: for each spanning read, the chance of an indel inside the two windows at the read's own indel rate (1 − exp(−rate × 4 × window)), averaged (since ruleset 0.0.7; the junction table reports the raw fraction and the background). `--platform ont`, which turns the indel-near gate off, is deprecated and removed in 0.2: with the excess the gate does not fire on ONT reads by chemistry (GM12878, the chr22 ONT re-simulation), so the two presets give the same verdicts. A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
 | noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on every haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
 | degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` and no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
@@ -58,7 +58,7 @@ on two axes; the binned pair is projected to one confidence class.
 When several mechanisms fire, one is reported as `primary_mechanism`; the order is
 **mapping > noncanonical > rt_switch > degradation** (and the variant rescue, below,
 preempts all of them). Rationale: **alignment reliability is the most upstream
-concern** — if the spanning reads do not map confidently, the junction may be a
+concern**: if the spanning reads do not map confidently, the junction may be a
 mapping artifact and downstream motif/QC signals are moot; non-canonical motif is the
 next strongest structural signal; RT-switching and intra-priming degradation are
 softer biochemical signals. Only the first-matching mechanism is reported, both as
@@ -71,7 +71,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    junction explained by reference bias is `REFERENCE_BIAS`, via either:
    - *Pangenome axis* (`--pangenome-junctions`): all of the isoform's novel
      junctions are realizable on a pangenome graph haplotype path (mechanism
-     `population_known`) — consistent with reference bias, not proof the splice is
+     `population_known`), consistent with reference bias, not proof the splice is
      used. Independent only if the junction set is from population assemblies, which
      PanIsoGuard cannot verify, so it is gated by the same circularity firewall
      as the variant axis: `--pangenome-provenance population`/`external` promote,
@@ -122,23 +122,23 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    suffices, and the reads may come from the other one (about 1 in 10 rescued
    junctions in HG03516; see [benchmark/refbias_3way](../benchmark/refbias_3way)).
 2. Otherwise project (Axis A × Axis B):
-   - `SUPPORTED × none → NOVEL_CONFIRMED`
-   - `SUPPORTED × mechanism → NOVEL_PROBABLE`
-   - `PARTIAL × any → UNCONFIRMED` (an uncorroborated novel junction leaves the
+   - `SUPPORTED`, mechanism `none`: `NOVEL_CONFIRMED`
+   - `SUPPORTED`, a mechanism: `NOVEL_PROBABLE`
+   - `PARTIAL`, any mechanism: `UNCONFIRMED` (an uncorroborated novel junction leaves the
      chain unconfirmed; before 0.0.4 `PARTIAL × none` promoted to `NOVEL_PROBABLE`,
-     which produced false positives — see
+     which produced false positives; see
      [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h))
-   - `UNSUPPORTED × none → UNCONFIRMED`
-   - `UNSUPPORTED × mechanism → ARTIFACT`
-   - `UNKNOWN` support → `UNRESOLVED`, except:
-     - `UNKNOWN × strong mapping artifact → UNCONFIRMED` (reason
+   - `UNSUPPORTED`, mechanism `none`: `UNCONFIRMED`
+   - `UNSUPPORTED`, a mechanism: `ARTIFACT`
+   - `UNKNOWN` support: `UNRESOLVED`, except:
+     - `UNKNOWN`, strong mapping artifact: `UNCONFIRMED` (reason
        `mapping_without_short_reads`): the mapping sign preempts consensus and whole-chain
        support, but without short reads it holds the call instead of rejecting it. Before
        ruleset 0.0.5 this cell was `ARTIFACT`; on SQANTI-SIM 11 of the 31 isoforms it
        rejected were genuine, and on real ONT data the HiFi-calibrated gate fires on most
        junctions; and
-     - `UNKNOWN × caller-consensus (≥ consensus_min_callers, no mapping artifact) →
-       NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign, noted as
+     - `UNKNOWN`, caller consensus (≥ `consensus_min_callers`, no mapping artifact):
+       `NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign, noted as
        `caller_consensus;rt_switch_sign`) or `UNCONFIRMED` (`noncanonical` or
        `degradation`, reason `consensus_with_<mechanism>`). Multi-caller agreement corroborates the chain methodologically
        when the short-read axis is silent; a strong mapping artifact still preempts
@@ -148,8 +148,8 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        is joined by intron-chain fingerprint (the `fingerprint` column `combine`
        writes since 0.0.6), not by native id, because two callers may reuse one name
        for different chains.
-     - `UNKNOWN × whole-chain long-read support (≥ chain_min_full_reads, no mapping
-       artifact, no consensus) → NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign,
+     - `UNKNOWN`, whole-chain long-read support (≥ `chain_min_full_reads`, no mapping
+       artifact, no consensus): `NOVEL_PROBABLE` (mechanism `none`, or an RT-switch sign,
        `chain_support;rt_switch_sign`) or `UNCONFIRMED` (`noncanonical` or `degradation`,
        `chain_support_with_<mechanism>`), since 0.0.7. The RT-switch sign stopped demoting
        methodological support in ruleset 0.0.5: on SQANTI-SIM every isoform it held was
@@ -176,7 +176,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        there instead; the evidence is then independent (`evidence.chain_independent`,
        reason `chain_support;independent_library`), but the class is still `PROBABLE`. On
        LRGASP WTC11, with the other platform's library as the independent one, 13 of 17
-       (PacBio → ONT) and 14 of 16 (ONT → PacBio) validated novel isoforms are carried by
+       (PacBio to ONT) and 14 of 16 (ONT to PacBio) validated novel isoforms are carried by
        ≥ 3 independent reads (the misses have 0–2), and within genes the other library
        covers the novel lifts reproduce like known transcripts; but a second library attests
        expression, not correct splicing, so the evidence is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
@@ -185,14 +185,14 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        recombines each gene's annotated transcripts at a shared intron into
        novel-in-catalog chains and reports the fraction that ≥ `chain_min_full_reads` reads
        carry end to end (an upper bound; some decoys are real, unannotated isoforms).
-- Pass-through: `full-splice_match → KNOWN`; `incomplete-splice_match →
-  KNOWN_FRAGMENT` (verdict `known_fragment`, reason `ism_chain_support`) when
+- Pass-through: `full-splice_match` is `KNOWN`; `incomplete-splice_match` is
+  `KNOWN_FRAGMENT` (verdict `known_fragment`, reason `ism_chain_support`) when
   ≥ `chain_min_full_reads` long reads carry its whole intron chain and the 3' end shows
   no intra-priming sign (an RTS sign is noted, `;rts_sign`), since ruleset 0.0.5;
   otherwise `UNCONFIRMED` (a truncated known transcript; the intra-priming / RTS sign is
   reported in the reason, `ism_intrapriming` / `ism_rts`, but does not change the class,
   because the splice structure is known and only the 3' end is unreliable); non-targeted
-  categories (genic, antisense, fusion, intergenic, genic_intron) → `UNRESOLVED` with
+  categories (genic, antisense, fusion, intergenic, genic_intron) are `UNRESOLVED` with
   verdict `not_adjudicated`.
 
 ## `verdict` and `verdict_reason` (since 0.0.6)
@@ -228,8 +228,8 @@ haplotypes rather than SQANTI3),
 [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h), `per_class.py`).
 
 **`ARTIFACT` semantics (read carefully).** `ARTIFACT` denotes *(UNSUPPORTED × any
-mechanism)* — short reads were checked at a covered locus, none supports the novel
-junction, and an artifact sign is present — i.e. a **combined confidence × mechanism**
+mechanism)*: short reads were checked at a covered locus, none supports the novel
+junction, and an artifact sign is present, i.e. a **combined confidence × mechanism**
 signal, not a standalone claim that the call is spurious. Since ruleset 0.0.5 no
 isoform is `ARTIFACT` without short reads (the mapping sign alone holds it
 `UNCONFIRMED`). A novel isoform with an unusual motif but no short-read backing lands
@@ -258,11 +258,11 @@ promoted to a hard class. `provenance.log` reports which axes were evaluable.
   (`tests/unit/variant_motif_test.cpp`; see [benchmark/variant_inject](../benchmark/variant_inject)).
 - **GATE-1 (met)**: the pangenome reference is the **HPRC v1.1 Minigraph-Cactus
   GRCh38** graph, with HG002/NA24385 confirmed out-of-graph (absent from the 47
-  assembly samples → non-circular). On chr22, `vg deconstruct` → population deletions →
+  assembly samples, so non-circular). On chr22, `vg deconstruct` gives population deletions, then
   graph-supported junctions: the rescue produces **0 false rescues** on real FLAIR novel
   junctions, fires correctly when a novel intron is a real population deletion
   (population provenance), and is held by the circularity firewall under
-  circular-risk provenance — see [benchmark/pangenome](../benchmark/pangenome) and
+  circular-risk provenance; see [benchmark/pangenome](../benchmark/pangenome) and
   [benchmark/results/pangenome](../benchmark/results/pangenome).
 
 ## Future work

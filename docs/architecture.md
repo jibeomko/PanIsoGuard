@@ -58,7 +58,7 @@ User-facing subcommands, dispatched samtools-style from
 
 | Command | Source | Purpose |
 |---------|--------|---------|
-| `adjudicate` | [`cmd_adjudicate.cpp`](../src/cli/cmd_adjudicate.cpp) | classify novel isoforms → 4 output files |
+| `adjudicate` | [`cmd_adjudicate.cpp`](../src/cli/cmd_adjudicate.cpp) | classify novel isoforms into 4 output files |
 | `combine`    | [`cmd_combine.cpp`](../src/cli/cmd_combine.cpp) | integrate multiple callers by intron-chain fingerprint |
 | `decoys`     | [`cmd_decoys.cpp`](../src/cli/cmd_decoys.cpp) | per-dataset false-lift bound of the whole-chain read support |
 | `example`    | [`cmd_example.cpp`](../src/cli/cmd_example.cpp) | copy a bundled example into a working folder |
@@ -70,12 +70,12 @@ Argument parsing and the shared load-and-run path live in
 
 In-house parsers (no external parsing deps) under [`src/io/`](../src/io/):
 
-- **SQANTI3 classification** (`sqanti_reader.cpp`) — name-indexed columns, tolerant
+- **SQANTI3 classification** (`sqanti_reader.cpp`): name-indexed columns, tolerant
   to SQANTI3's appended filter columns.
-- **Caller isoforms** — BED12 (`bed12_reader.cpp`) or GTF (`gtf_reader.cpp`).
-- **Reference GTF** → known-intron/known-transcript catalog (`gtf_reader.cpp`).
-- **STAR `SJ.tab`** (`sj_tab_reader.cpp`) — short-read splice junctions.
-- **Pangenome junctions** (`pangenome_reader.cpp`) — graph-haplotype-supported junctions.
+- **Caller isoforms**: BED12 (`bed12_reader.cpp`) or GTF (`gtf_reader.cpp`).
+- **Reference GTF**: known-intron/known-transcript catalog (`gtf_reader.cpp`).
+- **STAR `SJ.tab`** (`sj_tab_reader.cpp`): short-read splice junctions.
+- **Pangenome junctions** (`pangenome_reader.cpp`): graph-haplotype-supported junctions.
 - **BAM/CRAM** (`src/evidence/bam_features.cpp`, htslib) and **haplotype FASTA**
   (`src/evidence/variant_motif.cpp`, htslib `faidx`) are opened lazily by the
   evidence layer.
@@ -87,14 +87,14 @@ Every transcript structure is normalized into a **0-based half-open intron chain
 `IntronChain`, `Strand`). This single convention lets `SJ.tab`, GTF, BED12, and
 pangenome coordinates be compared by exact equality. One derived structure:
 
-- **Intron-chain fingerprint** (`src/core/fingerprint.cpp`) — an FNV-1a hash over
+- **Intron-chain fingerprint** (`src/core/fingerprint.cpp`): an FNV-1a hash over
   `chrom + strand + sorted introns`; used by `combine` to merge isoforms across
   callers that use different running-ID schemes.
 
 ## 4. Evidence layer
 
 Given a novel junction, each axis produces an orthogonal, independently-skippable
-signal (absent input ⇒ the axis is *not_evaluable*, never silently treated as
+signal (an absent input means the axis is *not_evaluable*, never silently treated as
 for/against):
 
 | Axis | Module | Signal |
@@ -121,13 +121,13 @@ the reference-bias circularity firewall are documented in
 ## Data flow
 
 ```text
-inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjTable/BAM/Haplotype/Pangenome)
+inputs -> [readers] -> SqantiTable + {id -> IntronChain} + Catalog + (SjTable/BAM/Haplotype/Pangenome)
                               │
                               ▼
                     [adjudicator] per isoform: novel-junction detection + evidence collection
                               │
                               ▼
-                    EvidenceVector ─► [RuleEngine.evaluate] ─► Verdict
+                    EvidenceVector -> [RuleEngine.evaluate] -> Verdict
                               │
                               ▼
               .adjudicated.tsv / .junctions.tsv / .attribution.jsonl (rule_trace) / .provenance.log
@@ -135,11 +135,11 @@ inputs ─► [readers] ─► SqantiTable + {id→IntronChain} + Catalog + (SjT
 
 ## Design properties
 
-- **Deterministic + auditable** — every verdict carries a `rule_trace` listing the
+- **Deterministic + auditable**: every verdict carries a `rule_trace` listing the
   rules that fired; no randomness in the decision path.
-- **Orthogonal axes** — each evidence axis is optional, so a run with only SQANTI priors
+- **Orthogonal axes**: each evidence axis is optional, so a run with only SQANTI priors
   still produces verdicts that say which axes were checked.
-- **Circularity firewall** — a rescue that would rest on the sample's own RNA-derived
+- **Circularity firewall**: a rescue that would rest on the sample's own RNA-derived
   data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
-- htslib-only — the sole non-vendored dependency; toml++ and Catch2 are vendored
+- htslib-only: the sole non-vendored dependency; toml++ and Catch2 are vendored
   single-header components.

@@ -7,11 +7,11 @@ tracked run, how many calls the choice decides and what they are where a truth o
 filter exists. Why the two policies are both defensible, and why this is the one tracked
 decision without a direct real-data test, is spelled out below.
 
-| run | lifts carrying the RTS sign | truth / external view | annotate → hold |
+| run | lifts carrying the RTS sign | truth / external view | annotate, then hold |
 |---|---:|---|---|
-| SQANTI-SIM chr22, 1 M pairs + BAM | 26 | 26 genuine / 0 false | P 0.993 / R 0.752 / AUPRC 0.975 → 0.992 / 0.716 / 0.973 |
-| SQANTI-SIM chr22, no short reads + BAM | 57 | 57 / 0 | 0.993 / 0.748 / 0.953 → 0.992 / 0.670 / 0.939 |
-| end2end chr22 | 4 | 4 / 0 | genuine `NOVEL_PROBABLE` 19/20 → 15/20 |
+| SQANTI-SIM chr22, 1 M pairs + BAM | 26 | 26 genuine / 0 false | P 0.993 / R 0.752 / AUPRC 0.975 to 0.992 / 0.716 / 0.973 |
+| SQANTI-SIM chr22, no short reads + BAM | 57 | 57 / 0 | 0.993 / 0.748 / 0.953 to 0.992 / 0.670 / 0.939 |
+| end2end chr22 | 4 | 4 / 0 | genuine `NOVEL_PROBABLE` 19/20 to 15/20 |
 | LRGASP WTC11 PacBio, + Illumina / none | 912 / 1,324 | validated targets among them: MTHFS; CENPK, MTHFS | the held ones would be `UNCONFIRMED`, never `ARTIFACT` |
 | LRGASP WTC11 ONT, + Illumina / none | 122 / 222 | MTHFS, USF1; CENPK, MTHFS, RND2, USF1 | |
 | HG03516 Kinnex (arm C) | 1,293 of 7,068 `NOVEL_PROBABLE` | All 1,293 are SQANTI3-filter `Artifact`s | |

@@ -1,7 +1,7 @@
 # Head-to-head vs the SQANTI3 filter (and a one-line short-read rule)
 
 Question: on the same truth set and the same inputs, is PanIsoGuard more accurate than
-what users already run — the SQANTI3 rules / ML filter — or than the simplest possible
+what users already run (the SQANTI3 rules / ML filter) or than the simplest possible
 short-read rule? Answer: no. Its ranking ties a one-line rule; at its default
 operating point it trades a lot of recall for a little precision; with no short reads it
 is worse than the SQANTI3 rules filter. The only measurable edge is small and comes from
@@ -19,7 +19,7 @@ Short-read settings (every method gets the same junctions):
 |---|---|
 | `none` | No short reads |
 | `oracle` | the truth-derived SJ.tab of `../sqanti_sim` (every simulated junction, 50 reads) |
-| `sr_N` | realistic: N wgsim 2×100 pairs from the simulated transcripts, weighted by their long-read counts → STAR 2-pass → `SJ.out.tab` |
+| `sr_N` | realistic: N wgsim 2×100 pairs from the simulated transcripts, weighted by their long-read counts, STAR 2-pass, `SJ.out.tab` |
 
 Methods:
 
@@ -36,7 +36,7 @@ Methods:
 | short reads | method | precision | recall | F1 | AUPRC |
 |---|---|---:|---:|---:|---:|
 | none | SQ3rules | 0.918 | 0.886 | 0.902 | 0.909 |
-| none | PIG | — (0 calls) | 0.000 | — | 0.824 |
+| none | PIG | n/a (0 calls) | 0.000 | n/a | 0.824 |
 | none | PIG+bam | 0.993 | 0.748 | 0.853 | 0.953 |
 | sr_1M | SQ3rules | 0.918 | 0.890 | 0.904 | 0.909 |
 | sr_1M | SQ3strict | 0.978 | 0.840 | 0.903 | 0.955 |
@@ -107,7 +107,7 @@ with the rule trace and the mechanism behind it, and explicit abstention.
 The first run of this comparison exposed a projection bug: `PARTIAL` short-read support
 (some but not all novel junctions corroborated) was promoted to `NOVEL_PROBABLE`.
 Those were exactly PanIsoGuard's extra NNC false positives (oracle run: 6 vs 3 for the
-short-read rule; 3 vs 3 after the fix). Since 0.0.4, `PARTIAL` → `UNCONFIRMED`.
+short-read rule; 3 vs 3 after the fix). Since 0.0.4, `PARTIAL` to `UNCONFIRMED`.
 
 ## Caveats
 
@@ -135,7 +135,7 @@ isoforms with no novel junction to test) is more precise than `UNCONFIRMED` at e
 |---|---:|---:|---:|---:|---:|---:|
 | NOVEL_CONFIRMED | 357 | 3 | 0.992 | 351 | 3 | 0.992 |
 | NOVEL_PROBABLE | 41 | 1 | 0.976 | 198 | 1 | 0.995 |
-| KNOWN_FRAGMENT | — | — | — | 153 | 11 | 0.933 |
+| KNOWN_FRAGMENT | n/a | n/a | n/a | 153 | 11 | 0.933 |
 | UNRESOLVED | 160 | 7 | 0.958 | 0 | 6 | 0.000 |
 | UNCONFIRMED | 169 | 61 | 0.735 | 23 | 36 | 0.390 |
 | ARTIFACT | 3 | 68 | 0.042 | 5 | 83 | 0.057 |

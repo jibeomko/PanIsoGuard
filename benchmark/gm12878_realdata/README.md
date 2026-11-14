@@ -1,7 +1,7 @@
-# PanIsoGuard on a real published ONT dataset (GM12878) — robustness
+# PanIsoGuard on a real published ONT dataset (GM12878): robustness
 
-Applies PanIsoGuard's axes to a real, public, whole-genome ONT direct-RNA dataset —
-ENCODE GM12878 (`ENCFF440ZML`, `minimap2 -ax splice -uf`) — and reports what
+Applies PanIsoGuard's axes to a real, public, whole-genome ONT direct-RNA dataset,
+ENCODE GM12878 (`ENCFF440ZML`, `minimap2 -ax splice -uf`), and reports what
 each axis does on real data: a chemistry-calibration finding for the BAM axis, and the
 scope of the reference-bias rescue on a reference-grade sample.
 
@@ -35,7 +35,7 @@ Two things this shows:
   run is the evidence.
 - The raw indel-near fraction over-flags on ONT. ONT's intrinsic indel error rate makes
   "indel adjacent to junction" pervasive, so the raw fraction exceeds the HiFi-calibrated 0.5
-  gate (genuine max 0.19 on clean HiFi — see [bam_axis](../bam_axis)) at 67 % of ONT junctions
+  gate (genuine max 0.19 on clean HiFi; see [bam_axis](../bam_axis)) at 67 % of ONT junctions
   and does not separate single-caller (mean 0.63) from ≥ 2-caller (mean 0.67) novels; through
   ruleset 0.0.6 the mapping sign fired on 17 / 31 = 55 % of ≥ 2-caller vs 112 / 254 = 44 % of
   single-caller chains. Since ruleset 0.0.7 the gate reads the fraction in excess of what each
@@ -47,7 +47,7 @@ Two things this shows:
 ## 2. The consensus axis is the chemistry-independent signal
 
 The same 285 real novel chains separate cleanly at the sequence level, no read-chemistry
-calibration required: 254 single-caller vs 31 reproducible (≥ 2-caller) — the 9.2×
+calibration required: 254 single-caller vs 31 reproducible (≥ 2-caller), the 9.2×
 decision impact quantified in [wholegenome_multicaller](../wholegenome_multicaller). This is
 why PanIsoGuard leads with consensus + reference-bias (sequence-level) and treats the BAM
 read-level axis as an optional, chemistry-sensitive corroborator.
@@ -57,7 +57,7 @@ read-level axis as an optional, chemistry-sensitive corroborator.
 Scanning all 1,364 caller-reported novel junctions against NA12878's own SNV-consensus
 haplotype (HG001 GIAB v4.2.1) finds 0 reference-bias (`CREATED`) junctions. This is the
 expected result: GM12878 = NA12878 is the GIAB reference-grade sample (about
-as concordant with GRCh38 as a human genome gets), so the rescue's base rate is ~0 — matching
+as concordant with GRCh38 as a human genome gets), so the rescue's base rate is ~0, matching
 the `pangenome_public` null. The rescue's value rises with divergence from the reference;
 on personalized genomes it fires at a similar rate per genome with no false rescue in those scans (the
 [giab_cohort_rescue](../giab_cohort_rescue): 137 across 4 individuals, 0 false). A

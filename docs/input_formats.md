@@ -4,9 +4,9 @@ All internal coordinates are **0-based, half-open** introns `[start, end)`. The
 readers convert each source so the same intron yields the same coordinates, which
 is what makes fingerprint matching and short-read corroboration exact:
 
-- STAR `SJ.tab` (1-based inclusive `s..e`) → `{s-1, e}`
-- GTF exons (1-based); intron between exon_i and exon_{i+1} → `{exon_i.end, exon_{i+1}.start-1}`
-- BED12 blocks (0-based); intron between blocks → `{block_i.end, block_{i+1}.start}`
+- STAR `SJ.tab` (1-based inclusive `s..e`) gives `{s-1, e}`
+- GTF exons (1-based); intron between exon_i and exon_{i+1} gives `{exon_i.end, exon_{i+1}.start-1}`
+- BED12 blocks (0-based); intron between blocks gives `{block_i.end, block_{i+1}.start}`
 
 ## SQANTI3 classification (`--classification`, required unless `--no-sqanti3`)
 
@@ -16,7 +16,7 @@ Read (as priors, never recomputed): `chrom`, `strand`, `structural_category`, `R
 `all_canonical`, `perc_A_downstream_TTS` and, when present, `polyA_motif_found`. Every
 other column is ignored. Category strings are the
 SQANTI3 spelling (`full-splice_match`, `incomplete-splice_match`,
-`novel_in_catalog`, `novel_not_in_catalog`, …).
+`novel_in_catalog`, `novel_not_in_catalog` and so on).
 
 `--no-sqanti3` replaces the file. The structural category is derived from the intron chain
 against `--ref-gtf`: an annotated chain is `full-splice_match`, a contiguous part of one
@@ -35,7 +35,7 @@ under `novel_in_catalog`, so they are adjudicated (benchmark/no_sqanti3).
 ## Caller isoforms (`--isoforms-bed` or `--isoforms-gtf`, required)
 
 The structure of the called isoforms, as BED12 or GTF. **Transcript/isoform IDs
-must match the SQANTI3 `isoform` IDs** — this is the join key between QC and
+must match the SQANTI3 `isoform` IDs**: this is the join key between QC and
 structure (e.g. FLAIR's combined IDs `{n}-1_{ENST}_{ENSG}` appear identically in
 both files). GTF: `exon` lines grouped by `transcript_id`. BED12: `blockSizes` /
 `blockStarts` relative to `chromStart`.
@@ -80,7 +80,7 @@ reaches `chain_min_full_reads` on its own, and the JSONL records the count per l
 A `faidx`-indexed personalized genome FASTA (e.g. from `bcftools consensus` on a
 sample VCF) plus `--reference` (the unmodified genome). The variant axis compares
 the splice motif at each novel junction between the reference and the haplotype(s).
-**Caveat:** coordinates must align between reference and haplotype — fine for SNVs;
+**Caveat:** coordinates must align between reference and haplotype: fine for SNVs;
 indels shift downstream coordinates (a documented limitation). A splice dinucleotide that
 contains an N, a junction of unknown strand, or a haplotype whose contig is missing from
 the FASTA is not evaluable at that junction: `created` needs one readable canonical
@@ -140,18 +140,18 @@ chrom   intron_start   intron_end   strand   [n_haplotypes]   [haplotype_ids]
 same convention as STAR `SJ.tab` and GTF introns); `strand` is `+`/`-` (`1`/`2` also
 accepted); the optional 5th column is the number of supporting graph haplotypes
 (default `1`, gated by `axis_pangenome.min_haplotypes`; note `1` is a single graph path,
-not a population frequency — raise it for stricter support); the optional 6th column is
+not a population frequency; raise it for stricter support); the optional 6th column is
 a comma-separated list of the haplotype/path ids carrying the junction (e.g.
 `HG002#1,HG005#2`; duplicate rows for one junction union their ids;
 `benchmark/pangenome/derive_junctions.py` writes it from the genotype columns of a
 `vg deconstruct` VCF). When all of an
-isoform's novel-vs-linear-reference junctions are found here — on one common path, if
-path ids are given — the apparent novelty is consistent
-with reference bias → `REFERENCE_BIAS` (mechanism `population_known`); with path ids and
+isoform's novel-vs-linear-reference junctions are found here (on one common path, if
+path ids are given), the apparent novelty is consistent
+with reference bias, so `REFERENCE_BIAS` (mechanism `population_known`); with path ids and
 no common path the call is held `UNRESOLVED` (`path_inconsistent`). This
 is independent evidence only if the file was extracted from population assemblies;
 PanIsoGuard cannot verify that, so the rescue is gated by
-`--pangenome-provenance {population|external|sample_derived|unknown}` — `population`/
+`--pangenome-provenance {population|external|sample_derived|unknown}`: `population`/
 `external` promote, while the default `unknown` (and `sample_derived`) are held
 `UNRESOLVED` under the same circularity firewall as the variant axis. When path ids are
 given on some rows only, the rows that have them must share a path; a row without ids

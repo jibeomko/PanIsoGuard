@@ -12,7 +12,7 @@ novel isoform, and what a filter does with it is a real-data precision check.
 |---|---:|---:|---:|---:|---:|
 | LRGASP WTC11 PacBio, + Illumina | 48 | 4 | 0 | 3 | 1 |
 | LRGASP WTC11 PacBio, no short reads | 48 | 4 | 0 | 0 | 1 |
-| LRGASP WTC11 ONT, + Illumina | 25 | 0 | – | – | – |
+| LRGASP WTC11 ONT, + Illumina | 25 | 0 | n/a | n/a | n/a |
 | HG03516 Kinnex (no short reads) | 26 | 2 | 0 | 0 | 2 |
 | HG02717 Kinnex (no short reads) | 37 | 7 | 3 | 0 | 5 |
 | total without short reads (one run per data set) | | 13 | 3 | 0 | 8 |

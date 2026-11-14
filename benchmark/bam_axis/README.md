@@ -1,4 +1,4 @@
-# BAM mapping axis — wiring the indel-near read signal
+# BAM mapping axis: wiring the indel-near read signal
 
 The BAM read-level axis (`adjudicate --bam`) inspects the spanning reads at every novel
 junction. When this protocol was run (0.0.4) it measured four fractions: low-MAPQ,
@@ -11,12 +11,12 @@ removed in 0.0.8, so its numbers below are history.
 ## The mechanism (and why it is the "pangenome insertion" case)
 
 A genuine spliceosomal intron aligns as a clean `N` (ref-skip) in the read CIGAR. A common
-false novel junction is instead an alignment-ambiguous indel — a small insertion or
+false novel junction is instead an alignment-ambiguous indel, a small insertion or
 deletion that the aligner could equally render as a short intron, so the caller reports a
 "novel junction" that is really an indel. That is exactly what `bam_frac_indel_near`
 measures: the fraction of exact-spanning reads that carry an indel within the junction
 window. (A sample insertion relative to the reference does not create a reference-
-coordinate intron the way a deletion does — it surfaces as an indel/soft-clip near the
+coordinate intron the way a deletion does; it surfaces as an indel/soft-clip near the
 junction. So the BAM indel-near signal is how insertion-driven apparent-novelty gets
 caught, complementing the deletion-driven reference-bias rescue of the variant/pangenome
 axis.)
@@ -44,7 +44,7 @@ this set, and, unlike `indel_near`, which is junction-proximal (`junction_window
 measured a terminal soft-clip anywhere on the read, so on real long reads it also fired on
 adapter / poly-A read ends of legitimate junction-spanning reads
 ([gm12878_realdata](../gm12878_realdata): 134 of 191 ONT junctions in the last run that measured it). A default-on gate
-would have demoted genuine novels (`NOVEL_CONFIRMED` → `NOVEL_PROBABLE`). The fraction and
+would have demoted genuine novels (`NOVEL_CONFIRMED` to `NOVEL_PROBABLE`). The fraction and
 its config keys (`max_softclip_frac`, `softclip_min_bp`) were removed in 0.0.8; a config
 that still sets them is rejected.
 
@@ -58,7 +58,7 @@ gates):
 |:---:|:---:|:---:|:---:|
 | 0.5 | 14 / 120 | 0 | 1.000 |
 
-## Impact — wired ON vs OFF (same binary, same inputs)
+## Impact: wired ON vs OFF (same binary, same inputs)
 
 `adjudicate --bam` with the default config (ON) vs a config that raises the indel-near
 gate above 1.0 (OFF, never fires):
@@ -67,14 +67,14 @@ gate above 1.0 (OFF, never fires):
 |---|:---:|:---:|
 | false-novel specificity | 0.966 | 0.966 (unchanged) |
 | genuine sensitivity | 0.782 | 0.782 (unchanged; 0.589 before the 0.0.7 whole-chain support, which is on in both) |
-| genuine isoforms lost from confident-novel | — | 0 |
+| genuine isoforms lost from confident-novel | n/a | 0 |
 
-False-novel transitions OFF→ON: 9 `UNCONFIRMED → ARTIFACT`. Zero genuine
+False-novel transitions from off to on: 9 `UNCONFIRMED` to `ARTIFACT`. Zero genuine
 isoforms changed class. (0.0.4–0.0.5: 41 / 124 caught and 24 relabelled, before the ≥ 3-read
 gate.)
 
-> Superseded table. Before 0.0.4 this table read specificity 0.946 → 0.966: the gain
-> was 3 false novels demoted `NOVEL_PROBABLE → UNCONFIRMED`. All 3 had *partial*
+> Superseded table. Before 0.0.4 this table read specificity 0.946 to 0.966: the gain
+> was 3 false novels demoted `NOVEL_PROBABLE` to `UNCONFIRMED`. All 3 had *partial*
 > short-read support, and the PARTIAL-never-promotes fix (see
 > [sqanti3_filter_h2h](../sqanti3_filter_h2h)) now keeps them non-confident without the BAM,
 > so indel-near no longer moves the operating point on this set. What remains is sharper

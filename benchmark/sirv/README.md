@@ -31,7 +31,7 @@ specificity(false)=0.944   genuine-recall(decisive)=1.000   precision(genuine)=0
 Specificity (0.944) is lower than the GENCODE end-to-end
 run (0.996) because SIRVs are deliberately dense, heavily-overlapping isoforms that
 share splice junctions. The 3 false positives are FLAIR mis-collapses that form a
-*novel combination of individually real, short-read-supported junctions* — the
+*novel combination of individually real, short-read-supported junctions*, the
 short-read axis confirms each junction but cannot, on its own, judge whether the
 combination is genuine. This is the documented limitation that multi-caller
 consensus and read-level full-length support are designed to address (see

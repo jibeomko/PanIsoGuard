@@ -1,7 +1,7 @@
 # Multi-caller quickstart (self-contained, offline, <1 s)
 
-The shortest end-to-end run of PanIsoGuard's main flow — **integrate several callers,
-then let cross-caller agreement decide which novel isoforms to trust** — on tiny committed
+The shortest end-to-end run of PanIsoGuard's main flow, **integrate several callers,
+then let cross-caller agreement decide which novel isoforms to trust**, on tiny committed
 fixtures (no downloads, no real callers, deterministic).
 
 ```bash
@@ -27,8 +27,8 @@ recovered by two or more callers is `NOVEL_PROBABLE`. The consensus axis never r
 ## The pipeline (same three commands on real data)
 
 ```
-combine  --gtf flair:… --gtf isoquant:… --gtf bambu:… --ref-gtf … --out matrix.tsv
-adjudicate --classification <sqanti> --isoforms-gtf <caller> --ref-gtf … --caller-support matrix.tsv --out-prefix sample
+combine  --gtf flair:<gtf> --gtf isoquant:<gtf> --gtf bambu:<gtf> --ref-gtf <gtf> --out matrix.tsv
+adjudicate --classification <sqanti> --isoforms-gtf <caller> --ref-gtf <gtf> --caller-support matrix.tsv --out-prefix sample
 ```
 
 For the full real-data, truth-scored version (5 callers, gffcompare/TAMA head-to-head) see

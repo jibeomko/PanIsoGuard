@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Score the multi-caller consensus axis on the SIRV-Set4 spike-in reference — a SECOND,
-denser, multi-contig transcriptome — against the hidden-chain truth. This is the
+"""Score the multi-caller consensus axis on the SIRV-Set4 spike-in reference (a second,
+denser, multi-contig transcriptome) against the hidden-chain truth. This is the
 generalization companion to score_multicaller.py (which is GENCODE chr22): it checks that
 "single-caller novels are mostly artifacts; >= k-caller consensus raises precision" is not
 specific to one reference/simulator.

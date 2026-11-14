@@ -74,7 +74,7 @@ std::vector<ConsensusIsoform> ConsensusBuilder::build(const Catalog* catalog) co
     iso.support = g.support;
     if (catalog != nullptr && !g.monoexonic) {
       iso.catalog_checked = true;
-      // NOTE: catalog membership is by fingerprint only, so a 64-bit collision could
+      // catalog membership is by fingerprint only, so a 64-bit collision could
       // mislabel known/novel here. This affects only the combine support-matrix
       // annotation (~1e-9 at realistic catalog sizes), not the adjudicate verdict,
       // which classifies novelty per-intron via Catalog::has_intron.

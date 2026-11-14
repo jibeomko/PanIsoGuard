@@ -18,7 +18,7 @@ graph-supported junction at the deleted span.
      6th column so PanIsoGuard can require one common path across an isoform's junctions.
 
 Independence (non-circular) holds only because the adjudicated sample is OUT of the
-graph — verify e.g. `vg paths --list-samples` does not include it. The output is the
+graph; verify e.g. `vg paths --list-samples` does not include it. The output is the
 `--pangenome-junctions` file consumed by PanIsoGuard's pangenome reference-bias axis.
 
 Usage: derive_junctions.py <deconstruct.vcf> <out.tsv> [min_del_len=50]
