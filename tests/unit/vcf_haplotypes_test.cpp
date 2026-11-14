@@ -337,3 +337,24 @@ TEST_CASE("two records at one position are two records, in either row order", "[
   CHECK(one_set.haps[0].motif == "GT-AG");
   CHECK(one_set.verdict == VariantVerdict::kCreated);
 }
+
+// two_jx_dup_*.vcf.gz: the second donor site written twice with the same alleles. With another genotype
+// (1|0:1 then 0|1:2) the file contradicts itself and the bases are unknown in either row order; an identical
+// repeat is one record.
+TEST_CASE("a repeated site with another genotype is a contradiction, not two haplotypes", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  for (const char* f : {"two_jx_dup_conflict.vcf.gz", "two_jx_dup_conflict_swapped.vcf.gz"}) {
+    auto vcf = std::make_shared<VcfHaplotypes>(tiny(f));
+    HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{vcf});
+    const JunctionMotifs m = p.motifs("chrT2", {60, 80}, Strand::kPlus);
+    CHECK_FALSE(m.haps[0].evaluable); CHECK_FALSE(m.haps[1].evaluable);
+    CHECK(m.verdict == VariantVerdict::kNotEvaluable);
+    CHECK(vcf->n_conflicting_records() == 1);
+  }
+  auto same = std::make_shared<VcfHaplotypes>(tiny("two_jx_dup_identical.vcf.gz"));
+  HaplotypeProvider p(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{same});
+  const JunctionMotifs m = p.motifs("chrT2", {60, 80}, Strand::kPlus);
+  CHECK(m.haps[0].motif == "GT-AG");
+  CHECK(m.verdict == VariantVerdict::kCreated);
+  CHECK(same->n_conflicting_records() == 0);
+}

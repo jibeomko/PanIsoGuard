@@ -28,6 +28,7 @@ struct RunProvenance {
   long haplotype_vcf_unphased_het = 0;                 // unphased heterozygous alleles applied at motifs
   long haplotype_vcf_non_snv = 0;                      // indel / symbolic alleles skipped at motifs
   long haplotype_vcf_missing = 0;                      // missing or absent alleles that left a motif base unknown
+  long haplotype_vcf_conflicting = 0;                  // records repeating a site with another genotype (bases made unknown)
   std::string pangenome_path;       // "" if none
   std::string kept_path;            // "" if none (--write-kept: the isoform file filtered to kept verdicts)
   std::string kept_verdicts;        // the --keep-verdicts list that selected them

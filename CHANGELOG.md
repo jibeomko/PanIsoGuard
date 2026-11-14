@@ -106,6 +106,14 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by a sixth external review (of fb60a4b) on 2026-11-14, with a regression test:
+- A site written twice with the same position and alleles but another genotype or phase set
+  was counted once (the second record's phase was dropped while its alleles were applied), so
+  a canonical motif the file does not support could be composed and the call depended on row
+  order. Such a repeat is a contradiction: the bases are unknown on every haplotype and the
+  provenance log counts it (`haplotype_vcf_conflicting_records_at_motifs`); an identical
+  repeat is one record.
+
 Found by a fifth external review (of 4ba3058) on 2026-11-14, with a regression test:
 - The once-per-junction record count told records apart by position alone, so two records at
   one position (different ALT alleles, different phase sets) were counted as one and the call

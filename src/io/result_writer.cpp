@@ -161,6 +161,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
     out << "haplotype_vcf_unphased_het_applied_at_motifs\t" << prov.haplotype_vcf_unphased_het << '\n';
     out << "haplotype_vcf_non_snv_skipped_at_motifs\t" << prov.haplotype_vcf_non_snv << '\n';
     out << "haplotype_vcf_missing_alleles_at_motifs\t" << prov.haplotype_vcf_missing << '\n';
+    out << "haplotype_vcf_conflicting_records_at_motifs\t" << prov.haplotype_vcf_conflicting << '\n';
   }
   out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
   if (!prov.kept_path.empty()) {

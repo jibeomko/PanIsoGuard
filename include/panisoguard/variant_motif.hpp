@@ -52,8 +52,10 @@ struct WindowPhase {
                                  // and shaped a window base: two or more need one phase set
   long phase_set = kNoPhaseSet;
   bool mixed_sets = false;
-  std::vector<std::string> counted;   // records already counted (position, REF and ALT alleles): one MNP over both windows is one
-                                      // record, two records at one position are two
+  std::vector<std::string> counted;   // records already counted (position, alleles and genotype): one MNP over both windows is
+                                      // one record, two records at one position are two
+  std::vector<std::pair<std::string, std::string>> seen;   // (position + alleles, genotype) of the records read: a second record with
+                                                           // the same alleles and another genotype contradicts the first
   void add_set(long ps) { if (phase_set == kNoPhaseSet) phase_set = ps; else if (phase_set != ps) mixed_sets = true; }
 };
 
@@ -92,6 +94,7 @@ class VcfHaplotypes {
   long n_unphased_het_applied() const;   // over every window queried so far
   long n_non_snv_skipped() const;
   long n_missing_alleles() const;        // missing or absent alleles that left a motif base unknown
+  long n_conflicting_records() const;    // records repeating another's position and alleles with a different genotype
 
  private:
   struct Impl;

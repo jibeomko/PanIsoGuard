@@ -24,6 +24,7 @@ struct VcfHaplotypes::Impl {
   mutable long n_unphased = 0;
   mutable long n_non_snv = 0;
   mutable long n_missing = 0;
+  mutable long n_conflicting = 0;
   mutable int32_t* ps = nullptr;   // bcf_get_format_int32 buffer for PS
   mutable int ps_cap = 0;
 };
@@ -117,6 +118,7 @@ const std::string& VcfHaplotypes::sample() const { return impl_->sample; }
 long VcfHaplotypes::n_unphased_het_applied() const { return impl_->n_unphased; }
 long VcfHaplotypes::n_non_snv_skipped() const { return impl_->n_non_snv; }
 long VcfHaplotypes::n_missing_alleles() const { return impl_->n_missing; }
+long VcfHaplotypes::n_conflicting_records() const { return impl_->n_conflicting; }
 
 std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_t start, int64_t end,
                                                 const std::string& ref_window, WindowPhase& phase) const {
@@ -143,6 +145,32 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     }
     const int per = ngt / impl_->n_samples;
     const int* g = impl_->gt + impl_->sample_idx * per;
+    // the record's identity: position and alleles; its genotype (alleles, separators, phase set) apart
+    std::string record_key = std::to_string(rec->pos);
+    for (int a = 0; a < rec->n_allele; ++a) { record_key += a ? ',' : ':'; record_key += rec->d.allele[a]; }
+    std::string gt_key;
+    for (int h = 0; h < per; ++h) {
+      if (g[h] == bcf_int32_vector_end) break;
+      if (h) gt_key += bcf_gt_is_phased(g[h]) ? '|' : '/';
+      gt_key += bcf_gt_is_missing(g[h]) ? "." : std::to_string(bcf_gt_allele(g[h]));
+    }
+    {
+      const int nps = bcf_get_format_int32(impl_->hdr, rec, "PS", &impl_->ps, &impl_->ps_cap);
+      if (nps > 0) {
+        const int32_t v = impl_->ps[impl_->sample_idx * (nps / impl_->n_samples)];
+        if (v != bcf_int32_missing && v != bcf_int32_vector_end) gt_key += ":" + std::to_string(v);
+      }
+    }
+    bool conflict = false, duplicate = false;
+    for (const auto& s : phase.seen)
+      if (s.first == record_key) { if (s.second != gt_key) conflict = true; else duplicate = true; }
+    if (conflict) {
+      // the same site with another genotype: the file contradicts itself here, so the bases are unknown
+      for (auto& h : haps) for (int64_t pos = k0; pos < k1; ++pos) h[static_cast<std::size_t>(pos - start)] = 'N';
+      if (k1 > k0) { phase.missing = true; ++impl_->n_conflicting; }
+      continue;
+    }
+    if (!duplicate) phase.seen.emplace_back(record_key, gt_key);
     bool applied = false, het = false, phased = true, ended = false, wrote_n = false;
     int first_allele = -1, n_known = 0, n_missing_here = 0;
     for (int h = 0; h < static_cast<int>(haps.size()); ++h) {
@@ -172,11 +200,10 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     // composition is an observation only if they are phased together. A record that changed no base
     // and left no base unknown (a skipped indel) places nothing.
     const bool index_dependent = n_known >= 1 && (het || n_missing_here >= 1);
-    std::string record_key = std::to_string(rec->pos);   // a record is its position and its alleles: two records may share a position
-    for (int a = 0; a < rec->n_allele; ++a) { record_key += a ? ',' : ':'; record_key += rec->d.allele[a]; }
-    const bool counted_before = std::find(phase.counted.begin(), phase.counted.end(), record_key) != phase.counted.end();
+    const std::string full_key = record_key + "#" + gt_key;
+    const bool counted_before = std::find(phase.counted.begin(), phase.counted.end(), full_key) != phase.counted.end();
     if (index_dependent && (applied || wrote_n) && !counted_before) {
-      phase.counted.push_back(record_key);   // a record spanning both windows of a junction is read twice but is one record
+      phase.counted.push_back(full_key);   // a record spanning both windows of a junction is read twice but is one record
       ++phase.n_het;
       if (!phased) { ++impl_->n_unphased; phase.unphased = true; }
       else {

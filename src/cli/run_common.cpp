@@ -283,6 +283,7 @@ RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
     prov.haplotype_vcf_unphased_het += v->n_unphased_het_applied();
     prov.haplotype_vcf_non_snv += v->n_non_snv_skipped();
     prov.haplotype_vcf_missing += v->n_missing_alleles();
+    prov.haplotype_vcf_conflicting += v->n_conflicting_records();
   }
   prov.pangenome_path = c.pangenome_junctions;
   prov.variant_axis_on = !c.reference_haplotypes.empty() || !c.haplotype_vcfs.empty();

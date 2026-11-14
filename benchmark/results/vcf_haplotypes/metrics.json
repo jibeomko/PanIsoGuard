@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/vcf_haplotypes/run.sh; benchmark/vcf_haplotypes/compare_routes.py LABEL:FASTA_PREFIX:VCF_PREFIX ... --emit-metrics ...",
   "data_provenance": "The variant-axis runs already on disk, re-run with the haplotypes read from a VCF instead of consensus FASTAs: HG002 chr22 (GIAB v4.2.1 biallelic SNVs; FASTA = bcftools consensus -H 1 of the same file; benchmark/hg002) and every per-chromosome scan of HG03516 and HG02717 (paftools SNV calls per parental HPRC R2 assembly, consensus FASTA per haplotype; benchmark/hg03516_refbias). Public GIAB / HPRC / GENCODE v49.",
-  "generated_utc": "2026-11-14T12:10:34Z",
+  "generated_utc": "2026-11-14T12:29:54Z",
   "metrics": {
     "per_sample": {
       "HG002": {
