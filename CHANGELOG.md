@@ -3,7 +3,7 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-14
 
 ### Added
 - `adjudicate --haplotype-vcf PATH` (repeatable) with `--vcf-sample NAME`: the variant axis
