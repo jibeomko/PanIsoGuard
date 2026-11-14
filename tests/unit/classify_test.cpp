@@ -24,6 +24,7 @@ std::string write_gtf() {
   tx("A", "+", {{1, 100}, {201, 300}, {401, 500}, {601, 700}});
   tx("B", "+", {{1, 100}, {701, 800}, {901, 1000}});
   tx("M", "-", {{2001, 2100}, {2201, 2300}});
+  tx("S", "+", {{3001, 3400}});                                   // a mono-exonic transcript
   return path;
 }
 // chrC, 6000 bases: GT at every annotated intron start and AG before every annotated intron
@@ -54,22 +55,34 @@ TEST_CASE("classify_isoforms gives SQANTI3's structural categories from the chai
       iso("fsm", Strand::kPlus, {{100, 200}, {300, 400}, {500, 600}}, 0, 700),
       iso("ism", Strand::kPlus, {{300, 400}, {500, 600}}, 250, 700),
       iso("nic", Strand::kPlus, {{300, 400}, {800, 900}}, 250, 1000),
+      iso("nic_sites", Strand::kPlus, {{100, 400}}, 0, 500),           // known donor and acceptor, new junction
+      iso("nic_retained", Strand::kPlus, {{100, 200}, {300, 400}}, 0, 700),   // A's first two introns, span retains the third
       iso("nnc", Strand::kPlus, {{100, 200}, {350, 400}}, 0, 500),
       iso("anti", Strand::kPlus, {{2100, 2200}}, 2000, 2300),
       iso("inter", Strand::kPlus, {{5000, 5100}}, 4900, 5200),
-      iso("mono", Strand::kPlus, {}, 0, 100),
+      iso("mono_fsm", Strand::kPlus, {}, 3050, 3300),                  // inside S's single exon
+      iso("mono_ism", Strand::kPlus, {}, 210, 290),                    // inside A's second exon
+      iso("mono_genic", Strand::kPlus, {}, 250, 350),                  // crosses A's exon end
+      iso("mono_intron", Strand::kPlus, {}, 110, 190),                 // inside A's first intron
+      iso("mono_inter", Strand::kPlus, {}, 5000, 5100),
   };
   const SqantiTable t = classify_isoforms(isos, cat, nullptr);
-  REQUIRE(t.records.size() == 7);
+  REQUIRE(t.records.size() == 13);
   std::map<std::string, std::string> cat_of;
   for (const auto& r : t.records) cat_of[r.isoform] = r.structural_category;
   CHECK(cat_of["fsm"] == "full-splice_match");
   CHECK(cat_of["ism"] == "incomplete-splice_match");
   CHECK(cat_of["nic"] == "novel_in_catalog");
+  CHECK(cat_of["nic_sites"] == "novel_in_catalog");
+  CHECK(cat_of["nic_retained"] == "novel_in_catalog");
   CHECK(cat_of["nnc"] == "novel_not_in_catalog");
   CHECK(cat_of["anti"] == "antisense");
   CHECK(cat_of["inter"] == "intergenic");
-  CHECK(cat_of["mono"] == "mono-exon");
+  CHECK(cat_of["mono_fsm"] == "full-splice_match");
+  CHECK(cat_of["mono_ism"] == "incomplete-splice_match");
+  CHECK(cat_of["mono_genic"] == "genic");
+  CHECK(cat_of["mono_intron"] == "genic_intron");
+  CHECK(cat_of["mono_inter"] == "intergenic");
   // without the genome the QC priors are not evaluable, never false
   CHECK(sqanti_is_na_token(t.records[0].all_canonical));
   CHECK(sqanti_is_na(t.records[0].perc_A_downstream_TTS));
@@ -88,7 +101,7 @@ TEST_CASE("classify_isoforms reads splice motifs and the 3' A content from the g
       iso("nnc", Strand::kPlus, {{100, 200}, {350, 400}}, 0, 500),                  // {350,400}: CC-AG
       iso("bend", Strand::kPlus, {{100, 700}, {800, 900}}, 0, 1000),                // ends before 20 C bases
       iso("minus", Strand::kMinus, {{2100, 2200}}, 1000, 2300),                     // 3' end at 1000: bases 980..1000 are C, no T
-      iso("mono", Strand::kPlus, {}, 0, 100),
+      iso("mono", Strand::kPlus, {}, 5000, 5100),
   };
   const SqantiTable t = classify_isoforms(isos, cat, &ref);
   std::map<std::string, SqantiRecord> r;
@@ -107,7 +120,7 @@ TEST_CASE("classify_isoforms reads splice motifs and the 3' A content from the g
   const auto out = adjudicate(in, RuleEngine());
   for (const auto& o : out) {
     if (o.isoform_id == "fsm") CHECK(o.verdict.confidence == ConfidenceClass::kKnown);
-    if (o.isoform_id == "mono") CHECK(o.verdict.verdict == "not_adjudicated");
+    if (o.isoform_id == "mono") CHECK(o.verdict.verdict == "not_adjudicated");   // intergenic
     if (o.isoform_id == "nnc") CHECK(o.evidence.n_novel_junctions == 1);
   }
   std::remove(gtf.c_str()); std::remove(fa.c_str()); std::remove((fa + ".fai").c_str());

@@ -28,7 +28,9 @@ whose locus is annotated only on the other strand `antisense`, one in an unannot
 `perc_A_downstream_TTS` the A content of the 20 bases after the 3′ end on the transcript
 strand, SQANTI3's definitions; without it both are NA. `RTS_stage` and `polyA_motif_found`
 are NA. The provenance log says the rows were computed. On the chr22 five-caller set the
-categories agree with SQANTI3's for the isoforms it classifies (benchmark/no_sqanti3).
+categories equal SQANTI3's for 98.6 % of the multi-exon isoforms; the rest are
+retained-intron sub-chains that SQANTI3 files under `incomplete-splice_match` and this mode
+under `novel_in_catalog`, so they are adjudicated (benchmark/no_sqanti3).
 
 ## Caller isoforms (`--isoforms-bed` or `--isoforms-gtf`, required)
 

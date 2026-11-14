@@ -104,54 +104,98 @@ std::vector<Transcript> read_gtf_transcripts(const std::string& path) {
   std::vector<Transcript> out;
   out.reserve(order.size());
   for (const auto& tid : order) {
-    Transcript t{tid, chain_from_exons(acc[tid]), acc[tid].gene_id};
+    Transcript t;
+    t.id = tid;
+    t.chain = chain_from_exons(acc[tid]);
+    t.gene_id = acc[tid].gene_id;
     for (const auto& e : acc[tid].exons) {
       if (t.end == 0 || e.first - 1 < t.start) t.start = e.first - 1;   // 1-based inclusive exon -> 0-based half-open span
       if (e.second > t.end) t.end = e.second;
+      t.exons.emplace_back(e.first - 1, e.second);
     }
+    std::sort(t.exons.begin(), t.exons.end());
     out.push_back(std::move(t));
   }
   return out;
 }
 
-void Catalog::add_transcript(const Transcript& t) {
-  if (t.end > t.start) spans_[t.chain.chrom + '|' + strand_char(t.chain.strand)].emplace_back(t.start, t.end);
-  if (t.chain.monoexonic()) return;
-  chains_.insert(fingerprint_intron_chain(t.chain));
-  for (const auto& j : t.chain.introns) introns_.insert(junction_key(t.chain.chrom, t.chain.strand, j));
-  chain_list_.push_back(t.chain);
-  for (const auto& j : t.chain.introns) chains_by_intron_[junction_key(t.chain.chrom, t.chain.strand, j)].push_back(chain_list_.size() - 1);
-}
-
-bool Catalog::has_subchain(const IntronChain& chain) const {
-  if (chain.monoexonic()) return false;
-  const auto it = chains_by_intron_.find(junction_key(chain.chrom, chain.strand, chain.introns.front()));
-  if (it == chains_by_intron_.end()) return false;
-  for (const std::size_t i : it->second)
-    if (contiguous_subchain(chain.introns, chain_list_[i].introns)) return true;
-  return false;
-}
-
 namespace {
-bool any_overlap(const std::vector<std::pair<int64_t, int64_t>>* spans, int64_t start, int64_t end) {
-  if (spans == nullptr) return false;
-  for (const auto& s : *spans)
-    if (s.first < end && s.second > start) return true;
-  return false;
-}
+std::string locus_key(const std::string& chrom, Strand strand) { return chrom + '|' + strand_char(strand); }
+std::string site_key(const std::string& chrom, Strand strand, int64_t pos) { return locus_key(chrom, strand) + ':' + std::to_string(pos); }
 }  // namespace
 
+void Catalog::add_transcript(const Transcript& t) {
+  txs_.push_back(t);
+  const std::size_t idx = txs_.size() - 1;
+  if (t.end > t.start) txs_by_locus_[locus_key(t.chain.chrom, t.chain.strand)].push_back(idx);
+  if (t.chain.monoexonic()) return;
+  chains_.insert(fingerprint_intron_chain(t.chain));
+  for (const auto& j : t.chain.introns) {
+    introns_.insert(junction_key(t.chain.chrom, t.chain.strand, j));
+    intron_starts_.insert(site_key(t.chain.chrom, t.chain.strand, j.start));
+    intron_ends_.insert(site_key(t.chain.chrom, t.chain.strand, j.end));
+    txs_by_intron_[junction_key(t.chain.chrom, t.chain.strand, j)].push_back(idx);
+  }
+}
+
+bool Catalog::has_intron_start(const std::string& chrom, Strand strand, int64_t pos) const {
+  return intron_starts_.count(site_key(chrom, strand, pos)) != 0;
+}
+bool Catalog::has_intron_end(const std::string& chrom, Strand strand, int64_t pos) const {
+  return intron_ends_.count(site_key(chrom, strand, pos)) != 0;
+}
+
+bool Catalog::has_subchain(const IntronChain& chain, int64_t start, int64_t end) const {
+  if (chain.monoexonic()) return false;
+  const auto it = txs_by_intron_.find(junction_key(chain.chrom, chain.strand, chain.introns.front()));
+  if (it == txs_by_intron_.end()) return false;
+  for (const std::size_t i : it->second) {
+    const std::vector<Junction>& full = txs_[i].chain.introns;
+    if (!contiguous_subchain(chain.introns, full)) continue;
+    // the matched run is the reference introns equal to the chain; every other reference
+    // intron must lie outside the isoform's span (otherwise the isoform retains it)
+    bool retained = false;
+    for (const auto& j : full) {
+      bool in_chain = false;
+      for (const auto& q : chain.introns) if (q == j) { in_chain = true; break; }
+      if (!in_chain && j.start >= start && j.end <= end) { retained = true; break; }
+    }
+    if (!retained) return true;
+  }
+  return false;
+}
+
+std::string Catalog::mono_exon_category(const std::string& chrom, Strand strand, int64_t start, int64_t end) const {
+  const auto it = txs_by_locus_.find(locus_key(chrom, strand));
+  if (it == txs_by_locus_.end()) return "";
+  bool in_exon_mono = false, in_exon_multi = false, touches_exon = false, in_span = false;
+  for (const std::size_t i : it->second) {
+    const Transcript& t = txs_[i];
+    if (!(t.start < end && t.end > start)) continue;
+    in_span = true;
+    for (const auto& e : t.exons) {
+      if (e.first <= start && end <= e.second) { (t.chain.monoexonic() ? in_exon_mono : in_exon_multi) = true; }
+      else if (e.first < end && e.second > start) touches_exon = true;
+    }
+  }
+  if (in_exon_mono) return "full-splice_match";
+  if (in_exon_multi) return "incomplete-splice_match";
+  if (touches_exon) return "genic";
+  if (in_span) return "genic_intron";
+  return "";
+}
+
 bool Catalog::overlaps(const std::string& chrom, Strand strand, int64_t start, int64_t end) const {
-  const auto it = spans_.find(chrom + '|' + strand_char(strand));
-  return any_overlap(it == spans_.end() ? nullptr : &it->second, start, end);
+  const auto it = txs_by_locus_.find(locus_key(chrom, strand));
+  if (it == txs_by_locus_.end()) return false;
+  for (const std::size_t i : it->second)
+    if (txs_[i].start < end && txs_[i].end > start) return true;
+  return false;
 }
 
 bool Catalog::overlaps_any_strand(const std::string& chrom, int64_t start, int64_t end) const {
-  for (const char* s : {"+", "-", "."}) {
-    const auto it = spans_.find(chrom + '|' + s);
-    if (any_overlap(it == spans_.end() ? nullptr : &it->second, start, end)) return true;
-  }
-  return false;
+  return overlaps(chrom, Strand::kPlus, start, end) || overlaps(chrom, Strand::kMinus, start, end) ||
+         overlaps(chrom, Strand::kUnknown, start, end);
 }
 
 Catalog build_catalog_from_gtf(const std::string& path) {

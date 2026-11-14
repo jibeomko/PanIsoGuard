@@ -1,0 +1,412 @@
+{
+  "command": "bash benchmark/no_sqanti3/run.sh; benchmark/no_sqanti3/score_no_sqanti3.py --out ... --truth ... --gtf ... --cls ... --emit-metrics ...",
+  "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each with its SQANTI3 6.0.1 classification; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated.",
+  "generated_utc": "2026-11-14T00:51:22Z",
+  "metrics": {
+    "bambu.nosr": {
+      "accuracy": {
+        "computed": {
+          "FN": 20,
+          "FP": 122,
+          "TN": 21,
+          "TP": 389,
+          "precision": 0.761,
+          "recall": 0.951
+        },
+        "sqanti3": {
+          "FN": 20,
+          "FP": 120,
+          "TN": 23,
+          "TP": 389,
+          "precision": 0.764,
+          "recall": 0.951
+        }
+      },
+      "all_canonical": {
+        "agree": 552,
+        "both_evaluable": 552
+      },
+      "category_agreement": 0.9964,
+      "category_confusion": {
+        "antisense->novel_not_in_catalog": 1,
+        "genic->novel_not_in_catalog": 1
+      },
+      "class_agreement": 0.9964,
+      "class_moves": {
+        "UNRESOLVED->NOVEL_PROBABLE": 2
+      },
+      "isoforms": 552,
+      "mono_exon_sqanti3_categories": {},
+      "multi_exon": 552
+    },
+    "bambu.sr1M": {
+      "accuracy": {
+        "computed": {
+          "FN": 16,
+          "FP": 133,
+          "TN": 10,
+          "TP": 393,
+          "precision": 0.747,
+          "recall": 0.961
+        },
+        "sqanti3": {
+          "FN": 16,
+          "FP": 131,
+          "TN": 12,
+          "TP": 393,
+          "precision": 0.75,
+          "recall": 0.961
+        }
+      },
+      "all_canonical": {
+        "agree": 552,
+        "both_evaluable": 552
+      },
+      "category_agreement": 0.9964,
+      "category_confusion": {
+        "antisense->novel_not_in_catalog": 1,
+        "genic->novel_not_in_catalog": 1
+      },
+      "class_agreement": 0.9493,
+      "class_moves": {
+        "NOVEL_PROBABLE->NOVEL_CONFIRMED": 26,
+        "UNRESOLVED->NOVEL_CONFIRMED": 2
+      },
+      "isoforms": 552,
+      "mono_exon_sqanti3_categories": {},
+      "multi_exon": 552
+    },
+    "espresso.nosr": {
+      "accuracy": {
+        "computed": {
+          "FN": 34,
+          "FP": 7,
+          "TN": 258,
+          "TP": 521,
+          "precision": 0.987,
+          "recall": 0.939
+        },
+        "sqanti3": {
+          "FN": 34,
+          "FP": 7,
+          "TN": 258,
+          "TP": 521,
+          "precision": 0.987,
+          "recall": 0.939
+        }
+      },
+      "all_canonical": {
+        "agree": 1500,
+        "both_evaluable": 1500
+      },
+      "category_agreement": 1.0,
+      "category_confusion": {},
+      "class_agreement": 1.0,
+      "class_moves": {},
+      "isoforms": 1561,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 61
+      },
+      "multi_exon": 1500
+    },
+    "espresso.sr1M": {
+      "accuracy": {
+        "computed": {
+          "FN": 31,
+          "FP": 7,
+          "TN": 258,
+          "TP": 524,
+          "precision": 0.987,
+          "recall": 0.944
+        },
+        "sqanti3": {
+          "FN": 31,
+          "FP": 7,
+          "TN": 258,
+          "TP": 524,
+          "precision": 0.987,
+          "recall": 0.944
+        }
+      },
+      "all_canonical": {
+        "agree": 1500,
+        "both_evaluable": 1500
+      },
+      "category_agreement": 1.0,
+      "category_confusion": {},
+      "class_agreement": 0.9795,
+      "class_moves": {
+        "NOVEL_PROBABLE->NOVEL_CONFIRMED": 32
+      },
+      "isoforms": 1561,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 61
+      },
+      "multi_exon": 1500
+    },
+    "flair.nosr": {
+      "accuracy": {
+        "computed": {
+          "FN": 162,
+          "FP": 4,
+          "TN": 144,
+          "TP": 568,
+          "precision": 0.993,
+          "recall": 0.778
+        },
+        "sqanti3": {
+          "FN": 184,
+          "FP": 4,
+          "TN": 144,
+          "TP": 546,
+          "precision": 0.993,
+          "recall": 0.748
+        }
+      },
+      "all_canonical": {
+        "agree": 1530,
+        "both_evaluable": 1530
+      },
+      "category_agreement": 0.983,
+      "category_confusion": {
+        "genic->novel_not_in_catalog": 3,
+        "incomplete-splice_match->novel_in_catalog": 23
+      },
+      "class_agreement": 0.9842,
+      "class_moves": {
+        "KNOWN->UNRESOLVED": 1,
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 23,
+        "NOVEL_PROBABLE->UNCONFIRMED": 1
+      },
+      "isoforms": 1579,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 33,
+        "genic": 7,
+        "incomplete-splice_match": 9
+      },
+      "multi_exon": 1530
+    },
+    "flair.sr1M": {
+      "accuracy": {
+        "computed": {
+          "FN": 158,
+          "FP": 4,
+          "TN": 144,
+          "TP": 572,
+          "precision": 0.993,
+          "recall": 0.784
+        },
+        "sqanti3": {
+          "FN": 181,
+          "FP": 4,
+          "TN": 144,
+          "TP": 549,
+          "precision": 0.993,
+          "recall": 0.752
+        }
+      },
+      "all_canonical": {
+        "agree": 1530,
+        "both_evaluable": 1530
+      },
+      "category_agreement": 0.983,
+      "category_confusion": {
+        "genic->novel_not_in_catalog": 3,
+        "incomplete-splice_match->novel_in_catalog": 23
+      },
+      "class_agreement": 0.9607,
+      "class_moves": {
+        "ARTIFACT->UNCONFIRMED": 5,
+        "KNOWN->UNRESOLVED": 1,
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 23,
+        "NOVEL_PROBABLE->NOVEL_CONFIRMED": 30,
+        "UNRESOLVED->ARTIFACT": 3
+      },
+      "isoforms": 1579,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 33,
+        "genic": 7,
+        "incomplete-splice_match": 9
+      },
+      "multi_exon": 1530
+    },
+    "isoquant.nosr": {
+      "accuracy": {
+        "computed": {
+          "FN": 152,
+          "FP": 4,
+          "TN": 152,
+          "TP": 455,
+          "precision": 0.991,
+          "recall": 0.75
+        },
+        "sqanti3": {
+          "FN": 177,
+          "FP": 4,
+          "TN": 152,
+          "TP": 430,
+          "precision": 0.991,
+          "recall": 0.708
+        }
+      },
+      "all_canonical": {
+        "agree": 1441,
+        "both_evaluable": 1441
+      },
+      "category_agreement": 0.9827,
+      "category_confusion": {
+        "incomplete-splice_match->novel_in_catalog": 25
+      },
+      "class_agreement": 0.9827,
+      "class_moves": {
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 25
+      },
+      "isoforms": 1442,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 1
+      },
+      "multi_exon": 1441
+    },
+    "isoquant.sr1M": {
+      "accuracy": {
+        "computed": {
+          "FN": 147,
+          "FP": 4,
+          "TN": 152,
+          "TP": 460,
+          "precision": 0.991,
+          "recall": 0.758
+        },
+        "sqanti3": {
+          "FN": 172,
+          "FP": 4,
+          "TN": 152,
+          "TP": 435,
+          "precision": 0.991,
+          "recall": 0.717
+        }
+      },
+      "all_canonical": {
+        "agree": 1441,
+        "both_evaluable": 1441
+      },
+      "category_agreement": 0.9827,
+      "category_confusion": {
+        "incomplete-splice_match->novel_in_catalog": 25
+      },
+      "class_agreement": 0.9653,
+      "class_moves": {
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 25,
+        "NOVEL_PROBABLE->NOVEL_CONFIRMED": 25
+      },
+      "isoforms": 1442,
+      "mono_exon_sqanti3_categories": {
+        "full-splice_match": 1
+      },
+      "multi_exon": 1441
+    },
+    "talon.nosr": {
+      "accuracy": {
+        "computed": {
+          "FN": 175,
+          "FP": 222,
+          "TN": 1105,
+          "TP": 522,
+          "precision": 0.702,
+          "recall": 0.749
+        },
+        "sqanti3": {
+          "FN": 203,
+          "FP": 196,
+          "TN": 1131,
+          "TP": 494,
+          "precision": 0.716,
+          "recall": 0.709
+        }
+      },
+      "all_canonical": {
+        "agree": 2703,
+        "both_evaluable": 2703
+      },
+      "category_agreement": 0.9797,
+      "category_confusion": {
+        "antisense->novel_not_in_catalog": 1,
+        "fusion->novel_not_in_catalog": 1,
+        "genic->novel_not_in_catalog": 1,
+        "incomplete-splice_match->novel_in_catalog": 52
+      },
+      "class_agreement": 0.9812,
+      "class_moves": {
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 52,
+        "NOVEL_PROBABLE->UNCONFIRMED": 1,
+        "UNRESOLVED->NOVEL_PROBABLE": 3
+      },
+      "isoforms": 2977,
+      "mono_exon_sqanti3_categories": {
+        "antisense": 2,
+        "full-splice_match": 67,
+        "genic": 11,
+        "genic_intron": 3,
+        "incomplete-splice_match": 186,
+        "intergenic": 1,
+        "novel_in_catalog": 4
+      },
+      "multi_exon": 2703
+    },
+    "talon.sr1M": {
+      "accuracy": {
+        "computed": {
+          "FN": 177,
+          "FP": 225,
+          "TN": 1102,
+          "TP": 520,
+          "precision": 0.698,
+          "recall": 0.746
+        },
+        "sqanti3": {
+          "FN": 206,
+          "FP": 199,
+          "TN": 1128,
+          "TP": 491,
+          "precision": 0.712,
+          "recall": 0.704
+        }
+      },
+      "all_canonical": {
+        "agree": 2703,
+        "both_evaluable": 2703
+      },
+      "category_agreement": 0.9797,
+      "category_confusion": {
+        "antisense->novel_not_in_catalog": 1,
+        "fusion->novel_not_in_catalog": 1,
+        "genic->novel_not_in_catalog": 1,
+        "incomplete-splice_match->novel_in_catalog": 52
+      },
+      "class_agreement": 0.9667,
+      "class_moves": {
+        "KNOWN_FRAGMENT->NOVEL_PROBABLE": 52,
+        "NOVEL_PROBABLE->NOVEL_CONFIRMED": 44,
+        "UNRESOLVED->NOVEL_CONFIRMED": 3
+      },
+      "isoforms": 2977,
+      "mono_exon_sqanti3_categories": {
+        "antisense": 2,
+        "full-splice_match": 67,
+        "genic": 11,
+        "genic_intron": 3,
+        "incomplete-splice_match": 186,
+        "intergenic": 1,
+        "novel_in_catalog": 4
+      },
+      "multi_exon": 2703
+    }
+  },
+  "notes": "adjudicate --no-sqanti3 (categories from the chains and the reference GTF, splice motifs and the 3' A content from the genome, RT-switch not evaluable) against the SQANTI3-based run on the same isoforms: category agreement over the isoforms SQANTI3 classifies, all_canonical agreement where both are evaluable, confidence class agreement, and genuine-novel precision / recall of both modes against the truth.",
+  "protocol": "no_sqanti3",
+  "ruleset_version": null,
+  "scope": "gencode_v49_chr22_5caller",
+  "source": null,
+  "status": "tracked",
+  "tool_version": "0.0.7"
+}

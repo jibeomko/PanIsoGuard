@@ -51,7 +51,11 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   and the 3′ A content from `--reference` with SQANTI3's definitions; the RT-switch flag and
   the polyA motif are not evaluable. The caller's isoform file now carries each transcript's
   span, and the reference catalog answers sub-chain and locus-overlap questions. The
-  provenance log records that the rows were computed.
+  provenance log records that the rows were computed. On the five chr22 callers the categories equal
+  SQANTI3's for 98.6 % of 7726 multi-exon isoforms and the splice-motif prior wherever both
+  evaluate it; the differing isoforms are retained-intron sub-chains SQANTI3 files under ISM,
+  which this mode adjudicates (FLAIR recall 0.748 → 0.778 at precision 0.993;
+  benchmark/no_sqanti3, a new tracked protocol).
 
 ### Fixed
 Found by a code audit on 2026-10-31; each has a regression test.

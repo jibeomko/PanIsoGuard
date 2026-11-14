@@ -8,18 +8,21 @@ namespace panisoguard {
 
 namespace {
 
-const char* category_of(const CallerIsoform& iso, const Catalog& cat) {
+std::string category_of(const CallerIsoform& iso, const Catalog& cat) {
   const IntronChain& c = iso.chain;
-  if (c.monoexonic()) return "mono-exon";
+  if (c.monoexonic()) {
+    const std::string m = cat.mono_exon_category(c.chrom, c.strand, iso.start, iso.end);
+    if (!m.empty()) return m;
+    return cat.overlaps_any_strand(c.chrom, iso.start, iso.end) ? "antisense" : "intergenic";
+  }
   if (cat.has_chain(fingerprint_intron_chain(c))) return "full-splice_match";
-  if (cat.has_subchain(c)) return "incomplete-splice_match";
-  bool all_known = true;
+  if (cat.has_subchain(c, iso.start, iso.end)) return "incomplete-splice_match";
+  if (!cat.overlaps(c.chrom, c.strand, iso.start, iso.end))
+    return cat.overlaps_any_strand(c.chrom, iso.start, iso.end) ? "antisense" : "intergenic";
+  bool all_sites_known = true;
   for (const auto& j : c.introns)
-    if (!cat.has_intron(c.chrom, c.strand, j)) { all_known = false; break; }
-  if (all_known) return "novel_in_catalog";
-  if (cat.overlaps(c.chrom, c.strand, iso.start, iso.end)) return "novel_not_in_catalog";
-  if (cat.overlaps_any_strand(c.chrom, iso.start, iso.end)) return "antisense";
-  return "intergenic";
+    if (!cat.has_intron_start(c.chrom, c.strand, j.start) || !cat.has_intron_end(c.chrom, c.strand, j.end)) { all_sites_known = false; break; }
+  return all_sites_known ? "novel_in_catalog" : "novel_not_in_catalog";
 }
 
 std::string all_canonical_of(const CallerIsoform& iso, const FastaFetcher& ref) {
