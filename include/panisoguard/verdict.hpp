@@ -88,6 +88,9 @@ struct EvidenceVector {
   int n_novel_jx_variant_created = 0;     // how many are created on >= 1 haplotype (per-junction view)
   bool haplotype_consistent = false;      // one haplotype carries the canonical motif at every
                                           // created junction (a chain lives on one haplotype)
+  bool haplotype_phase_unknown = false;   // VCF input: >= 2 created junctions rest on heterozygous alleles
+                                          // whose phase relation the file does not give (unphased, or
+                                          // different phase sets), so "one haplotype" is not established
   int n_novel_jx_variant_disrupted = 0;   // canonical on the reference, non-canonical on every
                                           // haplotype: the canonical motif exists only on the reference
   bool variant_circular = false;  // haplotype provenance is RNA-derived/unknown (circular-risk)

@@ -263,6 +263,15 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "pangenome_path" + mapping_note);
     return true;
   }
+  if (ev.variant_evaluable && all_created && !ev.variant_circular && ev.haplotype_phase_unknown) {
+    // whether the alleles happen to be written on the same haplotype index or not, the file does
+    // not say they share one: the same information gives the same call
+    v.primary_mechanism = Mechanism::kVariant;
+    trace(v, "every novel junction is created on a haplotype, but the alleles behind them are unphased or in "
+             "different phase sets, so one common haplotype is not established -> UNRESOLVED (haplotype_phase_unknown)");
+    finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "haplotype_phase_unknown");
+    return true;
+  }
   if (var_rescue && !ev.variant_circular) {
     v.primary_mechanism = Mechanism::kVariant;
     trace(v, "variant creates canonical splice motif on haplotype, non-canonical on reference -> "

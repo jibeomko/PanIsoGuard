@@ -226,11 +226,16 @@ panisoguard adjudicate \
 ```
 
 From the VCF only same-length substitutions reach the splice motifs; indels are skipped and
-counted in the provenance log. An unphased heterozygous genotype is applied by allele order,
-as `bcftools consensus -H 1` and `-H 2` would, and the junction table marks it `unphased`, so
-a rescue that needs two junctions on one haplotype can be weighed. Haplotype FASTAs give the
-same verdicts when they are built from SNVs only; a consensus that also applied indels shifts
-every downstream coordinate and reads the wrong bases.
+counted in the provenance log. A missing allele (`.`, or a genotype shorter than the sample's
+ploidy) leaves that haplotype's base unknown, so the motif there is not evaluable rather than
+reference. An unphased heterozygous genotype is applied by allele order, as `bcftools consensus
+-H 1` and `-H 2` would, and the junction table marks it `unphased`. A rescue that needs two or
+more junctions on one haplotype requires their alleles to be phased in one phase set (`PS`);
+when they are unphased or in different sets the call is held (`haplotype_phase_unknown`), since
+the file does not say they share a haplotype. Haplotype FASTAs give the same verdicts when they
+are built from SNVs only; a consensus that also applied indels shifts every downstream coordinate
+and reads the wrong bases, and a consensus cannot carry phase sets, so with FASTAs the
+across-junction claim rests on how they were built.
 
 **Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22) — instead of the sample's
 own haplotypes, give splice junctions taken from a pangenome graph such as HPRC (extracted
@@ -402,7 +407,7 @@ isoforms, with every input a run can take. Adding the inputs one at a time chang
 junction is canonical on the sample's haplotype, with independent provenance). Two scripts check the
 example and run in CI: `check_worked_locus.py` recomputes every verdict with the Python
 standard library and compares it with the binary, and `rules_replay.py` is the whole rulebook of
-`RuleEngine::evaluate()` in 44 lines of Python, replayed against the binary's `attribution.jsonl`.
+`RuleEngine::evaluate()` in 49 lines of Python, replayed against the binary's `attribution.jsonl`.
 
 ## When to use PanIsoGuard
 

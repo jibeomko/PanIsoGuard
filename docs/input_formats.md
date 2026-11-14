@@ -97,13 +97,21 @@ a run from the VCF gives the verdicts of a run from those FASTAs. Several files 
 haplotypes in order (two haploid assembly-derived VCFs give two haplotypes). With more than
 one sample in the file, name one with `--vcf-sample`. Only same-length substitutions (SNVs,
 MNPs) are applied at the splice dinucleotides; indels and symbolic alleles are skipped and
-counted (`haplotype_vcf_non_snv_skipped_at_motifs` in the provenance log). An unphased
-heterozygous genotype is applied by allele order and counted
-(`haplotype_vcf_unphased_het_applied_at_motifs`); the junction table's `variant_phase` column
-says `phased` (phased or homozygous), `unphased`, or `NA`, and the rule trace of a rescue that
-rests on an unphased allele says so. A contig missing from the VCF header is not evaluable;
-a contig present without records is reference. `--haplotype-vcf` and `--reference-haplotype`
-are not combined in one run.
+counted (`haplotype_vcf_non_snv_skipped_at_motifs` in the provenance log). A missing allele
+(`.`) or a genotype with fewer alleles than the sample's ploidy leaves the motif base unknown
+(N) on that haplotype, so the motif is not evaluable there, never reference
+(`haplotype_vcf_missing_alleles_at_motifs`). The ploidy is the largest genotype in the file,
+read once when the file is opened. An unphased heterozygous genotype is applied by allele
+order and counted (`haplotype_vcf_unphased_het_applied_at_motifs`); the junction table's
+`variant_phase` column says `phased` (phased or homozygous), `unphased`, or `NA`. One created
+junction is rescued whichever haplotype carries the allele. Two or more created junctions
+that rest on heterozygous alleles are rescued only when those alleles are phased into one
+phase set (FORMAT `PS`; phased genotypes without `PS` form one default set): unphased
+alleles, or alleles in different sets, do not establish a common haplotype and the isoform
+is held with reason `haplotype_phase_unknown` (`haplotype_phase_unknown` in the JSONL),
+whichever haplotype index the alleles are written on. A contig missing from the VCF header is
+not evaluable; a contig present without records is reference. `--haplotype-vcf` and
+`--reference-haplotype` are not combined in one run.
 
 ## Pangenome graph junctions (`--pangenome-junctions`, optional)
 

@@ -1,6 +1,7 @@
 #include "panisoguard/variant_motif.hpp"
 
 #include <cctype>
+#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 
@@ -22,6 +23,9 @@ struct VcfHaplotypes::Impl {
   mutable int gt_cap = 0;
   mutable long n_unphased = 0;
   mutable long n_non_snv = 0;
+  mutable long n_missing = 0;
+  mutable int32_t* ps = nullptr;   // bcf_get_format_int32 buffer for PS
+  mutable int ps_cap = 0;
 };
 
 VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample) : impl_(new Impl) {
@@ -78,11 +82,11 @@ VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample)
     bcf_sr_destroy(impl_->sr); delete impl_;
     throw std::runtime_error("--haplotype-vcf " + path + " holds " + std::to_string(n) + " samples; name one with --vcf-sample");
   }
-  // The sample's ploidy: the largest genotype among the first records (up to 10,000), so a
-  // haploid record at the top of the file (a male X, a mitochondrial contig) does not hide the
-  // second haplotype. A file without records keeps the default 2.
+  // The sample's ploidy: the largest genotype in the file, read once here, so a haploid
+  // record anywhere (a male X, a mitochondrial contig) neither hides a haplotype nor invents
+  // one. A file without records keeps the default 2.
   int ploidy = 0;
-  for (int n = 0; n < 10000 && bcf_sr_next_line(impl_->sr); ++n) {
+  while (bcf_sr_next_line(impl_->sr)) {
     bcf1_t* rec = bcf_sr_get_line(impl_->sr, 0);
     const int ngt = bcf_get_genotypes(impl_->hdr, rec, &impl_->gt, &impl_->gt_cap);
     if (ngt <= 0) continue;
@@ -100,6 +104,7 @@ VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample)
 VcfHaplotypes::~VcfHaplotypes() {
   if (impl_ != nullptr) {
     if (impl_->gt) free(impl_->gt);
+    if (impl_->ps) free(impl_->ps);
     if (impl_->sr) bcf_sr_destroy(impl_->sr);
     delete impl_;
   }
@@ -111,9 +116,10 @@ const std::string& VcfHaplotypes::path() const { return impl_->path; }
 const std::string& VcfHaplotypes::sample() const { return impl_->sample; }
 long VcfHaplotypes::n_unphased_het_applied() const { return impl_->n_unphased; }
 long VcfHaplotypes::n_non_snv_skipped() const { return impl_->n_non_snv; }
+long VcfHaplotypes::n_missing_alleles() const { return impl_->n_missing; }
 
 std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_t start, int64_t end,
-                                                const std::string& ref_window, bool& unphased) const {
+                                                const std::string& ref_window, WindowPhase& phase) const {
   const int rid = bcf_hdr_name2id(impl_->hdr, chrom.c_str());
   if (rid < 0) return {};
   std::vector<std::string> haps(n_haplotypes(), ref_window);
@@ -130,11 +136,18 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
     if (ngt <= 0) continue;
     const int per = ngt / impl_->n_samples;
     const int* g = impl_->gt + impl_->sample_idx * per;
-    bool applied = false, het = false, phased = true;
+    // the window bases this record covers (an MNP may start before the window)
+    const int64_t k0 = std::max<int64_t>(start, rec->pos), k1 = std::min<int64_t>(end, rec->pos + reflen);
+    bool applied = false, het = false, phased = true, ended = false;
     int first_allele = -1;
-    for (int h = 0; h < per && h < static_cast<int>(haps.size()); ++h) {
-      if (g[h] == bcf_int32_vector_end) break;
-      if (bcf_gt_is_missing(g[h])) continue;
+    for (int h = 0; h < static_cast<int>(haps.size()); ++h) {
+      if (h >= per || g[h] == bcf_int32_vector_end) ended = true;
+      if (ended || bcf_gt_is_missing(g[h])) {
+        // no allele for this haplotype at a motif base: unknown, not reference
+        for (int64_t pos = k0; pos < k1; ++pos) haps[h][static_cast<std::size_t>(pos - start)] = 'N';
+        if (k1 > k0) { phase.missing = true; ++impl_->n_missing; }
+        continue;
+      }
       const int a = bcf_gt_allele(g[h]);
       if (first_allele < 0) first_allele = a; else if (a != first_allele) het = true;
       if (h > 0 && !bcf_gt_is_phased(g[h])) phased = false;
@@ -142,15 +155,25 @@ std::vector<std::string> VcfHaplotypes::overlay(const std::string& chrom, int64_
       const char* alt = rec->d.allele[a];
       const int altlen = static_cast<int>(std::strlen(alt));
       if (altlen != reflen || alt[0] == '<' || alt[0] == '*') { ++impl_->n_non_snv; continue; }
-      for (int k = 0; k < reflen; ++k) {
-        const int64_t pos = rec->pos + k;
-        if (pos >= start && pos < end) {
-          haps[h][static_cast<std::size_t>(pos - start)] = static_cast<char>(std::toupper(static_cast<unsigned char>(alt[k])));
-          applied = true;
-        }
+      for (int64_t pos = k0; pos < k1; ++pos) {
+        haps[h][static_cast<std::size_t>(pos - start)] = static_cast<char>(std::toupper(static_cast<unsigned char>(alt[pos - rec->pos])));
+        applied = true;
       }
     }
-    if (applied && het && !phased) { unphased = true; ++impl_->n_unphased; }
+    if (applied && het) {
+      if (!phased) { phase.unphased = true; ++impl_->n_unphased; }
+      else {
+        // the phase set of this genotype: FORMAT PS, else the file's default set
+        long set = kDefaultPhaseSet;
+        const int nps = bcf_get_format_int32(impl_->hdr, rec, "PS", &impl_->ps, &impl_->ps_cap);
+        if (nps > 0) {
+          const int per_ps = nps / impl_->n_samples;
+          const int32_t v = impl_->ps[impl_->sample_idx * per_ps];
+          if (v != bcf_int32_missing && v != bcf_int32_vector_end) set = v;
+        }
+        phase.add_set(set);
+      }
+    }
   }
   return haps;
 }

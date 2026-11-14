@@ -130,9 +130,9 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
   m.haps.reserve(n_haplotypes());
   for (const auto& hap : haps_) m.haps.push_back(splice_motif(*hap, chrom, intron, strand));
   for (const auto& vcf : vcfs_) {
-    bool unphased = false;
-    const std::vector<std::string> lefts = left.size() == 2 ? vcf->overlay(chrom, intron.start, intron.start + 2, left, unphased) : std::vector<std::string>{};
-    const std::vector<std::string> rights = right.size() == 2 ? vcf->overlay(chrom, intron.end - 2, intron.end, right, unphased) : std::vector<std::string>{};
+    WindowPhase wp;   // one record for both windows: the phase sets of a junction are read together
+    const std::vector<std::string> lefts = left.size() == 2 ? vcf->overlay(chrom, intron.start, intron.start + 2, left, wp) : std::vector<std::string>{};
+    const std::vector<std::string> rights = right.size() == 2 ? vcf->overlay(chrom, intron.end - 2, intron.end, right, wp) : std::vector<std::string>{};
     if (lefts.size() != vcf->n_haplotypes() || rights.size() != vcf->n_haplotypes()) {
       m.haps.insert(m.haps.end(), vcf->n_haplotypes(), SpliceMotif{});   // contig unknown to the VCF: not evaluable
       continue;
@@ -142,8 +142,12 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
       for (std::size_t h = 0; h < lefts.size(); ++h) if (lefts[h] != left || rights[h] != right) return true;
       return false;
     }();
-    if (unphased) m.phase = MotifPhase::kUnphased;
+    if (wp.unphased) m.phase = MotifPhase::kUnphased;
     else if (changed && m.phase == MotifPhase::kUnknown) m.phase = MotifPhase::kPhased;
+    if (wp.phase_set != kNoPhaseSet) {
+      if (m.phase_set == kNoPhaseSet) m.phase_set = wp.phase_set; else if (m.phase_set != wp.phase_set) m.phase_mixed = true;
+    }
+    if (wp.mixed_sets) m.phase_mixed = true;
   }
   if (!m.ref.evaluable || m.haps.empty()) return m;
   bool all_hap_evaluable = true, any_hap_canonical = false;

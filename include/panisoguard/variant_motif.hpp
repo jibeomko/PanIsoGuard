@@ -38,14 +38,33 @@ SpliceMotif splice_motif(const FastaFetcher& fa, const std::string& chrom, const
 // The same from the two genomic dinucleotides already in hand (5' end of the intron, 3' end).
 SpliceMotif splice_motif_from(const std::string& left, const std::string& right, Strand strand);
 
+// What the alleles applied inside one window said about phase and completeness: an unphased
+// heterozygous allele was used; an allele was missing (`.`, or a genotype shorter than the
+// sample's ploidy, in which case the base is unknown, not reference); the phase set (FORMAT PS)
+// of the phased heterozygous alleles, kDefaultPhaseSet for phased genotypes without PS,
+// kNoPhaseSet when no heterozygous allele was applied, and `mixed_sets` when two sets met.
+constexpr long kNoPhaseSet = -1;
+constexpr long kDefaultPhaseSet = -2;
+struct WindowPhase {
+  bool unphased = false;
+  bool missing = false;
+  long phase_set = kNoPhaseSet;
+  bool mixed_sets = false;
+  void add_set(long ps) { if (phase_set == kNoPhaseSet) phase_set = ps; else if (phase_set != ps) mixed_sets = true; }
+};
+
 // One sample's haplotypes read from an indexed VCF/BCF, applied to the reference on demand.
 // The sample's alleles are taken by position in the genotype (first allele = haplotype 1,
 // second = haplotype 2), exactly as `bcftools consensus -H 1` / `-H 2` build a FASTA, so a
 // run from the VCF equals a run from those FASTAs. Only same-length substitutions (SNVs,
-// MNPs) are applied; indels and symbolic alleles are skipped and counted. An unphased
-// heterozygous genotype is applied by allele order and counted, and the junction is marked
-// so the per-haplotype claim can be weighed. A contig missing from the VCF header is not
-// evaluable; a contig present but without records is reference.
+// MNPs) are applied; indels and symbolic alleles are skipped and counted. A missing allele
+// (`.`) or a genotype shorter than the ploidy leaves the base unknown (N) on that haplotype,
+// so the motif there is not evaluable rather than reference. An unphased heterozygous
+// genotype is applied by allele order and counted, and the junction is marked so the
+// per-haplotype claim can be weighed; the phase set of a phased allele is kept so that a
+// claim spanning several junctions can require one set. The ploidy is the largest genotype in
+// the file (read once at open). A contig missing from the VCF header is not evaluable; a
+// contig present but without records is reference.
 class VcfHaplotypes {
  public:
   // `sample` may be empty when the file holds one sample. Throws when the file cannot be
@@ -61,13 +80,14 @@ class VcfHaplotypes {
   const std::string& sample() const;
 
   // The sample's haplotypes over 0-based half-open [start, end), given the reference bases of
-  // that window. Empty when the contig is not in the VCF header. `unphased` is set when an
-  // unphased heterozygous allele was applied inside the window.
+  // that window. Empty when the contig is not in the VCF header. `phase` accumulates what the
+  // applied alleles said (see WindowPhase); pass one object for both windows of a junction.
   std::vector<std::string> overlay(const std::string& chrom, int64_t start, int64_t end,
-                                   const std::string& ref_window, bool& unphased) const;
+                                   const std::string& ref_window, WindowPhase& phase) const;
 
   long n_unphased_het_applied() const;   // over every window queried so far
   long n_non_snv_skipped() const;
+  long n_missing_alleles() const;        // missing or absent alleles that left a motif base unknown
 
  private:
   struct Impl;
@@ -88,12 +108,17 @@ enum class VariantVerdict {
 // genotype); unphased (a heterozygous genotype applied by allele order).
 enum class MotifPhase { kUnknown, kPhased, kUnphased };
 
-// The motif of one intron on the reference and on every haplotype, with the verdict.
+// The motif of one intron on the reference and on every haplotype, with the verdict. For VCF
+// input, `phase_set` is the phase set of the heterozygous alleles that shaped the motifs
+// (kNoPhaseSet when none did, kDefaultPhaseSet for phased genotypes without PS) and
+// `phase_mixed` says two sets met at this junction.
 struct JunctionMotifs {
   SpliceMotif ref;
   std::vector<SpliceMotif> haps;  // in --reference-haplotype / --haplotype-vcf order
   VariantVerdict verdict = VariantVerdict::kNotEvaluable;
   MotifPhase phase = MotifPhase::kUnknown;
+  long phase_set = kNoPhaseSet;
+  bool phase_mixed = false;
 };
 
 class HaplotypeProvider {

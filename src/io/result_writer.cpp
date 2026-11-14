@@ -84,6 +84,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
         << "\"n_novel_jx_variant_disrupted\":" << e.n_novel_jx_variant_disrupted << ","
         << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
+        << "\"haplotype_phase_unknown\":" << (e.haplotype_phase_unknown ? "true" : "false") << ","
         << "\"n_novel_jx_phase_uncertain\":" << e.n_novel_jx_phase_uncertain << ","
         << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
         << "\"pangenome_evaluable\":" << (e.pangenome_evaluable ? "true" : "false") << ","
@@ -159,6 +160,7 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
     out << "haplotype_vcf_sample\t" << (prov.haplotype_vcf_sample.empty() ? "<the only sample>" : prov.haplotype_vcf_sample) << '\n';
     out << "haplotype_vcf_unphased_het_applied_at_motifs\t" << prov.haplotype_vcf_unphased_het << '\n';
     out << "haplotype_vcf_non_snv_skipped_at_motifs\t" << prov.haplotype_vcf_non_snv << '\n';
+    out << "haplotype_vcf_missing_alleles_at_motifs\t" << prov.haplotype_vcf_missing << '\n';
   }
   out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
   if (!prov.kept_path.empty()) {

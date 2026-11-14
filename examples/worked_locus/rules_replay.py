@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The rulebook of RuleEngine::evaluate() in 44 lines of Python (evaluate() below), replayed on the
+"""The rulebook of RuleEngine::evaluate() in 49 lines of Python (evaluate() below), replayed on the
 worked locus and compared, isoform by isoform, with the verdicts the binary writes. The six runs add
 one input at a time (reference GTF, short-read junctions, long-read BAM, haplotypes, provenance).
 CTest runs this as `integration_rules_replay`.
@@ -25,10 +25,15 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
         return "UNCONFIRMED"
     if cat not in NOVEL:
         return "UNRESOLVED"
-    rescues = [e[f"{a}_circular"] for a in ("pangenome", "variant") if e[f"{a}_evaluable"] and e[f"{a}_rescue"]]
-    if rescues:                                                # reference-bias rescue first: independent evidence
-        return "REFERENCE_BIAS" if not all(rescues) else "UNRESOLVED"   # on either axis promotes, else held
     n, k = e["n_novel_junctions"], e["n_novel_jx_sr_supported"]
+    pan = e["pangenome_evaluable"] and e["pangenome_rescue"]
+    var_all = e["variant_evaluable"] and n > 0 and e["n_novel_jx_variant_created"] == n   # every novel junction created
+    if pan and not e["pangenome_circular"]:                    # reference-bias rescue first: independent evidence promotes
+        return "REFERENCE_BIAS"
+    if var_all and not e["variant_circular"] and e["variant_rescue"] and not e.get("haplotype_phase_unknown", False):
+        return "REFERENCE_BIAS"                                # one haplotype carries every created junction, in one phase set
+    if pan or var_all:
+        return "UNRESOLVED"                                    # circular-risk, phase unknown, or no common haplotype: held
     if not (e["sj_evaluable"] and e["chain_available"] and e["catalog_evaluable"]) or n == 0:
         sup = "UNKNOWN"
     elif k == 0 and ((e["n_known_junctions"] > 0 and e["n_known_jx_sr_supported"] == 0) or e["sj_no_junction_in_span"]):

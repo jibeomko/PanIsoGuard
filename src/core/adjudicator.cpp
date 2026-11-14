@@ -109,6 +109,9 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
     int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0, n_phase_uncertain = 0;
+    // created junctions whose canonical motif sits on some but not all haplotypes rest on a
+    // heterozygous allele; a common haplotype across them needs their alleles in one phase set
+    int n_phase_dependent = 0; bool phase_broken = false; long phase_set_common = kNoPhaseSet;
     int n_known = 0, n_known_supported = 0, n_bam_gated = 0;
     bool any_bam_eval = false;
     bool any_variant_eval = false;
@@ -171,6 +174,13 @@ EvidenceVector build_evidence(const SqantiRecord& r,
           ++n_variant_created;
           if (jm.phase == MotifPhase::kUnphased) ++n_phase_uncertain;
           for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
+          const bool on_every_hap = std::find(hap_at.begin(), hap_at.end(), false) == hap_at.end();
+          if (!on_every_hap && jm.phase != MotifPhase::kUnknown) {   // VCF input and a heterozygous allele
+            ++n_phase_dependent;
+            if (jm.phase == MotifPhase::kUnphased || jm.phase_mixed) phase_broken = true;
+            else if (phase_set_common == kNoPhaseSet) phase_set_common = jm.phase_set;
+            else if (phase_set_common != jm.phase_set) phase_broken = true;
+          }
         }
       }
       if (pangenome != nullptr) {
@@ -238,6 +248,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
     ev.haplotype_consistent = n_variant_created > 0 &&
                               std::find(hap_common.begin(), hap_common.end(), true) != hap_common.end();
+    ev.haplotype_phase_unknown = n_phase_dependent >= 2 && phase_broken;
     // Rescue requires all of the isoform's novel junctions to be explained by the
     // reference-bias evidence -- a single explained junction does not make a
     // multi-novel-junction isoform "false novel" (the others may be new) --

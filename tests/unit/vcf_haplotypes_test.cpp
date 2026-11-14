@@ -23,12 +23,12 @@ TEST_CASE("VcfHaplotypes applies the sample's alleles by haplotype, like bcftool
   CHECK(vcf.n_haplotypes() == 2);
   CHECK(vcf.has_chrom("chrT2"));
   CHECK_FALSE(vcf.has_chrom("chrZ"));
-  bool unphased = false;
-  CHECK(vcf.overlay("chrT2", 20, 22, "GG", unphased) == std::vector<std::string>{"GT", "GG"});
-  CHECK(vcf.overlay("chrT2", 60, 62, "GG", unphased) == std::vector<std::string>{"GG", "GT"});
-  CHECK(vcf.overlay("chrT2", 38, 40, "AG", unphased) == std::vector<std::string>{"AG", "AG"});   // no variant: reference
-  CHECK_FALSE(unphased);
-  CHECK(vcf.overlay("chrZ", 20, 22, "GG", unphased).empty());                                       // contig not in the header
+  WindowPhase wp;
+  CHECK(vcf.overlay("chrT2", 20, 22, "GG", wp) == std::vector<std::string>{"GT", "GG"});
+  CHECK(vcf.overlay("chrT2", 60, 62, "GG", wp) == std::vector<std::string>{"GG", "GT"});
+  CHECK(vcf.overlay("chrT2", 38, 40, "AG", wp) == std::vector<std::string>{"AG", "AG"});   // no variant: reference
+  CHECK_FALSE(wp.unphased);
+  CHECK(vcf.overlay("chrZ", 20, 22, "GG", wp).empty());                                       // contig not in the header
   CHECK(vcf.n_unphased_het_applied() == 0);
   CHECK(vcf.n_non_snv_skipped() == 0);
 }
@@ -100,8 +100,12 @@ TEST_CASE("adjudicator with --haplotype-vcf: one haplotype must carry every nove
     HaplotypeProvider unph(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{vcf});
     in.haplotype = &unph;
     const auto out = adjudicate(in, RuleEngine(), &jx);
-    // 0/1 at both sites puts both T alleles on haplotype 2, so the chain is "consistent" only by allele order
-    CHECK(out[0].verdict.confidence == ConfidenceClass::kReferenceBias);
+    // 0/1 at both sites puts both T alleles on haplotype 2 by allele order only: each junction is created
+    // on a haplotype, but the file does not say it is the same one, so the chain is held
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kUnresolved);
+    CHECK(out[0].verdict.verdict_reason == "haplotype_phase_unknown");
+    CHECK(out[0].evidence.n_novel_jx_variant_created == 2);
+    CHECK(out[0].evidence.haplotype_phase_unknown);
     CHECK(out[0].evidence.n_novel_jx_phase_uncertain == 2);
     REQUIRE(jx.size() == 2);
     CHECK(jx[0].variant_phase == "unphased");
@@ -109,7 +113,7 @@ TEST_CASE("adjudicator with --haplotype-vcf: one haplotype must carry every nove
     CHECK(vcf->n_unphased_het_applied() == 2);
     CHECK(vcf->n_non_snv_skipped() == 1);   // the G>GA insertion inside the first donor window
     bool found = false;
-    for (const auto& t : out[0].verdict.rule_trace) if (t.find("unphased allele") != std::string::npos) found = true;
+    for (const auto& t : out[0].verdict.rule_trace) if (t.find("one common haplotype is not established") != std::string::npos) found = true;
     CHECK(found);
   }
 }
@@ -120,8 +124,8 @@ TEST_CASE("VcfHaplotypes refuses what it cannot read safely", "[vcf]") {
   REQUIRE_THROWS_WITH(VcfHaplotypes(tiny("two_jx_twosample.vcf.gz"), "S9"), Catch::Contains("S9"));
   // S2 of the two-sample file carries both variants on haplotype 1
   VcfHaplotypes s2(tiny("two_jx_twosample.vcf.gz"), "S2");
-  bool unphased = false;
-  CHECK(s2.overlay("chrT2", 20, 22, "GG", unphased) == std::vector<std::string>{"GT", "GG"});
+  WindowPhase wp;
+  CHECK(s2.overlay("chrT2", 20, 22, "GG", wp) == std::vector<std::string>{"GT", "GG"});
   // an uncompressed, unindexed VCF is refused
   const std::string plain = scratch("plain.vcf");
   { std::ofstream(plain) << "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n"; }
@@ -136,16 +140,17 @@ TEST_CASE("VcfHaplotypes refuses what it cannot read safely", "[vcf]") {
 TEST_CASE("VcfHaplotypes edge cases: ploidy from several records, MNPs, skipped alleles, missing and stacked genotypes", "[vcf]") {
   VcfHaplotypes vcf(tiny("two_jx_edges.vcf.gz"));
   CHECK(vcf.n_haplotypes() == 2);   // not the haploid first record's 1
-  bool unphased = false;
-  CHECK(vcf.overlay("chrT2", 20, 22, "GG", unphased) == std::vector<std::string>{"GT", "GG"});   // MNP applied base by base
-  CHECK(vcf.overlay("chrT2", 60, 62, "GG", unphased) == std::vector<std::string>{"GC", "GG"});   // allele 2 of a multiallelic site
-  CHECK(vcf.overlay("chrT2", 38, 40, "AG", unphased) == std::vector<std::string>{"AG", "AG"});   // `*` skipped
+  WindowPhase wp;
+  CHECK(vcf.overlay("chrT2", 20, 22, "GG", wp) == std::vector<std::string>{"GT", "GG"});   // MNP applied base by base
+  CHECK(vcf.overlay("chrT2", 60, 62, "GG", wp) == std::vector<std::string>{"GC", "GG"});   // allele 2 of a multiallelic site
+  CHECK(vcf.overlay("chrT2", 38, 40, "AG", wp) == std::vector<std::string>{"AG", "AG"});   // `*` skipped
   CHECK(vcf.n_non_snv_skipped() == 1);
-  CHECK(vcf.overlay("chrT2", 40, 42, "AA", unphased) == std::vector<std::string>{"AA", "AA"});   // <DEL> skipped
+  CHECK(vcf.overlay("chrT2", 40, 42, "AA", wp) == std::vector<std::string>{"AA", "AA"});   // <DEL> skipped
   CHECK(vcf.n_non_snv_skipped() == 2);
-  CHECK(vcf.overlay("chrT2", 78, 80, "AG", unphased) == std::vector<std::string>{"AG", "AG"});   // ./. is reference
-  CHECK(vcf.overlay("chrT2", 99, 101, "AA", unphased) == std::vector<std::string>{"CA", "GA"});  // two records, one position
-  CHECK_FALSE(unphased);
+  CHECK(vcf.overlay("chrT2", 78, 80, "AG", wp) == std::vector<std::string>{"AN", "AN"});   // ./. is unknown, not reference
+  CHECK(wp.missing);
+  CHECK(vcf.overlay("chrT2", 99, 101, "AA", wp) == std::vector<std::string>{"CA", "GA"});  // two records, one position
+  CHECK_FALSE(wp.unphased);
   CHECK(vcf.n_unphased_het_applied() == 0);
 }
 
@@ -158,4 +163,73 @@ TEST_CASE("a VCF without the junction's contig leaves the variant axis not evalu
   CHECK_FALSE(m.haps[1].evaluable);
   CHECK(m.verdict == VariantVerdict::kNotEvaluable);
   CHECK(m.phase == MotifPhase::kUnknown);
+}
+
+// two_jx_missing.vcf.gz: at the first donor the genotype is 0|. (allele missing on haplotype 2) and
+// 0|1 one base on; haplotype 2 could carry GT-AG (the T) but the missing base is unknown, so
+// nothing may be called canonical there and the junction is not rescued.
+TEST_CASE("a missing allele at a motif base leaves that haplotype's motif unknown, not reference", "[vcf][variant]") {
+  VcfHaplotypes vcf(tiny("two_jx_missing.vcf.gz"));
+  WindowPhase wp;
+  CHECK(vcf.overlay("chrT2", 20, 22, "GG", wp) == std::vector<std::string>{"GG", "NT"});
+  CHECK(wp.missing);
+  CHECK(vcf.n_missing_alleles() == 1);
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  HaplotypeProvider prov(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny("two_jx_missing.vcf.gz"))});
+  const JunctionMotifs m = prov.motifs("chrT2", {20, 40}, Strand::kPlus);
+  CHECK(m.haps[0].evaluable); CHECK_FALSE(m.haps[0].canonical);
+  CHECK_FALSE(m.haps[1].evaluable);
+  CHECK(m.verdict == VariantVerdict::kNotEvaluable);   // no haplotype is known to be canonical
+}
+
+// two_jx_haploid.vcf.gz: a diploid record elsewhere (ploidy 2) and a haploid genotype `1` that breaks the
+// canonical acceptor of the first intron; the absent second allele is unknown, not a surviving reference
+// copy, so the junction is not "none" but not evaluable.
+TEST_CASE("a haploid genotype in a diploid file does not invent a reference haplotype", "[vcf][variant]") {
+  VcfHaplotypes vcf(tiny("two_jx_haploid.vcf.gz"));
+  CHECK(vcf.n_haplotypes() == 2);
+  WindowPhase wp;
+  CHECK(vcf.overlay("chrT2", 38, 40, "AG", wp) == std::vector<std::string>{"CG", "NG"});
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  HaplotypeProvider prov(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny("two_jx_haploid.vcf.gz"))});
+  // the reference intron {20,40} is GG-AG; with the acceptor broken on the only present allele
+  const JunctionMotifs m = prov.motifs("chrT2", {20, 40}, Strand::kPlus);
+  CHECK(m.haps[0].evaluable); CHECK_FALSE(m.haps[0].canonical);
+  CHECK_FALSE(m.haps[1].evaluable);
+}
+
+// two_jx_phasesets*.vcf.gz: both novel junctions are created by heterozygous alleles written first
+// (1|0). With PS 1 and PS 2 the file does not say the two alleles share a haplotype, so the rescue is
+// held; flipping the second block's order changes nothing; one phase set (PS 7 twice) rescues.
+TEST_CASE("adjudicator with --haplotype-vcf: a common haplotype needs one phase set", "[vcf][adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  auto ref = std::make_shared<FastaFetcher>(tiny("two_jx_ref.fa"));
+  SqantiTable sqanti;
+  SqantiRecord r;
+  r.isoform = "isoBoth"; r.chrom = "chrT2"; r.strand = Strand::kPlus;
+  r.structural_category = "novel_not_in_catalog"; r.all_canonical = "non_canonical";
+  sqanti.records.push_back(r);
+  std::map<std::string, IntronChain> chains;
+  IntronChain c; c.chrom = "chrT2"; c.strand = Strand::kPlus; c.introns = {{20, 40}, {60, 80}};
+  chains["isoBoth"] = c;
+  AdjudicateInputs in;
+  in.sqanti = &sqanti; in.chains = &chains; in.catalog = &cat; in.haplotype_circular = false;
+  auto run = [&](const char* vcf) {
+    HaplotypeProvider hp(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{std::make_shared<VcfHaplotypes>(tiny(vcf))});
+    in.haplotype = &hp;
+    return adjudicate(in, RuleEngine(), nullptr).at(0);
+  };
+  const AdjudicationResult two_sets = run("two_jx_phasesets.vcf.gz");
+  CHECK(two_sets.evidence.n_novel_jx_variant_created == 2);
+  CHECK(two_sets.evidence.haplotype_phase_unknown);
+  CHECK(two_sets.verdict.confidence == ConfidenceClass::kUnresolved);
+  CHECK(two_sets.verdict.verdict_reason == "haplotype_phase_unknown");
+  const AdjudicationResult flipped = run("two_jx_phasesets_flip.vcf.gz");
+  CHECK(flipped.verdict.confidence == ConfidenceClass::kUnresolved);          // the same information, the same call
+  CHECK(flipped.verdict.verdict_reason == "haplotype_phase_unknown");
+  const AdjudicationResult one_set = run("two_jx_sameset.vcf.gz");
+  CHECK_FALSE(one_set.evidence.haplotype_phase_unknown);
+  CHECK(one_set.verdict.confidence == ConfidenceClass::kReferenceBias);
+  const AdjudicationResult no_ps = run("two_jx_joint.vcf.gz");                 // phased, no PS: one default set
+  CHECK(no_ps.verdict.confidence == ConfidenceClass::kReferenceBias);
 }

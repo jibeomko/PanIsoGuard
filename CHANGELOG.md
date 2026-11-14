@@ -80,7 +80,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - `attribution.jsonl` carries two inputs the rules read that it did not record: `catalog_evaluable`
   (a reference GTF was given, so junctions could be told known from novel) and
   `sj_no_junction_in_span` (short reads were given but none splices within the isoform's span).
-  With them the replayed rulebook (`examples/worked_locus/rules_replay.py`, now 44 lines) decides
+  With them the replayed rulebook (`examples/worked_locus/rules_replay.py`, now 49 lines) decides
   every record from the JSONL alone, including the coverage rule and the "examined chain" gate on
   caller agreement and whole-chain reads.
 - The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
@@ -106,12 +106,42 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   warning, and will be removed in 0.2.
 
 ### Fixed
+Found by an external review of 688530b on 2026-11-14 (VCF input and `--no-sqanti3`); each has a
+regression test:
+- A missing allele (`.`) at a splice motif, or a genotype shorter than the sample's ploidy, was
+  read as the reference base, so an incomplete genotype could complete a canonical motif and
+  rescue the junction. The base is unknown now (N): that haplotype's motif is not evaluable,
+  another haplotype's certain canonical motif still rescues, and the provenance log counts
+  the cases (`haplotype_vcf_missing_alleles_at_motifs`).
+- Alleles were joined into one haplotype by their position in the genotype alone, so two
+  created junctions whose variants sat in different phase sets (FORMAT `PS`), or were
+  unphased, were called reference bias when both were written first, and held when one was
+  written second. The phase set is read now: two or more created junctions that rest on
+  heterozygous alleles need one phase set, else the call is held with reason
+  `haplotype_phase_unknown` (JSONL `haplotype_phase_unknown`), the same call for either
+  writing of the alleles. One created junction is unaffected.
+- The ploidy was taken from the first 10,000 records; a diploid file whose genotypes grew later
+  lost its second allele, and a haploid genotype in a diploid file gained a reference
+  haplotype that does not exist. The ploidy is the largest genotype in the whole file, and an
+  absent allele is unknown, not reference.
+- `--no-sqanti3` stopped reading splice motifs at the first unreadable one, so an isoform
+  whose first donor sat on N and whose second intron was plainly non-canonical was classified
+  `NA` and lifted to `NOVEL_PROBABLE`; every intron is read, one non-canonical motif decides,
+  and `NA` is returned only when no intron is non-canonical and one is unreadable.
+- `--no-sqanti3` counted N among the 20 bases downstream of the 3′ end, so an unknown window
+  read as 0 % A; only A/C/G/T bases count, and a window without them is `NA`.
+- `benchmark/vcf_haplotypes/compare_routes.py` compared only the isoforms and junctions present
+  in both routes, so a row missing from the VCF run passed; missing and extra rows are counted
+  and count against agreement, and the script says `ROUTES DIFFER` when any is found.
+- The CTest `integration_validation_bams_duplicate` used a directory another test created and
+  failed when run alone; it makes its own.
+
 Found by a sanitizer build and an edge-case review of the 0.1.0 inputs on 2026-11-14:
 - `--haplotype-vcf` on a file with several samples and no `--vcf-sample` read freed memory while
   composing its error message (AddressSanitizer: heap-use-after-free); the count is copied first.
 - The sample's ploidy was read from the first record alone, so a haploid record at the top of the
   file (a male X, a mitochondrial contig) hid the second haplotype everywhere; it is now the
-  largest genotype among the first 10,000 records (fixture `two_jx_edges.vcf.gz`, which also
+  largest genotype in the file (fixture `two_jx_edges.vcf.gz`, which also
   covers an MNP over a motif, `*` and `<DEL>` alleles, a carried second ALT, a missing genotype
   and two records at one position).
 - Two `--validation-bam` files with the same file name in different directories shared one key

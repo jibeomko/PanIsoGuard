@@ -131,3 +131,28 @@ TEST_CASE("classify_isoforms refuses a catalog built without its transcripts", "
   const Catalog slim = build_catalog_from_gtf(gtf, /*with_transcripts=*/false);
   CHECK_THROWS_AS(classify_isoforms({}, slim, nullptr), std::logic_error);
 }
+
+// A genome with unknown bases: the first intron's donor is NN, the second intron is CC-CC; the 20 bases
+// after the 3' end are all N.
+TEST_CASE("classify_isoforms: a certain non-canonical motif outweighs an unreadable one, and N is not a base", "[classify]") {
+  const std::string fa = scratch("classify_n.fa");
+  std::string seq(1200, 'A');
+  seq[100] = 'N'; seq[101] = 'N';                 // donor of intron {100,200}
+  seq[198] = 'A'; seq[199] = 'G';                 // its acceptor AG
+  seq[300] = 'C'; seq[301] = 'C'; seq[398] = 'C'; seq[399] = 'C';   // intron {300,400}: CC-CC
+  for (int i = 500; i < 520; ++i) seq[i] = 'N';   // downstream of a 3' end at 500
+  { std::ofstream(fa) << ">chrN\n" << seq << "\n"; }
+  FastaFetcher ref(fa);
+  Catalog empty;
+  std::vector<CallerIsoform> isos;
+  CallerIsoform a; a.id = "nn_then_cc"; a.chain.chrom = "chrN"; a.chain.strand = Strand::kPlus; a.chain.introns = {{100, 200}, {300, 400}}; a.start = 0; a.end = 500;
+  CallerIsoform b; b.id = "nn_only"; b.chain.chrom = "chrN"; b.chain.strand = Strand::kPlus; b.chain.introns = {{100, 200}}; b.start = 0; b.end = 300;
+  isos.push_back(a); isos.push_back(b);
+  const SqantiTable t = classify_isoforms(isos, empty, &ref);
+  REQUIRE(t.records.size() == 2);
+  CHECK(t.records[0].all_canonical == "non_canonical");
+  CHECK(sqanti_is_na(t.records[0].perc_A_downstream_TTS));   // 20 N: no information, not 0 % A
+  CHECK(t.records[1].all_canonical == "NA");
+  CHECK(t.records[1].perc_A_downstream_TTS == 90.0);          // 18 A and the CC donor among the 20 bases after 300
+  std::remove(fa.c_str()); std::remove((fa + ".fai").c_str());
+}

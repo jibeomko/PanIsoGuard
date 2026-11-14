@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/no_sqanti3/run.sh; benchmark/no_sqanti3/score_no_sqanti3.py --out ... --truth ... --gtf ... --cls ... --emit-metrics ...",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each with its SQANTI3 6.0.1 classification; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated.",
-  "generated_utc": "2026-11-14T03:11:25Z",
+  "generated_utc": "2026-11-14T09:48:27Z",
   "metrics": {
     "bambu.nosr": {
       "accuracy": {

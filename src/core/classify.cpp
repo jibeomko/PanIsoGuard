@@ -26,14 +26,17 @@ std::string category_of(const CallerIsoform& iso, const Catalog& cat) {
   return all_sites_known ? "novel_in_catalog" : "novel_not_in_catalog";
 }
 
+// Every intron is read: one certain non-canonical motif decides, an unreadable motif (N, or
+// a contig the genome lacks) only makes the answer NA when no intron is non-canonical.
 std::string all_canonical_of(const CallerIsoform& iso, const FastaFetcher& ref) {
   if (iso.chain.monoexonic()) return "NA";
+  bool unknown = false;
   for (const auto& j : iso.chain.introns) {
     const SpliceMotif m = splice_motif(ref, iso.chain.chrom, j, iso.chain.strand);
-    if (!m.evaluable) return "NA";
-    if (!m.canonical) return "non_canonical";
+    if (!m.evaluable) unknown = true;
+    else if (!m.canonical) return "non_canonical";
   }
-  return "canonical";
+  return unknown ? "NA" : "canonical";
 }
 
 // Percent A in the 20 genomic bases downstream of the 3' end, read on the transcript strand
@@ -45,10 +48,14 @@ double perc_a_of(const CallerIsoform& iso, const FastaFetcher& ref) {
   char base;
   if (iso.chain.strand == Strand::kPlus) { seq = ref.fetch(iso.chain.chrom, iso.end, iso.end + kWindow); base = 'A'; }
   else { seq = ref.fetch(iso.chain.chrom, iso.start - kWindow, iso.start); base = 'T'; }
-  if (seq.empty()) return SqantiRecord::kNaN;
-  int n = 0;
-  for (char ch : seq) if (ch == base) ++n;
-  return 100.0 * n / static_cast<double>(seq.size());
+  int n = 0, known = 0;   // an N is no information, not a non-A base
+  for (char ch : seq) {
+    if (ch != 'A' && ch != 'C' && ch != 'G' && ch != 'T') continue;
+    ++known;
+    if (ch == base) ++n;
+  }
+  if (known == 0) return SqantiRecord::kNaN;
+  return 100.0 * n / static_cast<double>(known);
 }
 
 }  // namespace
