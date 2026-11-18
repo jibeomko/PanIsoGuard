@@ -115,7 +115,7 @@ int cmd_decoys(int argc, char** argv) {
     std::ofstream tsv(out_prefix + ".decoys.tsv");
     if (!tsv) throw std::runtime_error("cannot write " + out_prefix + ".decoys.tsv");
     tsv << "decoy_id\tchrom\tstrand\tgene_id\tn_introns\tparent_a\tparent_b\tintrons_1based\t"
-           "n_full_reads\tn_partial_reads\tparent_a_full_reads\tparent_b_full_reads\tlifted\n";
+           "n_full_reads\tn_partial_reads\tparent_a_full_reads\tparent_b_full_reads\tlifted\tn_spanning_reads\n";
     Tally all, both_parents;
     std::map<std::size_t, Tally> by_n;
     std::size_t k = 0;
@@ -129,7 +129,7 @@ int cmd_decoys(int argc, char** argv) {
       tsv << "decoy_" << ++k << '\t' << d.chain.chrom << '\t' << strand_char(d.chain.strand) << '\t'
           << d.gene_id << '\t' << d.chain.introns.size() << '\t' << d.parent_a << '\t' << d.parent_b << '\t'
           << introns_1based(d.chain) << '\t' << s.n_full << '\t' << s.n_partial << '\t' << pa << '\t' << pb
-          << '\t' << (lifted ? "true" : "false") << '\n';
+          << '\t' << (lifted ? "true" : "false") << '\t' << s.n_span << '\n';
       if (k % 20000 == 0) std::fprintf(stderr, "  %zu / %zu decoys\n", k, decoys.size());
     }
     close_checked(tsv, out_prefix + ".decoys.tsv");

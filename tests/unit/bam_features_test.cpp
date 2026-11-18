@@ -69,12 +69,14 @@ TEST_CASE("BAM chain support counts primary reads carrying the whole intron chai
   REQUIRE(s1.evaluated);
   CHECK(s1.n_full == 4);      // r1, r2 (low MAPQ still counts), r4, r5; r3 is supplementary
   CHECK(s1.n_partial == 0);
+  CHECK(s1.n_span == 4);      // the same four reach from before the intron to past it: the chain is all of the depth
 
   IntronChain two = one;      // a second intron no read has: the reads are consistent but too short
   two.introns.push_back({3500, 4000});
   const ChainBamSupport s2 = r.chain_support(two);
   CHECK(s2.n_full == 0);
   CHECK(s2.n_partial == 4);
+  CHECK(s2.n_span == 0);      // no read reaches past the second intron
 
   IntronChain mono = one;
   mono.introns.clear();

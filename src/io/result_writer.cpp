@@ -99,6 +99,7 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"chain_independent\":" << (e.chain_independent ? "true" : "false") << ","
         << "\"chain_n_full_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_full_reads) : "null") << ","
         << "\"chain_n_partial_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_partial_reads) : "null") << ","
+        << "\"chain_n_spanning_reads\":" << (e.chain_evaluable ? std::to_string(e.chain_n_spanning_reads) : "null") << ","
         << "\"chain_n_full_reads_own\":" << (e.chain_n_full_reads_own >= 0 ? std::to_string(e.chain_n_full_reads_own) : "null") << ","
         << "\"chain_full_reads_by_library\":";
     if (e.chain_full_by_library.empty()) {

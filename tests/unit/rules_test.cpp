@@ -311,6 +311,32 @@ TEST_CASE("rules: an independent rescue on one axis is not held by a circular-ri
   CHECK(v.circularity_flag);
 }
 
+TEST_CASE("rules: a read-share floor for whole-chain support is off unless the config asks for it", "[rules][chain][config]") {
+  EvidenceVector ev = novel_ev(0, 0);
+  ev.sj_evaluable = false;
+  ev.n_novel_junctions = 0;
+  ev.catalog_evaluable = true;
+  ev.chain_evaluable = true;
+  ev.chain_n_full_reads = 3;
+  ev.chain_n_spanning_reads = 700;   // 0.4 % of the reads that span the chain
+  CHECK(RuleEngine().evaluate(ev).confidence == ConfidenceClass::kNovelProbable);
+  const std::string path = scratch("rules_fraction.toml");
+  std::ofstream(path) << "[axis_chain]\nmin_fraction = 0.01\n";
+  const RuleEngine eng = RuleEngine::from_toml(path);
+  std::remove(path.c_str());
+  Verdict v = eng.evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kUnresolved);
+  bool said = false;
+  for (const auto& t : v.rule_trace) if (t.find("below min_fraction 0.01") != std::string::npos) said = true;
+  CHECK(said);
+  ev.chain_n_full_reads = 7;         // 1 %
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kNovelProbable);
+  ev.structural_category = "incomplete-splice_match";   // the same floor for a known fragment
+  ev.chain_n_full_reads = 3;
+  CHECK(eng.evaluate(ev).confidence == ConfidenceClass::kUnconfirmed);
+  CHECK(RuleEngine().evaluate(ev).confidence == ConfidenceClass::kKnownFragment);
+}
+
 TEST_CASE("rules: a config value of the wrong type or outside its range is an error", "[rules][config]") {
   auto with_toml = [](const std::string& body) {
     const std::string path = scratch("rules_cfg.toml");
@@ -326,6 +352,8 @@ TEST_CASE("rules: a config value of the wrong type or outside its range is an er
   CHECK_THROWS(with_toml("[axis_novelty_support]\nconsensus_min_callers = \"two\"\n"));     // wrong type
   CHECK_THROWS(with_toml("[axis_chain]\nmin_full_reads = 0\n"));
   CHECK_THROWS(with_toml("[axis_chain]\nmin_full_reads = 2.5\n"));
+  CHECK(with_toml("[axis_chain]\nmin_fraction = 0.05\n").chain_min_fraction == Approx(0.05));
+  CHECK_THROWS(with_toml("[axis_chain]\nmin_fraction = 1.5\n"));
   CHECK_THROWS(with_toml("[axis_artifact.degradation]\nmax_perc_A_downstream_TTS = 250\n"));
   CHECK_THROWS(with_toml("[axis_artifact.mapping]\nmin_mapq = 300\n"));
   CHECK_THROWS(with_toml("[axis_novelty_support]\nsj_require_canonical_motif = \"yes\"\n"));

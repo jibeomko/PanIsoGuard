@@ -116,6 +116,7 @@ struct EvidenceVector {
   bool chain_independent = false;   // counted in --validation-bam libraries the caller did not use
   int chain_n_full_reads = 0;       // with validation libraries: the largest count among them
   int chain_n_partial_reads = 0;
+  int chain_n_spanning_reads = 0;   // reads at the chain's first donor that reach past its last intron (the depth)
   int chain_n_full_reads_own = -1;  // the caller's own --bam when validation libraries decide; -1 = not counted
   std::vector<std::pair<std::string, int>> chain_full_by_library;  // (library file name, whole-chain reads), validation libraries only
   int chain_n_libraries_supporting = 0;   // validation libraries with >= chain_min_full_reads on their own

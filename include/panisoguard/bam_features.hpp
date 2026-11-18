@@ -36,11 +36,15 @@ struct JunctionBamFeatures {
 // of the read's N ops in one primary alignment (n_full); among the reads at the chain's
 // first donor site, those whose own intron list is a contiguous part of the chain are
 // consistent but too short to carry it (n_partial). Exact coordinates, like the junction
-// features: a wobbling ONT junction does not count.
+// features: a wobbling ONT junction does not count. n_span is the depth the chain is seen at:
+// the reads at the first donor site that reach past the chain's last intron, whatever they splice
+// (the whole-chain reads are among them), so n_full / n_span is the chain's share of the reads
+// that could have carried it.
 struct ChainBamSupport {
   bool evaluated = false;  // false if the contig is absent from the BAM header
   int n_full = 0;
   int n_partial = 0;
+  int n_span = 0;
 };
 
 struct BamFeatureParams {

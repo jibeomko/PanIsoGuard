@@ -102,8 +102,9 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   get_double(map, "axis_artifact.mapping", "max_indel_near_frac", 0.0, 2.0, c.bam_max_indel_near_frac);
 
   const toml::table* chain = section(&tbl, "axis_chain", "axis_chain");
-  only_keys(chain, "axis_chain", {"min_full_reads"});
+  only_keys(chain, "axis_chain", {"min_full_reads", "min_fraction"});
   get_int(chain, "axis_chain", "min_full_reads", 1, 1000000, c.chain_min_full_reads);
+  get_double(chain, "axis_chain", "min_fraction", 0.0, 1.0, c.chain_min_fraction);
   const toml::table* pan = section(&tbl, "axis_pangenome", "axis_pangenome");
   only_keys(pan, "axis_pangenome", {"min_haplotypes"});
   get_int(pan, "axis_pangenome", "min_haplotypes", 1, 1000000, c.pangenome_min_haplotypes);
@@ -129,6 +130,7 @@ std::string RuleEngine::thresholds_summary() const {
          " sj_require_canonical_motif=" + (c.sj_require_canonical_motif ? "true" : "false") +
          " consensus_min_callers=" + std::to_string(c.consensus_min_callers) +
          " chain_min_full_reads=" + std::to_string(c.chain_min_full_reads) +
+         " chain_min_fraction=" + num(c.chain_min_fraction) +
          " max_perc_A_downstream_TTS=" + num(c.perc_A_degradation_threshold) +
          " platform=" + c.platform +
          " min_mapq=" + std::to_string(c.bam_min_mapq) +
@@ -149,6 +151,13 @@ std::string RuleEngine::thresholds_summary() const {
 namespace {
 
 void trace(Verdict& v, std::string s) { v.rule_trace.push_back(std::move(s)); }
+
+// Whole-chain support: enough reads carry the entire chain and, where [axis_chain] min_fraction
+// is set, they are at least that share of the reads that span it.
+bool chain_supported(const RuleConfig& cfg, const EvidenceVector& ev) {
+  return ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads &&
+         ev.chain_n_full_reads >= cfg.chain_min_fraction * ev.chain_n_spanning_reads;
+}
 
 void finish(Verdict& v, ConfidenceClass c, const char* verdict, std::string reason) {
   v.confidence = c;
@@ -215,7 +224,7 @@ bool pass_through(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& 
     // whole intron chain >= chain_min_full_reads long reads carry, with no intra-priming sign,
     // is a KNOWN_FRAGMENT: a known structure seen end to end, kept apart from the novel classes
     // because nothing novel was tested.
-    const bool chain_ok = ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads;
+    const bool chain_ok = chain_supported(cfg, ev);
     if (chain_ok && !s.intrapriming) {
       trace(v, "category=incomplete-splice_match, " + std::to_string(ev.chain_n_full_reads) +
                    " whole-chain read(s), no intra-priming sign -> KNOWN_FRAGMENT");
@@ -426,7 +435,13 @@ Call project_unknown(const RuleConfig& cfg, const EvidenceVector& ev, Mechanism 
   const bool weak_sign = mech == Mechanism::kRtSwitch;
   const std::string sign_note = weak_sign ? ";" + mc + "_sign" : "";
   const bool consensus = ev.consensus_evaluable && ev.n_callers >= cfg.consensus_min_callers;
-  const bool chain_reads = ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads;
+  const bool chain_reads = chain_supported(cfg, ev);
+  if (!chain_reads && ev.chain_evaluable && ev.chain_n_full_reads >= cfg.chain_min_full_reads) {
+    std::ostringstream share;
+    share << cfg.chain_min_fraction;
+    trace(v, std::to_string(ev.chain_n_full_reads) + " whole-chain read(s) among " + std::to_string(ev.chain_n_spanning_reads) +
+                 " that span the chain: below min_fraction " + share.str() + " -> not chain-supported");
+  }
   const bool examined = ev.chain_available && ev.catalog_evaluable;
   if (mech == Mechanism::kMapping) {
     // Without short reads a mapping sign alone is not decisive (a third of such calls were

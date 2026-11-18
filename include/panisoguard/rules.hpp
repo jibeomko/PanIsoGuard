@@ -30,6 +30,8 @@ struct RuleConfig {
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
   // Whole-chain long-read support (--bam): reads carrying the isoform's entire intron chain
   int chain_min_full_reads = 3;             // >= this many -> UNKNOWN support becomes PROBABLE (never CONFIRMED)
+  double chain_min_fraction = 0.0;          // and >= this share of the reads spanning the chain (0 = no share asked:
+                                            // amplicon-validated chains sit below 1 %, benchmark/chain_support)
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes; the history is in CHANGELOG.md.

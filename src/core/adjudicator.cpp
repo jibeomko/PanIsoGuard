@@ -86,6 +86,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         if (cs.n_full > ev.chain_n_full_reads || (cs.n_full == ev.chain_n_full_reads && cs.n_partial > ev.chain_n_partial_reads)) {
           ev.chain_n_full_reads = cs.n_full;
           ev.chain_n_partial_reads = cs.n_partial;
+          ev.chain_n_spanning_reads = cs.n_span;
         }
       }
       if (bam != nullptr) {
@@ -97,6 +98,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       ev.chain_evaluable = cs.evaluated;
       ev.chain_n_full_reads = cs.n_full;
       ev.chain_n_partial_reads = cs.n_partial;
+      ev.chain_n_spanning_reads = cs.n_span;
     }
   }
 

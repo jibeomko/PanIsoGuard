@@ -203,6 +203,8 @@ ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
       if (op == BAM_CREF_SKIP) { introns.push_back(Junction{rpos, rpos + len}); rpos += len; }
       else if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF || op == BAM_CDEL) rpos += len;
     }
+    // aligned on both sides of the chain: before its first intron and after its last
+    if (b->core.pos < chain.introns.front().start && rpos > chain.introns.back().end) ++s.n_span;
     if (introns.empty()) continue;
     if (contiguous_subchain(chain.introns, introns)) ++s.n_full;
     else if (contiguous_subchain(introns, chain.introns)) ++s.n_partial;
