@@ -70,3 +70,5 @@ benchmark/**/data/
 !tests/data/tiny/strand.bam.bai
 !tests/data/tiny/noisy.bam
 !tests/data/tiny/noisy.bam.bai
+!tests/data/tiny/indel.bam
+!tests/data/tiny/indel.bam.bai

@@ -259,6 +259,7 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
   in.pangenome_circular = pangenome_provenance_is_circular(c.pangenome_provenance);
   in.caller_support = caller_support_ptr;
   run.results = adjudicate(in, run.engine, &run.junctions);
+  if (haplo) run.haplotype_fasta_length_mismatches = haplo->n_length_mismatches();
   return run;
 }
 
@@ -281,10 +282,14 @@ RunProvenance provenance_for(const CommonArgs& c, const LoadedRun& run) {
   prov.haplotype_vcf_sample = c.vcf_sample;
   for (const auto& v : run.haplotype_vcfs) {
     prov.haplotype_vcf_unphased_het += v->n_unphased_het_applied();
-    prov.haplotype_vcf_non_snv += v->n_non_snv_skipped();
+    prov.haplotype_vcf_indels += v->n_indels_applied();
+    prov.haplotype_vcf_deletion_match += v->n_deletions_equal_to_junctions();
+    prov.haplotype_vcf_unapplied += v->n_unapplied_alleles();
     prov.haplotype_vcf_missing += v->n_missing_alleles();
     prov.haplotype_vcf_conflicting += v->n_conflicting_records();
+    prov.haplotype_vcf_ref_mismatch += v->n_ref_mismatches();
   }
+  prov.haplotype_fasta_length_mismatch = run.haplotype_fasta_length_mismatches;
   prov.pangenome_path = c.pangenome_junctions;
   prov.variant_axis_on = !c.reference_haplotypes.empty() || !c.haplotype_vcfs.empty();
   prov.variant_circular = haplotype_provenance_is_circular(c.haplotype_provenance);

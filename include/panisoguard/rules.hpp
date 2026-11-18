@@ -26,6 +26,9 @@ struct RuleConfig {
   double bam_max_indel_near_frac = 0.5;     // > this excess fraction (over the reads' own indel rate) with an indel adjacent to the
                                             // junction -> mapping artifact (an alignment-ambiguous indel, not a real
                                             // intron). Junction-proximal (bam_junction_window_bp); validated on chr22.
+  // Variant (reference-bias) axis: which haplotype the reads of an explained junction come from
+  int variant_phase_margin = 2;             // a read is assigned to a haplotype it agrees with at >= this many more sites
+  int variant_phase_min_reads = 3;          // assigned reads needed before the reads can contradict the haplotype
   // Pangenome (reference-bias) axis
   int pangenome_min_haplotypes = 1;         // a novel junction must be on >= this many graph haplotypes to rescue
   // Whole-chain long-read support (--bam): reads carrying the isoform's entire intron chain
@@ -35,7 +38,7 @@ struct RuleConfig {
   std::string sqanti3_version_target = "6.0";
   // Bump (and the [meta] name in config/rules.default.toml) whenever a threshold default or
   // the projection in RuleEngine::evaluate() changes; the history is in CHANGELOG.md.
-  std::string ruleset_version = "builtin-0.0.7";
+  std::string ruleset_version = "builtin-0.0.8";
 };
 
 class RuleEngine {

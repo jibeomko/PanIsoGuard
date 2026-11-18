@@ -214,4 +214,65 @@ ChainBamSupport BamReader::chain_support(const IntronChain& chain) const {
   return s;
 }
 
+char JunctionRead::base_at(int64_t pos) const {
+  // the last block starting at or before pos
+  std::size_t lo = 0, hi = blocks.size();
+  while (lo < hi) {
+    const std::size_t mid = (lo + hi) / 2;
+    if (blocks[mid].ref <= pos) lo = mid + 1; else hi = mid;
+  }
+  if (lo == 0) return 0;
+  const Block& b = blocks[lo - 1];
+  if (pos >= b.ref + b.len) return 0;
+  const std::size_t q = static_cast<std::size_t>(b.qry + (pos - b.ref));
+  return q < seq.size() ? seq[q] : 0;
+}
+
+std::vector<JunctionRead> BamReader::junction_reads(const std::string& chrom, const Junction& intron, Strand strand,
+                                                    std::size_t max_reads) const {
+  std::vector<JunctionRead> out;
+  const int tid = sam_hdr_name2tid(impl_->hdr, chrom.c_str());
+  if (tid < 0) return out;
+  // a read splicing here is aligned at the base before the intron
+  const Itr itr = query(impl_->idx, impl_->path, tid, intron.start > 0 ? intron.start - 1 : 0, intron.start + 1);
+  const Rec rec = new_record();
+  bam1_t* b = rec.get();
+  int ret = -1;
+  while (out.size() < max_reads && (ret = sam_itr_next(impl_->fp, itr.get(), b)) >= 0) {
+    if (b->core.flag & (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) continue;
+    if (!strand_compatible(b, strand)) continue;
+    JunctionRead r;
+    r.start = b->core.pos;
+    const uint32_t* cig = bam_get_cigar(b);
+    int64_t rpos = b->core.pos, qpos = 0;
+    bool spanning = false;
+    for (int i = 0; i < static_cast<int>(b->core.n_cigar); ++i) {
+      const int op = bam_cigar_op(cig[i]);
+      const int64_t len = bam_cigar_oplen(cig[i]);
+      switch (op) {
+        case BAM_CMATCH: case BAM_CEQUAL: case BAM_CDIFF:
+          r.blocks.push_back(JunctionRead::Block{rpos, qpos, len});
+          rpos += len; qpos += len;
+          break;
+        case BAM_CREF_SKIP:
+          if (rpos == intron.start && rpos + len == intron.end) spanning = true;
+          rpos += len;
+          break;
+        case BAM_CDEL: rpos += len; break;
+        case BAM_CINS: r.insertions.emplace_back(rpos, static_cast<int>(len)); qpos += len; break;
+        case BAM_CSOFT_CLIP: qpos += len; break;
+        default: break;
+      }
+    }
+    if (!spanning) continue;
+    r.end = rpos;
+    const uint8_t* seq = bam_get_seq(b);
+    r.seq.resize(static_cast<std::size_t>(b->core.l_qseq));
+    for (int i = 0; i < b->core.l_qseq; ++i) r.seq[static_cast<std::size_t>(i)] = seq_nt16_str[bam_seqi(seq, i)];
+    out.push_back(std::move(r));
+  }
+  if (out.size() < max_reads) check_read(ret, impl_->path, chrom);
+  return out;
+}
+
 }  // namespace panisoguard

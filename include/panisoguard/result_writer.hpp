@@ -26,9 +26,13 @@ struct RunProvenance {
   std::vector<std::string> haplotype_vcf_paths;        // or the sample's VCF/BCF files (variant axis)
   std::string haplotype_vcf_sample;                    // --vcf-sample, "" = the file's only sample
   long haplotype_vcf_unphased_het = 0;                 // unphased heterozygous alleles applied at motifs
-  long haplotype_vcf_non_snv = 0;                      // indel / symbolic alleles skipped at motifs
+  long haplotype_vcf_indels = 0;                       // records with an insertion or deletion applied at motifs
+  long haplotype_vcf_deletion_match = 0;               // junctions equal to a deletion one of the files carries
+  long haplotype_vcf_unapplied = 0;                    // symbolic or `*` alleles that could not be applied at motifs
   long haplotype_vcf_missing = 0;                      // missing or absent alleles that left a motif base unknown
-  long haplotype_vcf_conflicting = 0;                  // records repeating a site with another genotype (bases made unknown)
+  long haplotype_vcf_conflicting = 0;                  // sites written twice with another genotype, or two alleles on one base
+  long haplotype_vcf_ref_mismatch = 0;                 // records whose REF is not the reference
+  long haplotype_fasta_length_mismatch = 0;            // haplotype FASTA contigs of another length than the reference's
   std::string pangenome_path;       // "" if none
   std::string kept_path;            // "" if none (--write-kept: the isoform file filtered to kept verdicts)
   std::string kept_verdicts;        // the --keep-verdicts list that selected them

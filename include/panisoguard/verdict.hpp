@@ -35,8 +35,9 @@ enum class ConfidenceClass {
   kUnresolved,       // nothing to test, held by the circularity firewall, or a category
                      // PanIsoGuard does not adjudicate
   kReferenceBias,    // the novelty is explained by the sample's genome: a novel-vs-reference
-                     // junction canonical on a personalized haplotype (variant axis) or
-                     // realizable on a pangenome path (pangenome axis). The junction is real.
+                     // junction canonical on a personalized haplotype or equal to a deletion the
+                     // sample carries (variant axis), or realizable on a pangenome path
+                     // (pangenome axis). The reads are right; the reference is what differs.
   kArtifact,         // evidence against
 };
 
@@ -80,14 +81,19 @@ struct EvidenceVector {
   double bam_max_frac_indel_near = 0.0;
   double bam_max_frac_indel_near_excess = 0.0;  // above the reads' own indel rate; the gate reads this
 
-  // variant (reference-bias) axis: a novel junction that is non-canonical on the
-  // reference but canonical on a personalized haplotype FASTA.
+  // variant (reference-bias) axis: a novel junction the sample's haplotypes explain. Either it
+  // is non-canonical on the reference but canonical on a haplotype (created), or a haplotype
+  // carries a deletion equal to the intron, so the reads lack those bases without a splice
+  // (deleted).
   bool variant_evaluable = false;
-  int n_novel_jx_phase_uncertain = 0;  // created junctions whose haplotype allele was unphased (VCF input)
-  bool variant_rescue = false;            // all novel junctions variant-created on one common haplotype
+  int n_novel_jx_phase_uncertain = 0;  // explained junctions whose haplotype allele was unphased (VCF input)
+  bool variant_rescue = false;            // all novel junctions explained on one common haplotype
   int n_novel_jx_variant_created = 0;     // how many are created on >= 1 haplotype (per-junction view)
-  bool haplotype_consistent = false;      // one haplotype carries the canonical motif at every
-                                          // created junction (a chain lives on one haplotype)
+  int n_novel_jx_variant_deleted = 0;     // how many equal a deletion on >= 1 haplotype
+  int n_novel_jx_read_phase_contradicted = 0;   // explained on some haplotypes only, while the junction's reads
+                                                // carry the other haplotypes' alleles: not counted above
+  bool haplotype_consistent = false;      // one haplotype explains every created or deleted
+                                          // junction (a chain lives on one haplotype)
   bool haplotype_phase_unknown = false;   // VCF input: >= 2 created junctions rest on heterozygous alleles
                                           // whose phase relation the file does not give (unphased, or
                                           // different phase sets), so "one haplotype" is not established

@@ -53,13 +53,24 @@ struct JunctionRow {
   bool sj_evaluable = false;  int sj_n_uniq = 0;  bool sr_supported = false;
   // novel junctions only (the axes below classify novelty vs the reference):
   bool variant_evaluable = false;  std::string ref_motif;  std::vector<std::string> hap_motifs;
-  std::string variant = "NA";           // created | disrupted | none | NA
+  std::string variant = "NA";           // created | deleted | disrupted | none | NA
   std::string variant_phase = "NA";     // phased | unphased | unlinked (two heterozygous records not phased together) | NA
   std::vector<int> canonical_on;         // 1-based haplotype indices whose motif is canonical
+  // Which haplotype the junction's reads come from, for a junction explained on some haplotypes
+  // only (needs --bam): consistent | contradicted | mixed | uninformative | NA.
+  std::string read_phase = "NA";
+  int read_phase_n_motif = 0, read_phase_n_other = 0;
   bool pangenome_evaluable = false;  bool pangenome_supported = false;
   int pangenome_n_haplotypes = 0;  std::vector<std::string> pangenome_paths;
   bool bam_evaluable = false;  JunctionBamFeatures bam;
 };
+
+// How many of a junction's reads carry the alleles of the haplotypes that explain it (`on`) and
+// how many those of the other haplotypes. A read is assigned when it agrees with one group at
+// `margin` more of the sites than with the other, so one sequencing error cannot place it.
+struct ReadPhase { int n_sites = 0, n_motif = 0, n_other = 0; };
+ReadPhase read_phase(const std::vector<JunctionRead>& reads, const std::vector<PhaseSite>& sites,
+                     const std::vector<bool>& on, int margin);
 
 // The classification and the isoform file must describe the same isoforms. Evidence is looked
 // up at the chain's coordinates while the output row carries the record's, so a record whose

@@ -62,6 +62,7 @@ struct LoadedRun {
   std::vector<JunctionRow> junctions;  // one row per junction of the adjudicated isoforms
   RuleEngine engine;
   std::vector<std::shared_ptr<VcfHaplotypes>> haplotype_vcfs;  // kept for the provenance counters
+  long haplotype_fasta_length_mismatches = 0;                  // haplotype FASTA contigs of another length
 };
 
 // Read every supplied input and run adjudication. Throws std::exception on I/O

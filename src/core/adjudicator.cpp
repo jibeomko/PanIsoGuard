@@ -8,10 +8,98 @@
 #include "panisoguard/fingerprint.hpp"
 
 namespace panisoguard {
+
+ReadPhase read_phase(const std::vector<JunctionRead>& reads, const std::vector<PhaseSite>& sites,
+                     const std::vector<bool>& on, int margin) {
+  ReadPhase p;
+  p.n_sites = static_cast<int>(sites.size());
+  std::vector<int> match(on.size());
+  for (const JunctionRead& r : reads) {
+    std::fill(match.begin(), match.end(), 0);
+    for (const PhaseSite& s : sites) {   // in position order
+      if (s.pos < r.start) continue;
+      if (s.pos >= r.end) break;
+      const char c = r.base_at(s.pos);
+      if (c == 0) continue;
+      for (std::size_t h = 0; h < on.size() && h < s.bases.size(); ++h) if (s.bases[h] == c) ++match[h];
+    }
+    int motif = 0, other = 0;   // the best agreement inside each group of haplotypes
+    for (std::size_t h = 0; h < on.size(); ++h) {
+      int& best = on[h] ? motif : other;
+      best = std::max(best, match[h]);
+    }
+    if (motif - other >= margin) ++p.n_motif;
+    else if (other - motif >= margin) ++p.n_other;
+  }
+  return p;
+}
+
 namespace {
 
-// Assemble the evidence for one SQANTI record. `bam_cache` memoizes per-junction
-// BAM features across isoforms that share a junction.
+constexpr std::size_t kJunctionReadCap = 200;   // junction reads looked at per junction
+
+// What the variant axis found at one novel junction; the same for every isoform that uses it.
+struct VariantAt {
+  JunctionMotifs jm;
+  std::vector<bool> on;            // per haplotype: it explains the junction (canonical motif, or it lacks the intron)
+  std::string read_phase = "NA";
+  ReadPhase reads;
+};
+
+VariantAt variant_at(const HaplotypeProvider& haplotype, const BamReader* bam, const std::string& chrom,
+                     const Junction& intron, Strand strand, const RuleConfig& cfg) {
+  VariantAt va;
+  std::vector<JunctionRead> reads;
+  bool loaded = false;
+  auto load = [&]() {
+    if (!loaded && bam != nullptr) reads = bam->junction_reads(chrom, intron, strand, kJunctionReadCap);
+    loaded = true;
+  };
+  // An insertion exactly at an exon boundary: the reads carry it (with an insertion of that
+  // length within a few bases on the exon side) or they do not. Read fractions need
+  // bam_min_spanning reads, as on the mapping axis; between 20% and 80% the reads do not settle it.
+  const BoundaryOracle oracle = [&](bool left, int len) {
+    load();
+    const int n = static_cast<int>(reads.size());
+    if (len <= 0 || n < cfg.bam_min_spanning) return BoundaryReads::kUnknown;
+    const int64_t b = left ? intron.start : intron.end;
+    int k = 0;
+    for (const JunctionRead& r : reads) {
+      for (const auto& ins : r.insertions) {
+        if (ins.second != len) continue;
+        if (left ? (ins.first >= b - 3 - len && ins.first <= b) : (ins.first >= b && ins.first <= b + 3 + len)) { ++k; break; }
+      }
+    }
+    return 5 * k <= n ? BoundaryReads::kWithout : 5 * k >= 4 * n ? BoundaryReads::kWith : BoundaryReads::kUnknown;
+  };
+  va.jm = haplotype.motifs(chrom, intron, strand, bam != nullptr ? oracle : BoundaryOracle());
+  const JunctionMotifs& jm = va.jm;
+  va.on.assign(jm.haps.size(), false);
+  bool all_known = true, some = false, every = !jm.haps.empty();
+  for (std::size_t h = 0; h < jm.haps.size(); ++h) {
+    va.on[h] = jm.deleted[h] || (jm.haps[h].evaluable && jm.haps[h].canonical);
+    if (!jm.deleted[h] && !jm.haps[h].evaluable) all_known = false;
+    if (va.on[h]) some = true; else every = false;
+  }
+  // A junction explained on some haplotypes only is used by reads of those haplotypes: the
+  // sample's other heterozygous sites say which haplotype each junction read comes from.
+  const bool explained = jm.verdict == VariantVerdict::kCreated || jm.verdict == VariantVerdict::kDeleted;
+  if (explained && bam != nullptr && some && !every && all_known) {
+    load();
+    va.read_phase = "uninformative";
+    if (!reads.empty()) {
+      int64_t lo = reads.front().start, hi = reads.front().end;
+      for (const JunctionRead& r : reads) { lo = std::min(lo, r.start); hi = std::max(hi, r.end); }
+      va.reads = read_phase(reads, haplotype.phase_sites(chrom, lo, hi, jm), va.on, cfg.variant_phase_margin);
+      if (va.reads.n_motif + va.reads.n_other >= cfg.variant_phase_min_reads)
+        va.read_phase = va.reads.n_other == 0 ? "consistent" : va.reads.n_motif == 0 ? "contradicted" : "mixed";
+    }
+  }
+  return va;
+}
+
+// Assemble the evidence for one SQANTI record. `bam_cache` and `variant_cache` memoize the
+// per-junction BAM features and variant findings across isoforms that share a junction.
 EvidenceVector build_evidence(const SqantiRecord& r,
                               const std::map<std::string, IntronChain>& chains,
                               const Catalog* catalog, const SjTable* sj, const BamReader* bam,
@@ -21,6 +109,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
                               const CallerSupport* caller_support,
                               const RuleConfig& cfg,
                               std::unordered_map<std::string, JunctionBamFeatures>& bam_cache,
+                              std::unordered_map<std::string, VariantAt>& variant_cache,
                               std::unordered_map<std::string, JunctionRow>* jrows) {
   EvidenceVector ev;
   ev.structural_category = r.structural_category;
@@ -110,9 +199,10 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     bp.min_mapq = cfg.bam_min_mapq;
     bp.junction_window_bp = cfg.bam_junction_window_bp;
 
-    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_disrupted = 0, n_phase_uncertain = 0;
-    // created junctions whose canonical motif sits on some but not all haplotypes rest on a
-    // heterozygous allele; a common haplotype across them needs their alleles in one phase set
+    int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_deleted = 0, n_variant_disrupted = 0;
+    int n_phase_uncertain = 0, n_phase_contradicted = 0;
+    // explained junctions that some but not all haplotypes explain rest on a heterozygous
+    // allele; a common haplotype across them needs their alleles in one phase set
     int n_phase_dependent = 0; bool phase_broken = false; long phase_set_common = kNoPhaseSet;
     int n_known = 0, n_known_supported = 0, n_bam_gated = 0;
     bool any_bam_eval = false;
@@ -150,38 +240,49 @@ EvidenceVector build_evidence(const SqantiRecord& r,
       }
       ++n_novel;
       if (haplotype != nullptr) {
-        const JunctionMotifs jm = haplotype->motifs(chain.chrom, intron, chain.strand);
+        auto vit = variant_cache.find(key);
+        if (vit == variant_cache.end())
+          vit = variant_cache.emplace(key, variant_at(*haplotype, bam, chain.chrom, intron, chain.strand, cfg)).first;
+        const VariantAt& va = vit->second;
+        const JunctionMotifs& jm = va.jm;
         const VariantVerdict vv = jm.verdict;
-        hap_at.assign(jm.haps.size(), false);
-        for (std::size_t h = 0; h < jm.haps.size(); ++h) hap_at[h] = jm.haps[h].evaluable && jm.haps[h].canonical;
+        hap_at = va.on;
         if (jr != nullptr) {
           jr->variant_evaluable = vv != VariantVerdict::kNotEvaluable;
           jr->ref_motif = jm.ref.evaluable ? jm.ref.motif : "NA";
           jr->hap_motifs.clear();
           jr->canonical_on.clear();
           for (std::size_t h = 0; h < jm.haps.size(); ++h) {
-            jr->hap_motifs.push_back(jm.haps[h].evaluable ? jm.haps[h].motif : "NA");
-            if (hap_at[h]) jr->canonical_on.push_back(static_cast<int>(h) + 1);
+            jr->hap_motifs.push_back(jm.deleted[h] ? "DEL" : jm.haps[h].evaluable ? jm.haps[h].motif : "NA");
+            if (jm.haps[h].evaluable && jm.haps[h].canonical) jr->canonical_on.push_back(static_cast<int>(h) + 1);
           }
-          jr->variant = vv == VariantVerdict::kCreated ? "created" : vv == VariantVerdict::kDisrupted ? "disrupted"
-                      : vv == VariantVerdict::kNone ? "none" : "NA";
+          jr->variant = vv == VariantVerdict::kCreated ? "created" : vv == VariantVerdict::kDeleted ? "deleted"
+                      : vv == VariantVerdict::kDisrupted ? "disrupted" : vv == VariantVerdict::kNone ? "none" : "NA";
           jr->variant_phase = jm.phase_unlinked ? "unlinked" : jm.phase == MotifPhase::kPhased ? "phased" : jm.phase == MotifPhase::kUnphased ? "unphased" : "NA";
+          jr->read_phase = va.read_phase;
+          jr->read_phase_n_motif = va.reads.n_motif;
+          jr->read_phase_n_other = va.reads.n_other;
         }
         if (vv != VariantVerdict::kNotEvaluable) any_variant_eval = true;
         if (vv == VariantVerdict::kDisrupted) ++n_variant_disrupted;
-        // kCreated (non-canonical on reference, canonical on a haplotype) drives the
-        // reference-bias rescue; kDisrupted (canonical on reference, non-canonical on every
-        // haplotype) is a non-canonical sign for the mechanism axis (rules.cpp).
-        if (vv == VariantVerdict::kCreated) {
-          ++n_variant_created;
-          if (jm.phase == MotifPhase::kUnphased) ++n_phase_uncertain;
-          for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
-          const bool on_every_hap = std::find(hap_at.begin(), hap_at.end(), false) == hap_at.end();
-          if (!on_every_hap && jm.phase != MotifPhase::kUnknown) {   // VCF input and a heterozygous allele
-            ++n_phase_dependent;
-            if (jm.phase == MotifPhase::kUnphased || jm.phase_mixed) phase_broken = true;
-            else if (phase_set_common == kNoPhaseSet) phase_set_common = jm.phase_set;
-            else if (phase_set_common != jm.phase_set) phase_broken = true;
+        // kCreated (non-canonical on reference, canonical on a haplotype) and kDeleted (a
+        // haplotype lacks the intron's bases) drive the reference-bias rescue; kDisrupted
+        // (canonical on reference, non-canonical on every haplotype) is a non-canonical sign
+        // for the mechanism axis (rules.cpp).
+        if (vv == VariantVerdict::kCreated || vv == VariantVerdict::kDeleted) {
+          if (va.read_phase == "contradicted") {
+            ++n_phase_contradicted;   // the reads come from a haplotype that does not explain the junction
+          } else {
+            if (vv == VariantVerdict::kCreated) ++n_variant_created; else ++n_variant_deleted;
+            if (jm.phase == MotifPhase::kUnphased) ++n_phase_uncertain;
+            for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
+            const bool on_every_hap = std::find(hap_at.begin(), hap_at.end(), false) == hap_at.end();
+            if (!on_every_hap && jm.phase != MotifPhase::kUnknown) {   // VCF input and a heterozygous allele
+              ++n_phase_dependent;
+              if (jm.phase == MotifPhase::kUnphased || jm.phase_mixed) phase_broken = true;
+              else if (phase_set_common == kNoPhaseSet) phase_set_common = jm.phase_set;
+              else if (phase_set_common != jm.phase_set) phase_broken = true;
+            }
           }
         }
       }
@@ -247,8 +348,10 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.variant_evaluable = (haplotype != nullptr) && any_variant_eval;
     ev.n_novel_jx_phase_uncertain = n_phase_uncertain;
     ev.n_novel_jx_variant_created = n_variant_created;
+    ev.n_novel_jx_variant_deleted = n_variant_deleted;
+    ev.n_novel_jx_read_phase_contradicted = n_phase_contradicted;
     ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
-    ev.haplotype_consistent = n_variant_created > 0 &&
+    ev.haplotype_consistent = n_variant_created + n_variant_deleted > 0 &&
                               std::find(hap_common.begin(), hap_common.end(), true) != hap_common.end();
     ev.haplotype_phase_unknown = n_phase_dependent >= 2 && phase_broken;
     // Rescue requires all of the isoform's novel junctions to be explained by the
@@ -256,7 +359,7 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     // multi-novel-junction isoform "false novel" (the others may be new) --
     // and explained on one haplotype (the per-junction count alone would accept junction
     // 1 on haplotype A plus junction 2 on haplotype B).
-    ev.variant_rescue = (n_novel > 0 && n_variant_created == n_novel && ev.haplotype_consistent);
+    ev.variant_rescue = (n_novel > 0 && n_variant_created + n_variant_deleted == n_novel && ev.haplotype_consistent);
     // Keep the circular-risk flag consistent with evaluability (it is only read by the
     // rescue branch, which already requires *_evaluable, so this is a clarity guard).
     ev.variant_circular = ev.variant_evaluable && haplotype_circular;
@@ -302,6 +405,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
   }
 
   std::unordered_map<std::string, JunctionBamFeatures> bam_cache;
+  std::unordered_map<std::string, VariantAt> variant_cache;
   std::unordered_map<std::string, JunctionRow> jrows;
   std::vector<AdjudicationResult> out;
   out.reserve(in.sqanti->records.size());
@@ -313,7 +417,7 @@ std::vector<AdjudicationResult> adjudicate(const AdjudicateInputs& in, const Rul
     res.structural_category = r.structural_category;
     res.evidence = build_evidence(r, *in.chains, in.catalog, in.sj, in.bam, in.validation_bams, in.haplotype,
                                   in.haplotype_circular, in.pangenome, in.pangenome_circular,
-                                  in.caller_support, engine.config(), bam_cache,
+                                  in.caller_support, engine.config(), bam_cache, variant_cache,
                                   junctions != nullptr ? &jrows : nullptr);
     res.verdict = engine.evaluate(res.evidence);
     out.push_back(std::move(res));

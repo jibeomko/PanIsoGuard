@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "panisoguard/types.hpp"
 
@@ -47,6 +50,17 @@ struct ChainBamSupport {
   int n_span = 0;
 };
 
+// One primary alignment that splices exactly at a junction, kept as far as telling its
+// haplotype needs: where its bases stand on the reference, and the insertions it carries.
+struct JunctionRead {
+  struct Block { int64_t ref = 0, qry = 0, len = 0; };   // an aligned run: reference start, read offset, length
+  int64_t start = 0, end = 0;                            // reference span [start, end)
+  std::vector<Block> blocks;                             // in reference order
+  std::vector<std::pair<int64_t, int>> insertions;       // (reference position the inserted bases precede, length)
+  std::string seq;
+  char base_at(int64_t pos) const;                       // the read's base aligned to `pos`; 0 when it has none
+};
+
 struct BamFeatureParams {
   int min_mapq = 20;
   int junction_window_bp = 10;
@@ -67,6 +81,10 @@ class BamReader {
                                            const BamFeatureParams& p) const;
   // Primary alignments only (secondary/supplementary skipped); monoexonic chains -> not evaluated.
   ChainBamSupport chain_support(const IntronChain& chain) const;
+  // The primary alignments with an N op equal to the junction, at most `max_reads` of them in
+  // file order (empty when the contig is absent).
+  std::vector<JunctionRead> junction_reads(const std::string& chrom, const Junction& intron, Strand strand,
+                                           std::size_t max_reads) const;
 
  private:
   struct Impl;

@@ -14,7 +14,7 @@ namespace panisoguard {
 namespace {
 
 // DNA-side summary, independent of the verdict: do the sample's haplotypes / the pangenome
-// make the isoform's novel junctions canonical / realizable? "haplotype" and "pangenome"
+// explain the isoform's novel junctions (a canonical motif or an equal deletion / a path)? "haplotype" and "pangenome"
 // mean every novel junction, on one haplotype or path; "partial" some of them; "none" the
 // axis was evaluated and explains nothing; "NA" no genome evidence was supplied.
 std::string genomic_compatibility(const EvidenceVector& e) {
@@ -23,7 +23,7 @@ std::string genomic_compatibility(const EvidenceVector& e) {
   if (e.variant_evaluable && e.variant_rescue) s += "haplotype";
   if (e.pangenome_evaluable && e.pangenome_rescue) s += std::string(s.empty() ? "" : ";") + "pangenome";
   if (!s.empty()) return s;
-  if (e.n_novel_jx_variant_created > 0 || e.n_novel_jx_pangenome > 0) return "partial";
+  if (e.n_novel_jx_variant_created > 0 || e.n_novel_jx_variant_deleted > 0 || e.n_novel_jx_pangenome > 0) return "partial";
   return "none";
 }
 
@@ -82,8 +82,10 @@ void write_jsonl(const std::string& path, const std::vector<AdjudicationResult>&
         << "\"variant_evaluable\":" << (e.variant_evaluable ? "true" : "false") << ","
         << "\"variant_rescue\":" << (e.variant_rescue ? "true" : "false") << ","
         << "\"n_novel_jx_variant_created\":" << e.n_novel_jx_variant_created << ","
+        << "\"n_novel_jx_variant_deleted\":" << e.n_novel_jx_variant_deleted << ","
+        << "\"n_novel_jx_read_phase_contradicted\":" << e.n_novel_jx_read_phase_contradicted << ","
         << "\"n_novel_jx_variant_disrupted\":" << e.n_novel_jx_variant_disrupted << ","
-        << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
+        << "\"haplotype_consistent\":" << (e.n_novel_jx_variant_created + e.n_novel_jx_variant_deleted > 0 ? (e.haplotype_consistent ? "true" : "false") : "null") << ","
         << "\"haplotype_phase_unknown\":" << (e.haplotype_phase_unknown ? "true" : "false") << ","
         << "\"n_novel_jx_phase_uncertain\":" << e.n_novel_jx_phase_uncertain << ","
         << "\"variant_circular\":" << (e.variant_circular ? "true" : "false") << ","
@@ -160,10 +162,15 @@ void write_provenance(const std::string& path, const std::vector<AdjudicationRes
   if (!prov.haplotype_vcf_paths.empty()) {
     out << "haplotype_vcf_sample\t" << (prov.haplotype_vcf_sample.empty() ? "<the only sample>" : prov.haplotype_vcf_sample) << '\n';
     out << "haplotype_vcf_unphased_het_applied_at_motifs\t" << prov.haplotype_vcf_unphased_het << '\n';
-    out << "haplotype_vcf_non_snv_skipped_at_motifs\t" << prov.haplotype_vcf_non_snv << '\n';
+    out << "haplotype_vcf_indels_applied_at_motifs\t" << prov.haplotype_vcf_indels << '\n';
+    out << "haplotype_vcf_deletions_equal_to_junctions\t" << prov.haplotype_vcf_deletion_match << '\n';
+    out << "haplotype_vcf_unapplied_alleles_at_motifs\t" << prov.haplotype_vcf_unapplied << '\n';
     out << "haplotype_vcf_missing_alleles_at_motifs\t" << prov.haplotype_vcf_missing << '\n';
     out << "haplotype_vcf_conflicting_records_at_motifs\t" << prov.haplotype_vcf_conflicting << '\n';
+    out << "haplotype_vcf_ref_mismatches_at_motifs\t" << prov.haplotype_vcf_ref_mismatch << '\n';
   }
+  if (!prov.reference_haplotype_paths.empty())
+    out << "reference_haplotype_contig_length_mismatches\t" << prov.haplotype_fasta_length_mismatch << '\n';
   out << "pangenome_junctions\t" << (prov.pangenome_path.empty() ? "<none>" : prov.pangenome_path) << '\n';
   if (!prov.kept_path.empty()) {
     out << "kept_isoforms\t" << prov.kept_path << '\n';
@@ -234,10 +241,11 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
   auto yn = [](bool evaluable, bool v) { return evaluable ? (v ? "true" : "false") : "NA"; };
   out << "chrom\tstart\tend\tstrand\tn_isoforms\tisoforms\tknown\tsr_n_uniq\tsr_supported\tref_motif\thap_motifs\t"
          "variant\tcanonical_on_haplotypes\tvariant_phase\tpangenome_n_haplotypes\tpangenome_paths\tpangenome_supported\t"
-         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\tbam_indel_near_background\treference_bias\n";
+         "bam_n_spanning\tbam_frac_low_mapq\tbam_frac_supplementary\tbam_frac_indel_near\tbam_indel_near_background\treference_bias\t"
+         "read_phase\tread_phase_n_motif\tread_phase_n_other\n";
   for (const auto& j : rows) {
     std::string rb;
-    if (j.variant == "created") rb += "haplotype_variant";
+    if (j.read_phase != "contradicted") rb += j.variant == "created" ? "haplotype_variant" : j.variant == "deleted" ? "haplotype_deletion" : "";
     if (j.pangenome_supported) rb += std::string(rb.empty() ? "" : ";") + "pangenome_path";
     out << j.chrom << '\t' << j.intron.start + 1 << '\t' << j.intron.end << '\t' << strand_char(j.strand) << '\t'
         << j.isoforms.size() << '\t' << join(j.isoforms) << '\t' << (j.known ? "true" : "false") << '\t'
@@ -252,7 +260,9 @@ void write_junctions_tsv(const std::string& path, const std::vector<JunctionRow>
     } else {
       out << "NA\tNA\tNA\tNA\tNA";
     }
-    out << '\t' << (rb.empty() ? "-" : rb) << '\n';
+    out << '\t' << (rb.empty() ? "-" : rb) << '\t' << j.read_phase << '\t';
+    if (j.read_phase == "NA") out << "NA\tNA\n";
+    else out << j.read_phase_n_motif << '\t' << j.read_phase_n_other << '\n';
   }
   close_checked(out, path);
 }

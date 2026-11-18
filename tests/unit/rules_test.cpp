@@ -337,6 +337,29 @@ TEST_CASE("rules: a read-share floor for whole-chain support is off unless the c
   CHECK(RuleEngine().evaluate(ev).confidence == ConfidenceClass::kKnownFragment);
 }
 
+TEST_CASE("rules: a junction equal to a deletion of the sample is reference bias; reads of the other haplotype undo it", "[rules][rescue]") {
+  EvidenceVector ev = novel_ev(2, 0);
+  ev.variant_evaluable = true;
+  ev.n_novel_jx_variant_deleted = 2;
+  ev.haplotype_consistent = true;
+  ev.variant_rescue = true;
+  Verdict v = RuleEngine().evaluate(ev);
+  CHECK(v.confidence == ConfidenceClass::kReferenceBias);
+  CHECK(v.verdict_reason == "haplotype_deletion");
+  ev.n_novel_jx_variant_deleted = 1;
+  ev.n_novel_jx_variant_created = 1;
+  CHECK(RuleEngine().evaluate(ev).verdict_reason == "haplotype_variant;haplotype_deletion");
+  // one of the two explained junctions is used by reads of the other haplotype: not explained
+  ev.n_novel_jx_variant_created = 0;
+  ev.n_novel_jx_read_phase_contradicted = 1;
+  ev.variant_rescue = false;
+  v = RuleEngine().evaluate(ev);
+  CHECK(v.confidence != ConfidenceClass::kReferenceBias);
+  bool said = false;
+  for (const auto& t : v.rule_trace) if (t.find("not counted as explained") != std::string::npos) said = true;
+  CHECK(said);
+}
+
 TEST_CASE("rules: a config value of the wrong type or outside its range is an error", "[rules][config]") {
   auto with_toml = [](const std::string& body) {
     const std::string path = scratch("rules_cfg.toml");
@@ -354,6 +377,8 @@ TEST_CASE("rules: a config value of the wrong type or outside its range is an er
   CHECK_THROWS(with_toml("[axis_chain]\nmin_full_reads = 2.5\n"));
   CHECK(with_toml("[axis_chain]\nmin_fraction = 0.05\n").chain_min_fraction == Approx(0.05));
   CHECK_THROWS(with_toml("[axis_chain]\nmin_fraction = 1.5\n"));
+  CHECK(with_toml("[axis_variant]\nphase_margin = 3\nphase_min_reads = 5\n").variant_phase_min_reads == 5);
+  CHECK_THROWS(with_toml("[axis_variant]\nphase_margin = 0\n"));
   CHECK_THROWS(with_toml("[axis_artifact.degradation]\nmax_perc_A_downstream_TTS = 250\n"));
   CHECK_THROWS(with_toml("[axis_artifact.mapping]\nmin_mapq = 300\n"));
   CHECK_THROWS(with_toml("[axis_novelty_support]\nsj_require_canonical_motif = \"yes\"\n"));

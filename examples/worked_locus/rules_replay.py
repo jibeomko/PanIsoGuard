@@ -27,11 +27,11 @@ def evaluate(cat, e, perc_a, min_callers=2, min_chain=3):
         return "UNRESOLVED"
     n, k = e["n_novel_junctions"], e["n_novel_jx_sr_supported"]
     pan = e["pangenome_evaluable"] and e["pangenome_rescue"]
-    var_all = e["variant_evaluable"] and n > 0 and e["n_novel_jx_variant_created"] == n   # every novel junction created
+    var_all = e["variant_evaluable"] and n > 0 and e["n_novel_jx_variant_created"] + e["n_novel_jx_variant_deleted"] == n   # each explained
     if pan and not e["pangenome_circular"]:                    # reference-bias rescue first: independent evidence promotes
         return "REFERENCE_BIAS"
     if var_all and not e["variant_circular"] and e["variant_rescue"] and not e.get("haplotype_phase_unknown", False):
-        return "REFERENCE_BIAS"                                # one haplotype carries every created junction, in one phase set
+        return "REFERENCE_BIAS"                                # one haplotype explains every novel junction, in one phase set
     pan_all = e["pangenome_evaluable"] and n > 0 and e["n_novel_jx_pangenome"] == n
     if pan or var_all or (pan_all and e.get("pangenome_path_consistent") is False):
         return "UNRESOLVED"                                    # circular-risk, phase unknown, no common haplotype or path: held

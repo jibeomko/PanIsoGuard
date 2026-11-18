@@ -86,6 +86,27 @@ TEST_CASE("BAM chain support counts primary reads carrying the whole intron chai
   CHECK_FALSE(r.chain_support(absent).evaluated);
 }
 
+TEST_CASE("junction_reads returns the primary alignments that splice exactly at a junction", "[bam][phase]") {
+  BamReader r(tiny("mini.bam"));
+  const auto reads = r.junction_reads("chr1", {2000, 3000}, Strand::kPlus, 200);
+  REQUIRE(reads.size() == 4);   // r1, r2, r4, r5 in file order; r3 is supplementary
+  for (const JunctionRead& x : reads) {
+    CHECK(x.start == 1900);
+    CHECK(x.blocks.front().ref == 1900);
+    CHECK(x.blocks.back().ref + x.blocks.back().len == x.end);
+    CHECK(x.base_at(2500) == 0);   // inside the intron (the fixture's reads carry no sequence; bases are tested on indel.bam)
+  }
+  CHECK(reads[0].end == 3100);
+  CHECK(reads[3].end == 3095);   // r5: five of its last hundred bases are an insertion
+  CHECK(reads[2].blocks.front().qry == 30);   // r4: thirty soft-clipped bases precede the first aligned one
+  REQUIRE(reads[3].insertions.size() == 1);   // r5: an insertion right after the intron
+  CHECK(reads[3].insertions[0].first == 3000);
+  CHECK(reads[3].insertions[0].second == 5);
+  CHECK(r.junction_reads("chr1", {2000, 3000}, Strand::kPlus, 2).size() == 2);   // the cap
+  CHECK(r.junction_reads("chr1", {2000, 3001}, Strand::kPlus, 200).empty());     // another junction
+  CHECK(r.junction_reads("chrZ", {2000, 3000}, Strand::kPlus, 200).empty());     // contig absent
+}
+
 TEST_CASE("BAM reads on the other strand do not support a junction or a chain", "[bam][strand]") {
   // strand.sam: five reads spanning chr1 [1000,1100): two XS:A:- (STAR style), one ts:A:+ on a
   // forward alignment (= plus), one ts:A:+ on a reverse alignment (minimap2: = minus), one untagged.

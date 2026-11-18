@@ -69,7 +69,7 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
       if (!known) fail(name + "." + key, "is not a key PanIsoGuard reads (misspelt?)");
     }
   };
-  only_keys(&tbl, "config", {"meta", "axis_novelty_support", "axis_artifact", "axis_chain", "axis_pangenome", "confidence"});
+  only_keys(&tbl, "config", {"meta", "axis_novelty_support", "axis_artifact", "axis_chain", "axis_variant", "axis_pangenome", "confidence"});
 
   const toml::table* meta = section(&tbl, "meta", "meta");
   only_keys(meta, "meta", {"sqanti3_version_target", "ruleset_version"});
@@ -105,6 +105,10 @@ RuleEngine RuleEngine::from_toml(const std::string& path) {
   only_keys(chain, "axis_chain", {"min_full_reads", "min_fraction"});
   get_int(chain, "axis_chain", "min_full_reads", 1, 1000000, c.chain_min_full_reads);
   get_double(chain, "axis_chain", "min_fraction", 0.0, 1.0, c.chain_min_fraction);
+  const toml::table* var = section(&tbl, "axis_variant", "axis_variant");
+  only_keys(var, "axis_variant", {"phase_margin", "phase_min_reads"});
+  get_int(var, "axis_variant", "phase_margin", 1, 1000000, c.variant_phase_margin);
+  get_int(var, "axis_variant", "phase_min_reads", 1, 1000000, c.variant_phase_min_reads);
   const toml::table* pan = section(&tbl, "axis_pangenome", "axis_pangenome");
   only_keys(pan, "axis_pangenome", {"min_haplotypes"});
   get_int(pan, "axis_pangenome", "min_haplotypes", 1, 1000000, c.pangenome_min_haplotypes);
@@ -139,6 +143,8 @@ std::string RuleEngine::thresholds_summary() const {
          " max_low_mapq_frac=" + num(c.bam_max_low_mapq_frac) +
          " max_supplementary_frac=" + num(c.bam_max_supplementary_frac) +
          " max_indel_near_frac=" + num(c.bam_max_indel_near_frac) +
+         " phase_margin=" + std::to_string(c.variant_phase_margin) +
+         " phase_min_reads=" + std::to_string(c.variant_phase_min_reads) +
          " pangenome_min_haplotypes=" + std::to_string(c.pangenome_min_haplotypes);
 }
 
@@ -204,6 +210,12 @@ void trace_unused_signs(const RuleConfig& cfg, const EvidenceVector& ev, Verdict
     trace(v, "mapping axis not evaluated: fewer than " + std::to_string(cfg.bam_min_spanning) +
                  " spanning reads at every novel junction (" + std::to_string(ev.bam_n_spanning_total) + " in total)");
   }
+  if (ev.n_novel_jx_read_phase_contradicted > 0) {
+    trace(v, std::to_string(ev.n_novel_jx_read_phase_contradicted) +
+                 " novel junction(s) explained on one haplotype only, but the reads that use them carry the other "
+                 "haplotype's alleles at >= " + std::to_string(cfg.variant_phase_min_reads) +
+                 " reads and none the explaining one's -> not counted as explained");
+  }
   if (ev.variant_evaluable && ev.n_novel_jx_variant_disrupted > 0 && ev.variant_circular) {
     trace(v, std::to_string(ev.n_novel_jx_variant_disrupted) +
                  " novel junction(s) variant-disrupted on the haplotypes, but provenance is circular-risk -> sign ignored");
@@ -250,7 +262,9 @@ bool pass_through(const RuleConfig& cfg, const EvidenceVector& ev, const Signs& 
 
 // --- 1. Reference-bias rescue: the pangenome and the sample's haplotypes. True when final.
 // Rescue needs ALL of the isoform's novel junctions explained (an isoform is "reference bias"
-// only if its whole novelty is); the per-junction count is in the evidence. Both axes pass the
+// only if its whole novelty is); the per-junction count is in the evidence. A haplotype
+// explains a junction by a canonical motif the reference lacks (created) or by a deletion equal
+// to the intron (deleted: the reads lack those bases because the genome does). Both axes pass the
 // circularity firewall: provenance that is not independent of the sample's RNA holds the call
 // instead of promoting it, but only when neither axis offers an independent rescue. A rescue
 // is not blocked by a mapping sign (that blocked a correct rescue in refbias_phasing); the
@@ -259,7 +273,8 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
   const std::string mapping_note = s.mapping_sign ? ";mapping_sign" : "";
   const std::string mapping_trace = s.mapping_sign ? "; mapping sign present" : "";
   const bool all_pan = ev.n_novel_junctions > 0 && ev.n_novel_jx_pangenome == ev.n_novel_junctions;
-  const bool all_created = ev.n_novel_junctions > 0 && ev.n_novel_jx_variant_created == ev.n_novel_junctions;
+  const int n_explained = ev.n_novel_jx_variant_created + ev.n_novel_jx_variant_deleted;
+  const bool all_explained = ev.n_novel_junctions > 0 && n_explained == ev.n_novel_junctions;
   const bool pan_rescue = ev.pangenome_evaluable && ev.pangenome_rescue;
   const bool var_rescue = ev.variant_evaluable && ev.variant_rescue;
   const std::string pan_frac = std::to_string(ev.n_novel_jx_pangenome) + "/" + std::to_string(ev.n_novel_junctions);
@@ -272,23 +287,32 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
     finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "pangenome_path" + mapping_note);
     return true;
   }
-  if (ev.variant_evaluable && all_created && !ev.variant_circular && ev.haplotype_phase_unknown) {
+  if (ev.variant_evaluable && all_explained && !ev.variant_circular && ev.haplotype_phase_unknown) {
     // whether the alleles happen to be written on the same haplotype index or not, the file does
     // not say they share one: the same information gives the same call
     v.primary_mechanism = Mechanism::kVariant;
-    trace(v, "every novel junction is created on a haplotype, but the alleles behind them are unphased or in "
+    trace(v, "every novel junction is explained on a haplotype, but the alleles behind them are unphased or in "
              "different phase sets, so one common haplotype is not established -> UNRESOLVED (haplotype_phase_unknown)");
     finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "haplotype_phase_unknown");
     return true;
   }
   if (var_rescue && !ev.variant_circular) {
     v.primary_mechanism = Mechanism::kVariant;
-    trace(v, "variant creates canonical splice motif on haplotype, non-canonical on reference -> "
-             "REFERENCE_BIAS (reference bias)" + mapping_trace +
+    const int n_del = ev.n_novel_jx_variant_deleted;
+    const std::string what =
+        n_del == 0 ? "variant creates canonical splice motif on haplotype, non-canonical on reference"
+        : n_del == ev.n_novel_junctions
+            ? "a haplotype of the sample carries a deletion equal to every novel junction, so the reads lack those "
+              "bases without a splice"
+            : "every novel junction is explained on one haplotype (" + std::to_string(ev.n_novel_jx_variant_created) +
+                  " by a canonical motif the reference lacks, " + std::to_string(n_del) + " by a deletion equal to the intron)";
+    trace(v, what + " -> REFERENCE_BIAS (reference bias)" + mapping_trace +
              (ev.n_novel_jx_phase_uncertain > 0
                   ? "; " + std::to_string(ev.n_novel_jx_phase_uncertain) + " junction(s) rest on an unphased allele assigned by order"
                   : ""));
-    finish(v, ConfidenceClass::kReferenceBias, "reference_bias", "haplotype_variant" + mapping_note);
+    finish(v, ConfidenceClass::kReferenceBias, "reference_bias",
+           std::string(n_del == ev.n_novel_junctions ? "haplotype_deletion" : n_del > 0 ? "haplotype_variant;haplotype_deletion"
+                                                                                         : "haplotype_variant") + mapping_note);
     return true;
   }
   if (pan_rescue) {
@@ -302,8 +326,9 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
   if (var_rescue) {
     v.primary_mechanism = Mechanism::kVariant;
     v.circularity_flag = true;
-    trace(v, "variant creates canonical motif on haplotype but provenance is circular-risk "
-             "(RNA-derived/unknown) -> held UNRESOLVED (not promoted)");
+    trace(v, std::string(ev.n_novel_jx_variant_deleted == 0 ? "variant creates canonical motif on haplotype"
+                                                            : "the sample's haplotype explains every novel junction") +
+                 " but provenance is circular-risk (RNA-derived/unknown) -> held UNRESOLVED (not promoted)");
     finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "firewall_held");
     return true;
   }
@@ -317,9 +342,9 @@ bool reference_bias(const EvidenceVector& ev, const Signs& s, Verdict& v) {
     finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "path_inconsistent");
     return true;
   }
-  if (ev.variant_evaluable && all_created && !ev.haplotype_consistent) {
+  if (ev.variant_evaluable && all_explained && !ev.haplotype_consistent) {
     v.primary_mechanism = Mechanism::kVariant;
-    trace(v, "every novel junction is variant-created, but on different haplotypes (no haplotype "
+    trace(v, "every novel junction is explained by a haplotype, but by different ones (no haplotype "
              "carries the whole chain) -> held UNRESOLVED");
     finish(v, ConfidenceClass::kUnresolved, "unconfirmed", "haplotype_inconsistent");
     return true;
