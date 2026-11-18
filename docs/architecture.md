@@ -102,7 +102,8 @@ for/against):
 | Short-read SJ | `SjTable::find_exact` | the junction is corroborated by STAR `SJ.tab` |
 | Long-read BAM | `BamReader::features_at_junction` | read-level spanning / MAPQ / supplementary / indel features |
 | SQANTI priors | (read from the classification) | RTS_stage, all_canonical, perc_A_downstream_TTS |
-| Variant motif | `HaplotypeProvider::motifs` | a splice motif created/destroyed on a personalized haplotype |
+| Variant motif | `HaplotypeProvider::motifs` | a splice motif created or destroyed on a haplotype of the sample, or a deletion there equal to the junction |
+| Read haplotype | `BamReader::junction_reads`, `read_phase` | whether the reads that use a junction explained on some haplotypes come from those haplotypes |
 | Pangenome | `PangenomeJunctions::find_exact` | the junction is realizable on a pangenome graph path |
 
 All signals are assembled into one `EvidenceVector`
@@ -162,10 +163,11 @@ PanIsoGuard/
 |-- src/
 |   |-- cli/                         # commands: adjudicate, combine, decoys, example
 |   |-- io/                          # SQANTI/GTF/BED12/SJ/pangenome readers + result writer
-|   |-- evidence/                    # BAM and FASTA evidence (via htslib)
+|   |-- evidence/                    # BAM, FASTA and VCF evidence (via htslib)
 |   `-- core/                        # caller matching, reference catalog, rules, verdicts
 |-- tests/
 |   |-- unit/                        # Catch2 tests, module by module
+|   |-- vcf_phase_matrix.py, vcf_random_invariance.py   # property checks of the VCF haplotype route
 |   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA test files
 |-- docs/                            # architecture, algorithm, input formats, validation plan
 |-- docs/figures/                    # README figures (SVG sources + rendered PNGs)

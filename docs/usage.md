@@ -74,19 +74,24 @@ panisoguard adjudicate \
   --out-prefix     out/sample
 ```
 
-From the VCF only same-length substitutions reach the splice motifs; indels are skipped and
-counted in the provenance log. A missing allele (`.`, or a genotype shorter than the sample's
-ploidy, or a record with no `GT`) leaves that haplotype's base unknown, so the motif there is
-not evaluable rather than reference. Two variants inside one motif that place alleles by
-haplotype index (heterozygous or partly missing) are combined only when they are phased into
-one phase set. An unphased heterozygous genotype is applied by allele order, as `bcftools consensus
--H 1` and `-H 2` would, and the junction table marks it `unphased`. A rescue that needs two or
-more junctions on one haplotype requires their alleles to be phased in one phase set (`PS`);
-when they are unphased or in different sets the call is held (`haplotype_phase_unknown`), since
-the file does not say they share a haplotype. Haplotype FASTAs give the same verdicts when they
-are built from SNVs only; a consensus that also applied indels shifts every downstream coordinate
-and reads the wrong bases, and a consensus cannot carry phase sets, so with FASTAs the
-across-junction claim rests on how they were built.
+From the VCF every allele with a sequence is applied: substitutions, insertions and deletions.
+A haplotype that carries a deletion equal to the junction explains it too (its reads lack those
+bases without a splice; reason `haplotype_deletion`). What the file leaves open stays unknown,
+never reference: a missing allele (`.`, a genotype shorter than the sample's ploidy, a record
+with no `GT`), an allele index the record does not define, a REF that is not the reference, two
+records that disagree on one base, a symbolic allele without an end. Heterozygous records are
+linked only inside one phase set: where what a haplotype carries depends on how two unlinked
+records lie to each other, the motif is not known on any haplotype, and a rescue that needs two
+or more junctions on one haplotype is held (`haplotype_phase_unknown`) unless their alleles
+share a set. An unphased heterozygous genotype on its own is applied by allele order, as
+`bcftools consensus -H 1` and `-H 2` would, and the junction table marks it `unphased`. With
+`--bam`, the reads that use a junction explained on one haplotype only are assigned to a
+haplotype by the sample's other heterozygous sites; when they all come from the other
+haplotype the junction is not counted as explained (`read_phase` in the junction table).
+Haplotype FASTAs give the same verdicts for substitutions; they cannot carry insertions,
+deletions or phase sets (a consensus of another length is refused per contig), so with FASTAs
+the across-junction claim rests on how they were built. Details:
+[input formats](input_formats.md#sample-vcfbcf---haplotype-vcf-optional-repeatable).
 
 **Reference-bias check with a pangenome** (tested on HPRC v1.1 chr22): instead of the sample's
 own haplotypes, give splice junctions taken from a pangenome graph such as HPRC (extracted
@@ -148,7 +153,7 @@ one evidence axis in the verdict; see
 |------|----------|
 | `<prefix>.adjudicated.tsv`   | One row per isoform: the confidence class, the `verdict` (known / known_fragment / confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and `verdict_reason` (the one rule that decided it), the short-read support level, the main artifact cause (if any), novel-junction counts, and `genomic_compatibility` (the DNA side on its own: `haplotype` / `pangenome` / `partial` / `none` / `NA`, whatever the verdict) |
 | `<prefix>.attribution.jsonl` | One JSON record per isoform: all the evidence that was used and the `rule_trace` (the rules that decided the verdict, in order) |
-| `<prefix>.junctions.tsv`     | One row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `disrupted` / `none`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
+| `<prefix>.junctions.tsv`     | One row per junction of the adjudicated isoforms: which isoforms use it, whether it is in the reference, its short-read count, its splice motif on the reference and on each haplotype (`created` / `deleted` / `disrupted` / `none`), the haplotype of the reads that use it (`read_phase`), pangenome support and paths, and the long-read alignment fractions. A reference-bias junction inside an isoform that was not rescued (another junction unexplained) is visible here |
 | `<prefix>.provenance.log`    | how the run was done: tool and rule versions, the thresholds, which evidence was used, whether any input could make the evidence circular, and how many isoforms got each class |
 
 With `--write-kept PATH`, `adjudicate` also copies the input isoform GTF (or BED12) keeping only
@@ -175,7 +180,7 @@ with the isoform, and `verdict_reason` names the one rule that decided it.
 | `NOVEL_PROBABLE` | confirmed | Short reads confirm every novel junction but there is one artifact sign; or short reads could not be checked and either at least 2 callers found the same isoform (`caller_consensus`) or at least 3 long reads carry its whole intron chain (`chain_support`); both are methodological rather than experimental support, and an RT-switching sign does not demote them (`;rt_switch_sign`). |
 | `UNCONFIRMED` | unconfirmed | Weak evidence: only some novel junctions confirmed (`partial_support`), or none but no artifact sign (`unsupported_no_sign`). Also an ISM without whole-chain read support (`ism`, `ism_intrapriming`, `ism_rts`), and, when there are no short reads, a novel isoform whose long-read alignments at the junction look wrong (`mapping_without_short_reads`). |
 | `UNRESOLVED` | unconfirmed | Nothing to test: no short reads (`no_short_reads`), no coverage at the locus (`no_coverage`), no novel junction to check (`no_novel_junction`, NIC combinations of known junctions), or a reference-bias explanation held by the circularity firewall (`firewall_held`). SQANTI3 categories PanIsoGuard does not judge (genic, antisense, fusion, intergenic) are here with verdict `not_adjudicated`. |
-| `REFERENCE_BIAS` | reference_bias | Haplotype (`haplotype_variant`) or pangenome (`pangenome_path`) evidence supports a reference-bias explanation for every novel junction. This does not independently confirm the full isoform; a population path also does not establish the sample's genotype. |
+| `REFERENCE_BIAS` | reference_bias | Haplotype (`haplotype_variant`, `haplotype_deletion`) or pangenome (`pangenome_path`) evidence supports a reference-bias explanation for every novel junction. This does not independently confirm the full isoform; a population path also does not establish the sample's genotype. |
 | `ARTIFACT` | artifact | Probably not real: short reads were checked, none supports any novel junction, the isoform's known junctions (if it has any) do have reads, and there is an artifact sign (`unsupported_<sign>`). Never given without short reads. |
 
 The names before 0.0.6 were `HIGH_CONF_KNOWN`, `HIGH_CONF_NOVEL`, `MEDIUM_CONF_NOVEL`,

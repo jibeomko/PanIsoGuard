@@ -48,9 +48,10 @@ on two axes; the binned pair is projected to one confidence class.
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
 | mapping_or_repeat | BAM reads spanning the junction; the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The indel-near fraction is taken in excess of its background: for each spanning read, the chance of an indel inside the two windows at the read's own indel rate (1 - exp(-rate × 4 × window)), averaged (since ruleset 0.0.7; the junction table reports the raw fraction and the background). `--platform ont`, which turns the indel-near gate off, is deprecated and removed in 0.2: with the excess the gate does not fire on ONT reads by chemistry (GM12878, the chr22 ONT re-simulation), so the two presets give the same verdicts. A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
-| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on every haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
+| noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on every haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` or `--haplotype-vcf` |
 | degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` and no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70-80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11-17 %), so the sign is real, but the 20-30 % with a motif are kept | always; the motif column when supplied |
-| variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
+| variant_created | the sample's haplotypes against the reference at each novel junction: a canonical splice motif the reference lacks (a substitution, insertion or deletion at the motif), or a deletion equal to the intron | `--reference` + `--reference-haplotype` (substitutions) or `--haplotype-vcf` |
+| the haplotype of the junction reads | the reads that use a junction explained on some haplotypes only, assigned by the sample's other heterozygous sites (`read_phase` in the junction table); reads of a haplotype that does not explain it take the explanation away | `--bam` with either haplotype input |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
 
 ## Mechanism priority and its rationale
@@ -78,23 +79,31 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
      while `sample_derived`/`unknown` (the default) are held `UNRESOLVED`. Checked on
      real HPRC v1.1 chr22 graph junctions (GATE-1; see
      [benchmark/pangenome](../benchmark/pangenome)).
-   - *Variant axis* (`--reference-haplotype`): the junction is non-canonical on the
-     reference but canonical on a personalized haplotype (mechanism
-     `variant_created`). **Circularity firewall:** if the haplotype provenance is
+   - *Variant axis* (`--reference-haplotype`, `--haplotype-vcf`): a haplotype of the sample
+     explains the junction. Either the junction is non-canonical on the reference but
+     canonical on the haplotype (a substitution, or with a VCF an insertion or deletion,
+     at the motif; reason `haplotype_variant`), or the haplotype carries a deletion equal to
+     the intron, so its reads lack those bases without a splice (VCF only; reason
+     `haplotype_deletion`). Mechanism `variant_created` in both cases.
+     **Circularity firewall:** if the haplotype provenance is
      RNA-derived/unknown this is *not* independent evidence, so it is held
      `UNRESOLVED` with `circularity_flag=true` and never promoted; only
      `wgs`/`external` provenance promotes. A splice dinucleotide that contains an N, a
      junction of unknown strand, or a haplotype whose contig cannot be read is *not
      evaluable*: `created` needs one readable canonical haplotype, while `disrupted`
      and `none` are statements about every haplotype and need every haplotype readable.
-     With `--haplotype-vcf` a missing allele leaves the base unknown (not evaluable, never
-     reference), two heterozygous variants inside one motif are combined only when they are
-     phased into one phase set (`PS`; otherwise the motif is not evaluable on any haplotype,
-     `unlinked` in the junction table), and a rescue of two or more created junctions that
-     rest on heterozygous alleles needs those alleles in one phase set; unphased alleles or
-     different sets do not establish a common haplotype, so the call is held
-     (`haplotype_phase_unknown`). In every case the call is the same whichever haplotype
-     index the alleles are written on.
+     With `--haplotype-vcf` whatever the file leaves open is unknown (not evaluable, never
+     reference): a missing or undefined allele, a REF that is not the reference, two records
+     that disagree on one base, an allele without a sequence. Heterozygous records are linked
+     only inside one phase set (`PS`): when what a haplotype carries at a junction depends
+     on how two unlinked groups of records lie to each other, the motif is not evaluable on
+     any haplotype (`unlinked` in the junction table), and a rescue of two or more
+     explained junctions that rest on heterozygous alleles needs those alleles in one phase
+     set; unphased alleles or different sets do not establish a common haplotype, so the
+     call is held (`haplotype_phase_unknown`). In every case the call is the same whichever
+     haplotype index the alleles are written on and however an indel is placed in a repeat
+     ([input formats](input_formats.md#sample-vcfbcf---haplotype-vcf-optional-repeatable);
+     CTest `integration_vcf_random_invariance`).
 
    Independent evidence on either axis promotes. A circular-risk rescue holds the call only
    when neither axis offers an independent one (so an unknown-provenance pangenome file
@@ -104,7 +113,7 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    haplotype or one graph path**: a transcript is one molecule from one allele, so
    junction 1 fixed on haplotype A plus junction 2 fixed on haplotype B explains
    nothing. The adjudicator intersects the per-junction haplotype sets
-   (`evidence.haplotype_consistent`); when every junction is created but the
+   (`evidence.haplotype_consistent`); when every junction is explained but the
    intersection is empty the call is held `UNRESOLVED` with reason
    `haplotype_inconsistent`. The pangenome file may list the path ids per junction
    (optional 6th column); the rows that list them must share one path
@@ -115,12 +124,18 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
    every supporting junction listed its ids, so "consistent" can be told from "all on one
    path". The
    per-junction count is in `evidence.n_novel_jx_variant_created` /
-   `n_novel_jx_pangenome`. A rescue is not blocked by a BAM mapping sign (that blocked
+   `n_novel_jx_variant_deleted` / `n_novel_jx_pangenome`. A rescue is not blocked by a BAM mapping sign (that blocked
    a correct rescue in [benchmark/refbias_phasing](../benchmark/refbias_phasing)), but
    the sign is appended to the reason (`haplotype_variant;mapping_sign`) so the call
-   can be reviewed. The rescue is allele-agnostic: canonical on *either* haplotype
-   suffices, and the reads may come from the other one (about 1 in 10 rescued
-   junctions in HG03516; see [benchmark/refbias_3way](../benchmark/refbias_3way)).
+   can be reviewed. Without `--bam` the rescue is allele-agnostic: a haplotype that explains
+   the junction suffices, and the reads may come from the other one. With `--bam` the reads
+   that use a junction explained on some haplotypes only are assigned to a haplotype by the
+   sample's other heterozygous sites; when at least `phase_min_reads` (3) are assigned and
+   none of them to a haplotype that explains the junction, it is not counted as explained
+   (`evidence.n_novel_jx_read_phase_contradicted`, `read_phase` in the junction table), and
+   the isoform goes on to the grid below
+   ([benchmark/refbias_phasing](../benchmark/refbias_phasing),
+   [benchmark/refbias_3way](../benchmark/refbias_3way)).
 2. Otherwise project (Axis A × Axis B):
    - `SUPPORTED`, mechanism `none`: `NOVEL_CONFIRMED`
    - `SUPPORTED`, a mechanism: `NOVEL_PROBABLE`
@@ -185,6 +200,12 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        recombines each gene's annotated transcripts at a shared intron into
        novel-in-catalog chains and reports the fraction that ≥ `chain_min_full_reads` reads
        carry end to end (an upper bound; some decoys are real, unannotated isoforms).
+       `evidence.chain_n_spanning_reads` is the depth the chain is seen at (reads at its
+       first donor that reach past its last intron). `[axis_chain] min_fraction` can ask
+       that the whole-chain reads be a share of them; it is 0 by default, because
+       amplicon-validated chains go down to 0.2 % of the spanning reads while unvalidated
+       ones that reach three reads sit higher
+       ([benchmark/chain_support](../benchmark/chain_support), "Depth").
 - Pass-through: `full-splice_match` is `KNOWN`; `incomplete-splice_match` is
   `KNOWN_FRAGMENT` (verdict `known_fragment`, reason `ism_chain_support`) when
   ≥ `chain_min_full_reads` long reads carry its whole intron chain and the 3' end shows
@@ -212,7 +233,8 @@ one rule that decided it:
 
 `verdict_reason` codes: `full_splice_match`, `ism`, `ism_intrapriming`, `ism_rts`,
 `ism_chain_support[;rts_sign]`,
-`category_<category>`, `pangenome_path`, `haplotype_variant` (either `;mapping_sign`),
+`category_<category>`, `pangenome_path`, `haplotype_variant`, `haplotype_deletion`,
+`haplotype_variant;haplotype_deletion` (each also with `;mapping_sign`), `haplotype_phase_unknown`,
 `firewall_held`, `haplotype_inconsistent`, `path_inconsistent`, `all_junctions_supported`
 (a `noncanonical` reason carries `;haplotype_disrupted` when the sign came from the
 haplotypes rather than SQANTI3),

@@ -80,8 +80,11 @@ reaches `chain_min_full_reads` on its own, and the JSONL records the count per l
 A `faidx`-indexed personalized genome FASTA (e.g. from `bcftools consensus` on a
 sample VCF) plus `--reference` (the unmodified genome). The variant axis compares
 the splice motif at each novel junction between the reference and the haplotype(s).
-**Caveat:** coordinates must align between reference and haplotype: fine for SNVs;
-indels shift downstream coordinates (a documented limitation). A splice dinucleotide that
+A haplotype FASTA is read at the reference's coordinates, so it can carry substitutions
+only: build it from SNVs. A contig whose length differs from the reference's is not read
+(that haplotype is not evaluable there; a warning names the file and the contig, and the
+provenance log counts them in `reference_haplotype_contig_length_mismatches`); give
+insertions and deletions with `--haplotype-vcf`. A splice dinucleotide that
 contains an N, a junction of unknown strand, or a haplotype whose contig is missing from
 the FASTA is not evaluable at that junction: `created` needs one readable canonical
 haplotype, `disrupted` needs every haplotype readable. Set
@@ -93,35 +96,91 @@ rescue) vs `{rna_derived|unknown}` (held under the circularity firewall).
 An indexed VCF (`bgzip` + `tabix`) or BCF (`bcftools index`) with a genotype column, plus
 `--reference`. The alleles of the sample's genotype are the haplotypes: the first allele
 builds haplotype 1 and the second haplotype 2, as `bcftools consensus -H 1` and `-H 2` do, so
-a run from the VCF gives the verdicts of a run from those FASTAs. Several files add their
-haplotypes in order (two haploid assembly-derived VCFs give two haplotypes). With more than
-one sample in the file, name one with `--vcf-sample`. Only same-length substitutions (SNVs,
-MNPs) are applied at the splice dinucleotides; indels and symbolic alleles are skipped and
-counted (`haplotype_vcf_non_snv_skipped_at_motifs` in the provenance log). A missing allele
-(`.`) or a genotype with fewer alleles than the sample's ploidy leaves the motif base unknown
-(N) on that haplotype, so the motif is not evaluable there, never reference
-(`haplotype_vcf_missing_alleles_at_motifs`). The ploidy is the largest genotype in the file,
-read once when the file is opened. An unphased heterozygous genotype is applied by allele
-order and counted (`haplotype_vcf_unphased_het_applied_at_motifs`); the junction table's
-`variant_phase` column says `phased` (phased or homozygous), `unphased`, or `NA`. One created
-junction is rescued whichever haplotype carries the allele. Two records inside one motif (a
-donor and an acceptor variant, or two bases of one dinucleotide) that place alleles by
-haplotype index, heterozygous ones and partly missing ones such as `1|.` or `0|.`, are combined
-only when they are phased into one phase set (FORMAT `PS`; phased genotypes without `PS` form
-one default set; a `/` before a missing allele is unphased); otherwise no haplotype's motif at
-that junction is known and the junction table says `unlinked`. A homozygous record places the
-same base on every haplotype and needs no linkage. A site written twice with the same alleles
-and another genotype contradicts itself: its bases are unknown on every haplotype
-(`haplotype_vcf_conflicting_records_at_motifs` in the provenance log); an identical repeat is
-one record. A base once unknown stays unknown: a later record at that base, whatever its
-genotype or allele, does not restore it. Two or more created junctions that rest on heterozygous alleles are
+for a file of substitutions a run from the VCF gives the verdicts of a run from those FASTAs.
+Several files add their haplotypes in order (two haploid assembly-derived VCFs give two
+haplotypes). With more than one sample in the file, name one with `--vcf-sample`. The ploidy
+is the largest genotype in the file, read once when the file is opened. A contig missing from
+the VCF header is not evaluable; a contig present without records is reference.
+`--haplotype-vcf` and `--reference-haplotype` are not combined in one run.
+
+**What is applied.** Every allele that has a sequence: substitutions (SNVs, MNPs), insertions,
+deletions and other replacements. An insertion or deletion is moved towards the intron as far
+as the reference sequence allows, so the exon is read as the reference has it wherever that is
+possible, and a haplotype's motif is the two bases next to the last exonic base on each side.
+
+- An insertion or deletion inside or next to the motif changes it as a substitution does
+  (`haplotype_vcf_indels_applied_at_motifs` in the provenance log).
+- An insertion that ends up exactly between the exon and the intron can be intronic (the
+  junction reads do not carry it) or part of the exon (they do); the file cannot tell. With
+  `--bam` the junction reads decide: with at least `min_spanning` of them, an insertion of that
+  length within 3 bp plus its length on the exon side in at most 20 % of the reads makes it
+  intronic, in at least 80 % exonic. Between the two, and without `--bam`, that haplotype's
+  motif is not evaluable.
+- A deletion equal to the intron (wherever the reference lets the same deletion be written)
+  means the haplotype lacks those bases: its reads align with a gap there without a splice.
+  The junction table says `deleted` and gives the haplotype's motif as `DEL`; the junction
+  counts as explained, as a created motif does, and the verdict reason is `haplotype_deletion`
+  (`haplotype_vcf_deletions_equal_to_junctions`).
+- A symbolic `<DEL>` with `END` or `SVLEN` is a deletion. An allele without a sequence
+  (another symbolic allele, a breakend, a `<DEL>` without an end, a `*` whose deletion the
+  file does not carry) leaves its bases unknown and is counted
+  (`haplotype_vcf_unapplied_alleles_at_motifs`); a `*` inside a deletion or replacement on the
+  same haplotype is that deletion.
+
+**What stays unknown.** An unknown base reads N: the motif is not evaluable on that haplotype,
+never reference, and a base once unknown is not restored by another record.
+
+- A missing allele (`.`), a genotype with fewer alleles than the sample's ploidy, an allele
+  index the record does not define, or a record without `GT`: the record's REF span is unknown
+  on the haplotypes concerned (`haplotype_vcf_missing_alleles_at_motifs`).
+- A REF that is not the reference sequence: the record describes another genome, and its span
+  is unknown on every haplotype (`haplotype_vcf_ref_mismatches_at_motifs`).
+- Two records that give one haplotype different content at one base. An allele states the
+  sequence over its whole REF span, so the unchanged bases of an MNP count; the spans of both
+  records are unknown, in whichever order the rows come. Two substitutions that agree are one
+  statement. A site written twice with the same alleles and another genotype is unknown on
+  every haplotype; an identical repeat is one record
+  (`haplotype_vcf_conflicting_records_at_motifs`).
+
+**Phase.** An unphased heterozygous genotype is applied by allele order and counted
+(`haplotype_vcf_unphased_het_applied_at_motifs`); its allele order is not part of what it
+states (`0/1` and `1/0` are the same record). The junction table's `variant_phase` column says
+`phased` (phased or homozygous), `unphased`, `unlinked` or `NA`. One explained junction is
+rescued whichever haplotype carries the allele. The file links heterozygous records, and partly
+missing ones such as `1|.`, only inside one phase set (FORMAT `PS`; phased genotypes without
+`PS` form one default set; an unphased record is a group of its own; a `/` before a missing
+allele is unphased). At each junction every placement of the groups found within 64 bp of
+either boundary is tried (up to six groups; more are not tried and the junction is
+`unlinked`). A group matters when turning it over changes what a haplotype carries under some
+placement of the others. With two or more groups that matter, the per-haplotype bases would be
+a composition by allele order, so no haplotype's motif at that junction is known (`unlinked`).
+A heterozygous record that changes nothing under any placement does not count, and a homozygous
+record needs no linkage. Two or more explained junctions that rest on heterozygous alleles are
 rescued only when those alleles share one phase set: unphased alleles, or alleles in different
 sets, do not establish a common haplotype and the isoform is held with reason
-`haplotype_phase_unknown` (`haplotype_phase_unknown` in the JSONL). In both cases the call is
-the same whichever haplotype index the alleles are written on. A record without a `GT` field
-leaves its bases unknown on every haplotype. A contig missing from the VCF header is
-not evaluable; a contig present without records is reference. `--haplotype-vcf` and
-`--reference-haplotype` are not combined in one run.
+`haplotype_phase_unknown`. In every case the call is the same whichever haplotype index the
+alleles are written on, and however an insertion or deletion is placed inside a repeat.
+
+## Junction reads and the haplotype (`--bam` with either haplotype input)
+
+A junction that only some of the sample's haplotypes explain is used by reads of those
+haplotypes. For such a junction the primary alignments that splice exactly there (the first
+200) are compared with the sample's other heterozygous single-base sites they cover: sites of
+the same phase set for a VCF, positions where the haplotype FASTAs differ otherwise. A read is
+assigned to the haplotypes it agrees with at `phase_margin` (2) more sites than with the
+others, so one sequencing error cannot place it. The junction table reports `read_phase` with
+the two counts (`read_phase_n_motif`, `read_phase_n_other`):
+
+| `read_phase` | meaning |
+|---|---|
+| `consistent` | at least `phase_min_reads` (3) reads assigned, all to a haplotype that explains the junction |
+| `contradicted` | at least `phase_min_reads` assigned, none to a haplotype that explains it: the junction is not counted as explained |
+| `mixed` | reads of both kinds |
+| `uninformative` | fewer than `phase_min_reads` assigned (no heterozygous site covered, or too few reads) |
+| `NA` | every haplotype explains the junction or none does, a haplotype is unknown, or no `--bam` |
+
+Only `contradicted` changes a verdict: the isoform then goes through the normal rules, and its
+rule trace says so. Both thresholds are in `[axis_variant]` of the rules TOML.
 
 ## Pangenome graph junctions (`--pangenome-junctions`, optional)
 
@@ -164,7 +223,8 @@ junctions ([benchmark/pangenome](../benchmark/pangenome), CTest `integration_pan
 a missing key keeps the default. A key that is present must have the right type and a value
 in its range, a section must be a table, and a key PanIsoGuard does not read (a misspelling)
 is an error, or the run stops with the key name and the range: integer counts (`sj_min_uniq_reads`,
-`consensus_min_callers`, `min_spanning`, `min_full_reads`, `min_haplotypes`) are 1 or more;
+`consensus_min_callers`, `min_spanning`, `min_full_reads`, `min_haplotypes`, `phase_margin`,
+`phase_min_reads`) are 1 or more; `min_fraction` is 0-1;
 `min_mapq` is 0-255; `junction_window_bp` is 0-10000; `max_perc_A_downstream_TTS` is 0-100;
 the three mapping fraction gates are 0-2, where a value above 1 can never fire and so
 switches that gate off.
