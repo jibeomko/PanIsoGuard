@@ -213,8 +213,15 @@ if(PANISOGUARD_BUILD_TESTS)
       add_test(NAME integration_vcf_phase_matrix
         COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tests/vcf_phase_matrix.py" "$<TARGET_FILE:panisoguard>"
                 --bgzip "${PANISOGUARD_BGZIP}" --tabix "${PANISOGUARD_TABIX}" --work "${CMAKE_BINARY_DIR}/phase_matrix")
+      # Random VCFs (substitutions, indels, symbolic alleles, every way of writing a genotype) on a
+      # locus of one or two junctions: the call must not depend on how the same haplotypes are
+      # written, the motifs must equal those read off the haplotype sequences, and REFERENCE_BIAS
+      # must be given only when every reading of the file has a haplotype that explains the junctions.
+      add_test(NAME integration_vcf_random_invariance
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tests/vcf_random_invariance.py" "$<TARGET_FILE:panisoguard>"
+                --bgzip "${PANISOGUARD_BGZIP}" --tabix "${PANISOGUARD_TABIX}" --work "${CMAKE_BINARY_DIR}/random_invariance" --n 400)
     else()
-      message(STATUS "PanIsoGuard: bgzip/tabix not found; integration_vcf_phase_matrix not added")
+      message(STATUS "PanIsoGuard: bgzip/tabix not found; the VCF phase-matrix and random-invariance tests are not added")
     endif()
     add_test(NAME integration_decoys
       COMMAND bash -c "mkdir -p '${CMAKE_BINARY_DIR}/decoys' && '$<TARGET_FILE:panisoguard>' decoys --ref-gtf '${CMAKE_SOURCE_DIR}/tests/data/tiny/decoys.gtf' --bam '${CMAKE_SOURCE_DIR}/tests/data/tiny/mini.bam' --out '${CMAKE_BINARY_DIR}/decoys/toy' >/dev/null 2>&1 && test \"$(wc -l < '${CMAKE_BINARY_DIR}/decoys/toy.decoys.tsv')\" -ge 2 && '${Python3_EXECUTABLE}' -c \"import json,sys; d=json.load(open('${CMAKE_BINARY_DIR}/decoys/toy.decoys.json')); sys.exit(0 if d['decoys']['n'] >= 1 and d['parents']['n'] == 2 else 1)\"")
