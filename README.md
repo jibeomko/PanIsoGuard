@@ -102,7 +102,7 @@ conda-forge and bioconda, whatever your own conda settings are. The program is n
 `build/panisoguard`, and it runs without activating the environment. To call it as just
 `panisoguard`, as in [Usage](#usage), run `export PATH="$PWD/build:$PATH"`.
 
-**No conda? Use Docker.** Bioconda publishes a ready-made image on BioContainers, `docker pull quay.io/biocontainers/panisoguard:0.0.7--h8471819_0` (tags on [quay.io](https://quay.io/repository/biocontainers/panisoguard?tab=tags)); or build one yourself (from the same `PanIsoGuard` folder):
+**No conda? Use Docker.** Bioconda publishes a ready-made image on BioContainers, `docker pull quay.io/biocontainers/panisoguard:0.1.0--h8471819_0` (tags on [quay.io](https://quay.io/repository/biocontainers/panisoguard?tab=tags)); or build one yourself (from the same `PanIsoGuard` folder):
 
 ```bash
 docker build -t panisoguard .
