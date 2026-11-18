@@ -205,7 +205,7 @@ one rule that decided it:
 | `known` | KNOWN | matches a known transcript |
 | `known_fragment` | KNOWN_FRAGMENT | a truncated known transcript whose whole intron chain the long reads carry (since ruleset 0.0.5); a known structure, not a novel isoform |
 | `confirmed` | NOVEL_CONFIRMED, NOVEL_PROBABLE | keep (PROBABLE via `caller_consensus` or `chain_support` is methodological, not experimental, support) |
-| `reference_bias` | REFERENCE_BIAS | the junction is real; it looked novel or non-canonical because of the reference |
+| `reference_bias` | REFERENCE_BIAS | genomic evidence supports a reference-bias explanation; this does not independently confirm the full isoform or establish the sample's genotype from a population path |
 | `unconfirmed` | UNCONFIRMED, UNRESOLVED | review |
 | `artifact` | ARTIFACT | discard |
 | `not_adjudicated` | UNRESOLVED | a SQANTI3 category PanIsoGuard does not judge |

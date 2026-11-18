@@ -143,3 +143,36 @@ inputs -> [readers] -> SqantiTable + {id -> IntronChain} + Catalog + (SjTable/BA
   data is held `UNRESOLVED`, not promoted (variant and pangenome axes both gated).
 - htslib-only: the sole non-vendored dependency; toml++ and Catch2 are vendored
   single-header components.
+
+## Repository layout
+
+```text
+PanIsoGuard/
+|-- README.md                       # overview, quick start, usage
+|-- CMakeLists.txt                  # C++17/CMake build, install target, test wiring
+|-- cmake/FindHTSlib.cmake          # finds htslib for source and conda builds
+|-- config/rules.default.toml        # default thresholds and rule switches
+|-- include/panisoguard/             # C++ headers, one interface per module
+|   |-- types.hpp                    # Junction, IntronChain, Transcript, Evidence primitives
+|   |-- adjudicator.hpp              # per-isoform evidence collection and decision API
+|   |-- rules.hpp, verdict.hpp       # rule configuration, classes, mechanisms, rule traces
+|   |-- consensus.hpp, fingerprint.hpp
+|   |-- gtf.hpp, bed12.hpp, sqanti.hpp, sj_tab.hpp, pangenome.hpp
+|   `-- bam_features.hpp, variant_motif.hpp, result_writer.hpp
+|-- src/
+|   |-- cli/                         # commands: adjudicate, combine, decoys, example
+|   |-- io/                          # SQANTI/GTF/BED12/SJ/pangenome readers + result writer
+|   |-- evidence/                    # BAM and FASTA evidence (via htslib)
+|   `-- core/                        # caller matching, reference catalog, rules, verdicts
+|-- tests/
+|   |-- unit/                        # Catch2 tests, module by module
+|   `-- data/tiny/                   # minimal BAM/GTF/BED/SQANTI/SJ/FASTA test files
+|-- docs/                            # architecture, algorithm, input formats, validation plan
+|-- docs/figures/                    # README figures (SVG sources + rendered PNGs)
+|-- benchmark/                       # benchmarks on simulated and real data, with results
+|-- examples/                        # tiny, multi_caller (with expected outputs), worked_locus
+|-- recipes/bioconda/                # Bioconda meta.yaml and build.sh
+|-- thirdparty/                      # bundled header-only libraries and their licenses
+|-- LICENSE
+`-- THIRDPARTY.txt
+```
