@@ -19,20 +19,20 @@ against 84 % on PacBio. The filters are judged on that set, as in the PacBio pro
 
 ## Results (0.1.0 binary, ruleset 0.0.7)
 
-| short reads | method | TP | FP | precision | recall | AUPRC | coverage | selective risk | ΔAUPRC 95 % CI |
+| short reads | method | TP | FP | precision | recall | AUPRC | coverage | selective risk | AUPRC difference, 95 % CI |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---|
 | none | SQANTI3 rules filter | 286 | 1,275 | 0.183 | 0.894 | 0.172 | 1.000 | 0.313 | |
 | none | SQANTI3 ML filter | 108 | 478 | 0.184 | 0.338 | 0.136 | 1.000 | 0.165 | |
-| none | PanIsoGuard | 0 | 0 | n/a | 0.000 | 0.066 | 0.000 | n/a | vs rules [−0.120, −0.092] |
+| none | PanIsoGuard | 0 | 0 | n/a | 0.000 | 0.066 | 0.000 | n/a | vs rules [-0.120, -0.092] |
 | none | PanIsoGuard + BAM | 222 | 70 | 0.760 | 0.694 | 0.549 | 0.070 | 0.240 | vs rules [+0.325, +0.430] |
 | none | PanIsoGuard + BAM, `--platform ont` | 222 | 70 | 0.760 | 0.694 | 0.549 | 0.070 | 0.240 | vs rules [+0.325, +0.430] |
 | 1 M pairs | SQANTI3 rules filter | 288 | 1,275 | 0.184 | 0.900 | 0.173 | 1.000 | 0.313 | |
 | 1 M pairs | SQANTI3 rules + min_cov ≥ 3 | 269 | 98 | 0.733 | 0.841 | 0.628 | 1.000 | 0.036 | |
 | 1 M pairs | SQANTI3 ML filter | 127 | 69 | 0.648 | 0.397 | 0.541 | 1.000 | 0.063 | |
 | 1 M pairs | every junction ≥ 3 short reads | 299 | 114 | 0.724 | 0.934 | 0.681 | 1.000 | 0.032 | |
-| 1 M pairs | PanIsoGuard | 178 | 24 | 0.881 | 0.556 | 0.538 | 0.166 | 0.037 | vs the one-line rule [−0.205, −0.080] |
-| 1 M pairs | PanIsoGuard + BAM | 234 | 33 | 0.876 | 0.731 | 0.673 | 0.187 | 0.047 | vs the one-line rule [−0.069, +0.053] |
-| 1 M pairs | PanIsoGuard + BAM, `--platform ont` | 234 | 33 | 0.876 | 0.731 | 0.673 | 0.187 | 0.047 | vs the one-line rule [−0.069, +0.053] |
+| 1 M pairs | PanIsoGuard | 178 | 24 | 0.881 | 0.556 | 0.538 | 0.166 | 0.037 | vs the one-line rule [-0.205, -0.080] |
+| 1 M pairs | PanIsoGuard + BAM | 234 | 33 | 0.876 | 0.731 | 0.673 | 0.187 | 0.047 | vs the one-line rule [-0.069, +0.053] |
+| 1 M pairs | PanIsoGuard + BAM, `--platform ont` | 234 | 33 | 0.876 | 0.731 | 0.673 | 0.187 | 0.047 | vs the one-line rule [-0.069, +0.053] |
 
 Metrics as in [sqanti3_filter_h2h](../sqanti3_filter_h2h): positives are `NOVEL_CONFIRMED` /
 `NOVEL_PROBABLE` (PanIsoGuard) or `Isoform` (SQANTI3 filters); coverage is the share of isoforms given a

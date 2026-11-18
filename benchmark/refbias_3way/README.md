@@ -23,7 +23,7 @@ full personalized-genome re-analysis of the same reads retains or discards. It a
 
 Expected shape of the result: the rescue should recover most of the **splice-dinucleotide
 SNV** class (that is what it models) and none of the rest. Arm B1 below isolates the first;
-the difference B2 − B1 measures the second. A sensitivity well below 100 % against the full
+the difference B2 - B1 measures the second. A sensitivity well below 100 % against the full
 personalized pipeline is the expected, reportable scope of the method, not a failure.
 
 ## Arms
@@ -53,7 +53,7 @@ The unit is a junction (intron, GRCh38 coordinates, strand) used by at least one
 caller-reported novel model (NIC/NNC) in arm A: `J_A` (98,672 for HG03516). Isoform-level
 counts (what a user keeps after the SQANTI3 filter in each arm) are reported alongside.
 
-For each `j ∈ J_A`, arm A gives its status on GRCh38 (`known`, `novel-canonical`,
+For each `j` in `J_A`, arm A gives its status on GRCh38 (`known`, `novel-canonical`,
 `novel-noncanonical`) and the filter outcome of the models that use it.
 
 For arm B (B1 and B2), the label comes from the reads, not from coordinate liftover
@@ -73,7 +73,7 @@ one class, and the junction takes the majority class:
 | `no-reads` | No read spans the junction exactly in arm A (model coordinate displaced from the reads) |
 | `unassessable` | read unaligned, or region not lifted |
 
-Reference-bias truth: `T = same-canonical (non-canonical on GRCh38) ∪ shifted-known ∪
+Reference-bias truth: `T = same-canonical (non-canonical on GRCh38) + shifted-known +
 unspliced`, restricted to `j` that arm A calls novel; `T_core` leaves `unspliced` out (see
 Results for why). `T_B1` (SNV only) and `T_B2` (full).
 
@@ -86,7 +86,7 @@ empty: the firewall check.
 
 ## Metrics
 
-- sensitivity `|R ∩ T| / |T|` and precision `|R ∩ T| / |R|`, against `T_B1` and `T_B2`;
+- sensitivity `|R and T| / |T|` and precision `|R and T| / |R|`, against `T_B1` and `T_B2`;
   bootstrap CIs over junctions.
 - `T_B2 \ R` by mechanism: dinucleotide SNV missed (implementation), SNV outside the
   dinucleotide, indel at the site, SV / assembly-specific exon, alignment shift. This is the
@@ -168,14 +168,14 @@ it. HG02717 shows the same (271 on B2, 21 on B1).
 | | HG03516 B1 | HG03516 B2 | HG02717 B1 | HG02717 B2 |
 |---|---:|---:|---:|---:|
 | `R_rule` (junctions meeting the rescue criterion) | 35 | 35 | 42 | 42 |
-| `R_rule ∩ T` | 31 | 31 | 37 | 38 |
+| `R_rule and T` | 31 | 31 | 37 | 38 |
 | rule precision | 0.886 | 0.886 | 0.881 | 0.905 |
 | rule sensitivity, SNV class | 31 / 32 = 0.969 | 31 / 35 = 0.886 | 37 / 39 = 0.949 | 38 / 43 = 0.884 |
 | rule sensitivity, `T_core` | 0.795 | 0.660 | 0.740 | 0.717 |
 | `R` (junctions in `REFERENCE_BIAS` isoforms) | 13 (18 isoforms) | 13 | 22 (28 isoforms) | 22 |
-| `R ∩ T` | 12 | 12 | 21 | 19 |
-| verdict precision (95 % CI) | 0.923 (0.77–1.00) | 0.923 | 0.955 (0.86–1.00) | 0.864 (0.73–1.00) |
-| verdict sensitivity, SNV class (95 % CI) | 0.375 (0.22–0.56) | 0.343 (0.20–0.51) | 0.538 (0.38–0.69) | 0.442 (0.30–0.58) |
+| `R and T` | 12 | 12 | 21 | 19 |
+| verdict precision (95 % CI) | 0.923 (0.77-1.00) | 0.923 | 0.955 (0.86-1.00) | 0.864 (0.73-1.00) |
+| verdict sensitivity, SNV class (95 % CI) | 0.375 (0.22-0.56) | 0.343 (0.20-0.51) | 0.538 (0.38-0.69) | 0.442 (0.30-0.58) |
 
 The motif criterion itself finds 31 of 32 (HG03516) and 37 of 39 (HG02717) SNV-class
 junctions on B1. The `R_rule` junctions outside `T` (4 and 5) are `same-noncanonical` in the
@@ -188,10 +188,10 @@ The drop from `R_rule` to `R` (35 to 13 and 42 to 22) is not the criterion. Of t
 junctions in `T_B1` without a rescue verdict (20 and 18): 15 and 10 sit in isoforms with
 another novel junction the haplotypes do not explain (the verdict needs all of them), 4 and
 6 are in isoforms outside NIC/NNC (not adjudicated), 1 and 2 are criterion misses. B2 adds
-3 criterion misses in each individual, the non-SNV variants. `R ∖ T` is one junction in
-HG03516 (chr6:136,665,560–136,668,208) and one locus in HG02717 (three junctions sharing the
+3 criterion misses in each individual, the non-SNV variants. `R minus T` is one junction in
+HG03516 (chr6:136,665,560-136,668,208) and one locus in HG02717 (three junctions sharing the
 acceptor chr6:130,022,220), all `same-noncanonical` in the person: candidate false rescues,
-1 of 13 and 1–3 of 22.
+1 of 13 and 1-3 of 22.
 
 ### Isoform level, firewall, and what the rescue changes for a user
 
@@ -233,9 +233,9 @@ with `circularity_flag`.
 | C | `adjudicate` × 3 provenance runs, genome-wide with `--bam` | 10.3 min | 0.9 GB | 17.3 min | 0.9 GB |
 
 HG03516's B1 and B2 ran partly concurrently, so its walls are upper bounds; HG02717 ran
-sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7–12 h and
-38–78 GB on top of arm A; the post-hoc rescue costs 3–6 minutes per run (the three provenance
-runs above; 1.8–1.9 min each before the 0.0.7 whole-chain read pass) and under 1 GB, and recovers
+sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7-12 h and
+38-78 GB on top of arm A; the post-hoc rescue costs 3-6 minutes per run (the three provenance
+runs above; 1.8-1.9 min each before the 0.0.7 whole-chain read pass) and under 1 GB, and recovers
 31 of 32 and 37 of 39 SNV-class junctions at the rule level (12 of 32 and 21 of 39 as
 isoform verdicts, because of the all-junctions rule).
 

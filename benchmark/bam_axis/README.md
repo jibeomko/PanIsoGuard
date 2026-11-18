@@ -34,10 +34,10 @@ Adjudicating the chr22 SQANTI-SIM FLAIR output with `--bam` and stratifying
 Genuine junctions top out at 0.191; a false junction with ≥ 3 spanning reads has an
 indel next to it on every read 12 % of the time. (Before 0.0.6 the fraction was taken over
 every junction with ≥ 1 read, which gave a false mean of 0.350 and 33 % above 0.5: most of
-that came from 1–2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
+that came from 1-2-read junctions, where one indel is a fraction of 1.0. The 0.0.6 gate
 `min_spanning = 3` leaves those out.)
 
-Soft-clip was ≈0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020): it
+Soft-clip was about 0 on this clean PBSIM3 HiFi data (genuine max 0.042, false max 0.020): it
 did not discriminate here. It was wired into the same mapping mechanism but switched off
 by default (its gate could never fire), for two reasons: it had no demonstrated yield on
 this set, and, unlike `indel_near`, which is junction-proximal (`junction_window_bp`), it
@@ -70,7 +70,7 @@ gate above 1.0 (OFF, never fires):
 | genuine isoforms lost from confident-novel | n/a | 0 |
 
 False-novel transitions from off to on: 9 `UNCONFIRMED` to `ARTIFACT`. Zero genuine
-isoforms changed class. (0.0.4–0.0.5: 41 / 124 caught and 24 relabelled, before the ≥ 3-read
+isoforms changed class. (0.0.4-0.0.5: 41 / 124 caught and 24 relabelled, before the ≥ 3-read
 gate.)
 
 > Superseded table. Before 0.0.4 this table read specificity 0.946 to 0.966: the gain

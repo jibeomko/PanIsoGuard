@@ -26,7 +26,7 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
 - What the evidence covers. The simulation produces no RT switching, so its 87 / 0 says only
   that the flag lands on genuine isoforms (it is computed from the reference sequence around
   the junction, so in a simulation every flag is a false sign). LRGASP adds the one real-data
-  measurement: `RTS_stage` is TRUE on 12–18 % of the experimentally validated isoforms IsoQuant
+  measurement: `RTS_stage` is TRUE on 12-18 % of the experimentally validated isoforms IsoQuant
   called, and the four validated novel isoforms that carry it (MTHFS, CENPK, USF1, RND2) are the
   ones the policy keeps (SQANTI3's own default rules filter discards them: 2 / 17 PacBio and
   4 / 16 ONT validated novel isoforms, [../lrgasp_wtc11](../lrgasp_wtc11)), and all four are
@@ -36,8 +36,8 @@ SQANTI-SIM, 222 / 52 on LRGASP PacBio / ONT, 311 / 171 on the two Kinnex samples
 - The artifact side is still unmeasured. [../lrgasp_wtc11](../lrgasp_wtc11)
   (`cross_library.py`) counts each lifted PacBio isoform's reads in the ONT library of the same
   cells and the reverse. PacBio lifts carrying the sign reproduce in ONT at about half the rate
-  of the unflagged lifts in every bin of PacBio depth (own count 3–5: 4.5 % vs 12.6 %; 6–10:
-  7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs 40.1 %; > 50: 40.7 % vs 51.1 %),
+  of the unflagged lifts in every bin of PacBio depth (own count 3-5: 4.5 % vs 12.6 %; 6-10:
+  7.9 % vs 20.1 %; 11-20: 15.1 % vs 26.7 %; 21-50: 26.6 % vs 40.1 %; > 50: 40.7 % vs 51.1 %),
   which at first looks like half of them being library-specific artifacts. The control says
   otherwise: the annotated transcripts carrying the flag show the same deficit (FSM 6 / 11 /
   21 / 29 / 55 % flagged vs 18 / 29 / 39 / 50 / 72 % unflagged). The flag marks a

@@ -79,10 +79,10 @@ test of whether the axis is usable on ONT at all. On the 285 real novel chains
 | ± 5 bp | 281 | 175 |
 | ± 10 bp | 282 | 188 |
 
-Among reads that match a chain within 10 bp, 94.5 % of the splice sites are exact; 1–2 bp
-offsets are rare (0.1 %), the rest sit at 3–7 bp. These are caller chains built
+Among reads that match a chain within 10 bp, 94.5 % of the splice sites are exact; 1-2 bp
+offsets are rare (0.1 %), the rest sit at 3-7 bp. These are caller chains built
 from the same splice-aware alignment (`minimap2 -ax splice -uf`), so the aligner has already
-placed the sites consistently; a tolerance of ± 1–2 bp would change nothing, ± 5 bp would add
+placed the sites consistently; a tolerance of ± 1-2 bp would change nothing, ± 5 bp would add
 20 chains at the cost of accepting neighbouring alternative sites. No tolerance is shipped.
 PanIsoGuard itself counts 267 and 154 chains: it also requires the read's strand to agree
 with the isoform's, which drops one chain. Exact full-chain support is more frequent among

@@ -35,7 +35,7 @@ a log of the inputs that were used.
 **You need three files** from the step before: the SQANTI3 classification, the caller's
 isoforms (GTF or BED12), and the annotation you gave SQANTI3. Without a SQANTI3 run,
 `--no-sqanti3` classifies the isoforms itself from the chains and the annotation (and reads
-splice motifs and the 3′ A content from `--reference`); only SQANTI3's RT-switch flag is then
+splice motifs and the 3' A content from `--reference`); only SQANTI3's RT-switch flag is then
 missing. Short-read junctions and the
 long-read BAM are optional and make the verdicts stronger.
 
@@ -63,9 +63,9 @@ mechanism, the reasons) is explanation, not a second decision; see
 
 ## Contents
 
-- [In one screen](#in-one-screen) · [Quick start](#quick-start) · [Install](#install) · [Usage](#usage) · [Outputs](#outputs) · [Confidence classes](#confidence-classes) · [Evidence it uses](#evidence-it-uses)
-- [A worked locus](#a-worked-locus) · [When to use PanIsoGuard](#when-to-use-panisoguard) · [How it compares](#how-it-compares) · [Validation](#validation)
-- [Runtime & memory](#runtime--memory) · [Documentation](#documentation) · [Repository layout](#repository-layout)
+- [In one screen](#in-one-screen) | [Quick start](#quick-start) | [Install](#install) | [Usage](#usage) | [Outputs](#outputs) | [Confidence classes](#confidence-classes) | [Evidence it uses](#evidence-it-uses)
+- [A worked locus](#a-worked-locus) | [When to use PanIsoGuard](#when-to-use-panisoguard) | [How it compares](#how-it-compares) | [Validation](#validation)
+- [Runtime & memory](#runtime--memory) | [Documentation](#documentation) | [Repository layout](#repository-layout)
 
 ## At a glance
 
@@ -320,7 +320,7 @@ with the isoform, and `verdict_reason` names the one rule that decided it.
 | Class | `verdict` | Meaning |
 |---|---|---|
 | `KNOWN` | known | Matches a known transcript exactly (SQANTI3 FSM). Not adjudicated. |
-| `KNOWN_FRAGMENT` | known_fragment | A truncated known transcript (SQANTI3 ISM) whose whole intron chain at least 3 long reads carry, with no intra-priming sign at the 3′ end (`ism_chain_support`). A known structure, not a novel isoform. |
+| `KNOWN_FRAGMENT` | known_fragment | A truncated known transcript (SQANTI3 ISM) whose whole intron chain at least 3 long reads carry, with no intra-priming sign at the 3' end (`ism_chain_support`). A known structure, not a novel isoform. |
 | `NOVEL_CONFIRMED` | confirmed | Short reads confirm every novel junction, and there is no sign of an artifact. |
 | `NOVEL_PROBABLE` | confirmed | Short reads confirm every novel junction but there is one artifact sign; or short reads could not be checked and either at least 2 callers found the same isoform (`caller_consensus`) or at least 3 long reads carry its whole intron chain (`chain_support`); both are methodological rather than experimental support, and an RT-switching sign does not demote them (`;rt_switch_sign`). |
 | `UNCONFIRMED` | unconfirmed | Weak evidence: only some novel junctions confirmed (`partial_support`), or none but no artifact sign (`unsupported_no_sign`). Also an ISM without whole-chain read support (`ism`, `ism_intrapriming`, `ism_rts`), and, when there are no short reads, a novel isoform whose long-read alignments at the junction look wrong (`mapping_without_short_reads`). |
@@ -353,7 +353,7 @@ rate. The same table at every short-read depth:
 The signs of an artifact are checked in this order, and the first one found is reported:
 problems in the long-read alignments at the junction (`mapping_or_repeat`; needs at least 3
 spanning reads), a non-canonical splice site (`noncanonical`), reverse-transcriptase template
-switching (`rt_switch`), and an A-rich stretch right after the 3′ end with no polyA motif
+switching (`rt_switch`), and an A-rich stretch right after the 3' end with no polyA motif
 before it (`degradation`). The reference-bias checks come before all of these. Details:
 [docs/decision_engine.md](docs/decision_engine.md).
 
@@ -361,7 +361,7 @@ before it (`degradation`). The reference-bias checks come before all of these. D
 
 | Evidence | Input | Needed? | What PanIsoGuard checks |
 |---|---|---|---|
-| SQANTI3 QC | `--classification`, or `--no-sqanti3` | Required (one of the two) | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3′ end. With `--no-sqanti3` the category, the motif and the A content are computed from the chains, the annotation and `--reference`; the RT-switch flag is not evaluable |
+| SQANTI3 QC | `--classification`, or `--no-sqanti3` | Required (one of the two) | the structural category, and three artifact signs from SQANTI3's columns: non-canonical splice site, RT template switching, A-rich 3' end. With `--no-sqanti3` the category, the motif and the A content are computed from the chains, the annotation and `--reference`; the RT-switch flag is not evaluable |
 | Short reads | `--sj-tab` (STAR `SJ.out.tab`) | recommended | whether short reads confirm each novel junction; by default that takes at least 3 uniquely mapped reads and a canonical splice motif |
 | Long reads | `--bam` | recommended | whether the reads across each novel junction look misaligned: by default, more than half of them share one problem (low mapping quality, a supplementary alignment, or an indel next to the junction beyond what the reads' own indel rate predicts). The defaults were set on PacBio HiFi. Reads whose aligner put them on the other strand (`XS:A`, `ts:A`) are not counted. |
 | Caller agreement | `--caller-support` (from `combine`) | optional | how many callers found the same intron chain; used only when short-read support cannot be checked |
@@ -388,12 +388,12 @@ Run `panisoguard <command> --help` for all options. Input file formats:
 panisoguard decoys    --ref-gtf ref.gtf --bam aln.bam --out decoys/sample
 ```
 
-`decoys` joins the 5′ introns of one annotated transcript to the 3′ introns of another of the
+`decoys` joins the 5' introns of one annotated transcript to the 3' introns of another of the
 same gene at a shared intron (a novel combination of known junctions, which no short-read test
 can reach) and counts the reads that carry each such chain end to end. The fraction with at
 least 3 is what the `chain_support` lift would do to chains that are probably wrong, in your
 data. In simulation, where nothing expressed is unannotated, wrong combinations reach 3 reads
-in 0–0.1 % of cases (and the deleted genuine transcripts in 100 %); on real PacBio and Kinnex
+in 0-0.1 % of cases (and the deleted genuine transcripts in 100 %); on real PacBio and Kinnex
 data a third to a half of the recombinants of two expressed isoforms do, with as many reads as
 their parents, which is what unannotated combinatorial isoforms look like rather than chimeras
 ([benchmark/chain_support](benchmark/chain_support)). The number is an upper bound on the
@@ -429,14 +429,14 @@ junctions all have short-read support) is just as accurate and simpler; see
 - **You have the sample's haplotypes or a pangenome** and want to find *reference-bias*
   junctions: junctions that look non-canonical on the reference genome but are canonical in the
   sample. A built-in guard refuses to use the sample's own RNA as proof. Expect only a few such
-  junctions (about 30–45 in a genome that differs a lot from the reference). On two such
+  junctions (about 30-45 in a genome that differs a lot from the reference). On two such
   genomes, a phasing check agreed for 27 of 28 testable heterozygous junctions: the reads that
   use the junction come from the haplotype on which it is canonical
   ([benchmark/refbias_phasing](benchmark/refbias_phasing)). Homozygous junctions cannot be
   checked this way. Against a full personalized-genome re-analysis of the same reads
   (HG03516 and HG02717, [benchmark/refbias_3way](benchmark/refbias_3way)), the rescue
   criterion finds 31 of 32 and 37 of 39 splice-site-SNV junctions the personal genome makes
-  canonical, in 3–6 minutes instead of 7–11 hours; as isoform verdicts it recovers 12 of 32
+  canonical, in 3-6 minutes instead of 7-11 hours; as isoform verdicts it recovers 12 of 32
   and 21 of 39, because a verdict needs every novel junction of the isoform explained.
   Junctions moved by indels or structural variants it does not see.
 
@@ -487,13 +487,13 @@ Full tables, bootstrap confidence intervals and caveats are in
   `ont` presets give the same class to every isoform, because the indel-near sign is read in
   excess of the reads' own indel rate ([benchmark/sqanti_sim_ont](benchmark/sqanti_sim_ont)).
 - On the other callers' output (IsoQuant, Bambu, ESPRESSO, TALON, same alignment, no short
-  reads) it raises precision every time, by 0.01–0.02 where the caller is already strict and by
+  reads) it raises precision every time, by 0.01-0.02 where the caller is already strict and by
   0.32 on TALON, where SQANTI3's rules filter adds nothing; it is not a substitute for a caller's
   own read-count filter but stacks on it ([benchmark/caller_filters](benchmark/caller_filters)).
 - It decides fewer isoforms and is wrong less often on those it decides: at 1 M pairs with
   the BAM it gives a decisive class to 74 % of the isoforms and 1.4 % of those are wrong;
   the one-line rule decides all of them and 6.6 % are wrong
-  ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), risk–coverage).
+  ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), risk-coverage).
 - On real data with experimentally validated isoforms (LRGASP WTC11, PacBio and ONT), none
   of the validated isoforms the caller reconstructed is called an artifact, and without
   short reads the whole-chain reads keep all 17 (PacBio) and 16 (ONT) as
@@ -503,7 +503,7 @@ Full tables, bootstrap confidence intervals and caveats are in
   ([benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11)).
 - Real-data negatives point the same way. The 26 amplicon-unsupported LRGASP chains, adjudicated
   as would-be isoforms with no caller in the loop, are confirmed 0 times on PacBio and 3 times on
-  ONT, where 8–60 reads carry them end to end; SQANTI3's rules filter keeps 18 of the 26
+  ONT, where 8-60 reads carry them end to end; SQANTI3's rules filter keeps 18 of the 26
   ([benchmark/lrgasp_targets](benchmark/lrgasp_targets)). Of the 13 novel isoforms IsoQuant
   reports in TUSCO's 46 single-isoform genes, PanIsoGuard confirms 3 and SQANTI3's filter keeps 8
   ([benchmark/tusco_negatives](benchmark/tusco_negatives)).
@@ -516,7 +516,7 @@ So use it for the reason behind each call, not for a better score.
 (SQANTI-SIM, HG002/HPRC, LRGASP).
 
 **Thresholds.** On SQANTI-SIM (GENCODE v49 chr22), trying a grid of threshold values changes
-AUPRC very little (0.970–0.971), and the default is within 0.0001 of the best
+AUPRC very little (0.970-0.971), and the default is within 0.0001 of the best
 ([benchmark/results/sqanti_sim/sweep.tsv](benchmark/results/sqanti_sim/sweep.tsv)); the
 whole-chain read threshold is flat from 2 to 10 ([benchmark/chain_support](benchmark/chain_support)).
 The same thresholds, untouched, hold on chr20 and chr19
@@ -546,7 +546,7 @@ One thread, one `adjudicate` run with the long-read BAM, measured with `/usr/bin
 | LRGASP WTC11 PacBio, IsoQuant | 78,256 | 3.5 GB | SJ.tab | 2.2 min | 0.59 GB |
 | LRGASP WTC11 ONT, IsoQuant | 39,542 | 12.4 GB | SJ.tab | 5.9 min | 0.44 GB |
 | HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | Two haplotype FASTAs | 3.3 min | 0.47 GB |
-| `decoys` on the same BAMs | 139,003 decoys | | | 1–12 min | 0.41 GB |
+| `decoys` on the same BAMs | 139,003 decoys | | | 1-12 min | 0.41 GB |
 
 Building the GENCODE v49 catalog takes about 3 s of that; the rest is reading the BAM at each
 junction and chain. The callers and the alignment take most of the total time of a study;
@@ -565,7 +565,7 @@ PanIsoGuard itself is fast and needs no more memory than a laptop has.
 | [docs/relationship_to_merge_tools.md](docs/relationship_to_merge_tools.md) | How `combine` relates to gffcompare, TAMA and Bambu-NDR, and what is actually new in PanIsoGuard. |
 | [docs/input_formats.md](docs/input_formats.md) | Every input file format and its options. |
 | [docs/validation.md](docs/validation.md) | What has been checked and what is planned. |
-| [CHANGELOG.md](CHANGELOG.md) · [docs/releasing.md](docs/releasing.md) | What changed in each version; how releases and Bioconda updates are made. |
+| [CHANGELOG.md](CHANGELOG.md), [docs/releasing.md](docs/releasing.md) | What changed in each version; how releases and Bioconda updates are made. |
 | [examples/worked_locus/](examples/worked_locus/README.md) | One toy gene from input files to verdict, with a stdlib recomputation of every verdict and a 42-line replay of the rules, both checked in CI. |
 
 ## Repository layout

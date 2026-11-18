@@ -13,15 +13,15 @@ caller-support groups over the same 5 chr22 caller GTFs (FLAIR + IsoQuant + Bamb
 ESPRESSO + TALON), and we score each with the identical "≥ k callers" PR curve vs
 SQANTI-SIM truth. Matchers compared: `combine` (exact), gffcompare -i (the incumbent),
 TAMA merge (fuzzy, junction wobble 10 bp), and a controlled **exact-to-fuzzy wobble
-sweep** (0–20 bp).
+sweep** (0-20 bp).
 
 ## Result 1: `combine` equals `gffcompare -i` (exactly)
 
-| matcher | novel chains | ≥2 P/R | ≥3 P/R | n_callers dist (1·2·3·4·5) |
+| matcher | novel chains | ≥2 P/R | ≥3 P/R | n_callers dist (1/2/3/4/5) |
 |---------|-------------:|:------:|:------:|:--------------------------:|
-| PanIsoGuard `combine` (exact) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
-| gffcompare -i | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
-| wobble 0 bp (control) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105·163·254·128·332 |
+| PanIsoGuard `combine` (exact) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105/163/254/128/332 |
+| gffcompare -i | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105/163/254/128/332 |
+| wobble 0 bp (control) | 1982 | 0.852 / 0.971 | 0.980 / 0.910 | 1105/163/254/128/332 |
 
 `combine` reproduces gffcompare's grouping (same novel count, same n_callers
 distribution, same PR curve). So `combine` is not a new merge algorithm; it is a
@@ -36,9 +36,9 @@ the adjudicator directly (no Perl, no GTF round trip, no extra dependency).
 | TAMA (fuzzy, 10 bp) | 0.933 | 0.976 |
 | wobble 5 / 10 / 20 bp | 0.839 / 0.837 / 0.836 | 0.975 / 0.975 / 0.975 |
 
-At ≥ 3 callers the novel precision is 0.975–0.980 under every matcher in this experiment:
+At ≥ 3 callers the novel precision is 0.975-0.980 under every matcher in this experiment:
 exact, gffcompare, TAMA and the whole wobble range. At ≥ 2 callers the matchers differ
-(0.836–0.933; TAMA's larger groups lift it). That requiring more callers raises precision
+(0.836-0.933; TAMA's larger groups lift it). That requiring more callers raises precision
 is a property of the data (the callers disagree on artifacts), not of PanIsoGuard's exact
 matcher.
 
@@ -56,7 +56,7 @@ is a different, false chain still counts as merged).
 | wobble 2 / 5 / 10 / 20 bp | 0 / 1 / 1 / 1 | 2 / 46 / 62 / 80 |
 
 Of the 769 genuine novel chains in the truth (760 of them reported by at least one caller),
-4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single↔multi
+4 (TAMA) or 1 (wobble ≥ 5 bp) cross the single/multi
 boundary under a fuzzy matcher; the rest of the upgrades move within the multi-caller pile
 (for example 3 to 4 callers). So exact matching costs the consensus gate at most 4 genuine
 chains in 769 on this set, and the ≥ 3 precision (Result 2) is similar under every

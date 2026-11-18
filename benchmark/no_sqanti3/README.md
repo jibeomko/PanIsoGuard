@@ -2,7 +2,7 @@
 
 `adjudicate --no-sqanti3` computes the classification rows PanIsoGuard otherwise reads from
 SQANTI3: the structural category from the intron chain against the reference GTF, the splice
-motif and the 3′ A content from the genome. This protocol adjudicates the five chr22
+motif and the 3' A content from the genome. This protocol adjudicates the five chr22
 SQANTI-SIM callers twice, from SQANTI3 6.0.1's classification and from the computed one, in
 the two settings of the main text, and compares the categories, the motif prior, the
 confidence classes, and both modes' accuracy against the truth.

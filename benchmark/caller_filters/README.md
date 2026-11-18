@@ -23,11 +23,11 @@ coverage column here, so it is the perc_A + RTS rules.
 | TALON, filtered (1,760, 697) | 0.396 | 0.406 / 0.897 | 0.716 / 0.709 (0.39 / 0.284) | 0.712 / 0.704 |
 
 - Without short reads SQANTI3's rules filter does not add precision to four of the five
-  callers (± 0.01) and costs 10–13 % of their genuine isoforms; FLAIR is the exception (+0.08).
-- PanIsoGuard raises precision on every caller: by 0.01–0.02 where the caller is already
-  strict (IsoQuant, ESPRESSO, Bambu), by 0.15 on FLAIR and 0.32 on TALON, keeping 71–95 % of the
-  genuine isoforms. The selective risk says where the gain is cheap: 0.7–1.3 % of its decisive
-  calls are wrong on FLAIR, IsoQuant and ESPRESSO, 24–28 % on Bambu and TALON, whose false
+  callers (± 0.01) and costs 10-13 % of their genuine isoforms; FLAIR is the exception (+0.08).
+- PanIsoGuard raises precision on every caller: by 0.01-0.02 where the caller is already
+  strict (IsoQuant, ESPRESSO, Bambu), by 0.15 on FLAIR and 0.32 on TALON, keeping 71-95 % of the
+  genuine isoforms. The selective risk says where the gain is cheap: 0.7-1.3 % of its decisive
+  calls are wrong on FLAIR, IsoQuant and ESPRESSO, 24-28 % on Bambu and TALON, whose false
   chains are carried by reads ([../chain_support](../chain_support)).
 - For a strict caller the gain is reasons, not precision. On IsoQuant PanIsoGuard moves
   precision from 0.982 to 0.991 and holds 29 % of the genuine isoforms for review; what it adds

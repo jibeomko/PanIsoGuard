@@ -18,7 +18,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   read wrong bases at 7 junctions, which the VCF route cannot do.
 - Ruleset `builtin-0.0.7` (TOML `default-0.0.7`): the indel-near gate reads the fraction of
   spanning reads with an indel next to the junction in excess of the reads' own indel rate
-  (per read, the chance of an indel inside the two windows, 1 − exp(−rate × 4 × window),
+  (per read, the chance of an indel inside the two windows, 1 - exp(-rate × 4 × window),
   averaged over the spanning reads). On HiFi the background is near 0 and the gate behaves as
   before (bam_axis chr22: the same 14 of 120 false junctions caught, 0 genuine flagged); on
   ONT, whose reads carry indels everywhere, the raw fraction fired on 67 % of GM12878
@@ -67,7 +67,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   structural category comes from the intron chain against the reference GTF (annotated chain,
   contiguous part of one, new combination of annotated introns, novel intron in an annotated
   locus, antisense, intergenic; mono-exonic isoforms are not adjudicated), the splice motif
-  and the 3′ A content from `--reference` with SQANTI3's definitions; the RT-switch flag and
+  and the 3' A content from `--reference` with SQANTI3's definitions; the RT-switch flag and
   the polyA motif are not evaluable. The caller's isoform file now carries each transcript's
   span, and the reference catalog answers sub-chain and locus-overlap questions. The
   provenance log records that the rows were computed. On the five chr22 callers the categories equal
@@ -85,7 +85,7 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   caller agreement and whole-chain reads.
 - The reference catalog keeps every transcript's span and exons only when `--no-sqanti3` needs
   them; a GENCODE v49 run otherwise takes about half the memory it did at 0.1.0's first build
-  (the catalog with transcripts is what the runtime table measured at 0.85–1.0 GB).
+  (the catalog with transcripts is what the runtime table measured at 0.85-1.0 GB).
 - **Ruleset `builtin-0.0.6`.** The two reference-bias fixes above (independent rescue on
   either axis first; ambiguous or unreadable splice sites not evaluable) change verdicts only
   in those cases. On the worked locus and on SQANTI-SIM chr22 with short reads, BAM and
@@ -146,7 +146,7 @@ Each entry has a regression test.
   heterozygous variant is certain on its own, whichever haplotype carries it.
 - A record with no `GT` field (a variant named without a genotype) was read as the reference
   base; its bases are unknown on every haplotype now, counted with the missing alleles.
-- `--no-sqanti3`: a 3′ window with fewer than half of its 20 bases known is `NA` (one A among
+- `--no-sqanti3`: a 3' window with fewer than half of its 20 bases known is `NA` (one A among
   19 N read as 100 % A).
 - `compare_routes.py` counted `REFERENCE_BIAS` over the isoforms present in both routes only,
   and its `ROUTES DIFFER` line ignored a changed reason or motif; both are over every row now.
@@ -173,7 +173,7 @@ Each entry has a regression test.
   whose first donor sat on N and whose second intron was plainly non-canonical was classified
   `NA` and lifted to `NOVEL_PROBABLE`; every intron is read, one non-canonical motif decides,
   and `NA` is returned only when no intron is non-canonical and one is unreadable.
-- `--no-sqanti3` counted N among the 20 bases downstream of the 3′ end, so an unknown window
+- `--no-sqanti3` counted N among the 20 bases downstream of the 3' end, so an unknown window
   read as 0 % A; only A/C/G/T bases count, and a window without them is `NA`.
 - `benchmark/vcf_haplotypes/compare_routes.py` compared only the isoforms and junctions present
   in both routes, so a row missing from the VCF run passed; missing and extra rows are counted
@@ -245,7 +245,7 @@ Each entry has a regression test.
   same run. `--validation-bam` naming the same file as `--bam` was recorded as an independent
   library; it is refused.
 - Benchmark write-ups: the merge comparison said the consensus precision was the same under
-  every matcher; it is similar at ≥ 3 callers (0.975–0.980) and differs at ≥ 2 (0.836–0.933).
+  every matcher; it is similar at ≥ 3 callers (0.975-0.980) and differs at ≥ 2 (0.836-0.933).
   The bam_axis and GM12878 write-ups described the removed soft-clip gate as a current
   setting. Old class names in the synthetic_axes table and in benchmark script docstrings
   replaced. `docs/validation.md` rows corrected: bam_axis (false mean 0.129 after the
@@ -296,7 +296,7 @@ Each entry has a regression test.
 - **New: [benchmark/tusco_negatives](benchmark/tusco_negatives).** The first real-data negatives:
   novel isoforms IsoQuant reports in the 46 TUSCO universal single-isoform genes (presumed false
   by TUSCO's own scoring) on LRGASP WTC11 and the two HPRC Kinnex samples. 13 in total;
-  PanIsoGuard confirms 3 (HG02717, whole-chain reads at 3–5), SQANTI3's rules filter keeps 8;
+  PanIsoGuard confirms 3 (HG02717, whole-chain reads at 3-5), SQANTI3's rules filter keeps 8;
   with short reads 0 / 4 confirmed and 3 `ARTIFACT`.
 - [benchmark/lrgasp_wtc11](benchmark/lrgasp_wtc11): SQANTI3's default rules filter run on the
   same classifications (`run.sh sqanti_filter`, envelope
@@ -311,7 +311,7 @@ Each entry has a regression test.
   0.629, the supervised ceiling of SQANTI3's features on a permissive caller.
 - **New: [benchmark/caller_filters](benchmark/caller_filters).** Three post-caller filters on the
   same output (none / SQANTI3 rules / PanIsoGuard + BAM), five callers, no short reads: SQANTI3's
-  rules filter adds no precision to four of the five callers and costs 10–13 % of their genuine
+  rules filter adds no precision to four of the five callers and costs 10-13 % of their genuine
   isoforms; PanIsoGuard raises precision on every caller (FLAIR 0.839 to 0.993 at recall 0.75,
   TALON 0.396 to 0.716 at 0.71, strict callers +0.01 to 0.02). Each caller's own knob against it:
   Bambu's NDR buys precision faster at a steep recall price (0.82 at 0.58 vs PanIsoGuard 0.76 at
@@ -359,12 +359,12 @@ Each entry has a regression test.
   caller-consensus or whole-chain support to `UNCONFIRMED`; the lift stands with the sign in
   the reason (`chain_support;rt_switch_sign`, `caller_consensus;rt_switch_sign`): every
   isoform it held on SQANTI-SIM was genuine (26 / 0 with short reads, 57 / 0 without), and
-  SQANTI3's `RTS_stage` is TRUE on 12–18 % of LRGASP's experimentally validated isoforms.
+  SQANTI3's `RTS_stage` is TRUE on 12-18 % of LRGASP's experimentally validated isoforms.
   What this moves in every tracked run, and the limits of the evidence, is tabulated in
   [benchmark/rts_sensitivity](benchmark/rts_sensitivity). `noncanonical` (5 genuine / 13 false)
   and the intra-priming sign still hold the lift
   (`chain_support_with_<mechanism>`): the simulator does not model intra-priming, and on
-  real Iso-Seq the sign marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's
+  real Iso-Seq the sign marks 2,000-3,000 chain-supported isoforms per sample that SQANTI3's
   filter also rejects, so there is no evidence to lift them. Effect at 1 M pairs + BAM:
   recall 0.710 to 0.745 at precision 0.993 (AUPRC 0.974); without short reads 489 / 4 to
   546 genuine / 4 false (AUPRC 0.953 vs SQANTI3 rules 0.909, bootstrap CI [+0.029, +0.061]);
@@ -396,11 +396,11 @@ Each entry has a regression test.
   the chain axis uses, and reports the fraction ≥ `--min-full-reads` (default 3) next to the
   same fraction for the annotated parents (`<prefix>.decoys.tsv` / `.decoys.json`). On
   SQANTI-SIM the truth separates decoys that are deleted genuine transcripts from the rest
-  (`benchmark/chain_support/score_decoys.py`): wrong combinations reach 3 reads 0–0.1 % of the
-  time, the genuine ones 100 % (31 / 31). On real PacBio / Kinnex data 33–46 % of the
+  (`benchmark/chain_support/score_decoys.py`): wrong combinations reach 3 reads 0-0.1 % of the
+  time, the genuine ones 100 % (31 / 31). On real PacBio / Kinnex data 33-46 % of the
   recombinants of two expressed isoforms are carried by ≥ 3 reads, with as many reads as
   their parents and recur in an independent library (PacBio to ONT, one Kinnex individual to
-  the other) at 75–93 % when both parents are expressed in both, like the annotated
+  the other) at 75-93 % when both parents are expressed in both, like the annotated
   transcripts (unannotated combinatorial isoforms rather than chimeras), so the rate is an
   upper bound on the false lift and a measure of annotation incompleteness
   ([benchmark/chain_support](benchmark/chain_support)).
@@ -428,8 +428,8 @@ Each entry has a regression test.
   `chain_support;independent_library`; `provenance.log` records it). The class stays
   `NOVEL_PROBABLE`. Tested on LRGASP WTC11 with the other platform's library as the
   independent one (`benchmark/lrgasp_wtc11/cross_library.py`): 13 / 17 (PacBio to ONT) and
-  14 / 16 (ONT to PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0–2
-  reads); genome-wide the novel lifts reproduce at 60–75 % of the expressed-FSM rate at
+  14 / 16 (ONT to PacBio) validated novel isoforms have ≥ 3 independent reads (misses 0-2
+  reads); genome-wide the novel lifts reproduce at 60-75 % of the expressed-FSM rate at
   matched depth from PacBio to ONT (like FSM within genes the ONT library covers) and at
   about the FSM rate from ONT to PacBio. Chains carrying SQANTI3's RT-switch sign reproduce
   at half the rate from PacBio to ONT, known transcripts included: the flag marks
@@ -460,7 +460,7 @@ Each entry has a regression test.
   under 0.0.4, which held the RT-switch-flagged ones). Recall-side
   only: the GENCODE-rejected negatives were not reconstructed by the caller (the one
   unsupported novel chain it produced was held `UNRESOLVED`). SQANTI3's `RTS_stage` is TRUE
-  on 12–18 % of the experimentally supported isoforms, a measured false-sign rate.
+  on 12-18 % of the experimentally supported isoforms, a measured false-sign rate.
 - [benchmark/end2end](benchmark/end2end) re-run (its envelope was from 0.0.2): on the seeded
   chr22 pipeline, precision 1.000 / specificity 1.000, 19 of 20 genuine novels
   `NOVEL_PROBABLE` through whole-chain reads; `score.py --emit-metrics` writes the envelope.
@@ -480,13 +480,13 @@ Each entry has a regression test.
   short reads from 0 calls to 546 genuine / 4 false (recall 0.75, AUPRC 0.953 vs SQANTI3
   rules 0.909, bootstrap CI [+0.029, +0.061]). Per-class at 1 M + BAM: NOVEL_PROBABLE
   193 / 1, KNOWN_FRAGMENT 153 / 11, UNRESOLVED 0 / 6 (the genuine held NIC moved up),
-  UNCONFIRMED 25 / 36. The envelope now carries a risk–coverage point per method
+  UNCONFIRMED 25 / 36. The envelope now carries a risk-coverage point per method
   (PanIsoGuard + BAM decides 73 % of isoforms with 1.9 % wrong; the one-line rule decides
   all with 6.6 % wrong).
 - [benchmark/refbias_3way](benchmark/refbias_3way) arm C re-run with the chain axis: junction-level
   numbers and the 18 / 28 rescues unchanged; 5,784 / 7,011 isoforms that SQANTI3's filter
   keeps and PanIsoGuard used to hold `UNRESOLVED` are now `NOVEL_PROBABLE` (whole-chain
-  reads, no short reads in these samples); `adjudicate` takes 3–6 min per genome-wide run
+  reads, no short reads in these samples); `adjudicate` takes 3-6 min per genome-wide run
   instead of 2. Under ruleset 0.0.5: `NOVEL_PROBABLE` 7,081 / 8,368, of which 1,297 / 1,357 are
   SQANTI3 `Artifact`s lifted over the RT-switch sign; `KNOWN_FRAGMENT` 3,925 / 1,854; the
   741 / 605 BAM-only `ARTIFACT`s are now `UNCONFIRMED` (`mapping_without_short_reads`);
@@ -527,17 +527,17 @@ Each entry has a regression test.
   confirmed / reference_bias / unconfirmed / artifact / not_adjudicated) and
   `verdict_reason` (the one rule that decided it, e.g. `partial_support`, `no_coverage`,
   `firewall_held`, `ism_intrapriming`). They split the situations the classes mix:
-  `UNCONFIRMED` is ISM (0.92 precision on SQANTI-SIM) plus weak novels (0.36–0.56), and
+  `UNCONFIRMED` is ISM (0.92 precision on SQANTI-SIM) plus weak novels (0.36-0.56), and
   `UNRESOLVED` is "nothing to test" (0.96) plus firewall holds plus unadjudicated
   categories. `provenance.log` adds verdict counts.
 - **Rules (ruleset `0.0.3`).**
-  - The BAM mapping gate needs ≥ `min_spanning` (3) reads at a novel junction; with 1–2
+  - The BAM mapping gate needs ≥ `min_spanning` (3) reads at a novel junction; with 1-2
     reads a single indel made the fraction 1.0 and decided the verdict alone (45 % of
     HG03516's mapping-artifact calls rested on < 3 reads).
   - `UNSUPPORTED` needs coverage: if none of the isoform's known junctions has short-read
     support either, support is `UNKNOWN` (`no_coverage`), not evidence against.
   - Intra-priming (`degradation`) needs perc_A ≥ 60 and no polyA motif upstream
-    (SQANTI3 `polyA_motif_found`, when it ran with `--polyA_motif_list`); 20–30 % of
+    (SQANTI3 `polyA_motif_found`, when it ran with `--polyA_motif_list`); 20-30 % of
     perc_A-flagged 3' ends carry a motif and are no longer flagged. The column moved from
     `bio_flags` to `evidence`.
   - A reference-bias rescue carries a BAM mapping sign in its reason
@@ -575,7 +575,7 @@ Each entry has a regression test.
   diploid, the HPRC phased assembly, and PanIsoGuard post hoc; truth per junction = where
   the same reads splice on the personal genome. Rule level 31/32 SNV-class junctions
   (precision 31/35), verdict level 12/32 (precision 12/13); indel/SV-shifted junctions are
-  out of scope by construction; 5 min / 0.4 GB vs 11–12 h / 38–78 GB.
+  out of scope by construction; 5 min / 0.4 GB vs 11-12 h / 38-78 GB.
 - The `min_spanning` gate changes two earlier numbers: the BAM indel-near trigger now
   catches 14/124 false novel junctions on SQANTI-SIM (was 41/124; still 0 genuine flagged),
   and PanIsoGuard+BAM's AUPRC gain over the one-line short-read rule is within the

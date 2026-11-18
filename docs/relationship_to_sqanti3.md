@@ -16,7 +16,7 @@ deliberately does not recompute any of SQANTI3's descriptors.
 | Feature | Already in SQANTI3 | PanIsoGuard's stance |
 |---------|--------------------|----------------------|
 | TSS/TTS support (`dist_to_CAGE_peak`, `within_CAGE_peak`, `dist_to_polyA_site`, `within_polyA_site`, `ratio_TSS`) | yes | not used; it stays in the classification file |
-| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | consume: `perc_A_downstream_TTS ≥ 60` and `polyA_motif_found ≠ TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
+| polyA motif / intra-priming (`polyA_motif`, `polyA_dist`, `polyA_motif_found`, `perc_A_downstreamTTS`) | yes | consume: `perc_A_downstream_TTS ≥ 60` and `polyA_motif_found != TRUE` together are the intra-priming (`degradation`) prior (since 0.0.6; without the motif column perc_A alone decides) |
 | ORF / coding / NMD (`coding`, `ORF_length`, `CDS_*`, `predicted_NMD`) | yes (TransDecoder2) | not used |
 | splice-site motif / junction QC (`splice_site`, `RTS_junction`, `indel_near_junct`, `junction_category`) | yes (junctions file) | consume: `all_canonical` / `RTS_stage` are mechanism priors |
 | SQANTI-prior artifact rules | yes | already consumed: `RTS_stage`, `all_canonical`, `perc_A_downstream_TTS` |

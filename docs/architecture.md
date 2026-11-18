@@ -21,7 +21,7 @@ flowchart LR
 
   Normalize["<b>1. Normalize</b><br/>src/io readers<br/>typed transcript + junction models"]
   Consensus["<b>2. Merge callers</b><br/>intron-chain fingerprints<br/>caller support matrix"]
-  Evidence["<b>3. Build evidence</b><br/>SQANTI3 QC<br/>short‑read SJ<br/>Long Read BAM mapping<br/>Variant/Haplotype<br/>Pangenome"]
+  Evidence["<b>3. Build evidence</b><br/>SQANTI3 QC<br/>short-read SJ<br/>Long Read BAM mapping<br/>Variant/Haplotype<br/>Pangenome"]
   Decide["<b>4. Decide</b><br/>EvidenceVector to RuleEngine<br/>class + mechanism + trace"]
   Outputs["<b>Outputs</b><br/>*.adjudicated.tsv | *.junctions.tsv<br/>*.attribution.jsonl | *.provenance.log<br/>caller_support_matrix.tsv"]
 
@@ -122,14 +122,14 @@ the reference-bias circularity firewall are documented in
 
 ```text
 inputs -> [readers] -> SqantiTable + {id -> IntronChain} + Catalog + (SjTable/BAM/Haplotype/Pangenome)
-                              │
-                              ▼
+                              |
+                              v
                     [adjudicator] per isoform: novel-junction detection + evidence collection
-                              │
-                              ▼
+                              |
+                              v
                     EvidenceVector -> [RuleEngine.evaluate] -> Verdict
-                              │
-                              ▼
+                              |
+                              v
               .adjudicated.tsv / .junctions.tsv / .attribution.jsonl (rule_trace) / .provenance.log
 ```
 

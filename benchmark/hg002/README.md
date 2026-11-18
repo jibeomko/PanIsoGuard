@@ -52,7 +52,7 @@ mechanism on real human-genome variation.
 ## Whole-genome yield: how often does the rescue actually fire? ([run_wholegenome.sh](run_wholegenome.sh))
 
 The chr22 result above is one genuine case (N=1). Extending the **same annotation +
-variant scan to the whole genome** (HG002 v4.2.1, GENCODE v49, chr1–22; no RNA-seq, no
+variant scan to the whole genome** (HG002 v4.2.1, GENCODE v49, chr1-22; no RNA-seq, no
 caller runs) answers the follow-up question: is the rescue a recurring mechanism, or a check that
 never fires?
 

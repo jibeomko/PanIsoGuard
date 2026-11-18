@@ -9,9 +9,9 @@ R = junctions the rescue fired on: novel junctions of REFERENCE_BIAS isoforms th
 non-canonical on GRCh38 and canonical on at least one SNV-consensus haplotype (the rule's own
 criterion, recomputed here so R is junction-level).
 
-Reports sensitivity |R∩T|/|T| and precision |R∩T|/|R| with bootstrap CIs, the same against the
-in-scope subset of T (the SNV class only), the breakdown of T∖R by label (what the rescue
-cannot see), R∖T (candidate false rescues, for inspection), the firewall check on the
+Reports sensitivity |R and T|/|T| and precision |R and T|/|R| with bootstrap CIs, the same against the
+in-scope subset of T (the SNV class only), the breakdown of T minus R by label (what the rescue
+cannot see), R minus T (candidate false rescues, for inspection), the firewall check on the
 `unknown`-provenance run, the isoform-level A-vs-C view, and the stage cost table.
 
 Usage:

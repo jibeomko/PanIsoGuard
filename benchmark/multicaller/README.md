@@ -41,7 +41,7 @@ truth, precision climbs steeply and monotonically with agreement:
 A novel chain seen by only one of five callers is almost always an artifact
 (precision 0.012: 1,092 false vs 13 genuine). Agreement is the signal.
 
-## Precision–recall curve over the consensus threshold
+## Precision-recall curve over the consensus threshold
 
 Requiring "≥ k callers" is a tunable gate. Sweeping k traces a clean PR curve:
 
@@ -94,8 +94,8 @@ PIG.000233  callers=bambu,espresso,flair,isoquant,talon  novelty=novel
 > `combine` is not a new merge algorithm. Multi-caller consensus is established practice
 > (gffcompare, TAMA, LRGASP). The [merge_comparison](../merge_comparison) protocol shows
 > that `combine` groups isoforms like `gffcompare -i`, that the ≥ 3 precision above is
-> similar under every matcher on this set (0.975–0.980 across exact / gffcompare / TAMA / a
-> 0–20 bp wobble sweep; at ≥ 2 callers the matchers differ, 0.836–0.933), and that 4 of 769 genuine novel chains (TAMA) or 1 (wobble ≥ 5 bp) cross the
+> similar under every matcher on this set (0.975-0.980 across exact / gffcompare / TAMA / a
+> 0-20 bp wobble sweep; at ≥ 2 callers the matchers differ, 0.836-0.933), and that 4 of 769 genuine novel chains (TAMA) or 1 (wobble ≥ 5 bp) cross the
 > single/multi-caller boundary under a fuzzy matcher. What PanIsoGuard adds is the
 > reference-bias rescue, not the merge (see
 > [relationship_to_merge_tools.md](../../docs/relationship_to_merge_tools.md)).
@@ -104,11 +104,11 @@ PIG.000233  callers=bambu,espresso,flair,isoquant,talon  novelty=novel
 
 ```
 shared minimap2 alignment (PBSIM3 reads, chr22)
-  ├─ FLAIR collapse             ─┐
-  ├─ IsoQuant transcript_models ─┤
-  ├─ Bambu (novel BambuTx)      ─┼ panisoguard combine --gtf <caller:gtf>...
-  ├─ ESPRESSO (novel_isoform)   ─┤   --ref-gtf chr22_modified.gtf  ->  caller-support matrix
-  └─ TALON (filtered whitelist) ─┘        │
+  |- FLAIR collapse             -+
+  |- IsoQuant transcript_models -+
+  |- Bambu (novel BambuTx)      -+ panisoguard combine --gtf <caller:gtf>...
+  |- ESPRESSO (novel_isoform)   -+   --ref-gtf chr22_modified.gtf  ->  caller-support matrix
+  `- TALON (filtered whitelist) -+        |
         adjudicate --caller-support matrix  ->  consensus-promoted verdicts
         score_multicaller.py (vs SQANTI-SIM truth)  ->  results/multicaller/metrics.json
 ```

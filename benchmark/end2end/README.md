@@ -6,15 +6,15 @@ upstream pipeline and checks that PanIsoGuard behaves correctly on **real FLAIR 
 SQANTI3 output** derived from simulated reads.
 
 ```
-reference (1 chromosome) ─ hide ~20% transcripts (= genuine-novel truth)
-   │
-   ├─ PBSIM3  ─ simulate long reads from all chosen transcripts
-   ├─ minimap2 ─ splice-aware alignment
-   ├─ FLAIR    ─ collapse reads into isoforms
-   ├─ SQANTI3  ─ structural QC vs the REDUCED annotation
-   └─ PanIsoGuard adjudicate
-            │
-            └─ score: an isoform's intron chain matching a HIDDEN transcript = genuine;
+reference (1 chromosome) - hide ~20% transcripts (= genuine-novel truth)
+   |
+   |- PBSIM3  - simulate long reads from all chosen transcripts
+   |- minimap2 - splice-aware alignment
+   |- FLAIR    - collapse reads into isoforms
+   |- SQANTI3  - structural QC vs the REDUCED annotation
+   `- PanIsoGuard adjudicate
+            |
+            `- score: an isoform's intron chain matching a HIDDEN transcript = genuine;
                a novel chain matching nothing real = false (FLAIR/alignment artifact)
 ```
 

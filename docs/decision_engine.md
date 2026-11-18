@@ -47,9 +47,9 @@ on two axes; the binned pair is projected to one confidence class.
 | Mechanism | Source | Evaluable when |
 |-----------|--------|----------------|
 | short-read support | STAR `SJ.tab` exact junction match (strand-aware) vs the reference catalog | `--sj-tab` + `--ref-gtf` |
-| mapping_or_repeat | BAM reads spanning the junction; the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The indel-near fraction is taken in excess of its background: for each spanning read, the chance of an indel inside the two windows at the read's own indel rate (1 − exp(−rate × 4 × window)), averaged (since ruleset 0.0.7; the junction table reports the raw fraction and the background). `--platform ont`, which turns the indel-near gate off, is deprecated and removed in 0.2: with the excess the gate does not fire on ONT reads by chemistry (GM12878, the chr22 ONT re-simulation), so the two presets give the same verdicts. A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
+| mapping_or_repeat | BAM reads spanning the junction; the **low-MAPQ / supplementary / indel-near** fractions gate this mechanism (> 0.5 each), taken only over novel junctions with ≥ `min_spanning` (3) reads: with one or two reads a single indel is a fraction of 1.0, and 45 % of HG03516's mapping-artifact calls rested on < 3 reads before 0.0.6. The indel-near fraction is taken in excess of its background: for each spanning read, the chance of an indel inside the two windows at the read's own indel rate (1 - exp(-rate × 4 × window)), averaged (since ruleset 0.0.7; the junction table reports the raw fraction and the background). `--platform ont`, which turns the indel-near gate off, is deprecated and removed in 0.2: with the excess the gate does not fire on ONT reads by chemistry (GM12878, the chr22 ONT re-simulation), so the two presets give the same verdicts. A read whose aligner wrote the transcript strand (STAR/HISAT2 `XS:A`, minimap2 `ts:A`) counts only for junctions and chains on that strand; untagged reads count for either. | `--bam` |
 | noncanonical / rt_switch | SQANTI3 priors `all_canonical` / `RTS_stage`; `noncanonical` also when a novel junction is canonical on the reference but non-canonical on every haplotype of the sample (`evidence.n_novel_jx_variant_disrupted`, reason suffix `;haplotype_disrupted`; needs `wgs`/`external` haplotype provenance) | always (from classification); the haplotype form with `--reference-haplotype` |
-| degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` and no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70–80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11–17 %), so the sign is real, but the 20–30 % with a motif are kept | always; the motif column when supplied |
+| degradation (intra-priming) | SQANTI3 `perc_A_downstream_TTS ≥ 60` and no polyA motif upstream of the 3' end (`polyA_motif_found`, present when SQANTI3 ran with `--polyA_motif_list`; without it perc_A alone decides and `provenance.log` says so). On HG03516, 70-80 % of perc_A-flagged ends lack any of the 12 polyA hexamers (clean ends: 11-17 %), so the sign is real, but the 20-30 % with a motif are kept | always; the motif column when supplied |
 | variant_created | reference vs personalized haplotype FASTA splice-motif comparison | `--reference` + `--reference-haplotype` |
 | caller consensus | a `panisoguard combine` matrix: how many independent callers recovered the isoform's intron chain (`n_callers`) | `--caller-support` |
 
@@ -154,10 +154,10 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        `chain_support_with_<mechanism>`), since 0.0.7. The RT-switch sign stopped demoting
        methodological support in ruleset 0.0.5: on SQANTI-SIM every isoform it held was
        genuine (26 / 0 with short reads, 57 / 0 without), and SQANTI3's `RTS_stage` is TRUE
-       on 12–18 % of LRGASP's experimentally validated isoforms (what the choice moves per
+       on 12-18 % of LRGASP's experimentally validated isoforms (what the choice moves per
        dataset: [benchmark/rts_sensitivity](../benchmark/rts_sensitivity)). The intra-priming sign still
        holds: the simulator does not model it (4 / 0 there says nothing), and on real Iso-Seq
-       it marks 2,000–3,000 chain-supported isoforms per sample that SQANTI3's filter also
+       it marks 2,000-3,000 chain-supported isoforms per sample that SQANTI3's filter also
        rejects ([benchmark/refbias_3way](../benchmark/refbias_3way)). With `--bam`, the adjudicator counts the
        primary reads whose alignment carries the isoform's entire intron chain
        (`evidence.chain_n_full_reads`; `chain_n_partial_reads` are shorter reads
@@ -170,14 +170,14 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        ([benchmark/chain_support](../benchmark/chain_support)). Coordinates are exact: on
        real ONT direct-RNA 94.5 % of splice sites among near-matching reads are exact and a
        ± 5 bp tolerance would add 7 % of chains, so none is shipped
-       ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) § 4). With
+       ([benchmark/gm12878_realdata](../benchmark/gm12878_realdata) section 4). With
        `--validation-bam` (libraries the caller did not see, one option per library; each is
        counted on its own and one must reach the threshold alone) the reads are counted
        there instead; the evidence is then independent (`evidence.chain_independent`,
        reason `chain_support;independent_library`), but the class is still `PROBABLE`. On
        LRGASP WTC11, with the other platform's library as the independent one, 13 of 17
        (PacBio to ONT) and 14 of 16 (ONT to PacBio) validated novel isoforms are carried by
-       ≥ 3 independent reads (the misses have 0–2), and within genes the other library
+       ≥ 3 independent reads (the misses have 0-2), and within genes the other library
        covers the novel lifts reproduce like known transcripts; but a second library attests
        expression, not correct splicing, so the evidence is recorded rather than promoted ([benchmark/lrgasp_wtc11](../benchmark/lrgasp_wtc11)).
        Same chain+catalog requirement as consensus.
@@ -224,7 +224,7 @@ haplotypes rather than SQANTI3),
 `UNKNOWN`-support reasons `no_short_reads`, `no_coverage`, `no_novel_junction`,
 `caller_chain_absent`. The classes are not an ordered scale: on SQANTI-SIM truth
 `UNRESOLVED` (mostly NIC with no novel junction to test) has precision 0.96 while
-`UNCONFIRMED` novel isoforms have 0.36–0.56 (see
+`UNCONFIRMED` novel isoforms have 0.36-0.56 (see
 [benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h), `per_class.py`).
 
 **`ARTIFACT` semantics (read carefully).** `ARTIFACT` denotes *(UNSUPPORTED × any

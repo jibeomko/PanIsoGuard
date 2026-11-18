@@ -55,15 +55,15 @@ AUPRC difference vs `allSJ3`, bootstrap 95 % CI (2000 resamples):
 
 | | oracle | sr_250k | sr_1M | sr_4M |
 |---|---|---|---|---|
-| PIG | [−0.015, +0.005] | [−0.008, +0.014] | [−0.010, +0.011] | [−0.010, +0.011] |
-| PIG+bam | [−0.009, +0.011] | [−0.001, +0.020] | [−0.003, +0.017] | [−0.004, +0.017] |
+| PIG | [-0.015, +0.005] | [-0.008, +0.014] | [-0.010, +0.011] | [-0.010, +0.011] |
+| PIG+bam | [-0.009, +0.011] | [-0.001, +0.020] | [-0.003, +0.017] | [-0.004, +0.017] |
 
-With no short reads, vs `SQ3rules`: PIG [−0.105, −0.066] (worse), PIG+bam [+0.029, +0.061]
+With no short reads, vs `SQ3rules`: PIG [-0.105, -0.066] (worse), PIG+bam [+0.029, +0.061]
 (better, since the 0.0.7 whole-chain read support). Before 0.0.6 the BAM gain with short
 reads was significant at 250k pairs ([+0.002, +0.021]); the 0.0.6 rule that a junction feeds
 the BAM gate only with ≥ 3 spanning reads removed that.
 
-### Risk–coverage (1 M pairs)
+### Risk-coverage (1 M pairs)
 
 PanIsoGuard abstains (`UNRESOLVED`, `UNCONFIRMED`); the other methods decide every isoform.
 Coverage = share of the 870 isoforms given a decisive class (`NOVEL_CONFIRMED`,
@@ -84,7 +84,7 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
 
 - Ranking: PanIsoGuard ties `allSJ3` in every setting, with or without the BAM
   (every AUPRC difference is within the bootstrap interval).
-- Operating point: PanIsoGuard's precision is the highest (0.990–0.992 vs 0.976).
+- Operating point: PanIsoGuard's precision is the highest (0.990-0.992 vs 0.976).
   Without the BAM it holds nearly all NIC isoforms `UNRESOLVED` (no individually-novel
   junction to corroborate) and all ISM isoforms `UNCONFIRMED`, so it recalls ~0.55 against
   `allSJ3`'s ~0.94. With the BAM (0.0.7), NIC isoforms whose whole intron chain is carried

@@ -2,7 +2,7 @@
 
 `data/` holds a 1,700 bp toy chromosome `chrT` with one gene, GENE_T (+ strand): three reference
 transcripts (TX1 uses all five exons, TX2 skips exon 2, TX3 skips exon 4) and nine isoforms from a
-caller (`iso_known` = TX1, `iso_ism` = a truncated TX1, `iso_A`–`iso_G` novel), plus the inputs a run
+caller (`iso_known` = TX1, `iso_ism` = a truncated TX1, `iso_A` to `iso_G` novel), plus the inputs a run
 can take: a SQANTI3 classification, a second caller, STAR short-read junctions, a long-read BAM and
 two haplotype FASTAs. `data/build_toy.sh` shows how every file was made (`make_toy.py`, SQANTI3
 6.0.1, STAR); the outputs are committed, so nothing here needs those tools.

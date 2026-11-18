@@ -74,8 +74,8 @@ reverse (`cross_library.py`; `adjx_*` outputs).
 
 The misses are depth, not disagreement: FBXL16 and XPO7 (0 ONT reads), SPRING1 (1), CNN1 (2);
 SAC3D1 (0 PacBio reads), USF1 (1). At matched caller-library depth the novel lifts reproduce
-at 60–75 % of the rate of expressed known transcripts from PacBio to ONT (own count 3–5: 13 %
-vs 16 %; 6–10: 20 % vs 27 %; 11–20: 27 % vs 36 %; 21–50: 40 % vs 47 %; > 50: 51 % vs 69 %)
+at 60-75 % of the rate of expressed known transcripts from PacBio to ONT (own count 3-5: 13 %
+vs 16 %; 6-10: 20 % vs 27 %; 11-20: 27 % vs 36 %; 21-50: 40 % vs 47 %; > 50: 51 % vs 69 %)
 and at about the same rate from ONT to PacBio (34 / 59 / 67 / 88 / 92 % vs 56 / 70 / 83 / 93 /
 98 %); `KNOWN_FRAGMENT`s reproduce like FSM (43 % and 92 %). The per-isoform counts and bins
 are in the envelope (`cross_library`).
@@ -87,7 +87,7 @@ or better (NIC 23 / 32 / 44 / 60 / 78 %, NNC 30 / 47 / 50 / 77 / 84 %, against F
 
 The RT-switch sign, seen from the other library. PacBio lifts that carry SQANTI3's
 `RTS_stage` reproduce in ONT at about half the rate of the unflagged lifts in every depth bin
-(3–5: 4.5 % vs 12.6 %; 6–10: 7.9 % vs 20.1 %; 11–20: 15.1 % vs 26.7 %; 21–50: 26.6 % vs
+(3-5: 4.5 % vs 12.6 %; 6-10: 7.9 % vs 20.1 %; 11-20: 15.1 % vs 26.7 %; 21-50: 26.6 % vs
 40.1 %; > 50: 40.7 % vs 51.1 %). That is not evidence of RT artifacts, because the annotated
 transcripts show the same deficit: FSM with ≥ 3 PacBio reads reproduce in ONT at 18 / 29 /
 39 / 50 / 72 % without the flag and 6 / 11 / 21 / 29 / 55 % with it. `RTS_stage` marks a
@@ -129,7 +129,7 @@ pass-through, not adjudicated). The one unsupported novel chain the caller did p
 
 SQANTI3's RT-switching sign on validated isoforms. Of the experimentally supported
 targets IsoQuant reconstructed, `RTS_stage = TRUE` on 5 of 41 (PacBio; 3 FSM, 2 NIC) and
-7 of 40 (ONT; 3 FSM, 3 NIC, 1 NNC): a 12–18 % false-sign rate on isoforms that exist.
+7 of 40 (ONT; 3 FSM, 3 NIC, 1 NNC): a 12-18 % false-sign rate on isoforms that exist.
 PanIsoGuard consumes the sign as SQANTI3 reports it; this measured rate is why, since
 ruleset 0.0.5, the sign only annotates a call that short reads or whole-chain reads support
 (`;rt_switch_sign`) instead of holding it `UNCONFIRMED`, and why a sign alone never makes

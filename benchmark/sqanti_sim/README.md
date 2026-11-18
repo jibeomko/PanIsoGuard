@@ -62,7 +62,7 @@ same run read 4 false `NOVEL_PROBABLE`, precision 0.982, specificity 0.946, AUPR
 - Zero genuine_novel called ARTIFACT: it never wrongly rejected a real novel isoform.
 - The moderate recall (0.589) is abstention, not misclassification, but it has a cost
   (the SQANTI3 rules filter and the one-line short-read rule keep most of these isoforms at
-  ~0.93–0.99 precision; see [sqanti3_filter_h2h](../sqanti3_filter_h2h)):
+  ~0.93-0.99 precision; see [sqanti3_filter_h2h](../sqanti3_filter_h2h)):
   - NNC (novel-not-in-catalog) recall is 1.000: these carry
     novel junctions that the short-read axis corroborates.
   - NIC (novel-in-catalog) recall 0.477: NIC novelty is a *combination* of known

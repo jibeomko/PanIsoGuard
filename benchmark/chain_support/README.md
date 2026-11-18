@@ -43,12 +43,12 @@ them. Full numbers, including every off-to-on transition by truth label, in
   ESPRESSO (137 / 1).
 - Without short reads PanIsoGuard confirms nothing (and, since ruleset 0.0.5, rejects
   nothing either: the BAM-only `ARTIFACT` calls it used to make were 36 % wrong). With chain
-  support it decides 63–92 % of the isoforms at 0.7–1.3 % risk for FLAIR, IsoQuant and
+  support it decides 63-92 % of the isoforms at 0.7-1.3 % risk for FLAIR, IsoQuant and
   ESPRESSO.
 - Where it costs precision. Bambu and TALON's false novel chains are carried by reads
   too (they pass alignment artifacts through), so the lift adds false positives there: 15
   and 54 with short reads, 120 and 196 without. Their precision is low to begin with
-  (0.70–0.75) and barely moves, but a user of a permissive caller should know that read
+  (0.70-0.75) and barely moves, but a user of a permissive caller should know that read
   support cannot separate what the caller did not. Caller-level false chains (a caller
   stitching junctions no single read carries) are what the signal removes; alignment-level
   ones (every read carries the wrong chain) it cannot.
@@ -104,8 +104,8 @@ default stays 3; `[axis_chain] min_full_reads` is the knob.
 
 ## Decoy chains: how often does the lift fire on a chain the annotation does not know?
 
-`panisoguard decoys` recombines each gene's annotated transcripts: the 5′ introns of one joined
-to the 3′ introns of another at an intron they share, keeping only chains that are neither
+`panisoguard decoys` recombines each gene's annotated transcripts: the 5' introns of one joined
+to the 3' introns of another at an intron they share, keeping only chains that are neither
 annotated nor a contiguous piece of an annotated chain (at most 10 per gene, seed 1). Every
 junction is known, so these are exactly the NIC chains that only the chain axis can lift, and
 their whole-chain reads are counted with the same code the axis uses. `score_decoys.py`
@@ -129,12 +129,12 @@ the wrong ones reach 3 reads 4 / 3,014 times (0.13 %; 19 / 40,401 = 0.05 % witho
 where nothing expressed is unannotated, 0 / 3,198.
 
 - In simulation the lift almost never fires on a wrong combination of known junctions
-  (0–0.1 %) and always on the right ones. The decoy check recovers the truth set's own result
+  (0-0.1 %) and always on the right ones. The decoy check recovers the truth set's own result
   without the truth.
 - **On real data a third to a half of the recombinants of two expressed isoforms are carried by
   ≥ 3 reads.** They do not look like RT or PCR chimeras: the lifted decoys carry about as many
   reads as their parents (median 7 against the weaker parent's 5; read-count ratio to that
-  parent median 0.92–1.00, under 0.05 in fewer than 1 %), whereas a chimera is a small
+  parent median 0.92-1.00, under 0.05 in fewer than 1 %), whereas a chimera is a small
   fraction of the parent molecules. They look like combinatorial isoforms GENCODE does not
   list, in weakly expressed genes where 3 reads is most of the evidence there is. On real data
   the decoy rate is therefore an upper bound that mostly measures annotation incompleteness;
@@ -145,7 +145,7 @@ where nothing expressed is unannotated, 0 / 3,198.
   LRGASP PacBio, 18 % also have ≥ 3 reads in the ONT cDNA library of the same cells, against
   30 % of the annotated parents lifted in PacBio (the ONT library is shallower); from ONT to
   PacBio 73 % against 79 %; between the two Kinnex individuals 86 % / 92 % and 42 % / 52 %.
-  Restricted to decoys whose two parents are expressed in both libraries, 75–93 % of the
+  Restricted to decoys whose two parents are expressed in both libraries, 75-93 % of the
   lifted ones are lifted in the other library too. A chimera made during one library's
   reverse transcription would not recur in another platform or another person at the rate
   of the real transcripts.
@@ -157,7 +157,7 @@ where nothing expressed is unannotated, 0 / 3,198.
   distinct isoform from a rare recombinant of two expressed ones: that is why the lift stops at
   `NOVEL_PROBABLE`. The conditional column is a per-dataset knob: run `decoys` on your own
   BAM to see how combinatorial your expressed genes are at your depth before trusting the
-  lifted NIC calls as a set. 1–12 min genome-wide, 0.4 GB.
+  lifted NIC calls as a set. 1-12 min genome-wide, 0.4 GB.
 
 ## Reproduce
 

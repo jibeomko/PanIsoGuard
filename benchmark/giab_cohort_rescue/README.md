@@ -11,7 +11,7 @@ intron for a reference-bias splice site (`CREATED`: non-canonical on the linear
 reference, canonical on that individual's haplotype), and adjudicate the variant axis
 (`--haplotype-provenance wgs` for the rescue, `unknown` for the firewall).
 
-## Result (whole-genome, chr1–22)
+## Result (whole-genome, chr1-22)
 
 | individual | reference-bias junctions (`CREATED`) | rescued (`wgs`) | false rescues | firewall-held (circular) |
 |------------|:---:|:---:|:---:|:---:|
@@ -21,7 +21,7 @@ reference, canonical on that individual's haplotype), and adjudicate the variant
 | HG004 | 36 | 36 | 0 | 36 |
 | cohort | 137 | 137 / 137 (100 %) | 0 | 137 / 137 |
 
-Reading. Each personalized genome carries 31–37 genuine reference-bias splice
+Reading. Each personalized genome carries 31-37 genuine reference-bias splice
 junctions: junctions a *reference-only* pipeline would wrongly report as novel. PanIsoGuard's
 variant axis exonerates every one (137/137, 100 % sensitivity) with 0 false rescues,
 and the circularity firewall holds all 137 when the provenance is circular-risk. So the
