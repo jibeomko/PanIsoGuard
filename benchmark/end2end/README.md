@@ -39,7 +39,7 @@ Tools (each typically its own conda env): `pbsim3`, `minimap2`, `samtools`,
 ## Result (GENCODE v49 chr22; 150 transcripts, 30 hidden; 6000 PBSIM3 reads)
 
 FLAIR produced 397 isoforms (5019/6000 reads aligned). On the SQANTI-novel
-(NIC/NNC) set, scored by intron-chain truth (0.1.0 binary, ruleset 0.0.7, with the BAM):
+(NIC/NNC) set, scored by intron-chain truth (0.1.1 binary, ruleset 0.0.8, with the BAM):
 
 ```
             pred_genuine  pred_false  abstain

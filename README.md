@@ -139,9 +139,12 @@ not an estimate of accuracy on every sample.
 - **Real-data checks:** in LRGASP WTC11, none of the experimentally supported novel targets
   reconstructed by IsoQuant (17 PacBio, 16 ONT) is called an artifact. This subset checks
   retention of supported transcripts; it does not establish precision on all novel calls.
-- **Reference-bias scope:** 27 of 28 testable heterozygous junctions from two individuals
-  agree with the haplotype carrying the canonical motif. The pangenome rescue benchmark is
-  limited to HPRC chr22. A genomic explanation does not prove the full transcript is correct.
+- **Reference-bias scope:** judged on two individuals' own assemblies, 96 % of the junctions
+  attributed to the sample's genome (a variant at the splice site, or a deletion equal to the
+  junction) are confirmed, about half of those the assembly accounts for. 27 of 28 testable
+  heterozygous junctions agree with the haplotype carrying the canonical motif. The pangenome
+  rescue benchmark is limited to HPRC chr22. A genomic explanation does not prove the full
+  transcript is correct.
 - **Confidence classes:** these are evidence labels, not probabilities or an ordered score.
   Results depend on the supplied evidence and its coverage.
 

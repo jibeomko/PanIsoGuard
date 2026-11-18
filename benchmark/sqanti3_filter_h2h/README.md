@@ -146,5 +146,5 @@ whole-chain read support (151 of the 198), the ISM isoforms carried end to end m
 intra-priming, so the 3' sign cannot separate them here), and `UNRESOLVED` keeps the 6 false
 ones. Without the BAM `UNCONFIRMED` is two populations: ISM pass-through (154 / 13, 0.92) and
 novel isoforms with weak support (15 / 48, 0.24); with the BAM what remains is the weak-support
-novel set (23 / 36, 0.39), below the 0.83 base rate. Numbers from the 0.1.0 binary (ruleset
-`builtin-0.0.7`); `per_class_v010.txt` of `run.sh`'s work dir has every depth.
+novel set (23 / 36, 0.39), below the 0.83 base rate. Numbers from the 0.1.1 binary (ruleset
+`builtin-0.0.8`); `per_class_v011.txt` of `run.sh`'s work dir has every depth.

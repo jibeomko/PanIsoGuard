@@ -9,6 +9,11 @@ R = junctions the rescue fired on: novel junctions of REFERENCE_BIAS isoforms th
 non-canonical on GRCh38 and canonical on at least one SNV-consensus haplotype (the rule's own
 criterion, recomputed here so R is junction-level).
 
+With --vcf-arm (the run that reads every call of the assembly, insertions and deletions included,
+from one haploid VCF per haplotype) the same T is scored against what the tool itself reports in
+its junction table: V_rule = novel junctions it marks created or deleted and that the junction
+reads do not contradict, V = those inside REFERENCE_BIAS isoforms.
+
 Reports sensitivity |R and T|/|T| and precision |R and T|/|R| with bootstrap CIs, the same against the
 in-scope subset of T (the SNV class only), the breakdown of T minus R by label (what the rescue
 cannot see), R minus T (candidate false rescues, for inspection), the firewall check on the
@@ -54,6 +59,7 @@ def main():
     ap.add_argument("--classes", nargs="+", required=True, help="NAME=junction_classes.tsv per B arm")
     ap.add_argument("--out", default=None, help="metrics json (default $WORK/metrics.json)")
     ap.add_argument("--emit-metrics", default=None, help="also write the tracked envelope (benchmark/results/refbias_3way/metrics.json)")
+    ap.add_argument("--vcf-arm", default=None, help="output prefix of the --haplotype-vcf run (armC_vcf/wgs)")
     ap.add_argument("--label", default="HG03516", help="individual, the key under metrics.samples in the envelope (an existing envelope is updated in place)")
     a = ap.parse_args()
     W, D = a.work, a.data
@@ -96,6 +102,27 @@ def main():
            "rescued_isoforms": len(rescued), "R_junctions": len(R), "R_rule_junctions": len(R_rule),
            "firewall": firewall, "arms": {}}
 
+    # the VCF arm, from the tool's junction table
+    vcf = None
+    if a.vcf_arm:
+        jrow = {}
+        with open(a.vcf_arm + ".junctions.tsv") as f:
+            for p in csv.DictReader(f, delimiter="\t"):
+                if p["known"] == "false": jrow[(p["chrom"], int(p["start"]) - 1, int(p["end"]))] = p
+        with open(a.vcf_arm + ".adjudicated.tsv") as f: adj_v = {p["isoform_id"]: p for p in csv.DictReader(f, delimiter="\t")}
+        prov_v = dict(l.rstrip("\n").split("\t", 1) for l in open(a.vcf_arm + ".provenance.log") if "\t" in l and not l.startswith("#"))
+        explained = {k: p["variant"] for k, p in jrow.items() if p["variant"] in ("created", "deleted")}
+        V_rule = {k for k in explained if jrow[k]["read_phase"] != "contradicted"}
+        rescued_v = [i for i, p in adj_v.items() if p["confidence_class"] == "REFERENCE_BIAS"]
+        V = {k for iso in rescued_v for k in jx_of.get(iso, []) if k in V_rule}
+        vcf = {"rescued_isoforms": len(rescued_v),
+               "rescued_by_reason": dict(collections.Counter(adj_v[i]["verdict_reason"].split(";mapping_sign")[0] for i in rescued_v)),
+               "explained_junctions": dict(collections.Counter(explained.values())),
+               "read_phase": {v: dict(collections.Counter(jrow[k]["read_phase"] for k in explained if explained[k] == v)) for v in ("created", "deleted")},
+               "indels_applied_at_motifs": int(prov_v.get("haplotype_vcf_indels_applied_at_motifs", 0)),
+               "V_rule": len(V_rule), "V": len(V)}
+        out["vcf_route"] = vcf
+
     def why_missed(k, T):
         """Why a junction in T_snv got no rescue verdict."""
         if k not in R_rule: return "criterion-miss"
@@ -135,6 +162,20 @@ def main():
             "R_minus_T": sorted(f'{k[0]}:{k[1]}-{k[2]} label={lab[k]["label"] if k in lab else "absent"}' for k in R - T),
             "motif_disrupted_in_person": sum(1 for p in lab.values() if p["label"] == "same-noncanonical" and p["canonical_A"] == "True"),
         }
+        if vcf is not None:
+            by_label = lambda S: dict(collections.Counter(lab[k]["label"] if k in lab else "absent" for k in S))
+            T_unspliced = {k for k in T if lab[k]["label"] == "unspliced"}
+            created = {k for k in V_rule if explained[k] == "created"}; deleted = V_rule - created
+            arm["vcf_route"] = {
+                "V_rule": len(V_rule), "V_rule_and_T": len(V_rule & T), "precision": pr(V_rule & T, V_rule), "sensitivity": pr(V_rule & T, T),
+                "precision_ci": boot(V_rule & T, V_rule, lambda k: k in T), "sensitivity_ci": boot(V_rule & T, T, lambda k: k in V_rule),
+                "created": {"n": len(created), "in_T_snv_class": len(created & T_snv), "precision": pr(created & T_snv, created),
+                            "sensitivity_snv_class": pr(created & T_snv, T_snv), "other_by_label": by_label(created - T_snv)},
+                "deleted": {"n": len(deleted), "unspliced": len(deleted & T_unspliced), "precision": pr(deleted & T_unspliced, deleted),
+                            "sensitivity_unspliced": pr(deleted & T_unspliced, T_unspliced), "other_by_label": by_label(deleted - T_unspliced)},
+                "contradicted_by_reads_by_label": by_label(set(explained) - V_rule),
+                "V": len(V), "V_and_T": len(V & T), "precision_in_rescued_isoforms": pr(V & T, V),
+                "T_snv_missed": sorted(f"{k[0]}:{k[1]}-{k[2]}" for k in T_snv - created)}
         out["arms"][name] = arm
 
     # isoform level, A vs C: SQANTI3 rules filter verdict x PanIsoGuard class (novel isoforms only)
@@ -145,6 +186,11 @@ def main():
     xt = collections.Counter((rules[i], cls_C["wgs"][i]["confidence_class"]) for i in rules if i in cls_C["wgs"])
     out["isoform_A_vs_C"] = {f"SQ3rules={k[0]}|PIG={k[1]}": v for k, v in sorted(xt.items())}
     out["rescued_discarded_by_rules_filter"] = sum(1 for i in rescued if rules.get(i) == "Artifact")
+    if vcf is not None:   # what SQANTI3's rules filter does with the isoforms the VCF arm rescues, by reason
+        vcf["rescued_sqanti3_rules"] = {}
+        for i in rescued_v:
+            d = vcf["rescued_sqanti3_rules"].setdefault(adj_v[i]["verdict_reason"].split(";mapping_sign")[0], {})
+            d[rules.get(i, "not_filtered")] = d.get(rules.get(i, "not_filtered"), 0) + 1
 
     # cost table from /usr/bin/time outputs (+ arm A's alignment and IsoQuant from the original logs)
     cost = {}
@@ -165,6 +211,7 @@ def main():
         arms = {n: {k: v for k, v in arm.items() if k not in ("T_minus_R_snv_class", "R_minus_T", "labels")} for n, arm in out["arms"].items()}
         sample = {k: out[k] for k in ("n_novel_junctions_A", "n_noncanonical_A", "rescued_isoforms", "R_junctions",
                                       "R_rule_junctions", "firewall", "rescued_discarded_by_rules_filter", "cost")} | {"arms": arms}
+        if vcf is not None: sample["vcf_route"] = vcf
         samples = {}
         if os.path.exists(a.emit_metrics):
             try: samples = json.load(open(a.emit_metrics))["metrics"].get("samples", {})

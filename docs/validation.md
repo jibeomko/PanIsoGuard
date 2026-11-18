@@ -16,7 +16,14 @@ fixtures (including SJ.tab strand discrimination), cross-reader coordinate conve
 two-axis rule projection (mapping override, variant and pangenome circularity firewall),
 BAM read-level features, the splice-motif core, the pangenome rescue (all-or-nothing plus the
 provenance firewall), the decoy generator, and the input and output guards (write failures,
-an output that is an input, malformed GTF/BED12, config values out of range).
+an output that is an input, malformed GTF/BED12, config values out of range). Two property
+checks cover the VCF haplotype route: `integration_vcf_phase_matrix` (every pair of diploid
+genotypes at a two-variant motif, in one phase set, in two, and unphased) and
+`integration_vcf_random_invariance` (random files of substitutions, indels and symbolic
+alleles: the call must not depend on how the same haplotypes are written, each reported
+motif must equal the one read off the haplotype sequence, and `REFERENCE_BIAS` is allowed only
+when every reading of the file has a haplotype that explains the junctions). CI runs the suite
+a second time under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 ## Ground-truth validation
 
@@ -30,7 +37,7 @@ scale, on simulated reads and on real human variants.
 | [synthetic_axes](../benchmark/synthetic_axes) | synthetic contig, 4 labelled categories × 40, run through `adjudicate` in 4 configurations | the full configuration classifies all per truth (0 errors); the per-configuration differences isolate each axis (BAM for the mapping artifact, haplotype for the reference-bias rescue) |
 | [bam_axis](../benchmark/bam_axis) | chr22 SQANTI-SIM with `--bam`; the indel-near read fraction wired into the mapping mechanism | indel-near separates novel junctions (genuine max 0.191 vs false mean 0.133 over junctions with ≥ 3 spanning reads); gated at 0.5 it catches 14 of 120 false junctions with no genuine one flagged (before the 0.0.6 spanning-read gate, which counted every junction with ≥ 1 read: false mean 0.350, 41 of 124 caught) |
 | [gm12878_realdata](../benchmark/gm12878_realdata) | the BAM axis and the reference-bias rescue on the published GM12878 ONT direct-RNA data (ENCFF440ZML) | the raw indel-near fraction exceeds the HiFi-calibrated gate at 128 of 190 ONT junctions by chemistry alone (background 0.94); since ruleset 0.0.7 the gate reads the excess over each read's own indel rate and fires on none, so `--platform ont` changes nothing; the reference-bias scan finds 0 of 1,364 (a reference-grade genome); whole-chain reads work on ONT with exact coordinates (154 of 285 chains at ≥ 3 reads) |
-| [end2end](../benchmark/end2end) | PBSIM3, minimap2, FLAIR3, SQANTI3, then `adjudicate`; GENCODE chr22 (seeded, re-run with 0.1.0) | on the SQANTI-novel set (20 genuine, 249 false): precision 1.000, specificity 1.000; 19 genuine isoforms confirmed (16 `NOVEL_PROBABLE` through whole-chain reads, 3 `NOVEL_CONFIRMED`), 1 held; 239 of 249 false novels rejected (152 `ARTIFACT`, 87 `UNCONFIRMED`), 10 held |
+| [end2end](../benchmark/end2end) | PBSIM3, minimap2, FLAIR3, SQANTI3, then `adjudicate`; GENCODE chr22 (seeded, re-run with 0.1.1) | on the SQANTI-novel set (20 genuine, 249 false): precision 1.000, specificity 1.000; 19 genuine isoforms confirmed (16 `NOVEL_PROBABLE` through whole-chain reads, 3 `NOVEL_CONFIRMED`), 1 held; 239 of 249 false novels rejected (152 `ARTIFACT`, 87 `UNCONFIRMED`), 10 held |
 | [hg002](../benchmark/hg002) | GIAB HG002 v4.2.1 SNVs as a personalized haplotype, `--haplotype-provenance wgs` | the `REFERENCE_BIAS` rescue on real, WGS-derived (non-circular) variants: the one genuine case rescued, 0 false rescues |
 | [hg002_wholegenome](../benchmark/hg002) | the same scan over the whole genome (chr1-22, 597,781 GENCODE introns) | 33 reference-bias junctions genome-wide; 33 of 33 rescued, 0 false, 33 of 33 held by the firewall under circular-risk provenance |
 | [giab_cohort_rescue](../benchmark/giab_cohort_rescue) | the same scan on the four GIAB genomes (HG001-HG004) | 31-37 reference-bias junctions per genome, 137 in total; 137 rescued, 0 false, 137 held |
@@ -47,7 +54,7 @@ scale, on simulated reads and on real human variants.
 | [verdict_distribution](../benchmark/verdict_distribution) | descriptive: the verdict classes of the novel isoforms in the lrgasp_wtc11 and refbias_3way runs | Without short reads 37-66 % of a library's novel isoforms are lifted to probable and the rest held; with short reads the held ones become confirmed or artifact calls, except novel combinations of known junctions |
 | [rts_sensitivity](../benchmark/rts_sensitivity) | what the ruleset-0.0.5 RT-switch policy (a whole-chain or consensus lift stands with `;rt_switch_sign`) moves in every tracked run | SQANTI-SIM 26 / 0 and 57 / 0 genuine; end2end 4 / 0; LRGASP keeps the 4 validated isoforms the hold would have lost |
 | [lrgasp_wtc11](../benchmark/lrgasp_wtc11) | LRGASP's 89 WTC11 RT-PCR and amplicon-sequencing targets; our own IsoQuant / SQANTI3 / PanIsoGuard run on the public WTC11 PacBio cDNA, ONT cDNA and Illumina reads | of the supported NIC/NNC targets IsoQuant reconstructed and that are still novel in GENCODE v49 (17 PacBio, 16 ONT), PanIsoGuard discards none; SQANTI3's rules filter discards 2 and 4, all for `RTS_stage` |
-| [refbias_3way](../benchmark/refbias_3way) | the rescue against an independent standard: the same reads through GRCh38 (A), an SNV-personalized diploid (B1), the HPRC phased assembly (B2), and PanIsoGuard post hoc on A (C) | at the rule level 31 of 32 and 37 of 39 SNV-class junctions on B1 agree with the personal-genome alignment (the misses are reads from the other haplotype); at the verdict level 12 of 32 and 21 of 39, because the `REFERENCE_BIAS` verdict needs every novel junction of the isoform explained; shifted-known (indel / SV) junctions are out of scope by construction |
+| [refbias_3way](../benchmark/refbias_3way) | the rescue against an independent standard: the same reads through GRCh38 (A), an SNV-personalized diploid (B1), the HPRC phased assembly (B2), and PanIsoGuard post hoc on A with SNV-consensus FASTAs (C) and with the assembly's calls as VCFs, indels included (C-VCF) | C-VCF against B2: 255 of 265 and 171 of 179 junctions the tool attributes to the genome are confirmed (precision 0.96), 47 % and 53 % of those the assembly accounts for (33 of 35 and 41 of 43 splice-site variant junctions; 221 and 130 deletions equal to a junction); 144 and 108 `REFERENCE_BIAS` isoforms. C against B1: 31 of 32 and 37 of 39 SNV-class junctions at the rule level. A verdict needs every novel junction of the isoform explained; junctions an indel or SV moves to another position (shifted-known) are out of scope |
 | [sirv_multicaller](../benchmark/multicaller) | the multi-caller consensus on a second reference, Lexogen SIRV-Set4 | single-caller novel precision 0.037, ≥ 2 callers 1.000 against the SIRV hidden-chain truth (chr22: 0.012 and ≥ 3 callers 0.980) |
 | [sirv](../benchmark/sirv) | Lexogen SIRV-Set4 spike-in control | Specificity(false) 0.944, recall 1.000; the 3 false positives are FLAIR mis-collapses of individually real junctions, a documented limit of the short-read axis |
 | [calibration](../benchmark/calibration) | class to empirical P(genuine), train/test split | controlled Brier 0.0000 / ECE 0.0013; end-to-end Brier 0.0121 / ECE 0.0114 |
@@ -56,7 +63,7 @@ scale, on simulated reads and on real human variants.
 | [merge_comparison](../benchmark/merge_comparison) | `combine` against gffcompare -i, TAMA and a 0-20 bp wobble sweep on the same five-caller chr22 set | `combine` groups like gffcompare -i (same n_callers distribution and PR curve); ≥ 3-caller precision similar under every matcher on this set (0.975-0.980; at ≥ 2 callers 0.836-0.933); 4 of 769 genuine novel chains (TAMA) or 1 (wobble ≥ 5 bp) cross the single/multi-caller boundary (recounted 2026-11-01) |
 | [sqanti_sim](../benchmark/sqanti_sim) | SQANTI-SIM on GENCODE chr22: 769 transcripts deleted; PBSIM3 HiFi, FLAIR, SQANTI3, then `adjudicate` | precision 0.989, specificity 0.966, AUPRC 0.971 on the oracle junction set; the real baselines are in [sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) |
 | [pangenome](../benchmark/pangenome) | HPRC v1.1 Minigraph-Cactus chr22 graph, `vg deconstruct`, population-deletion junctions; the sample is not in the graph | 0 false rescues on real FLAIR novel junctions; the rescue fires when a novel intron is a population deletion (population provenance) and is held `UNRESOLVED` under circular-risk provenance |
-| [vcf_haplotypes](../benchmark/vcf_haplotypes) | `--haplotype-vcf` against `--reference-haplotype` on every variant-axis run on disk (HG002 chr22; HG03516 and HG02717, every chromosome, both parental haplotypes) | 93 runs: 767 of 767 isoforms keep their class and reason, 767 of 767 junctions their variant call and haplotype-1 motif; 302 junctions marked `phased`, none `unphased` |
+| [vcf_haplotypes](../benchmark/vcf_haplotypes) | `--haplotype-vcf` against `--reference-haplotype` on every variant-axis run on disk, all with SNV-only files, where the two inputs describe the same haplotypes (HG002 chr22; HG03516 and HG02717, every chromosome, both parental haplotypes) | 93 runs: 767 of 767 isoforms keep their class and reason, 767 of 767 junctions their variant call and haplotype-1 motif; 302 junctions marked `phased`, none `unphased` |
 
 **What the reference-bias numbers mean.** In `hg002`, `hg002_wholegenome`,
 `giab_cohort_rescue`, `hg03516_refbias` and `refbias_cohort` a junction is labelled
@@ -65,11 +72,14 @@ which is the criterion the variant rescue applies. "N of N rescued, 0 false, N o
 therefore shows that the rule is implemented as specified and that the provenance gate
 works; it is not independent evidence that these junctions are reference-bias artifacts.
 The motif-creating base is intronic, so reads that use the junction never contain it. The
-independent check is [refbias_phasing](../benchmark/refbias_phasing): for heterozygous
+independent checks are two. [refbias_phasing](../benchmark/refbias_phasing): for heterozygous
 junctions, do the reads that use the junction carry, at the gene's other heterozygous SNVs,
 the alleles of the haplotype that makes it canonical? In HG03516 and HG02717, 27 of 28
-testable junctions pass; the 34 homozygous junctions cannot be phased. The yield is
-30-45 junctions per divergent genome.
+testable junctions pass; the 34 homozygous junctions cannot be phased (`adjudicate --bam`
+makes this check per junction since 0.1.1). And [refbias_3way](../benchmark/refbias_3way):
+where the same reads splice on the person's own assembly. The yield is 30-45 splice-site
+junctions per divergent genome, and 130-230 novel junctions that equal a deletion in the
+person.
 
 **Accuracy against real baselines.** On the SQANTI-SIM truth set,
 [sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h) compares PanIsoGuard with the SQANTI3

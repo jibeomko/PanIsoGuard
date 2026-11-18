@@ -1,6 +1,7 @@
 # Reference bias three ways: GRCh38 pipeline vs personalized-genome pipeline vs PanIsoGuard
 
-Status: run on HG03516 and HG02717 (arms A, B1, B2, C; PanIsoGuard 0.0.6). Numbers:
+Status: run on HG03516 and HG02717 (arms A, B1, B2, C and, since 0.1.1, C with the assembly's
+calls as VCFs). Numbers:
 [Results](#results-hg03516-and-hg02717) below and
 [../results/refbias_3way/metrics.json](../results/refbias_3way/metrics.json).
 
@@ -21,8 +22,10 @@ full personalized-genome re-analysis of the same reads retains or discards. It a
 2. which reference-bias mechanisms the rescue cannot see by construction (indels, SVs,
    mapping shifts, motif-*disrupting* variants), and how large each is.
 
-Expected shape of the result: the rescue should recover most of the **splice-dinucleotide
-SNV** class (that is what it models) and none of the rest. Arm B1 below isolates the first;
+Expected shape of the result: with SNV-consensus FASTAs (arm C) the rescue should recover most
+of the **splice-dinucleotide SNV** class (that is what a FASTA in reference coordinates can
+carry) and none of the rest; with the assembly's calls as VCFs (arm C-VCF, 0.1.1) it also reads
+insertions and deletions at the motif and deletions equal to a junction. Arm B1 below isolates the first;
 the difference B2 - B1 measures the second. A sensitivity well below 100 % against the full
 personalized pipeline is the expected, reportable scope of the method, not a failure.
 
@@ -38,6 +41,7 @@ caller (IsoQuant 3.13, `pacbio_ccs`), the same annotation (GENCODE v49) and the 
 | B1 | SNV-personalized diploid: `mat_consensus.fa` + `pat_consensus.fa` (GRCh38 backbone with the haplotype's assembly SNVs applied; GRCh38 coordinates) | GENCODE v49, contigs renamed per haplotype | none (same coordinates) | SNV-mediated reference bias only, the component PanIsoGuard models |
 | B2 | HPRC R2 phased assembly, diploid: `mat.fa.gz` + `pat.fa.gz` (72 + 74 contigs, chromosome-scale) | GENCODE v49 lifted per haplotype with liftoff | lift junctions back to GRCh38 (`paftools.js liftover` on the asm5 PAF) + read-level cross-check | the full personalized pipeline: SNVs, indels, SVs, assembly-specific sequence |
 | C | GRCh38 (arm A's alignment and models) | GENCODE v49 | `panisoguard adjudicate --bam rna.aln.bam --reference GRCh38 --reference-haplotype mat_consensus.fa --reference-haplotype pat_consensus.fa --haplotype-provenance wgs` (no short reads exist for this sample, so the short-read axis is off) | PanIsoGuard post hoc on the reference-only pipeline |
+| C-VCF | as C | GENCODE v49 | the same with `--haplotype-vcf mat.hap.vcf.gz --haplotype-vcf pat.hap.vcf.gz` instead of the FASTAs: every `paftools.js call` record of each assembly haplotype against GRCh38 (3.8-4.0 M per haplotype: substitutions, insertions, deletions), one haploid VCF per haplotype | the same post-hoc run with the indels the consensus FASTAs leave out |
 
 Arm A alignment and IsoQuant come from [hg03516_refbias](../hg03516_refbias) (68,011
 models, 37,568 novel); `A_sqanti` runs SQANTI3 and its rules filter on all of them.
@@ -82,7 +86,9 @@ rescue's own criterion (non-canonical on GRCh38, canonical on a consensus haplot
 what the variant axis sees; `R` = novel junctions inside isoforms that got the
 `REFERENCE_BIAS` verdict (the verdict needs every novel junction of the isoform explained,
 and only NIC/NNC isoforms are adjudicated). `R_unknown` (provenance `unknown`) must be
-empty: the firewall check.
+empty: the firewall check. For arm C-VCF the sets are read from the tool's own junction table:
+`V_rule` = novel junctions it reports as `created` or `deleted` and that the junction reads do
+not contradict (`read_phase`), `V` = those inside `REFERENCE_BIAS` isoforms.
 
 ## Metrics
 
@@ -156,12 +162,14 @@ and 2,233 of them non-canonical on GRCh38. Where the same reads splice on the pe
 adds the SNV-class and shifted-known junctions that the SNV-only genome cannot show: indels
 and assembly-specific sequence at the splice site.
 
-`unspliced` is left out of `T_core`. B2's 499 (HG03516) are short introns (median 82 bp,
-55 % ≤ 100 bp; median 4 reads) at which minimap2 places a deletion instead of an intron on
-the diploid assembly; 308 of them are `same-canonical` on the SNV genome (B1, same
-coordinates), so the reads do splice there. That is alignment instability of short introns
-on a diploid assembly, not reference bias, and no post-hoc method could or should "rescue"
-it. HG02717 shows the same (271 on B2, 21 on B1).
+`unspliced` is left out of `T_core`. B2's 499 (HG03516) are short (median 82 bp, 55 % ≤ 100
+bp; median 4 reads): on the diploid assembly the reads run through the position without an
+intron. 308 of them are `same-canonical` on the SNV genome (B1), which has GRCh38's sequence
+there and so shows the same gap as GRCh38. The class holds two things: a deletion in the
+person that the GRCh38 pipeline reports as an intron (221 of the 499 equal a deletion in the
+assembly's own calls; the VCF arm below), and short introns that minimap2 renders as a deletion
+on the assembly. `T_core` keeps to the classes whose reading does not depend on that split.
+HG02717 shows the same (271 on B2, 21 on B1; 130 equal a deletion).
 
 ### Rule level and verdict level
 
@@ -181,8 +189,9 @@ The motif criterion itself finds 31 of 32 (HG03516) and 37 of 39 (HG02717) SNV-c
 junctions on B1. The `R_rule` junctions outside `T` (4 and 5) are `same-noncanonical` in the
 person: the haplotype with the canonical motif exists, but the reads come from the other
 one (the rescue is allele-agnostic; [refbias_phasing](../refbias_phasing) found
-the same 1-in-10). Shifted-known junctions (indel / SV mapping shifts) are never caught: the
-method does not model them.
+the same 1-in-10). Shifted-known junctions (indel / SV mapping shifts) are not caught: the
+FASTA route cannot carry indels (the VCF arm below reads them at the splice site, not where
+they move a junction to another position).
 
 The drop from `R_rule` to `R` (35 to 13 and 42 to 22) is not the criterion. Of the SNV-class
 junctions in `T_B1` without a rescue verdict (20 and 18): 15 and 10 sit in isoforms with
@@ -193,12 +202,66 @@ HG03516 (chr6:136,665,560-136,668,208) and one locus in HG02717 (three junctions
 acceptor chr6:130,022,220), all `same-noncanonical` in the person: candidate false rescues,
 1 of 13 and 1-3 of 22.
 
+### With the assembly's calls as VCFs: insertions, deletions and the reads' haplotype (0.1.1)
+
+Arm C-VCF, against the assembly arm B2 (B1 carries GRCh38's sequence wherever the person has
+an insertion or deletion, so it cannot label these):
+
+| | HG03516 | HG02717 |
+|---|---:|---:|
+| `T` on B2 (SNV class + shifted-known + unspliced) | 35 + 12 + 499 = 546 | 43 + 10 + 271 = 324 |
+| junctions the haplotypes explain: `created` / `deleted` | 37 / 229 | 45 / 135 |
+| of them contradicted by the junction reads | 1 | 1 |
+| `V_rule` | 265 | 179 |
+| `V_rule and T` | 255 | 171 |
+| precision (95 % CI) | 0.962 (0.94-0.98) | 0.955 (0.92-0.98) |
+| sensitivity over `T` (95 % CI) | 0.467 (0.42-0.51) | 0.528 (0.48-0.59) |
+| `created`: in the SNV class / all | 33 / 36 = 0.917 | 41 / 45 = 0.911 |
+| SNV-class junctions found | 33 / 35 = 0.943 | 41 / 43 = 0.953 |
+| `deleted`: `unspliced` on B2 / all | 221 / 229 = 0.965 | 130 / 134 = 0.970 |
+| `unspliced` junctions found | 221 / 499 = 0.443 | 130 / 271 = 0.480 |
+| `V` (junctions in `REFERENCE_BIAS` isoforms) | 107 (144 isoforms) | 81 (108 isoforms) |
+| `V and T` | 105 = 0.981 | 78 = 0.963 |
+
+- **The motif class.** Two more SNV-class junctions per individual than the FASTA route
+  (33 and 41 against 31 and 38 on B2): one made canonical by a 1-2 bp insertion or deletion
+  inside the motif, and chr19:41,565,056-41,565,563, where both haplotypes carry a 4-bp
+  insertion exactly at the acceptor and the 491 and 1,186 junction reads show that it is
+  intronic. The misses left (2 and 2) have no variant at the splice site in the call set. The
+  junctions `created` outside the class are `same-noncanonical` in the person (3 and 3) and
+  one `shifted-novel`; none has enough assigned reads to be contradicted.
+- **The reads' haplotype.** HG03516 chr3:184,709,997-184,735,943 is canonical on the maternal
+  haplotype only and all 3 assigned junction reads are paternal: `contradicted`, so the
+  junction is no longer counted as reference bias (its isoform is `genic`, a category that is
+  not adjudicated, so no verdict changes). That is the one junction
+  [refbias_phasing](../refbias_phasing) found contradicted, an alignment artifact, and
+  the precision of `created` rises from 0.886 to 0.917. Of the 37 and 45 `created` junctions,
+  13 and 16 are `consistent`, 8 and 14 `uninformative`, 15 and 15 explained on both haplotypes.
+- **Deletions equal to a junction.** 229 and 135 novel junctions of arm A equal a deletion one
+  of the assembly haplotypes carries against GRCh38. On the assembly, 221 and 130 of them are
+  `unspliced`: the reads run through without an intron, because the person's genome does not
+  have those bases. The GRCh38 pipeline reports each as a novel intron. Where the deletion is
+  heterozygous and at least 3 junction reads can be assigned, they come from the deletion
+  haplotype only at 20 of 23 (HG03516) and 21 of 24 (HG02717) junctions; 3 and 2 are `mixed`
+  and 1 (HG02717, in the IGH locus) is `contradicted`. This revises the reading of
+  `unspliced` above: 44-48 % of that class is a deletion in the person, not alignment
+  instability, and B1's `same-canonical` label for them says only that B1 has GRCh38's sequence
+  there. The other 278 and 141 `unspliced` junctions have no equal deletion in the call set.
+- **Verdicts.** 144 and 108 isoforms are `REFERENCE_BIAS` (18 and 28 with the FASTAs): 126 and
+  80 by `haplotype_deletion`, 18 and 28 by `haplotype_variant`. SQANTI3's rules filter in arm A
+  discards 142 and 104 of them (all of the `haplotype_variant` ones; 124 of 126 and 76 of 80 of
+  the deletions).
+- **Not seen.** `shifted-known` (12 and 10: the reads use an annotated junction at another
+  position in the person) stays out of reach: 1 of them equals a deletion, the rest need the
+  alignment on the personal genome.
+- **Cost.** One run, genome-wide with `--bam` and the two VCFs: 3.6 and 5.9 min, 0.6 GB.
+
 ### Isoform level, firewall, and what the rescue changes for a user
 
 SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated novel models
 and `Isoform` 9,253 (HG02717: 7,202 / 10,067). PanIsoGuard's `REFERENCE_BIAS` isoforms (18
 and 28) are all among the `Artifact`s in both individuals: without the rescue a user
-following the filter discards them. The rest (HG03516 / HG02717, 0.1.0 binary, ruleset 0.0.7):
+following the filter discards them. The rest (HG03516 / HG02717, 0.1.1 binary, ruleset 0.0.8):
 `NOVEL_PROBABLE` 7,068 / 8,364, every one with ≥ 3 whole-chain long reads (0.0.7 chain
 support; no short reads exist for these samples, so nothing is `CONFIRMED`): 5,775 / 7,007
 are SQANTI3 `Isoform`s and 1,293 / 1,357 are SQANTI3 `Artifact`s whose only sign is
@@ -230,7 +293,8 @@ with `circularity_flag`.
 | B2 | minimap2 splice:hq | 4 h 21 min | 38 GB | 3 h 32 min | 38 GB |
 | B2 | IsoQuant | 22 min (resumed after an OOM kill next to B1) | 5.9 GB | 1 h 37 min | 17 GB |
 | B2 | SQANTI3 | 8.9 min | 9.5 GB | 3.7 min | 9.4 GB |
-| C | `adjudicate` × 3 provenance runs, genome-wide with `--bam` | 10.3 min | 0.9 GB | 17.3 min | 0.9 GB |
+| C | `adjudicate` × 3 provenance runs, genome-wide with `--bam` | 10.9 min | 0.6 GB | 18.0 min | 0.6 GB |
+| C-VCF | `adjudicate`, one run with `--bam` and the two haploid VCFs | 3.6 min | 0.6 GB | 5.9 min | 0.6 GB |
 
 HG03516's B1 and B2 ran partly concurrently, so its walls are upper bounds; HG02717 ran
 sequentially (B1 7.0 h, B2 6.9 h end to end). The personalized pipelines cost 7-12 h and
@@ -248,5 +312,6 @@ gene/transcript/exon lines only, and both individuals' rows above are from that 
 
 `run.sh` (all arms; `SAMPLE=`, `WORK=` and tool paths as env vars), `classify_junctions.py`
 (read-level classes; `--same-coordinates` for B1, `--paf` liftover for B2), `score.py`
-(metrics, bootstrap, cost table; `--label <ID> --emit-metrics` adds the individual to the
+(metrics, bootstrap, cost table; `--vcf-arm armC_vcf/wgs` scores the VCF arm from the tool's
+junction table; `--label <ID> --emit-metrics` adds the individual to the
 tracked envelope checked by `benchmark/results/collect.py --check`).

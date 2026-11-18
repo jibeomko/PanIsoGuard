@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/sqanti_sim_ont/run.sh; benchmark/sqanti_sim_ont/emit_ont.py ROOT --emit-metrics ...",
   "data_provenance": "SQANTI-SIM on GENCODE v49 chr22, the design of benchmark/sqanti_sim reused unchanged (same reduced annotation, hidden transcripts and requested counts); reads re-simulated as ONT cDNA with NanoSim (SQANTI-SIM's pre-trained human WTC11 cDNA guppy model, 100,000 reads, seed 1); minimap2 -ax splice; FLAIR; SQANTI3 6.0.1; short reads none or 1 M wgsim pairs -> STAR 2-pass; SQANTI3 rules / ML / strict filters as in benchmark/sqanti3_filter_h2h. Public/simulated.",
-  "generated_utc": "2026-11-14T04:56:15Z",
+  "generated_utc": "2026-11-18T14:58:48Z",
   "metrics": {
     "bootstrap_auprc_diff_vs_SQ3rules_95ci_no_short_reads": {
       "PIG": [
@@ -198,9 +198,9 @@
   },
   "notes": "ONT counterpart of the chr22 truth set with the thresholds set on PacBio HiFi left untouched. Per short-read setting, non-FSM genuine-vs-false metrics per method as in sqanti3_filter_h2h (same bootstrap CIs), PanIsoGuard with the BAM under the default (hifi) preset and under --platform ont, the number of isoforms whose class differs between the presets, and, over the gated novel junctions, how many the raw indel-near fraction would flag against how many the excess over the reads' own indel rate flags (ruleset 0.0.7).",
   "protocol": "sqanti_sim_ont",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "gencode_v49_chr22_ont_nanosim_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

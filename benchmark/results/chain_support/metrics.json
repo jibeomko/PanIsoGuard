@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/chain_support/run.sh (adjudicate per caller with the chain axis ON = default and OFF = min_full_reads 1000000, with and without --sj-tab); benchmark/chain_support/score_chain.py",
   "data_provenance": "SQANTI-SIM GENCODE v49 chr22 (PBSIM3 HiFi, one shared minimap2 alignment) called by FLAIR, IsoQuant, Bambu, ESPRESSO and TALON (the benchmark/multicaller set), each classified with SQANTI3 6.0.1; short reads = 1 M wgsim pairs -> STAR (sqanti3_filter_h2h) or none. Public/simulated, no private data.",
-  "generated_utc": "2026-11-14T03:47:31Z",
+  "generated_utc": "2026-11-18T14:54:34Z",
   "metrics": {
     "bambu": {
       "n_genuine": 409,
@@ -339,6 +339,403 @@
           "lifted": 581,
           "n": 6278,
           "rate": 0.0925
+        }
+      }
+    },
+    "depth_share": {
+      "decoys": {
+        "hg02717_kinnex": {
+          "all": {
+            "kept_at_floor": {
+              "0.005": 3401,
+              "0.01": 2891,
+              "0.02": 2250,
+              "0.05": 1365,
+              "0.1": 878
+            },
+            "lifted": 4043,
+            "lowest_share": 0.0001,
+            "median_share": 0.0248
+          },
+          "both_parents_ge3": {
+            "kept_at_floor": {
+              "0.005": 1901,
+              "0.01": 1588,
+              "0.02": 1201,
+              "0.05": 695,
+              "0.1": 434
+            },
+            "lifted": 2308,
+            "lowest_share": 0.0001,
+            "median_share": 0.0215
+          }
+        },
+        "hg03516_kinnex": {
+          "all": {
+            "kept_at_floor": {
+              "0.005": 1884,
+              "0.01": 1711,
+              "0.02": 1433,
+              "0.05": 944,
+              "0.1": 614
+            },
+            "lifted": 1996,
+            "lowest_share": 0.0004,
+            "median_share": 0.0449
+          },
+          "both_parents_ge3": {
+            "kept_at_floor": {
+              "0.005": 911,
+              "0.01": 817,
+              "0.02": 664,
+              "0.05": 409,
+              "0.1": 259
+            },
+            "lifted": 976,
+            "lowest_share": 0.0007,
+            "median_share": 0.0377
+          }
+        },
+        "lrgasp_ont": {
+          "all": {
+            "kept_at_floor": {
+              "0.005": 736,
+              "0.01": 658,
+              "0.02": 547,
+              "0.05": 394,
+              "0.1": 275
+            },
+            "lifted": 848,
+            "lowest_share": 0.0001,
+            "median_share": 0.0411
+          },
+          "both_parents_ge3": {
+            "kept_at_floor": {
+              "0.005": 349,
+              "0.01": 293,
+              "0.02": 233,
+              "0.05": 159,
+              "0.1": 102
+            },
+            "lifted": 411,
+            "lowest_share": 0.0001,
+            "median_share": 0.0267
+          }
+        },
+        "lrgasp_pacbio": {
+          "all": {
+            "kept_at_floor": {
+              "0.005": 3142,
+              "0.01": 2805,
+              "0.02": 2236,
+              "0.05": 1419,
+              "0.1": 912
+            },
+            "lifted": 3415,
+            "lowest_share": 0.0002,
+            "median_share": 0.0361
+          },
+          "both_parents_ge3": {
+            "kept_at_floor": {
+              "0.005": 1708,
+              "0.01": 1508,
+              "0.02": 1167,
+              "0.05": 697,
+              "0.1": 409
+            },
+            "lifted": 1872,
+            "lowest_share": 0.0003,
+            "median_share": 0.0316
+          }
+        },
+        "sqsim_reduced": {
+          "all": {
+            "kept_at_floor": {
+              "0.005": 35,
+              "0.01": 35,
+              "0.02": 35,
+              "0.05": 35,
+              "0.1": 35
+            },
+            "lifted": 35,
+            "lowest_share": 0.2262,
+            "median_share": 1.0
+          },
+          "both_parents_ge3": {
+            "kept_at_floor": {
+              "0.005": 3,
+              "0.01": 3,
+              "0.02": 3,
+              "0.05": 3,
+              "0.1": 3
+            },
+            "lifted": 3,
+            "lowest_share": 0.4464,
+            "median_share": 0.5
+          },
+          "false": {
+            "kept_at_floor": {
+              "0.005": 4,
+              "0.01": 4,
+              "0.02": 4,
+              "0.05": 4,
+              "0.1": 4
+            },
+            "lifted": 4,
+            "lowest_share": 0.2909,
+            "median_share": 0.4486
+          },
+          "genuine": {
+            "kept_at_floor": {
+              "0.005": 31,
+              "0.01": 31,
+              "0.02": 31,
+              "0.05": 31,
+              "0.1": 31
+            },
+            "lifted": 31,
+            "lowest_share": 0.2262,
+            "median_share": 1.0
+          }
+        }
+      },
+      "floors": [
+        0.005,
+        0.01,
+        0.02,
+        0.05,
+        0.1
+      ],
+      "lrgasp_targets": {
+        "ont": {
+          "likely": {
+            "kept_at_floor": {
+              "0.005": 0,
+              "0.01": 0,
+              "0.02": 0,
+              "0.05": 0,
+              "0.1": 0
+            },
+            "lifted": 0,
+            "lowest_share": null,
+            "median_share": null
+          },
+          "supported": {
+            "kept_at_floor": {
+              "0.005": 23,
+              "0.01": 23,
+              "0.02": 20,
+              "0.05": 16,
+              "0.1": 14
+            },
+            "lifted": 25,
+            "lowest_share": 0.0024,
+            "median_share": 0.1172
+          },
+          "unsupported": {
+            "kept_at_floor": {
+              "0.005": 3,
+              "0.01": 3,
+              "0.02": 3,
+              "0.05": 2,
+              "0.1": 1
+            },
+            "lifted": 3,
+            "lowest_share": 0.0295,
+            "median_share": 0.0596
+          }
+        },
+        "pb": {
+          "likely": {
+            "kept_at_floor": {
+              "0.005": 1,
+              "0.01": 1,
+              "0.02": 1,
+              "0.05": 1,
+              "0.1": 1
+            },
+            "lifted": 1,
+            "lowest_share": 0.3393,
+            "median_share": 0.3393
+          },
+          "supported": {
+            "kept_at_floor": {
+              "0.005": 26,
+              "0.01": 25,
+              "0.02": 25,
+              "0.05": 22,
+              "0.1": 15
+            },
+            "lifted": 27,
+            "lowest_share": 0.0026,
+            "median_share": 0.1479
+          },
+          "unsupported": {
+            "kept_at_floor": {
+              "0.005": 0,
+              "0.01": 0,
+              "0.02": 0,
+              "0.05": 0,
+              "0.1": 0
+            },
+            "lifted": 0,
+            "lowest_share": null,
+            "median_share": null
+          }
+        }
+      },
+      "real_runs": {
+        "hg02717_kinnex": {
+          "kept_at_floor": {
+            "0.005": 8264,
+            "0.01": 8127,
+            "0.02": 7735,
+            "0.05": 5025,
+            "0.1": 3232
+          },
+          "lifted": 8364,
+          "lowest_share": 0.0002,
+          "median_share": 0.0677
+        },
+        "hg03516_kinnex": {
+          "kept_at_floor": {
+            "0.005": 7004,
+            "0.01": 6903,
+            "0.02": 6634,
+            "0.05": 4842,
+            "0.1": 3174
+          },
+          "lifted": 7068,
+          "lowest_share": 0.0001,
+          "median_share": 0.0852
+        },
+        "lrgasp_ont": {
+          "kept_at_floor": {
+            "0.005": 2695,
+            "0.01": 2628,
+            "0.02": 2445,
+            "0.05": 1774,
+            "0.1": 1291
+          },
+          "lifted": 2757,
+          "lowest_share": 0.0002,
+          "median_share": 0.0851
+        },
+        "lrgasp_pb": {
+          "kept_at_floor": {
+            "0.005": 8149,
+            "0.01": 8073,
+            "0.02": 7715,
+            "0.05": 4976,
+            "0.1": 3098
+          },
+          "lifted": 8194,
+          "lowest_share": 0.0004,
+          "median_share": 0.0667
+        }
+      },
+      "sqanti_sim": {
+        "flair": {
+          "false_novel": {
+            "kept_at_floor": {
+              "0.005": 4,
+              "0.01": 4,
+              "0.02": 4,
+              "0.05": 3,
+              "0.1": 3
+            },
+            "lifted": 4,
+            "lowest_share": 0.0476,
+            "median_share": 0.6022
+          },
+          "genuine_novel": {
+            "kept_at_floor": {
+              "0.005": 546,
+              "0.01": 546,
+              "0.02": 546,
+              "0.05": 546,
+              "0.1": 543
+            },
+            "lifted": 546,
+            "lowest_share": 0.0661,
+            "median_share": 1.0
+          }
+        },
+        "isoquant": {
+          "false_novel": {
+            "kept_at_floor": {
+              "0.005": 4,
+              "0.01": 4,
+              "0.02": 4,
+              "0.05": 3,
+              "0.1": 3
+            },
+            "lifted": 4,
+            "lowest_share": 0.0476,
+            "median_share": 0.6022
+          },
+          "genuine_novel": {
+            "kept_at_floor": {
+              "0.005": 430,
+              "0.01": 430,
+              "0.02": 430,
+              "0.05": 430,
+              "0.1": 429
+            },
+            "lifted": 430,
+            "lowest_share": 0.0721,
+            "median_share": 1.0
+          }
+        }
+      },
+      "tusco": {
+        "hg02717_kinnex": {
+          "kept_at_floor": {
+            "0.005": 2,
+            "0.01": 2,
+            "0.02": 2,
+            "0.05": 2,
+            "0.1": 2
+          },
+          "lifted": 3,
+          "lowest_share": 0.0042,
+          "median_share": 0.1389
+        },
+        "hg03516_kinnex": {
+          "kept_at_floor": {
+            "0.005": 0,
+            "0.01": 0,
+            "0.02": 0,
+            "0.05": 0,
+            "0.1": 0
+          },
+          "lifted": 0,
+          "lowest_share": null,
+          "median_share": null
+        },
+        "lrgasp_ont": {
+          "kept_at_floor": {
+            "0.005": 0,
+            "0.01": 0,
+            "0.02": 0,
+            "0.05": 0,
+            "0.1": 0
+          },
+          "lifted": 0,
+          "lowest_share": null,
+          "median_share": null
+        },
+        "lrgasp_pb": {
+          "kept_at_floor": {
+            "0.005": 0,
+            "0.01": 0,
+            "0.02": 0,
+            "0.05": 0,
+            "0.1": 0
+          },
+          "lifted": 0,
+          "lowest_share": null,
+          "median_share": null
         }
       }
     },
@@ -1080,9 +1477,9 @@
   },
   "notes": "Whole-chain read support (>= 3 primary reads carrying the entire intron chain, same BAM the callers used) lifts UNKNOWN-support isoforms to NOVEL_PROBABLE. It separates caller-level false chains (FLAIR, IsoQuant: their false novels mostly lack full-chain reads) from alignment-level ones (Bambu, ESPRESSO, TALON: their false novels are carried by reads too), so the lift is a recall gain at little precision cost for the former and a precision cost for the latter. Non-independent evidence by construction: it never reaches NOVEL_CONFIRMED and never overrides a short-read verdict. [decoys] `panisoguard decoys` recombines each gene's annotated transcripts at a shared intron into novel-in-catalog chains that are neither annotated nor a piece of an annotated chain, counts the reads carrying each end to end, and reports the fraction >= min_full_reads: a per-dataset upper bound on the chain axis's false-lift rate (some decoys are real, unannotated isoforms; on SQANTI-SIM the truth separates them). SIRV-Set4 (second truth set, PBSIM3 reads): read level replicates, flair: genuine 8/12 vs false 13/178 with >= 3 full-chain reads; isoquant: genuine 5/6 vs false 0/4 with >= 3 full-chain reads. Engine level not evaluable there: SQANTI3 classifies most FLAIR SIRV models antisense/intergenic (genuine chains by category: {'antisense': 7, 'novel_not_in_catalog': 4, 'intergenic': 1}), which PanIsoGuard does not adjudicate, and the adjudicated NNC carry mapping/noncanonical signs from the simulated reads, so ON == OFF.",
   "protocol": "chain_support",
-  "ruleset_version": "default-0.0.7",
+  "ruleset_version": "default-0.0.8",
   "scope": "gencode_v49_chr22_5caller_sqanti_sim",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

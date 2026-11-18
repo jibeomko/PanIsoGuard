@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Reference bias three ways (see README.md): the same Iso-Seq reads through the GRCh38
 # pipeline (A), an SNV-personalized diploid (B1), the HPRC phased assembly (B2), and
-# PanIsoGuard post hoc on A (C). Builds on the hg03516_refbias outputs in $DATA.
+# PanIsoGuard post hoc on A: with the two SNV-consensus FASTAs (C) and with every call of the
+# assembly, insertions and deletions included, as one haploid VCF per haplotype (C_vcf).
+# Builds on the hg03516_refbias outputs in $DATA.
 #
 # Usage: run.sh <stage>...   or   run.sh all
 # Stages are idempotent (each returns early when its final output exists) and each is
@@ -21,10 +23,11 @@ SAMTOOLS="${SAMTOOLS:-$CONDA/sqanti3/bin/samtools}"
 ISOQUANT="${ISOQUANT:-$CONDA/isoquant/bin/isoquant}"
 LIFTOFF="${LIFTOFF:-$CONDA/liftoff/bin/liftoff}"
 SQ3BIN="${SQ3BIN:-$CONDA/sqanti3/bin}"
+BCFTOOLS="${BCFTOOLS:-$CONDA/pigval/bin/bcftools}"
 export PATH="$SQ3BIN:$PATH"   # sqanti3_qc.py's `#!/usr/bin/env python` must find its own env
-ALL="A_sqanti B1_build B1_align B1_isoquant B1_sqanti B2_paf B2_liftoff B2_build B2_align B2_isoquant B2_sqanti C_adjudicate"
+ALL="A_sqanti B1_build B1_align B1_isoquant B1_sqanti B2_paf B2_liftoff B2_build B2_align B2_isoquant B2_sqanti C_adjudicate C_vcf"
 
-mkdir -p "$WORK"/{armA,armB1,armB2,armC,paf}; cd "$WORK"
+mkdir -p "$WORK"/{armA,armB1,armB2,armC,armC_vcf,paf}; cd "$WORK"
 log() { echo "[$(date '+%F %T')] $*"; }
 
 # Outer invocation: run each stage in a child under /usr/bin/time so wall/RSS are recorded.
@@ -115,6 +118,22 @@ C_adjudicate() {
   "$PIG" adjudicate "${common[@]}" --out-prefix armC/nohap > armC/nohap.log 2>&1
   "$PIG" adjudicate "${common[@]}" "${haps[@]}" --haplotype-provenance wgs     --out-prefix armC/wgs > armC/wgs.log 2>&1
   "$PIG" adjudicate "${common[@]}" "${haps[@]}" --haplotype-provenance unknown --out-prefix armC/unk > armC/unk.log 2>&1
+}
+
+# ---- C with the assembly's own calls: substitutions, insertions and deletions ----------
+# $DATA/<H>.vcf is `paftools.js call` of one assembly haplotype against GRCh38 (geno.sh); it
+# writes every genotype as 1/1, and one haplotype per file is GT 1.
+C_vcf() {
+  [ -s armC_vcf/wgs.adjudicated.tsv ] && return
+  for H in mat pat; do
+    [ -s "$DATA/$H.hap.vcf.gz.tbi" ] && continue
+    "$BCFTOOLS" sort "$DATA/$H.vcf" 2> /dev/null | sed 's/\t1\/1$/\t1/' | bgzip -c > "$DATA/$H.hap.vcf.gz"
+    tabix -f -p vcf "$DATA/$H.hap.vcf.gz"
+  done
+  "$PIG" adjudicate --classification armA/sq/iq_classification.txt --isoforms-gtf "$DATA/isoquant_out/iq/iq.transcript_models.gtf" \
+    --ref-gtf "$REFGTF" --bam "$DATA/rna.aln.bam" --reference "$GRCH38" \
+    --haplotype-vcf "$DATA/mat.hap.vcf.gz" --haplotype-vcf "$DATA/pat.hap.vcf.gz" --haplotype-provenance wgs \
+    --out-prefix armC_vcf/wgs > armC_vcf/wgs.log 2>&1
 }
 
 for s in "$@"; do "$s"; done

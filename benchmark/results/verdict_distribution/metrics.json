@@ -1,7 +1,7 @@
 {
   "command": "benchmark/verdict_distribution/score_distribution.py --run LABEL=x.adjudicated.tsv ... --emit-metrics benchmark/results/verdict_distribution/metrics.json",
   "data_provenance": "real public data, adjudicated tables written by benchmark/lrgasp_wtc11 (LRGASP WTC11 PacBio and ONT cDNA, IsoQuant 3.13 vs GENCODE v49, with and without the Illumina SJ.tab) and benchmark/refbias_3way (HPRC R2 HG03516 and HG02717 Kinnex Iso-Seq, IsoQuant vs GENCODE v49, personal haplotypes from the HPRC assemblies, no short reads). No private data.",
-  "generated_utc": "2026-11-14T03:47:33Z",
+  "generated_utc": "2026-11-18T14:54:35Z",
   "metrics": {
     "hg02717_kinnex": {
       "all": {
@@ -220,9 +220,9 @@
   },
   "notes": "Per run: confidence_class counts over all isoforms and over SQANTI3 NIC + NNC isoforms; how many NOVEL_PROBABLE calls carry the rt_switch_sign annotation; the verdict_reason behind UNCONFIRMED (held on a sign) and UNRESOLVED (undecided) novel calls. Descriptive: what a user sees after one run, not an accuracy claim.",
   "protocol": "verdict_distribution",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "real_data_verdict_distribution_lrgasp_wtc11_hprc_kinnex",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

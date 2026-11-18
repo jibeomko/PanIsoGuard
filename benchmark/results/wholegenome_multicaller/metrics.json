@@ -69,9 +69,9 @@
   },
   "notes": "Whole-genome real-data extension of the chr22 multicaller protocol; Read with its caveats. (1) Disagreement holds at genome scale: of the novel chains, the large majority are single-caller and only a small minority are recovered by >= 2 callers -- callers disagree on most novel calls even on real data, the same motivation as chr22. (2) The quality direction is correct but the headroom is small: multi-caller novel chains are 100% canonical while single-caller are already ~97.6% canonical. Production callers at recommended settings (IsoQuant, Bambu, ESPRESSO) are internally stringent, so they emit few non-canonical artifacts for consensus to filter -- a ceiling effect, and the absolute novel count is small (real cell line, most transcripts are known). The strong artifact-filtering on chr22 (single-caller precision 0.012) came largely from the liberal end (unfiltered TALON's false novels); at recommended settings callers are cleaner. On real data with stringent callers, the practical value of consensus is the reproducible high-confidence core + confidence stratification, not large-scale artifact removal. Small N: interpret the +canonical delta directionally.",
   "protocol": "wholegenome_multicaller",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "gm12878_wholegenome_3caller",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

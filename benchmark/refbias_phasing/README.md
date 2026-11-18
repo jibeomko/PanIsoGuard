@@ -44,12 +44,43 @@ U12 type), the paternal AC-AC. All 3 phased junction reads are paternal, and all
 insertion 3 bp upstream of the donor (`57M2I3M25946N...`), so the junction coordinate looks like an
 alignment artifact rather than maternal splicing. PanIsoGuard's BAM axis would flag these reads
 (indel-near fraction 1.0 > 0.5), but the reference-bias rescue is checked before the mapping
-mechanism, so it is rescued anyway. Letting a mapping flag block the rescue is *not* a clean fix:
+mechanism, so the mapping sign does not stop it. Letting a mapping flag block the rescue is *not* a clean fix:
 HG02717 chr2:88861556-88947305 also has indel-near 1.0 on all 81 junction reads and passes the
-phasing test (11/11 phased reads from H).
+phasing test (11/11 phased reads from H). The haplotype of the reads is: since 0.1.1 the tool makes
+this check itself (below) and does not count the junction.
 
 Three heterozygous junctions below the 3-read threshold lean the same way: HG03516
 chr6:136665560 (1 H, 1 O), chr7:45791846 (0 H, 2 O) and HG02717 chr4:56466745 (0 H, 2 O).
+
+## The same check inside the tool (0.1.1)
+
+Since 0.1.1 `adjudicate --bam` makes this check for every junction that some of the sample's
+haplotypes explain and others do not, and reports it in the junction table (`read_phase`,
+`read_phase_n_motif`, `read_phase_n_other`). The read assignment is the script's: a junction
+read goes to the haplotypes it agrees with at 2 more heterozygous single-base sites than with
+the others. The tool looks at the junction reads only (the first 200), so it does not ask that
+the other haplotype be seen at the locus; with at least 3 assigned reads a junction is
+`consistent` (none from a haplotype that does not explain it), `contradicted` (none from one
+that does) or `mixed`, and a `contradicted` junction is not counted as explained.
+
+On the [refbias_3way](../refbias_3way) runs with the SNV-consensus FASTAs (arm C):
+
+| | HG03516 | HG02717 |
+|---|---:|---:|
+| novel junctions `created` on a haplotype | 35 | 42 |
+| on both haplotypes, or one unreadable (`NA`) | 14 | 13 |
+| fewer than 3 assigned reads (`uninformative`) | 7 | 13 |
+| `consistent` | 13 | 16 |
+| `contradicted` | 1 | 0 |
+| `mixed` | 0 | 0 |
+
+The `consistent` counts are the script's 11 and 16 plus the junctions it set aside because the
+other haplotype was not seen at the locus; the one `contradicted` junction is the same
+(chr3:184709997-184735943, 0 and 3 reads). It sits in a `genic` isoform, which is not
+adjudicated, so no verdict changes; in the junction table it no longer counts as reference
+bias. With the assembly's insertions and deletions read from VCFs the same check covers the
+junctions that equal a deletion: 20 of 23 and 21 of 24 testable ones are `consistent`
+([refbias_3way](../refbias_3way)).
 
 ## Caveats
 

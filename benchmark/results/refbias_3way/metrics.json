@@ -1,7 +1,7 @@
 {
   "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
   "data_provenance": "real public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
-  "generated_utc": "2026-11-14T03:28:38Z",
+  "generated_utc": "2026-11-18T14:35:13Z",
   "metrics": {
     "samples": {
       "HG02717": {
@@ -52,7 +52,52 @@
             "sensitivity_snv_class_ci": [
               0.38461538461538464,
               0.6923076923076923
-            ]
+            ],
+            "vcf_route": {
+              "T_snv_missed": [
+                "chr17:5461351-5462264",
+                "chr1:192645368-192647924"
+              ],
+              "V": 81,
+              "V_and_T": 22,
+              "V_rule": 179,
+              "V_rule_and_T": 38,
+              "contradicted_by_reads_by_label": {
+                "same-noncanonical": 1
+              },
+              "created": {
+                "in_T_snv_class": 37,
+                "n": 45,
+                "other_by_label": {
+                  "same-noncanonical": 8
+                },
+                "precision": 0.8222222222222222,
+                "sensitivity_snv_class": 0.9487179487179487
+              },
+              "deleted": {
+                "n": 134,
+                "other_by_label": {
+                  "same-canonical": 78,
+                  "same-noncanonical": 51,
+                  "shifted-novel": 3,
+                  "unassessable": 1
+                },
+                "precision": 0.007462686567164179,
+                "sensitivity_unspliced": 0.047619047619047616,
+                "unspliced": 1
+              },
+              "precision": 0.2122905027932961,
+              "precision_ci": [
+                0.1564245810055866,
+                0.27932960893854747
+              ],
+              "precision_in_rescued_isoforms": 0.2716049382716049,
+              "sensitivity": 0.5352112676056338,
+              "sensitivity_ci": [
+                0.4084507042253521,
+                0.647887323943662
+              ]
+            }
           },
           "B2": {
             "R": 22,
@@ -99,7 +144,52 @@
             "sensitivity_snv_class_ci": [
               0.3023255813953488,
               0.5813953488372093
-            ]
+            ],
+            "vcf_route": {
+              "T_snv_missed": [
+                "chr17:5461351-5462264",
+                "chr1:192645368-192647924"
+              ],
+              "V": 81,
+              "V_and_T": 78,
+              "V_rule": 179,
+              "V_rule_and_T": 171,
+              "contradicted_by_reads_by_label": {
+                "unassessable": 1
+              },
+              "created": {
+                "in_T_snv_class": 41,
+                "n": 45,
+                "other_by_label": {
+                  "same-noncanonical": 3,
+                  "shifted-novel": 1
+                },
+                "precision": 0.9111111111111111,
+                "sensitivity_snv_class": 0.9534883720930233
+              },
+              "deleted": {
+                "n": 134,
+                "other_by_label": {
+                  "same-canonical": 1,
+                  "shifted-novel": 2,
+                  "unassessable": 1
+                },
+                "precision": 0.9701492537313433,
+                "sensitivity_unspliced": 0.4797047970479705,
+                "unspliced": 130
+              },
+              "precision": 0.9553072625698324,
+              "precision_ci": [
+                0.9217877094972067,
+                0.9832402234636871
+              ],
+              "precision_in_rescued_isoforms": 0.9629629629629629,
+              "sensitivity": 0.5277777777777778,
+              "sensitivity_ci": [
+                0.47530864197530864,
+                0.5864197530864198
+              ]
+            }
           }
         },
         "cost": {
@@ -152,8 +242,12 @@
             "wall": "3:39.43"
           },
           "C_adjudicate": {
-            "max_rss_gb": 0.9,
-            "wall": "17:20.90"
+            "max_rss_gb": 0.6,
+            "wall": "18:02.77"
+          },
+          "C_vcf": {
+            "max_rss_gb": 0.6,
+            "wall": "5:52.03"
           }
         },
         "firewall": {
@@ -164,7 +258,44 @@
         "n_noncanonical_A": 2233,
         "n_novel_junctions_A": 16014,
         "rescued_discarded_by_rules_filter": 28,
-        "rescued_isoforms": 28
+        "rescued_isoforms": 28,
+        "vcf_route": {
+          "V": 81,
+          "V_rule": 179,
+          "explained_junctions": {
+            "created": 45,
+            "deleted": 135
+          },
+          "indels_applied_at_motifs": 256,
+          "read_phase": {
+            "created": {
+              "NA": 15,
+              "consistent": 16,
+              "uninformative": 14
+            },
+            "deleted": {
+              "NA": 103,
+              "consistent": 21,
+              "contradicted": 1,
+              "mixed": 2,
+              "uninformative": 8
+            }
+          },
+          "rescued_by_reason": {
+            "haplotype_deletion": 80,
+            "haplotype_variant": 28
+          },
+          "rescued_isoforms": 108,
+          "rescued_sqanti3_rules": {
+            "haplotype_deletion": {
+              "Artifact": 76,
+              "Isoform": 4
+            },
+            "haplotype_variant": {
+              "Artifact": 28
+            }
+          }
+        }
       },
       "HG03516": {
         "R_junctions": 13,
@@ -214,7 +345,51 @@
             "sensitivity_snv_class_ci": [
               0.21875,
               0.5625
-            ]
+            ],
+            "vcf_route": {
+              "T_snv_missed": [
+                "chr1:6548256-6549178"
+              ],
+              "V": 107,
+              "V_and_T": 12,
+              "V_rule": 265,
+              "V_rule_and_T": 33,
+              "contradicted_by_reads_by_label": {
+                "same-noncanonical": 1
+              },
+              "created": {
+                "in_T_snv_class": 31,
+                "n": 36,
+                "other_by_label": {
+                  "same-noncanonical": 5
+                },
+                "precision": 0.8611111111111112,
+                "sensitivity_snv_class": 0.96875
+              },
+              "deleted": {
+                "n": 229,
+                "other_by_label": {
+                  "same-canonical": 140,
+                  "same-noncanonical": 78,
+                  "shifted-novel": 8,
+                  "unassessable": 1
+                },
+                "precision": 0.008733624454148471,
+                "sensitivity_unspliced": 0.04081632653061224,
+                "unspliced": 2
+              },
+              "precision": 0.12452830188679245,
+              "precision_ci": [
+                0.08679245283018867,
+                0.1660377358490566
+              ],
+              "precision_in_rescued_isoforms": 0.11214953271028037,
+              "sensitivity": 0.375,
+              "sensitivity_ci": [
+                0.2727272727272727,
+                0.4772727272727273
+              ]
+            }
           },
           "B2": {
             "R": 13,
@@ -260,7 +435,52 @@
             "sensitivity_snv_class_ci": [
               0.2,
               0.5142857142857142
-            ]
+            ],
+            "vcf_route": {
+              "T_snv_missed": [
+                "chr1:226399109-226399314",
+                "chr1:6548256-6549178"
+              ],
+              "V": 107,
+              "V_and_T": 105,
+              "V_rule": 265,
+              "V_rule_and_T": 255,
+              "contradicted_by_reads_by_label": {
+                "same-noncanonical": 1
+              },
+              "created": {
+                "in_T_snv_class": 33,
+                "n": 36,
+                "other_by_label": {
+                  "same-noncanonical": 3
+                },
+                "precision": 0.9166666666666666,
+                "sensitivity_snv_class": 0.9428571428571428
+              },
+              "deleted": {
+                "n": 229,
+                "other_by_label": {
+                  "same-canonical": 2,
+                  "shifted-known": 1,
+                  "shifted-novel": 2,
+                  "unassessable": 3
+                },
+                "precision": 0.9650655021834061,
+                "sensitivity_unspliced": 0.44288577154308617,
+                "unspliced": 221
+              },
+              "precision": 0.9622641509433962,
+              "precision_ci": [
+                0.9358490566037736,
+                0.9849056603773585
+              ],
+              "precision_in_rescued_isoforms": 0.9813084112149533,
+              "sensitivity": 0.46703296703296704,
+              "sensitivity_ci": [
+                0.4249084249084249,
+                0.5091575091575091
+              ]
+            }
           }
         },
         "cost": {
@@ -313,8 +533,12 @@
             "wall": "8:56.00"
           },
           "C_adjudicate": {
-            "max_rss_gb": 0.9,
-            "wall": "10:20.42"
+            "max_rss_gb": 0.6,
+            "wall": "10:51.14"
+          },
+          "C_vcf": {
+            "max_rss_gb": 0.6,
+            "wall": "3:34.51"
           }
         },
         "firewall": {
@@ -325,15 +549,52 @@
         "n_noncanonical_A": 2959,
         "n_novel_junctions_A": 21099,
         "rescued_discarded_by_rules_filter": 18,
-        "rescued_isoforms": 18
+        "rescued_isoforms": 18,
+        "vcf_route": {
+          "V": 107,
+          "V_rule": 265,
+          "explained_junctions": {
+            "created": 37,
+            "deleted": 229
+          },
+          "indels_applied_at_motifs": 410,
+          "read_phase": {
+            "created": {
+              "NA": 15,
+              "consistent": 13,
+              "contradicted": 1,
+              "uninformative": 8
+            },
+            "deleted": {
+              "NA": 189,
+              "consistent": 20,
+              "mixed": 3,
+              "uninformative": 17
+            }
+          },
+          "rescued_by_reason": {
+            "haplotype_deletion": 126,
+            "haplotype_variant": 18
+          },
+          "rescued_isoforms": 144,
+          "rescued_sqanti3_rules": {
+            "haplotype_deletion": {
+              "Artifact": 124,
+              "Isoform": 2
+            },
+            "haplotype_variant": {
+              "Artifact": 18
+            }
+          }
+        }
       }
     }
   },
   "notes": "Unit = GRCh38 novel junction of arm A, labelled by where the SAME reads splice on the personal genome. T = same-canonical (non-canonical on GRCh38) + shifted-known + unspliced; T_core drops unspliced (short introns that minimap2 renders as a deletion on the diploid assembly, median 82 bp; 308/499 of B2's are spliced on the SNV genome B1). R_rule = junctions meeting the rescue's own criterion (what the axis sees); R = junctions inside isoforms that got the REFERENCE_BIAS verdict (needs ALL of the isoform's novel junctions explained, NIC/NNC only). The gap R_rule -> R (35 -> 13) is the all-junctions rule and the category pass-throughs, not the motif criterion. Precision misses (4/35) are junctions whose reads come from the non-canonical haplotype. Firewall: 0 rescues under unknown provenance, 18/18 held.",
   "protocol": "refbias_3way",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "hprc_r2_grch38_vs_personalized_pipelines",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

@@ -16,20 +16,25 @@ show the precision-recall trade-offs under each tested input configuration.
   isoform gets one of 8 classes and a `rule_trace` that scripts can read. You can keep `NOVEL_CONFIRMED` and `NOVEL_PROBABLE` and
   review the rest, instead of looking at reads one by one.
 - **You have the sample's haplotypes or a pangenome** and want to investigate possible
-  *reference bias*: splice motifs made canonical by sample variants, or junctions supported
-  by population paths. Population support does not establish the sample's genotype or
-  expression. A provenance gate prevents RNA-derived or unknown-source genomic inputs from
-  providing an independent rescue explanation. Expect only a few such
-  junctions (about 30-45 in a genome that differs a lot from the reference). On two such
-  genomes, a phasing check agreed for 27 of 28 testable heterozygous junctions: the reads that
-  use the junction come from the haplotype on which it is canonical
-  ([benchmark/refbias_phasing](../benchmark/refbias_phasing)). Homozygous junctions cannot be
-  checked this way. Against a full personalized-genome re-analysis of the same reads
-  (HG03516 and HG02717, [benchmark/refbias_3way](../benchmark/refbias_3way)), the rescue
-  criterion finds 31 of 32 and 37 of 39 splice-site-SNV junctions the personal genome makes
-  canonical, in 3-6 minutes instead of 7-11 hours; as isoform verdicts it recovers 12 of 32
-  and 21 of 39, because a verdict needs every novel junction of the isoform explained.
-  Junctions moved by indels or structural variants it does not see.
+  *reference bias*: splice motifs made canonical by sample variants, deletions in the sample
+  that a reference pipeline reports as introns, or junctions supported by population paths.
+  Population support does not establish the sample's genotype or expression. A provenance gate
+  prevents RNA-derived or unknown-source genomic inputs from providing an independent rescue
+  explanation. Against a full personalized-genome re-analysis of the same reads (HG03516 and
+  HG02717, [benchmark/refbias_3way](../benchmark/refbias_3way)), with the assembly's variant
+  calls given as VCFs, 255 of 265 and 171 of 179 junctions PanIsoGuard attributes to the
+  genome are confirmed on the person's assembly (precision 0.96). That is 47 % and 53 % of the
+  junctions the assembly accounts for: 33 of 35 and 41 of 43 made canonical by a variant at the
+  splice site, and 221 and 130 that equal a deletion in the person. One run takes 4-6 minutes
+  instead of the 7-11 hours of the personalized pipeline. Consensus FASTAs carry substitutions
+  only and reach the splice-site SNV class alone (31 of 32 and 37 of 39 on an SNV-personalized
+  genome). As isoform verdicts fewer are recovered, because a verdict needs every novel
+  junction of the isoform explained (144 and 108 isoforms). The reads that use a junction
+  explained on one haplotype come from that haplotype at 27 of 28 testable junctions
+  ([benchmark/refbias_phasing](../benchmark/refbias_phasing)); `adjudicate --bam` makes the
+  same check per junction and does not count a contradicted one. Homozygous junctions cannot
+  be checked this way. A junction that an indel or structural variant moves to another
+  position it does not see.
 
 PanIsoGuard evaluates existing caller output. It can consume SQANTI3's QC results or compute
 structural categories, splice motifs and downstream A content with `--no-sqanti3`; that mode
@@ -144,6 +149,7 @@ One thread, one `adjudicate` run with the long-read BAM, measured with `/usr/bin
 | LRGASP WTC11 PacBio, IsoQuant | 78,256 | 3.5 GB | SJ.tab | 2.2 min | 0.59 GB |
 | LRGASP WTC11 ONT, IsoQuant | 39,542 | 12.4 GB | SJ.tab | 5.9 min | 0.44 GB |
 | HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | Two haplotype FASTAs | 3.3 min | 0.47 GB |
+| HG03516 Kinnex, IsoQuant | 68,011 | 5.1 GB | Two haploid VCFs (8.0 M records) | 3.6 min | 0.6 GB |
 | `decoys` on the same BAMs | 139,003 decoys | | | 1-12 min | 0.41 GB |
 
 Building the GENCODE v49 catalog takes about 3 s of that; the rest is reading the BAM at each

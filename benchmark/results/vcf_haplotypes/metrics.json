@@ -1,11 +1,12 @@
 {
   "command": "bash benchmark/vcf_haplotypes/run.sh; benchmark/vcf_haplotypes/compare_routes.py LABEL:FASTA_PREFIX:VCF_PREFIX ... --emit-metrics ...",
   "data_provenance": "The variant-axis runs already on disk, re-run with the haplotypes read from a VCF instead of consensus FASTAs: HG002 chr22 (GIAB v4.2.1 biallelic SNVs; FASTA = bcftools consensus -H 1 of the same file; benchmark/hg002) and every per-chromosome scan of HG03516 and HG02717 (paftools SNV calls per parental HPRC R2 assembly, consensus FASTA per haplotype; benchmark/hg03516_refbias). Public GIAB / HPRC / GENCODE v49.",
-  "generated_utc": "2026-11-14T12:29:54Z",
+  "generated_utc": "2026-11-18T14:12:54Z",
   "metrics": {
     "per_sample": {
       "HG002": {
         "differences": [],
+        "indels_applied": 0,
         "isoforms": 8,
         "isoforms_missing_in_vcf_run": 0,
         "isoforms_only_in_vcf_run": 0,
@@ -13,7 +14,6 @@
         "junctions_missing_in_vcf_run": 0,
         "junctions_only_in_vcf_run": 0,
         "missing_alleles": 0,
-        "non_snv_skipped": 0,
         "phase": {
           "NA": 5,
           "phased": 3,
@@ -27,11 +27,13 @@
         "same_haplotype1_motif": 8,
         "same_reason": 8,
         "same_variant_call": 8,
+        "unapplied_alleles": 0,
         "unphased_het_applied": 0,
         "variant_evaluable_vcf": 8
       },
       "HG02717": {
         "differences": [],
+        "indels_applied": 0,
         "isoforms": 347,
         "isoforms_missing_in_vcf_run": 0,
         "isoforms_only_in_vcf_run": 0,
@@ -39,7 +41,6 @@
         "junctions_missing_in_vcf_run": 0,
         "junctions_only_in_vcf_run": 0,
         "missing_alleles": 0,
-        "non_snv_skipped": 0,
         "phase": {
           "NA": 230,
           "phased": 117,
@@ -53,11 +54,13 @@
         "same_haplotype1_motif": 347,
         "same_reason": 347,
         "same_variant_call": 347,
+        "unapplied_alleles": 0,
         "unphased_het_applied": 0,
         "variant_evaluable_vcf": 347
       },
       "HG03516": {
         "differences": [],
+        "indels_applied": 0,
         "isoforms": 412,
         "isoforms_missing_in_vcf_run": 0,
         "isoforms_only_in_vcf_run": 0,
@@ -65,7 +68,6 @@
         "junctions_missing_in_vcf_run": 0,
         "junctions_only_in_vcf_run": 0,
         "missing_alleles": 0,
-        "non_snv_skipped": 0,
         "phase": {
           "NA": 230,
           "phased": 182,
@@ -79,6 +81,7 @@
         "same_haplotype1_motif": 412,
         "same_reason": 412,
         "same_variant_call": 412,
+        "unapplied_alleles": 0,
         "unphased_het_applied": 0,
         "variant_evaluable_vcf": 412
       }
@@ -97,11 +100,11 @@
       "same_variant_call": 767
     }
   },
-  "notes": "Equivalence of the two haplotype inputs: a run from an indexed VCF must give the verdicts and the per-junction motifs a run from the consensus FASTAs built from that VCF gives (haplotype 1 of the VCF = `bcftools consensus -H 1`). Only same-length substitutions are applied from the VCF; indels and symbolic alleles at a motif are skipped and counted (non_snv_skipped), unphased heterozygous alleles are applied by order and counted (unphased_het_applied) and the junction is marked unphased.",
+  "notes": "Equivalence of the two haplotype inputs: a run from an indexed VCF must give the verdicts and the per-junction motifs a run from the consensus FASTAs built from that VCF gives (haplotype 1 of the VCF = `bcftools consensus -H 1`). The files hold substitutions only, where the two inputs describe the same haplotypes; insertions and deletions, which the VCF route applies since 0.1.1 and a consensus FASTA in reference coordinates cannot carry, are scored in benchmark/refbias_3way. Unphased heterozygous alleles are applied by order and counted (unphased_het_applied) and the junction is marked unphased.",
   "protocol": "vcf_haplotypes",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "hg002_chr22_giab_v4.2.1_and_hprc_r2_hg03516_hg02717_all_chromosomes",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

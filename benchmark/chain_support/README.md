@@ -102,6 +102,50 @@ real, unannotated isoforms, so a higher threshold buys cleanliness against a com
 space the annotation does not describe, at a recall cost the simulation cannot price. The
 default stays 3; `[axis_chain] min_full_reads` is the knob.
 
+## Depth: should the lift ask for a share of the reads?
+
+Three reads in a gene with thousands is weaker evidence than three reads in a gene with ten.
+`chain_support` therefore also counts the reads that could have carried the chain: those at its
+first donor that reach past its last intron (`evidence.chain_n_spanning_reads`; `n_spanning_reads`
+in the `decoys` table), and `[axis_chain] min_fraction` can ask that the whole-chain reads be at
+least that share of them. `depth_share.py` reads the default runs (no floor) and counts the
+lifts that would remain at each floor, by the truth each data set has (envelope `depth_share`):
+
+| chain-lifted calls (no short reads) | lifted | lowest share | ≥ 0.5 % | ≥ 1 % | ≥ 2 % | ≥ 5 % | ≥ 10 % |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SQANTI-SIM chr22, FLAIR: genuine | 546 | 6.61 % | 546 | 546 | 546 | 546 | 543 |
+| SQANTI-SIM chr22, FLAIR: false | 4 | 4.76 % | 4 | 4 | 4 | 3 | 3 |
+| SQANTI-SIM chr22, IsoQuant: genuine | 430 | 7.21 % | 430 | 430 | 430 | 430 | 429 |
+| SQANTI-SIM chr22, IsoQuant: false | 4 | 4.76 % | 4 | 4 | 4 | 3 | 3 |
+| LRGASP amplicon targets, PacBio: supported | 27 | 0.26 % | 26 | 25 | 25 | 22 | 15 |
+| LRGASP amplicon targets, PacBio: unsupported | 0 | n/a | 0 | 0 | 0 | 0 | 0 |
+| LRGASP amplicon targets, ONT: supported | 25 | 0.24 % | 23 | 23 | 20 | 16 | 14 |
+| LRGASP amplicon targets, ONT: unsupported | 3 | 2.95 % | 3 | 3 | 3 | 2 | 1 |
+| TUSCO single-isoform genes, HG02717: presumed false | 3 | 0.42 % | 2 | 2 | 2 | 2 | 2 |
+| every chain lift, LRGASP PacBio | 8,194 | 0.04 % | 8,149 | 8,073 | 7,715 | 4,976 | 3,098 |
+| every chain lift, LRGASP ONT | 2,757 | 0.02 % | 2,695 | 2,628 | 2,445 | 1,774 | 1,291 |
+| every chain lift, HG03516 Kinnex | 7,068 | 0.01 % | 7,004 | 6,903 | 6,634 | 4,842 | 3,174 |
+| every chain lift, HG02717 Kinnex | 8,364 | 0.02 % | 8,264 | 8,127 | 7,735 | 5,025 | 3,232 |
+| decoys with both parents ≥ 3, LRGASP PacBio | 1,872 | 0.03 % | 1,708 | 1,508 | 1,167 | 697 | 409 |
+| decoys with both parents ≥ 3, HG03516 Kinnex | 976 | 0.07 % | 911 | 817 | 664 | 409 | 259 |
+
+- The simulation cannot price a floor: its genuine chains sit at a median share of 100 %, and the
+  lowest is 6.6 %. A 5 % floor removes 1 of the 4 false lifts and no genuine one.
+- The amplicon targets can. Validated novel chains go down to 0.26 % (PacBio) and 0.24 %
+  (ONT) of the spanning reads: minor isoforms of highly expressed genes, which is what a
+  validation study picks. A 5 % floor removes 5 of 27 and 9 of 25 validated lifts, and 1 of the
+  3 unvalidated ones on ONT; a 10 % floor 12 and 11, and 2 of the 3. Three unvalidated lifts are too few to
+  say that a floor selects against them; what it costs in validated chains is measured.
+- Of the three presumed-false lifts in TUSCO genes, a floor removes one (3 reads among 710,
+  0.42 %); the other two hold 14 % and 23 % of the reads.
+- On whole runs a 5 % floor withdraws 31-40 % of the lifted isoforms on PacBio and Kinnex and
+  36 % on ONT, and about 60 % of the lifted decoys of two expressed parents, which the
+  cross-library analysis below reads as unannotated isoforms rather than errors.
+
+So the floor is 0 by default (no verdict changes), the depth is reported for every isoform, and
+`min_fraction` is the knob for a study that wants only isoforms that are a visible share of
+their gene. A whole-chain lift says the chain exists in the library, not that it is abundant.
+
 ## Decoy chains: how often does the lift fire on a chain the annotation does not know?
 
 `panisoguard decoys` recombines each gene's annotated transcripts: the 5' introns of one joined
@@ -179,6 +223,14 @@ score_sirv_chain.py --work /path/to/pig_sirv/work --mc /path/to/pig_sirv_mc --ou
 panisoguard decoys --ref-gtf /path/to/chr22_modified.gtf --bam /path/to/aln.bam --out /tmp/decoys/sqsim
 score_decoys.py --run sqsim=/tmp/decoys/sqsim --truth sqsim=/path/to/truth.truth.tsv \
   --run pb=/tmp/decoys/lrgasp_pb --run ont=/tmp/decoys/lrgasp_ont --cross pb,ont \
+  --emit-metrics ../results/chain_support/metrics.json
+```
+
+```bash
+# the read share behind each lift (after run.sh, the decoy runs, ../lrgasp_targets and the real runs):
+depth_share.py --work /path/to/sqanti_sim/work --chain /tmp/chain_support --mc /path/to/multicaller/data \
+  --lrgasp /path/to/pig_lrgasp --tusco ../tusco_negatives/data/tusco_human.tsv \
+  --decoys lrgasp_pacbio=/tmp/decoys/lrgasp_pb --run lrgasp_pb=/path/pb/sq/iq_classification.txt,/path/pb/adj_nosr \
   --emit-metrics ../results/chain_support/metrics.json
 ```
 

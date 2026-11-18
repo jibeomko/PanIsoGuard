@@ -17,7 +17,7 @@ FLAIR reports 4,787 isoforms from the ONT reads (1,579 from the PacBio reads of 
 the 4,182 non-FSM ones 320 are genuine novel isoforms and 3,862 false, so the genuine share is 8 %
 against 84 % on PacBio. The filters are judged on that set, as in the PacBio protocol.
 
-## Results (0.1.0 binary, ruleset 0.0.7)
+## Results (0.1.1 binary, ruleset 0.0.8)
 
 | short reads | method | TP | FP | precision | recall | AUPRC | coverage | selective risk | AUPRC difference, 95 % CI |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---|

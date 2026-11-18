@@ -1,7 +1,7 @@
 {
   "command": "bash benchmark/lrgasp_wtc11/run.sh all; benchmark/lrgasp_wtc11/score_lrgasp.py --work W --emit-metrics ...",
   "data_provenance": "real public LRGASP WTC11 (ENCODE): PacBio cDNA ENCSR507JOF (3 reps), ONT cDNA ENCSR539ZXJ (rep 1), Illumina ENCSR673UKZ (rep 1) -> minimap2 / STAR 2-pass, IsoQuant 3.13, SQANTI3 6.0.1 vs GENCODE v49; truth = LRGASP Supplementary Data 15 (amplicon-sequencing validation): sheet wtc11-support (89 WTC11 consolidated-model targets, chains from WTC11_consolidated.bed.gz) and sheet gencode-support (79 GENCODE-reviewed known/novel/rejected models, chains from LRGASP_manual_annotation.human.all.bed.gz + human_GENCODE_tmerge_transcripts.bed.gz; 76 resolvable). No private data.",
-  "generated_utc": "2026-11-14T03:47:28Z",
+  "generated_utc": "2026-11-18T14:54:26Z",
   "metrics": {
     "cross_library": {
       "ont_nosr": {
@@ -2300,9 +2300,9 @@
   },
   "notes": "Per target set, platform and short-read setting: of the targets whose intron chain our IsoQuant run reported exactly, the PanIsoGuard class distribution for supported / likely / unsupported targets, plus how many experimentally supported isoforms carry SQANTI3's RTS_stage sign. Mostly positives (wtc11: 79 supported / 7 unsupported; gencode: 48 supported / 23 unsupported), so a recall-side check first; the negatives the caller did reconstruct are the only real-data precision evidence. [cross_library] --validation-bam with the other platform's library (same WTC11 cells): per-isoform whole-chain counts in the caller's own BAM vs the independent one, for the validated targets, the genome-wide chain lifts (split by the RT-switch sign) and expressed FSM as the baseline.",
   "protocol": "lrgasp_wtc11",
-  "ruleset_version": "builtin-0.0.7",
+  "ruleset_version": "builtin-0.0.8",
   "scope": "lrgasp_wtc11_validated_isoforms_pacbio_ont_illumina",
   "source": null,
   "status": "tracked",
-  "tool_version": "0.1.0"
+  "tool_version": "0.1.1"
 }

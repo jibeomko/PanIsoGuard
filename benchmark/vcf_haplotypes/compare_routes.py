@@ -4,7 +4,9 @@ For each LABEL:FASTA_PREFIX:VCF_PREFIX pair: isoforms whose confidence class and
 junctions whose variant call (none / created / disrupted / NA) agrees and whose first-haplotype motif
 agrees (the FASTA route carries one haplotype, the VCF route the sample's ploidy; haplotype 1 of the VCF is
 the FASTA's: `bcftools consensus -H 1`), the VCF route's unphased-het and non-SNV counters from its
-provenance log, and the junctions marked phased / unphased.
+provenance log, and the junctions marked phased / unphased. The files compared hold substitutions only,
+the one case in which the two inputs describe the same haplotypes: the VCF route also applies insertions
+and deletions, which a consensus FASTA in reference coordinates cannot carry (benchmark/refbias_3way).
 
 Usage: compare_routes.py LABEL:FASTA_PREFIX:VCF_PREFIX ... --emit-metrics out.json
 """
@@ -35,7 +37,7 @@ def main():
                                    "junctions": 0, "same_variant_call": 0, "same_haplotype1_motif": 0, "variant_evaluable_vcf": 0,
                                    "isoforms_missing_in_vcf_run": 0, "isoforms_only_in_vcf_run": 0,
                                    "junctions_missing_in_vcf_run": 0, "junctions_only_in_vcf_run": 0,
-                                   "phase": {"phased": 0, "unphased": 0, "unlinked": 0, "NA": 0}, "unphased_het_applied": 0, "non_snv_skipped": 0, "missing_alleles": 0,
+                                   "phase": {"phased": 0, "unphased": 0, "unlinked": 0, "NA": 0}, "unphased_het_applied": 0, "indels_applied": 0, "unapplied_alleles": 0, "missing_alleles": 0,
                                    "differences": []})
         fa_iso = {r["isoform_id"]: r for r in table(fa + ".adjudicated.tsv")}; vc_iso = {r["isoform_id"]: r for r in table(vc + ".adjudicated.tsv")}
         p["runs"] += 1; p["isoforms"] += len(fa_iso)   # the FASTA route's rows are the denominator
@@ -70,7 +72,8 @@ def main():
             p["phase"][q.get("variant_phase", "NA") if q.get("variant_phase", "NA") in p["phase"] else "NA"] += 1
         pv = provenance(vc + ".provenance.log"); prov = pv
         p["unphased_het_applied"] += int(pv.get("haplotype_vcf_unphased_het_applied_at_motifs", 0) or 0)
-        p["non_snv_skipped"] += int(pv.get("haplotype_vcf_non_snv_skipped_at_motifs", 0) or 0)
+        p["indels_applied"] += int(pv.get("haplotype_vcf_indels_applied_at_motifs", 0) or 0)
+        p["unapplied_alleles"] += int(pv.get("haplotype_vcf_unapplied_alleles_at_motifs", 0) or 0)
         p["missing_alleles"] += int(pv.get("haplotype_vcf_missing_alleles_at_motifs", 0) or 0)
     total = {k: sum(p[k] for p in per.values()) for k in ("runs", "isoforms", "same_class", "same_reason", "junctions", "same_variant_call", "same_haplotype1_motif",
                                                            "isoforms_missing_in_vcf_run", "isoforms_only_in_vcf_run", "junctions_missing_in_vcf_run", "junctions_only_in_vcf_run")}
@@ -79,7 +82,7 @@ def main():
               f"REFERENCE_BIAS fasta/vcf {p['reference_bias_fasta']}/{p['reference_bias_vcf']}  junctions {p['junctions']:>5}  same variant call {p['same_variant_call']:>5}  "
               f"same hap-1 motif {p['same_haplotype1_motif']:>5}  missing/only-in-VCF isoforms {p['isoforms_missing_in_vcf_run']}/{p['isoforms_only_in_vcf_run']} "
               f"junctions {p['junctions_missing_in_vcf_run']}/{p['junctions_only_in_vcf_run']}  phase {p['phase']}  unphased het {p['unphased_het_applied']}  "
-              f"non-SNV skipped {p['non_snv_skipped']}  missing alleles {p['missing_alleles']}")
+              f"indels applied {p['indels_applied']}  unapplied alleles {p['unapplied_alleles']}  missing alleles {p['missing_alleles']}")
         for d in p["differences"]: print("   ", d)
     print("total", total)
     if (total["isoforms"] != total["same_class"] or total["isoforms"] != total["same_reason"] or total["junctions"] != total["same_variant_call"]
@@ -95,9 +98,10 @@ def main():
            "command": "bash benchmark/vcf_haplotypes/run.sh; benchmark/vcf_haplotypes/compare_routes.py LABEL:FASTA_PREFIX:VCF_PREFIX ... --emit-metrics ...",
            "metrics": {"per_sample": per, "total": total},
            "notes": "Equivalence of the two haplotype inputs: a run from an indexed VCF must give the verdicts and the per-junction motifs a run from the "
-                    "consensus FASTAs built from that VCF gives (haplotype 1 of the VCF = `bcftools consensus -H 1`). Only same-length substitutions are "
-                    "applied from the VCF; indels and symbolic alleles at a motif are skipped and counted (non_snv_skipped), unphased heterozygous "
-                    "alleles are applied by order and counted (unphased_het_applied) and the junction is marked unphased."}
+                    "consensus FASTAs built from that VCF gives (haplotype 1 of the VCF = `bcftools consensus -H 1`). The files hold substitutions "
+                    "only, where the two inputs describe the same haplotypes; insertions and deletions, which the VCF route applies since 0.1.1 and "
+                    "a consensus FASTA in reference coordinates cannot carry, are scored in benchmark/refbias_3way. Unphased heterozygous alleles "
+                    "are applied by order and counted (unphased_het_applied) and the junction is marked unphased."}
     os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(env, open(out, "w"), indent=2, sort_keys=True); open(out, "a").write("\n"); print("wrote", out)
 
