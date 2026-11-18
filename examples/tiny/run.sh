@@ -30,8 +30,9 @@ if [[ -f expected/sample.adjudicated.tsv && -f expected/sample.attribution.jsonl
   diff -u expected/sample.attribution.jsonl "$OUT_DIR/sample.attribution.jsonl"
   diff -u expected/sample.junctions.tsv "$OUT_DIR/sample.junctions.tsv"
   # tool_version changes every release and the input.* lines carry file size/mtime;
-  # everything else in the log must match.
-  diff -u -I "^tool_version" -I "^input\." expected/sample.provenance.log "$OUT_DIR/sample.provenance.log"
+  # everything else in the log must match. grep, not diff -I: busybox diff has no -I.
+  stable() { grep -v -E '^(tool_version|input\.)' "$1"; }
+  diff -u <(stable expected/sample.provenance.log) <(stable "$OUT_DIR/sample.provenance.log")
   echo "example output matches expected files"
 else
   echo "expected files not found; generated output under $OUT_DIR/"
