@@ -3,6 +3,90 @@
 All notable, user-facing changes. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patch only).
 
+## [0.1.1] - 2026-11-19
+
+### Added
+- The variant axis reads insertions and deletions. `--haplotype-vcf` applies every allele that
+  has a sequence: substitutions, insertions, deletions and other replacements (a symbolic
+  `<DEL>` with `END` or `SVLEN` is a deletion). An insertion or deletion is moved towards the
+  intron as far as the reference sequence allows, and a haplotype's motif is the two bases next
+  to the last exonic base on each side, so the same haplotype gives the same call however an
+  indel is placed in a repeat. An insertion that ends up exactly at an exon boundary is intronic
+  or exonic according to the junction reads (`--bam`: at least `min_spanning` reads, the
+  insertion in at most 20 % or at least 80 % of them); without reads that haplotype's motif is
+  not evaluable. The provenance log counts the records used
+  (`haplotype_vcf_indels_applied_at_motifs`).
+- A junction that equals a deletion the sample carries is reference bias. When a haplotype has
+  a deletion equal to the intron (wherever the reference lets the same deletion be written), its
+  reads lack those bases without a splice. The junction table says `deleted` (haplotype motif
+  `DEL`), the junction counts as explained like a created motif, and the verdict reason is
+  `haplotype_deletion` (`n_novel_jx_variant_deleted` in the JSONL,
+  `haplotype_vcf_deletions_equal_to_junctions` in the provenance log).
+- The haplotype of the junction reads. With `--bam` and either haplotype input, the reads that
+  use a junction explained on some haplotypes only are assigned to a haplotype by the sample's
+  other heterozygous single-base sites (a read needs `phase_margin` = 2 more agreeing sites for
+  one side). The junction table gains `read_phase` (`consistent`, `contradicted`, `mixed`,
+  `uninformative`, `NA`), `read_phase_n_motif` and `read_phase_n_other`. A junction whose
+  assigned reads (`phase_min_reads` = 3 or more) all come from a haplotype that does not
+  explain it is not counted as explained (`n_novel_jx_read_phase_contradicted`, with a line in
+  the rule trace). Both thresholds are in the new `[axis_variant]` section of the rules TOML.
+- On HG03516 and HG02717, with every call of the HPRC assembly as haploid VCFs and judged by
+  where the same reads splice on that assembly ([benchmark/refbias_3way](benchmark/refbias_3way)):
+  255 of 265 and 171 of 179 junctions the axis explains are confirmed (precision 0.96), 47 % and
+  53 % of the junctions the assembly accounts for. 33 of 35 and 41 of 43 splice-site variant
+  junctions are found (31 and 38 with SNV-consensus FASTAs), 221 and 130 junctions equal a
+  deletion and are `unspliced` on the assembly, and the one junction the phasing benchmark
+  found contradicted is no longer counted by the tool. `REFERENCE_BIAS` isoforms: 144 and 108
+  (18 and 28 with the FASTAs).
+- `evidence.chain_n_spanning_reads`: the depth a chain is seen at (reads at its first donor
+  that reach past its last intron), also as `n_spanning_reads` in the `decoys` table.
+  `[axis_chain] min_fraction` asks that the whole-chain reads be at least that share of them.
+  It is 0 by default: among the amplicon-validated LRGASP chains the share goes down to 0.2 %,
+  so a floor removes validated chains before unvalidated ones
+  ([benchmark/chain_support](benchmark/chain_support), "Depth").
+- CTest `integration_vcf_random_invariance`: 400 random VCF files per run (substitutions,
+  indels, symbolic alleles, every way of writing a genotype). The call must not depend on row
+  order, haplotype labels, the orientation of unlinked groups, repeated rows, records away
+  from the motifs, or the placement of an indel in a repeat; every haplotype motif the tool
+  reports must equal the one read off the haplotype sequence; and `REFERENCE_BIAS` is allowed
+  only when every reading of the file has a haplotype that explains each junction.
+- CI builds and runs the whole test suite under AddressSanitizer and UndefinedBehaviorSanitizer.
+- Ruleset `builtin-0.0.8` (TOML `default-0.0.8`). Every tracked benchmark envelope was
+  regenerated with the 0.1.1 binary: no verdict and no score of 0.1.0 changed; `refbias_3way`
+  gains the VCF arm and `chain_support` the read-share analysis.
+
+### Changed
+- What a VCF leaves open stays unknown, never reference, in every way of writing it:
+  - Two records that give one haplotype different content at one base make the spans of both
+    unknown, in whichever order the rows come (before, the later row won). An allele states
+    the sequence over its whole REF span, so the unchanged bases of an MNP count; two
+    substitutions that agree are one statement.
+  - A REF that is not the reference sequence makes the record's span unknown on every haplotype
+    (`haplotype_vcf_ref_mismatches_at_motifs`).
+  - An allele index the record does not define (`2|0` with one ALT) is unknown, as a missing
+    allele is (before, it read as reference).
+  - An unphased genotype states its alleles in no order: `0/1` and `1/0` at one site are the
+    same record, not a contradiction.
+  - A `*` allele is the deletion that removes it when the file carries that deletion on the
+    same haplotype, and unknown otherwise; an allele without a sequence is unknown
+    (`haplotype_vcf_unapplied_alleles_at_motifs`, which replaces
+    `haplotype_vcf_non_snv_skipped_at_motifs`).
+- Linkage is decided by placement. Heterozygous and partly missing records are linked only
+  inside one phase set; at each junction every placement of the groups within 64 bp of either
+  boundary is tried, and the motif is known only if at most one group changes what a haplotype
+  carries. A record that changes nothing under any placement no longer makes a junction
+  `unlinked`, and two groups that interact through an indel do.
+- A haplotype FASTA whose contig length differs from the reference's is not read on that
+  contig: the haplotype is not evaluable there, a warning names the file and the contig, and
+  the provenance log counts them (`reference_haplotype_contig_length_mismatches`). Before, the
+  bases at the reference's coordinates were read from the shifted sequence.
+- The `haplotype_vcf_*` counters in the provenance log count each junction once, not once per
+  isoform that uses it.
+
+### Fixed
+- `examples/tiny/run.sh` compares the provenance log without `diff -I`, which BusyBox `diff`
+  (the BioContainers image) does not have.
+
 ## [0.1.0] - 2026-11-14
 
 ### Added
