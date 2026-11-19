@@ -87,7 +87,8 @@ rules and ML filters and with a one-line short-read rule, on oracle and on simul
 Illumina junctions. At ranking PanIsoGuard ties the one-line rule, with or without the BAM;
 at the operating point it is more precise and, with the whole-chain read support of 0.0.7,
 recalls 0.75 of the genuine isoforms with the BAM (0.55 without). With no short reads and
-the BAM it ranks above SQANTI3's rules filter (AUPRC 0.953 vs 0.909); without either it
+the BAM it ranks above SQANTI3's default rules filter (AUPRC 0.953 vs 0.909) and level with
+the caller's own read count (0.958; the same protocol, `count_baseline.py`); without either it
 confirms nothing.
 
 ## Tracked result files

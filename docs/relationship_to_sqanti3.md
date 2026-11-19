@@ -52,6 +52,15 @@ integrating orthogonal, largely SQANTI-independent evidence:
 It explicitly avoids re-deriving TSS/TTS, ORF/NMD, polyA motif, or splice motif, and
 makes no SQANTI3-style ML/rule QC filter; those would duplicate SQANTI3.
 
+SQANTI3's filter is not a black box either. The rules filter writes, for every isoform it
+discards, the descriptor that failed (`*_filtering_reasons.txt`), the ML filter a probability,
+and the rules are a JSON file a user can extend with any column of the classification,
+including a read count (`FL`). The difference is in what is read and what is recorded:
+PanIsoGuard reads the long-read alignments, the sample's genome and other callers, records the
+evidence for every isoform and every junction (kept, held or discarded), and has a third
+outcome, held, for calls the evidence does not settle. Against a read count as a filter, see
+[benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h#is-this-a-read-count-filter-no-short-reads).
+
 > **"Rescue" means the opposite thing in the two tools.** SQANTI3 *rescue* recovers a
 > reference transcript a caller failed to report (it adds a known model back).
 > PanIsoGuard's reference-bias *rescue* (`REFERENCE_BIAS`) does the reverse:

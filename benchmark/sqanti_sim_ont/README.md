@@ -41,8 +41,8 @@ the non-FSM isoforms.
 
 What holds from PacBio to ONT:
 
-- The ordering. Without short reads PanIsoGuard with the BAM is the better filter (precision 0.76
-  against 0.18 for SQANTI3's rules, AUPRC +0.33 to +0.43 above them); with short reads it is the most
+- The ordering. Without short reads PanIsoGuard with the BAM is more precise than SQANTI3's default
+  rules (0.76 against 0.18, AUPRC +0.33 to +0.43 above them); with short reads it is the most
   precise method (0.88) and ties the one-line short-read rule on AUPRC (0.673 against 0.681, the
   interval covering zero), as on PacBio.
 - The presets. `--platform hifi` and `--platform ont` give the same class to every one of the 4,787

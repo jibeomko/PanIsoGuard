@@ -17,6 +17,8 @@ PY=$HOME/miniconda3/envs/sqsim/bin/python   # needs scikit-learn
 PIG=$HOME/PanIsoGuard/build/panisoguard
 DEPTHS="250000 1000000 4000000"        # read pairs per realistic run
 OUT=${OUT:-h2h_work}
+MC=${MC:-}                             # optional: ../multicaller data (IsoQuant's counts and SQANTI3 run)
+CHAIN=${CHAIN:-}                       # optional: ../chain_support OUT (isoquant.nosr.on.*) and ../caller_filters OUT (rules_isoquant/)
 # ------------------------------------------------------------------------------
 HERE=$(cd "$(dirname "$0")" && pwd)
 mkdir -p "$OUT" && cd "$OUT"
@@ -95,3 +97,42 @@ for s in $settings; do
   "$PY" "$HERE/score_h2h.py" "$W/flair.isoforms.gtf" "$W/truth.truth.tsv" \
       "$W/sqanti_out/flair_classification.txt" "${m[@]}"
 done | tee h2h.txt
+
+# --- read-count baselines, no short reads ------------------------------------------------
+# The caller's own count per isoform as a filter, and SQANTI3's default rules with that count
+# required too: the FL column of the classification is filled from the caller's counts and
+# SQANTI3's own rules filter is run with FL >= k added to every rule.
+mkdir -p none/count
+awk -F'\t' '$3=="transcript"{match($9,/transcript_id "[^"]+"/); t=substr($9,RSTART+15,RLENGTH-16); match($9,/gene_id "[^"]+"/); g=substr($9,RSTART+9,RLENGTH-10); print t"_"g"\t"t}' \
+    "$W/flair.isoforms.gtf" > none/count/flair.ids.tsv          # FLAIR names a count row <transcript>_<gene>
+awk -F'\t' 'NR==FNR{id[$1]=$2; next} ($1 in id){print id[$1]"\t"$2}' none/count/flair.ids.tsv "$W/flair.isoform.counts.txt" > none/count/flair.counts.tsv
+for k in 3 10; do
+  cat > none/count/rules_fl$k.json <<JSON
+{
+    "full-splice_match": [ { "perc_A_downstream_TTS":[0,59], "FL":$k } ],
+    "rest": [ { "perc_A_downstream_TTS":[0,59], "all_canonical":"canonical", "RTS_stage":"FALSE", "FL":$k },
+              { "perc_A_downstream_TTS":[0,59], "RTS_stage":"FALSE", "min_cov":3, "FL":$k } ]
+}
+JSON
+done
+"$PY" "$HERE/count_baseline.py" --write-fl "$W/sqanti_out/flair_classification.txt" none/count/flair.counts.tsv none/count/flair_classification.FL.txt
+callers=()
+spec="flair=$W/flair.isoforms.gtf,$W/sqanti_out/flair_classification.txt,$PWD/none/count/flair.counts.tsv,$PWD/none/pigbam,$PWD/none/rules/rules_RulesFilter_classification.txt"
+for k in 3 10; do
+  sqanti3_filter.py rules --sqanti_class "$PWD/none/count/flair_classification.FL.txt" -j "$PWD/none/count/rules_fl$k.json" -o fl$k -d "$PWD/none/count/fl$k" --skip_report > none/count/fl$k.log 2>&1
+  spec="$spec,$PWD/none/count/fl$k/fl${k}_RulesFilter_classification.txt"
+done
+callers+=(--caller "$spec")
+if [ -n "$MC" ] && [ -n "$CHAIN" ]; then   # the same for IsoQuant on the same alignment
+  cat "$MC/isoquant_out/iq/iq.discovered_transcript_counts.tsv" "$MC/isoquant_out/iq/iq.transcript_counts.tsv" | grep -v '^#\|^__' > none/count/isoquant.counts.tsv
+  "$PY" "$HERE/count_baseline.py" --write-fl "$MC/sq_isoquant/isoquant_classification.txt" none/count/isoquant.counts.tsv none/count/isoquant_classification.FL.txt
+  spec="isoquant=$MC/isoquant_out/iq/iq.transcript_models.gtf,$MC/sq_isoquant/isoquant_classification.txt,$PWD/none/count/isoquant.counts.tsv,$CHAIN/isoquant.nosr.on,$CHAIN/rules_isoquant/rules_RulesFilter_classification.txt"
+  for k in 3 10; do
+    sqanti3_filter.py rules --sqanti_class "$PWD/none/count/isoquant_classification.FL.txt" -j "$PWD/none/count/rules_fl$k.json" -o iqfl$k -d "$PWD/none/count/iqfl$k" --skip_report > none/count/iqfl$k.log 2>&1
+    spec="$spec,$PWD/none/count/iqfl$k/iqfl${k}_RulesFilter_classification.txt"
+  done
+  callers+=(--caller "$spec")
+fi
+# to record it, after emit_metrics.py has written the envelope:
+#   count_baseline.py --work "$W" "${callers[@]}" --emit-metrics ../results/sqanti3_filter_h2h/metrics.json
+"$PY" "$HERE/count_baseline.py" --work "$W" "${callers[@]}" | tee count_baseline.txt

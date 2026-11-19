@@ -2,7 +2,8 @@
 """Write the tracked envelope for the head-to-head (../results/sqanti3_filter_h2h/metrics.json):
 per short-read setting, non-FSM metrics per method, plus bootstrap 95 % CIs (2000 resamples
 of the non-FSM isoforms, seed 1) of the AUPRC difference PIG / PIG+bam minus allSJ3 (and
-minus SQ3rules when there are no short reads).
+minus SQ3rules when there are no short reads). The `read_count_baseline` block that
+count_baseline.py adds to the envelope is kept as it is.
 
 Usage: emit_metrics.py <sqanti_sim work> <h2h work (run.sh OUT)> --emit-metrics out.json
 """
@@ -72,6 +73,9 @@ def main():
             env_metrics["bootstrap_auprc_diff_vs_allSJ3_95ci"][s] = cis
         print(s, {n: env_metrics[s][n]["auprc"] for n in preds}, cis, file=sys.stderr)
 
+    if os.path.exists(out):   # written by count_baseline.py
+        kept = json.load(open(out)).get("metrics", {}).get("read_count_baseline")
+        if kept is not None: env_metrics["read_count_baseline"] = kept
     prov = {}
     for line in open(f"{h2h}/none/pig.provenance.log"):
         if "\t" in line and not line.startswith("#"):
@@ -94,7 +98,10 @@ def main():
                  "this simulation (most NNC are genuine), so it is reported but not used for conclusions. "
                  "Conclusion: PanIsoGuard is not more accurate than a one-line short-read rule; PIG+bam's small "
                  "AUPRC gain is within the bootstrap CI at every depth since 0.0.6 (the BAM gate needs >= 3 "
-                 "spanning reads); with no short reads it is worse than the SQANTI3 rules filter.",
+                 "spanning reads). With no short reads and no BAM it confirms nothing; with the BAM it ranks above "
+                 "SQANTI3's default rules and level with the caller's own read count (read_count_baseline: the "
+                 "caller's count as a filter and a ranking, SQANTI3's rules with FL >= k required, the whole-chain "
+                 "read count alone; count_baseline.py).",
     }
     json.dump(env, open(out, "w"), indent=2, sort_keys=True); open(out, "a").write("\n")
     print("wrote", out, file=sys.stderr)

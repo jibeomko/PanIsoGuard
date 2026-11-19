@@ -132,8 +132,9 @@ short-read rule within bootstrap uncertainty. In this setting, 641 of 870 candid
 Another 164 are known fragments, and 65 are held for review. These are simulation results,
 not an estimate of accuracy on every sample.
 
-- **Without short reads:** with the BAM, AUPRC is 0.953 versus 0.909 for SQANTI3's rules
-  filter on chr22. Separate chr20 and chr19 evaluations support the same ordering. Without
+- **Without short reads:** with the BAM, AUPRC is 0.953 versus 0.909 for SQANTI3's default
+  rules filter on chr22, and 0.958 for ranking by the caller's own read count. Separate chr20
+  and chr19 evaluations support the same ordering against SQANTI3's rules. Without
   read support, caller agreement or usable genomic evidence, novel candidates remain
   unconfirmed or unresolved.
 - **Real-data checks:** in LRGASP WTC11, none of the experimentally supported novel targets

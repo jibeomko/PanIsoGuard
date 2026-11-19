@@ -51,6 +51,16 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   reports must equal the one read off the haplotype sequence; and `REFERENCE_BIAS` is allowed
   only when every reading of the file has a haplotype that explains each junction.
 - CI builds and runs the whole test suite under AddressSanitizer and UndefinedBehaviorSanitizer.
+- Read-count baselines in the head-to-head
+  ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), `count_baseline.py`). Without
+  short reads the caller's own read count ranks FLAIR's isoforms as well as PanIsoGuard does
+  (AUPRC 0.958 against 0.953, both above SQANTI3's default rules at 0.909), and SQANTI3's
+  rules filter run with `FL >= 10` required reaches precision 0.950 at recall 0.885. The whole-chain evidence differs at the operating point: at three reads the
+  caller's count passes all 140 false isoforms and whole-chain reads pass 41, and the verdict
+  passes 4 where the count raised to the same recall passes 19. The documents now say "above
+  SQANTI3's default rules" where they said "above SQANTI3's rules filter", and
+  docs/relationship_to_sqanti3.md notes that SQANTI3's rules filter records why it discards
+  an isoform.
 - Ruleset `builtin-0.0.8` (TOML `default-0.0.8`). Every tracked benchmark envelope was
   regenerated with the 0.1.1 binary: no verdict and no score of 0.1.0 changed; `refbias_3way`
   gains the VCF arm and `chain_support` the read-share analysis.

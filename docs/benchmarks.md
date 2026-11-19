@@ -71,8 +71,14 @@ Full tables, bootstrap confidence intervals and caveats are in
   (every difference is within the bootstrap interval).
 - Without short reads it confirms nothing unless you give it the BAM or caller agreement.
   With the BAM it keeps 546 of the 730 real isoforms at precision 0.993 and ranks above
-  SQANTI3's rules filter (0.953 vs 0.909); the long reads are the caller's own, so these
-  calls are `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`.
+  SQANTI3's default rules filter (0.953 vs 0.909); the long reads are the caller's own, so
+  these calls are `NOVEL_PROBABLE`, never `NOVEL_CONFIRMED`.
+- A read count does as well at ranking. The caller's own count per isoform ranks them at
+  0.958, and SQANTI3's rules with `FL ≥ 10` added reach precision 0.950 at recall 0.885. The
+  whole-chain evidence differs at the operating point: at three reads the caller's count
+  passes all 140 false isoforms and whole-chain reads pass 41, and the verdict passes 4
+  where the count, raised to the same recall, passes 19
+  ([benchmark/sqanti3_filter_h2h](../benchmark/sqanti3_filter_h2h#is-this-a-read-count-filter-no-short-reads)).
 - The same thresholds on two chromosomes they never saw (chr20, chr19) give the same picture:
   without short reads AUPRC 0.962 and 0.957 against 0.946 and 0.928 for SQANTI3's rules filter,
   both bootstrap intervals above zero; with 1 M pairs a tie with the one-line rule

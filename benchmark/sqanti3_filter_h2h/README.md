@@ -2,10 +2,9 @@
 
 Question: on the same truth set and the same inputs, is PanIsoGuard more accurate than
 what users already run (the SQANTI3 rules / ML filter) or than the simplest possible
-short-read rule? Answer: no. Its ranking ties a one-line rule; at its default
-operating point it trades a lot of recall for a little precision; with no short reads it
-is worse than the SQANTI3 rules filter. The only measurable edge is small and comes from
-the BAM mapping axis.
+rule? Answer: no. With short reads its ranking ties a one-line short-read rule; without them
+it ranks above SQANTI3's default rules only when it is given the BAM, and then level with the
+caller's own read count. At its default operating point it trades recall for precision.
 
 ## Setup
 
@@ -29,6 +28,7 @@ Methods:
 | `SQ3strict` | `sqanti3_filter.py rules` with `min_cov ≥ 3` required |
 | `SQ3ml` | `sqanti3_filter.py ml`, defaults |
 | `allSJ3` | One line: keep an isoform iff every junction has ≥ 3 unique short reads (SQANTI3 `min_cov`) |
+| caller's read count, `SQ3rules` with `FL ≥ k` | no short reads only: [below](#is-this-a-read-count-filter-no-short-reads) |
 | `PIG` / `PIG+bam` | `panisoguard adjudicate` (± `--bam`); positive = `NOVEL_CONFIRMED` / `NOVEL_PROBABLE`, ranked by class |
 
 ## Result (non-FSM, n = 870)
@@ -80,6 +80,55 @@ Coverage = share of the 870 isoforms given a decisive class (`NOVEL_CONFIRMED`,
 
 Every setting's point is in the envelope (`coverage`, `selective_risk` per method).
 
+## Is this a read-count filter? (no short reads)
+
+Without short reads PanIsoGuard's positive calls rest on reads that carry the whole intron
+chain. A caller already reports a read count per isoform, and SQANTI3's rules filter can
+require one (the `FL` descriptor), so the question is what the whole-chain evidence adds to a
+plain count. `count_baseline.py` scores, on the same truth set: the caller's own count as a
+filter at several thresholds and as a ranking; SQANTI3's rules filter run with its default
+rules plus `FL ≥ k` in every rule (the `FL` column filled from the caller's counts, as
+`sqanti3_qc.py --fl_count` fills it); the whole-chain read count with no other rule; and
+PanIsoGuard with the BAM. The AUPRC of a count row ranks by the count itself; a rules-filter
+row has one operating point. Envelope block `read_count_baseline`.
+
+| no short reads | FLAIR: genuine / false kept | precision | recall | AUPRC | IsoQuant: genuine / false kept | precision | recall | AUPRC |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| SQANTI3 rules, default | 647 / 58 | 0.918 | 0.886 | 0.909 | 538 / 10 | 0.982 | 0.886 | 0.982 |
+| caller's read count ≥ 3 | 730 / 140 | 0.839 | 1.000 | 0.958 | 607 / 10 | 0.984 | 1.000 | 0.992 |
+| caller's read count ≥ 5 | 730 / 108 | 0.871 | 1.000 |  | 607 / 7 | 0.989 | 1.000 |  |
+| caller's read count ≥ 10 | 729 / 68 | 0.915 | 0.999 |  | 605 / 7 | 0.989 | 0.997 |  |
+| caller's read count ≥ 20 | 726 / 43 | 0.944 | 0.995 |  | 604 / 6 | 0.990 | 0.995 |  |
+| SQANTI3 rules with FL ≥ 3 | 647 / 58 | 0.918 | 0.886 | 0.909 | 538 / 9 | 0.984 | 0.886 | 0.983 |
+| SQANTI3 rules with FL ≥ 10 | 646 / 34 | 0.950 | 0.885 | 0.937 | 536 / 7 | 0.987 | 0.883 | 0.987 |
+| whole-chain reads ≥ 3, nothing else | 730 / 41 | 0.947 | 1.000 | 0.964 | 607 / 8 | 0.987 | 1.000 | 0.988 |
+| PanIsoGuard + BAM | 546 / 4 | 0.993 | 0.748 | 0.953 | 430 / 4 | 0.991 | 0.708 | 0.988 |
+
+- **As a ranking it is level with the count.** The caller's read count alone ranks FLAIR's
+  isoforms above SQANTI3's default rules (AUPRC 0.958 against 0.909, difference [+0.028, +0.070]),
+  and PanIsoGuard does not rank them better than the count does (0.953, difference
+  [-0.023, +0.015]; IsoQuant 0.988 against 0.992, [-0.013, +0.007]). "Above SQANTI3's
+  rules filter" in the table above is a statement about the default rules, not about what a
+  count can do.
+- **At the same threshold the two counts are different evidence.** FLAIR reports no isoform
+  with fewer than three supporting reads, so a count of three removes nothing: all 140 false
+  isoforms pass. 41 of them have three reads that carry the whole chain; every one of the
+  730 genuine isoforms does. A caller assigns a read to the isoform it is compatible with; a
+  whole-chain read has every intron of the chain at exact coordinates in one alignment. The
+  count needs a threshold near 20 to come close (precision 0.944 against 0.947), and that
+  number moves with depth.
+- **The verdict is a stricter operating point than any count threshold.** PanIsoGuard keeps
+  546 genuine and 4 false isoforms (precision 0.993 at recall 0.748). Raising the caller's count
+  until recall falls to that level keeps 518 and 19 (count ≥ 64, precision 0.965); the
+  whole-chain count alone, 537 and 14 (precision 0.975). The difference comes from the rules around the
+  count: an artifact sign holds the call, and an incomplete splice match is a known fragment,
+  not a novel call. On IsoQuant, whose output has 11 false isoforms, every method is within
+  about 0.01 of the others.
+- **SQANTI3's rules with a count are a sound filter.** With `FL ≥ 10` they reach precision
+  0.950 at recall 0.885 on FLAIR. A user who wants one keep-or-discard list without short reads
+  and tunes that threshold on their own data gets most of the precision. What PanIsoGuard adds
+  to that is not accuracy: the evidence per junction, the held class, and the genome.
+
 ## Reading
 
 - Ranking: PanIsoGuard ties `allSJ3` in every setting, with or without the BAM
@@ -95,12 +144,16 @@ Every setting's point is in the envelope (`coverage`, `selective_risk` per metho
 - No short reads: without the BAM PanIsoGuard makes no positive calls (everything is
   held `UNRESOLVED` unless `--caller-support` is given) and ranks below SQANTI3's default
   rules. With the BAM it keeps 546 genuine / 4 false (recall 0.75 at precision 0.993) and
-  ranks above them; those calls rest on the caller's own reads, hence `NOVEL_PROBABLE`.
+  ranks above them, level with the caller's read count (the section above); those calls rest
+  on the caller's own reads, hence `NOVEL_PROBABLE`.
 - `SQ3ml` is not used for conclusions: its default training labels (FSM = TP, NNC = TN)
   are wrong for this simulation, where most NNC are genuine.
 
-So PanIsoGuard is not a more accurate filter. What it adds is a per-call verdict
-with the rule trace and the mechanism behind it, and explicit abstention.
+So PanIsoGuard is not a more accurate filter. SQANTI3's rules filter also says why it
+discards an isoform (`*_filtering_reasons.txt`: the descriptor that failed). What PanIsoGuard
+adds is evidence that filter does not read (the long-read alignments, the sample's genome,
+other callers), a record for every isoform and junction including the ones it keeps, and
+explicit abstention.
 
 ## Fixed along the way
 
@@ -121,7 +174,7 @@ short-read rule; 3 vs 3 after the fix). Since 0.0.4, `PARTIAL` to `UNCONFIRMED`.
 
 ```bash
 bash ../sqanti_sim/run.sh     # the truth set (once)
-bash run.sh                   # edit the paths at the top first
+bash run.sh                   # edit the paths at the top first; MC= and CHAIN= add IsoQuant to the count baselines
 ```
 
 ## Per-class precision (`per_class.py`)
