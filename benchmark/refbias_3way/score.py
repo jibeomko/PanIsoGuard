@@ -12,7 +12,9 @@ criterion, recomputed here so R is junction-level).
 With --vcf-arm (the run that reads every call of the assembly, insertions and deletions included,
 from one haploid VCF per haplotype) the same T is scored against what the tool itself reports in
 its junction table: V_rule = novel junctions it marks created or deleted and that the junction
-reads do not contradict, V = those inside REFERENCE_BIAS isoforms.
+reads do not contradict, V = those inside REFERENCE_BIAS isoforms. --call-set NAME=PREFIX scores
+further runs the same way (a call set that does not come from the assembly: short-read WGS, with
+and without its phasing) and says which of the assembly arm's confirmed junctions each one finds.
 
 Reports sensitivity |R and T|/|T| and precision |R and T|/|R| with bootstrap CIs, the same against the
 in-scope subset of T (the SNV class only), the breakdown of T minus R by label (what the rescue
@@ -22,7 +24,7 @@ cannot see), R minus T (candidate false rescues, for inspection), the firewall c
 Usage:
   score.py --work $WORK --data $DATA --genome GRCh38.fa --classes B1=armB1/junction_classes.tsv B2=...
 """
-import argparse, collections, csv, glob, json, os, random, re, sys
+import argparse, collections, csv, glob, gzip, json, os, random, re, sys
 import pysam
 
 CANON = {("GT", "AG"), ("GC", "AG"), ("AT", "AC")}
@@ -60,6 +62,8 @@ def main():
     ap.add_argument("--out", default=None, help="metrics json (default $WORK/metrics.json)")
     ap.add_argument("--emit-metrics", default=None, help="also write the tracked envelope (benchmark/results/refbias_3way/metrics.json)")
     ap.add_argument("--vcf-arm", default=None, help="output prefix of the --haplotype-vcf run (armC_vcf/wgs)")
+    ap.add_argument("--call-set", action="append", default=[], help="NAME=PREFIX[,VCF] of a --haplotype-vcf run with another call set (repeatable); with the "
+                                                                    "VCF it read, the deletion junctions it misses are looked up in that file")
     ap.add_argument("--label", default="HG03516", help="individual, the key under metrics.samples in the envelope (an existing envelope is updated in place)")
     a = ap.parse_args()
     W, D = a.work, a.data
@@ -102,26 +106,124 @@ def main():
            "rescued_isoforms": len(rescued), "R_junctions": len(R), "R_rule_junctions": len(R_rule),
            "firewall": firewall, "arms": {}}
 
-    # the VCF arm, from the tool's junction table
-    vcf = None
-    if a.vcf_arm:
+    # a --haplotype-vcf run, read from the tool's junction table
+    def vcf_run(prefix):
         jrow = {}
-        with open(a.vcf_arm + ".junctions.tsv") as f:
+        with open(prefix + ".junctions.tsv") as f:
             for p in csv.DictReader(f, delimiter="\t"):
                 if p["known"] == "false": jrow[(p["chrom"], int(p["start"]) - 1, int(p["end"]))] = p
-        with open(a.vcf_arm + ".adjudicated.tsv") as f: adj_v = {p["isoform_id"]: p for p in csv.DictReader(f, delimiter="\t")}
-        prov_v = dict(l.rstrip("\n").split("\t", 1) for l in open(a.vcf_arm + ".provenance.log") if "\t" in l and not l.startswith("#"))
+        with open(prefix + ".adjudicated.tsv") as f: adj_v = {p["isoform_id"]: p for p in csv.DictReader(f, delimiter="\t")}
+        prov_v = dict(l.rstrip("\n").split("\t", 1) for l in open(prefix + ".provenance.log") if "\t" in l and not l.startswith("#"))
         explained = {k: p["variant"] for k, p in jrow.items() if p["variant"] in ("created", "deleted")}
         V_rule = {k for k in explained if jrow[k]["read_phase"] != "contradicted"}
         rescued_v = [i for i, p in adj_v.items() if p["confidence_class"] == "REFERENCE_BIAS"]
         V = {k for iso in rescued_v for k in jx_of.get(iso, []) if k in V_rule}
-        vcf = {"rescued_isoforms": len(rescued_v),
+        top = {"rescued_isoforms": len(rescued_v),
                "rescued_by_reason": dict(collections.Counter(adj_v[i]["verdict_reason"].split(";mapping_sign")[0] for i in rescued_v)),
+               "held_phase_unknown": sum(p["verdict_reason"] == "haplotype_phase_unknown" for p in adj_v.values()),
                "explained_junctions": dict(collections.Counter(explained.values())),
+               "junction_phase": dict(collections.Counter(jrow[k]["variant_phase"] for k in explained)),
+               "junctions_unlinked": sum(p["variant_phase"] == "unlinked" for p in jrow.values()),
                "read_phase": {v: dict(collections.Counter(jrow[k]["read_phase"] for k in explained if explained[k] == v)) for v in ("created", "deleted")},
                "indels_applied_at_motifs": int(prov_v.get("haplotype_vcf_indels_applied_at_motifs", 0)),
+               "unphased_het_applied_at_motifs": int(prov_v.get("haplotype_vcf_unphased_het_applied_at_motifs", 0)),
+               "unapplied_alleles_at_motifs": int(prov_v.get("haplotype_vcf_unapplied_alleles_at_motifs", 0)),
                "V_rule": len(V_rule), "V": len(V)}
-        out["vcf_route"] = vcf
+        return {"jrow": jrow, "adj": adj_v, "explained": explained, "V_rule": V_rule, "V": V, "rescued": rescued_v, "top": top}
+
+    def vcf_against(run, lab, T, T_snv, reference=None):
+        """One VCF run against one B arm. `reference`: the assembly-call run, to say what this call set finds of it."""
+        by_label = lambda S: dict(collections.Counter(lab[k]["label"] if k in lab else "absent" for k in S))
+        pr = lambda num, den: len(num) / len(den) if den else float("nan")
+        explained, V_rule, V = run["explained"], run["V_rule"], run["V"]
+        T_unspliced = {k for k in T if lab[k]["label"] == "unspliced"}
+        created = {k for k in V_rule if explained[k] == "created"}; deleted = V_rule - created
+        res = {"V_rule": len(V_rule), "V_rule_and_T": len(V_rule & T), "precision": pr(V_rule & T, V_rule), "sensitivity": pr(V_rule & T, T),
+               "precision_ci": boot(V_rule & T, V_rule, lambda k: k in T), "sensitivity_ci": boot(V_rule & T, T, lambda k: k in V_rule),
+               "created": {"n": len(created), "in_T_snv_class": len(created & T_snv), "precision": pr(created & T_snv, created),
+                           "sensitivity_snv_class": pr(created & T_snv, T_snv), "other_by_label": by_label(created - T_snv)},
+               "deleted": {"n": len(deleted), "unspliced": len(deleted & T_unspliced), "precision": pr(deleted & T_unspliced, deleted),
+                           "sensitivity_unspliced": pr(deleted & T_unspliced, T_unspliced), "other_by_label": by_label(deleted - T_unspliced)},
+               "contradicted_by_reads_by_label": by_label(set(explained) - V_rule),
+               "V": len(V), "V_and_T": len(V & T), "precision_in_rescued_isoforms": pr(V & T, V),
+               "T_snv_missed": sorted(f"{k[0]}:{k[1]}-{k[2]}" for k in T_snv - created)}
+        if reference is not None:   # of what the assembly's own calls explain and the assembly confirms: found here, or why not
+            ref_ok = reference["V_rule"] & T
+            def state(k):
+                p = run["jrow"].get(k)
+                if p is None: return "junction not in this run"
+                if p["read_phase"] == "contradicted": return "contradicted by the reads"
+                if p["variant_phase"] == "unlinked": return "phase not given (unlinked)"
+                return {"none": "no explaining variant in the call set", "NA": "a base at the motif unknown", "disrupted": "disrupted"}.get(p["variant"], p["variant"])
+            res["of_the_assembly_arm_confirmed"] = {
+                "n": len(ref_ok), "found": len(ref_ok & V_rule),
+                "created": {"n": sum(reference["explained"][k] == "created" for k in ref_ok), "found": sum(reference["explained"][k] == "created" and k in V_rule for k in ref_ok)},
+                "deleted": {"n": sum(reference["explained"][k] == "deleted" for k in ref_ok), "found": sum(reference["explained"][k] == "deleted" and k in V_rule for k in ref_ok)},
+                "missed_by_state": dict(collections.Counter(state(k) for k in ref_ok - V_rule)),
+                "explained_here_only": len((V_rule & T) - ref_ok)}
+        return res
+
+    main_run = vcf_run(a.vcf_arm) if a.vcf_arm else None
+    vcf = main_run["top"] if main_run else None
+    if vcf is not None: out["vcf_route"] = vcf
+    def deletions_of(path):
+        """Deleted reference intervals [a, b) of a single-sample VCF, per chromosome: sequence alleles and <DEL> with END."""
+        out = collections.defaultdict(list)
+        for line in gzip.open(path, "rt"):
+            if line[0] == "#": continue
+            f = line.rstrip("\n").split("\t"); pos = int(f[1])
+            if not re.search(r"[1-9]", f[9].split(":")[0]): continue
+            if f[4].startswith("<DEL"):
+                m = re.search(r"(?:^|;)END=(\d+)", f[7])
+                if m: out[f[0]].append((pos, int(m.group(1)), "symbolic"))
+            elif not f[4].startswith("<") and len(f[3]) > len(f[4]):
+                out[f[0]].append((pos + len(f[4]) - 1, pos - 1 + len(f[3]), "sequence"))
+        return out
+
+    SIZES = (("under_50_bp", 0, 50), ("50_to_99_bp", 50, 100), ("100_to_299_bp", 100, 300), ("300_bp_or_more", 300, 10 ** 9))
+    def deletion_lookup(run, dels, ref_deleted):
+        """The junctions that equal a deletion in the assembly's calls, by length: found by this call set, and for the
+        others what the call set's file holds there (no deletion that overlaps; one of the same extent that the tool did
+        not use, e.g. next to an allele it cannot apply; one with other coordinates, by reciprocal overlap)."""
+        res = {}
+        for name, lo, hi in SIZES:
+            ks = [k for k in ref_deleted if lo <= k[2] - k[1] < hi]; why = collections.Counter(); found = 0
+            for c, s0, e0 in ks:
+                if (c, s0, e0) in run["V_rule"] and run["explained"][(c, s0, e0)] == "deleted": found += 1; continue
+                best = None
+                for d0, d1, kind in dels.get(c, []):
+                    ov = min(e0, d1) - max(s0, d0)
+                    if ov <= 0: continue
+                    rec = ov / max(e0 - s0, d1 - d0)
+                    if best is None or rec > best[0]: best = (rec, d0 == s0 and d1 == e0)
+                why["no_deletion_overlaps" if best is None else "same_extent_not_used" if best[1]
+                    else "other_coordinates_overlap_ge_80pct" if best[0] >= 0.8 else "other_coordinates_overlap_lt_80pct"] += 1
+            res[name] = {"n": len(ks), "found": found, "missed": dict(why)}
+        return res
+
+    def same_person(path, chrom="chr22"):
+        """Share of the call set's SNV alleles on one chromosome that the assembly's own calls also have: near 1 for the
+        same person, about one half for another."""
+        mine = set()
+        for line in gzip.open(path, "rt"):
+            if line.startswith(chrom + "\t"):
+                f = line.split("\t")
+                if len(f[3]) == 1 and len(f[4]) == 1: mine.add((int(f[1]), f[4]))
+        asm = set()
+        for h in ("mat", "pat"):
+            for line in pysam.TabixFile(f"{D}/{h}.hap.vcf.gz").fetch(chrom):
+                f = line.split("\t")
+                if len(f[3]) == 1 and len(f[4]) == 1: asm.add((int(f[1]), f[4]))
+        return {"chrom": chrom, "snv_alleles": len(mine), "also_in_the_assembly_calls": len(mine & asm), "share": round(len(mine & asm) / len(mine), 3) if mine else None}
+
+    call_sets = {}; call_vcf = {}; identity = {}
+    for spec in a.call_set:
+        cname, rest = spec.split("=", 1); prefix, _, vcf_path = rest.partition(",")
+        call_sets[cname] = vcf_run(prefix)
+        if vcf_path: call_vcf[cname] = deletions_of(vcf_path); identity[cname] = same_person(vcf_path)
+    for n, r in call_sets.items():
+        if n in identity: r["top"]["same_person_check"] = identity[n]
+    if call_sets: out["call_sets"] = {n: {"summary": r["top"], "arms": {}} for n, r in call_sets.items()}   # the same dict: filled further below
 
     def why_missed(k, T):
         """Why a junction in T_snv got no rescue verdict."""
@@ -162,20 +264,12 @@ def main():
             "R_minus_T": sorted(f'{k[0]}:{k[1]}-{k[2]} label={lab[k]["label"] if k in lab else "absent"}' for k in R - T),
             "motif_disrupted_in_person": sum(1 for p in lab.values() if p["label"] == "same-noncanonical" and p["canonical_A"] == "True"),
         }
-        if vcf is not None:
-            by_label = lambda S: dict(collections.Counter(lab[k]["label"] if k in lab else "absent" for k in S))
-            T_unspliced = {k for k in T if lab[k]["label"] == "unspliced"}
-            created = {k for k in V_rule if explained[k] == "created"}; deleted = V_rule - created
-            arm["vcf_route"] = {
-                "V_rule": len(V_rule), "V_rule_and_T": len(V_rule & T), "precision": pr(V_rule & T, V_rule), "sensitivity": pr(V_rule & T, T),
-                "precision_ci": boot(V_rule & T, V_rule, lambda k: k in T), "sensitivity_ci": boot(V_rule & T, T, lambda k: k in V_rule),
-                "created": {"n": len(created), "in_T_snv_class": len(created & T_snv), "precision": pr(created & T_snv, created),
-                            "sensitivity_snv_class": pr(created & T_snv, T_snv), "other_by_label": by_label(created - T_snv)},
-                "deleted": {"n": len(deleted), "unspliced": len(deleted & T_unspliced), "precision": pr(deleted & T_unspliced, deleted),
-                            "sensitivity_unspliced": pr(deleted & T_unspliced, T_unspliced), "other_by_label": by_label(deleted - T_unspliced)},
-                "contradicted_by_reads_by_label": by_label(set(explained) - V_rule),
-                "V": len(V), "V_and_T": len(V & T), "precision_in_rescued_isoforms": pr(V & T, V),
-                "T_snv_missed": sorted(f"{k[0]}:{k[1]}-{k[2]}" for k in T_snv - created)}
+        if main_run is not None: arm["vcf_route"] = vcf_against(main_run, lab, T, T_snv)
+        for cname, r in call_sets.items():
+            out["call_sets"][cname]["arms"][name] = vcf_against(r, lab, T, T_snv, reference=main_run)
+            if cname in call_vcf and main_run is not None:
+                ref_deleted = {k for k in main_run["V_rule"] & T if main_run["explained"][k] == "deleted"}
+                out["call_sets"][cname]["arms"][name]["deletion_junctions_by_length"] = deletion_lookup(r, call_vcf[cname], ref_deleted)
         out["arms"][name] = arm
 
     # isoform level, A vs C: SQANTI3 rules filter verdict x PanIsoGuard class (novel isoforms only)
@@ -186,10 +280,10 @@ def main():
     xt = collections.Counter((rules[i], cls_C["wgs"][i]["confidence_class"]) for i in rules if i in cls_C["wgs"])
     out["isoform_A_vs_C"] = {f"SQ3rules={k[0]}|PIG={k[1]}": v for k, v in sorted(xt.items())}
     out["rescued_discarded_by_rules_filter"] = sum(1 for i in rescued if rules.get(i) == "Artifact")
-    if vcf is not None:   # what SQANTI3's rules filter does with the isoforms the VCF arm rescues, by reason
-        vcf["rescued_sqanti3_rules"] = {}
-        for i in rescued_v:
-            d = vcf["rescued_sqanti3_rules"].setdefault(adj_v[i]["verdict_reason"].split(";mapping_sign")[0], {})
+    for run in ([main_run] if main_run else []) + list(call_sets.values()):   # what SQANTI3's rules filter does with the isoforms a VCF run rescues, by reason
+        run["top"]["rescued_sqanti3_rules"] = {}
+        for i in run["rescued"]:
+            d = run["top"]["rescued_sqanti3_rules"].setdefault(run["adj"][i]["verdict_reason"].split(";mapping_sign")[0], {})
             d[rules.get(i, "not_filtered")] = d.get(rules.get(i, "not_filtered"), 0) + 1
 
     # cost table from /usr/bin/time outputs (+ arm A's alignment and IsoQuant from the original logs)
@@ -212,6 +306,9 @@ def main():
         sample = {k: out[k] for k in ("n_novel_junctions_A", "n_noncanonical_A", "rescued_isoforms", "R_junctions",
                                       "R_rule_junctions", "firewall", "rescued_discarded_by_rules_filter", "cost")} | {"arms": arms}
         if vcf is not None: sample["vcf_route"] = vcf
+        if call_sets:
+            sample["call_sets"] = {n: {"summary": c["summary"], "arms": {arm: {k: v for k, v in x.items() if k != "T_snv_missed"} for arm, x in c["arms"].items()}}
+                                   for n, c in out["call_sets"].items()}
         samples = {}
         if os.path.exists(a.emit_metrics):
             try: samples = json.load(open(a.emit_metrics))["metrics"].get("samples", {})

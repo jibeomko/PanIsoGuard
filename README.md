@@ -142,10 +142,12 @@ not an estimate of accuracy on every sample.
   retention of supported transcripts; it does not establish precision on all novel calls.
 - **Reference-bias scope:** judged on two individuals' own assemblies, 96 % of the junctions
   attributed to the sample's genome (a variant at the splice site, or a deletion equal to the
-  junction) are confirmed, about half of those the assembly accounts for. 27 of 28 testable
-  heterozygous junctions agree with the haplotype carrying the canonical motif. The pangenome
-  rescue benchmark is limited to HPRC chr22. A genomic explanation does not prove the full
-  transcript is correct.
+  junction) are confirmed, about half of those the assembly accounts for. With short-read
+  variant calls of the same people, 93-94 % are confirmed and about a fifth to a quarter are
+  found, because short reads miss most of the deletions. 27 of 28 testable heterozygous
+  junctions agree with the haplotype carrying the canonical motif. The pangenome rescue
+  benchmark is limited to HPRC chr22. A genomic explanation does not prove the full transcript
+  is correct.
 - **Confidence classes:** these are evidence labels, not probabilities or an ordered score.
   Results depend on the supplied evidence and its coverage.
 

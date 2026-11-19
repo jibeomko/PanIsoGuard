@@ -1,7 +1,7 @@
 # Reference bias three ways: GRCh38 pipeline vs personalized-genome pipeline vs PanIsoGuard
 
 Status: run on HG03516 and HG02717 (arms A, B1, B2, C and, since 0.1.1, C with the assembly's
-calls as VCFs). Numbers:
+calls as VCFs and with the 1000 Genomes short-read calls of the same people). Numbers:
 [Results](#results-hg03516-and-hg02717) below and
 [../results/refbias_3way/metrics.json](../results/refbias_3way/metrics.json).
 
@@ -41,6 +41,7 @@ caller (IsoQuant 3.13, `pacbio_ccs`), the same annotation (GENCODE v49) and the 
 | B1 | SNV-personalized diploid: `mat_consensus.fa` + `pat_consensus.fa` (GRCh38 backbone with the haplotype's assembly SNVs applied; GRCh38 coordinates) | GENCODE v49, contigs renamed per haplotype | none (same coordinates) | SNV-mediated reference bias only, the component PanIsoGuard models |
 | B2 | HPRC R2 phased assembly, diploid: `mat.fa.gz` + `pat.fa.gz` (72 + 74 contigs, chromosome-scale) | GENCODE v49 lifted per haplotype with liftoff | lift junctions back to GRCh38 (`paftools.js liftover` on the asm5 PAF) + read-level cross-check | the full personalized pipeline: SNVs, indels, SVs, assembly-specific sequence |
 | C | GRCh38 (arm A's alignment and models) | GENCODE v49 | `panisoguard adjudicate --bam rna.aln.bam --reference GRCh38 --reference-haplotype mat_consensus.fa --reference-haplotype pat_consensus.fa --haplotype-provenance wgs` (no short reads exist for this sample, so the short-read axis is off) | PanIsoGuard post hoc on the reference-only pipeline |
+| C-1kGP | as C | GENCODE v49 | the same with one diploid `--haplotype-vcf`: the person's genotypes in the 1000 Genomes high-coverage phased panel (30x Illumina; SNVs, indels, SVs), as phased and with the phase removed | the post-hoc run with the variant calls a short-read WGS study has, independent of the assembly |
 | C-VCF | as C | GENCODE v49 | the same with `--haplotype-vcf mat.hap.vcf.gz --haplotype-vcf pat.hap.vcf.gz` instead of the FASTAs: every `paftools.js call` record of each assembly haplotype against GRCh38 (3.8-4.0 M per haplotype: substitutions, insertions, deletions), one haploid VCF per haplotype | the same post-hoc run with the indels the consensus FASTAs leave out |
 
 Arm A alignment and IsoQuant come from [hg03516_refbias](../hg03516_refbias) (68,011
@@ -256,6 +257,71 @@ an insertion or deletion, so it cannot label these):
   alignment on the personal genome.
 - **Cost.** One run, genome-wide with `--bam` and the two VCFs: 3.6 and 5.9 min, 0.6 GB.
 
+### With a call set that does not come from the assembly: 1000 Genomes short reads (0.1.1)
+
+In the arm above the variant calls and the standard are the same assembly. Both individuals are
+also in the 1000 Genomes high-coverage panel: SNVs, indels and SVs called from 30x Illumina
+reads of 3,202 samples and phased with the pedigree (Byrska-Bishop et al., Cell 2022). That is
+the input a study with short-read WGS of its sample has, and it owes nothing to the assembly.
+`fetch_1kgp.sh` reads each person's genotypes through the remote index (in the regions of the
+isoforms that have a novel junction; the panel is 30 GB) into one diploid VCF, and `C_1kgp`
+runs it twice: as phased, and with every `|` written `/`, as an unphased call set gives them.
+On chr22, 98.9 % and 98.3 % of each call set's SNV alleles are also in that person's assembly
+calls (the scorer's same-person check). Standard as before: where the same reads splice on the
+assembly (B2).
+
+| | HG03516: assembly calls | 1000 Genomes, phased | phase removed | HG02717: assembly calls | 1000 Genomes, phased | phase removed |
+|---|---:|---:|---:|---:|---:|---:|
+| `V_rule` (junctions explained, not contradicted by the reads) | 265 | 103 | 97 | 179 | 90 | 87 |
+| `V_rule and T` | 255 | 96 | 89 | 171 | 85 | 82 |
+| precision (95 % CI) | 0.962 (0.94-0.98) | 0.932 (0.88-0.97) | 0.918 (0.87-0.97) | 0.955 (0.92-0.98) | 0.944 (0.89-0.99) | 0.943 (0.90-0.99) |
+| sensitivity over `T` (95 % CI) | 47 % (42-51 %) | 18 % (14-21 %) | 16 % (13-19 %) | 53 % (48-59 %) | 26 % (22-31 %) | 25 % (21-30 %) |
+| splice-site class found | 33 / 35 | 31 / 35 | 31 / 35 | 41 / 43 | 38 / 43 | 37 / 43 |
+| `unspliced` found | 221 / 499 | 65 / 499 | 58 / 499 | 130 / 271 | 47 / 271 | 45 / 271 |
+| novel junctions left `unlinked` | 0 | 0 | 47 | 0 | 0 | 24 |
+| `REFERENCE_BIAS` isoforms (variant / deletion) | 144 (18 / 126) | 55 (18 / 37) | 48 (18 / 30) | 108 (28 / 80) | 65 (25 / 40) | 64 (25 / 39) |
+
+- **What it calls is as often right.** 96 of 103 and 85 of 90 junctions are confirmed on the
+  assembly (precision 0.93 and 0.94, against 0.96 and 0.96 with the assembly's own calls; the
+  intervals overlap). The junctions outside `T` are the same kind as before:
+  `same-noncanonical` in the person, or not assessable on the assembly.
+- **The splice-site class is nearly all there.** 31 of 35 and 38 of 43 are found
+  (33 and 41 with the assembly's calls).
+- **Most deletions are not.** Of the junctions that equal a deletion in the assembly's calls,
+  64 of 222 and 47 of 130 are found, and the share falls with length:
+
+| length of the junction | HG03516: found | no deletion in the call set | a deletion with other coordinates, overlap ≥ 80 % | other | HG02717: found | no deletion in the call set | other coordinates, overlap ≥ 80 % | other |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| under 50 bp | 52 / 89 | 30 | 1 | 6 | 40 / 65 | 18 | 2 | 5 |
+| 50-99 bp | 10 / 45 | 29 | 3 | 3 | 6 / 24 | 12 | 5 | 1 |
+| 100-299 bp | 1 / 38 | 30 | 6 | 1 | 1 / 24 | 20 | 2 | 1 |
+| 300 bp or more | 1 / 50 | 18 | 28 | 3 | 0 / 17 | 4 | 10 | 3 |
+
+  Under 50 bp the tool finds 6 in 10. Above that the call set mostly has no deletion there
+  (107 and 54 junctions over all lengths). Where it has one, usually a `<DEL>` from an SV
+  caller, its coordinates differ from the junction's (38 and 19 overlap it by 80 % or more,
+  some by 2 bp): the tool asks for a deletion equal to the intron, and it gives no credit to
+  one that is nearly so. So overall sensitivity is 18 % and 26 % of `T`, against 47 % and 53 %.
+- **At 13 and 9 of the missed junctions the motif is not evaluable.** 8 and 7 have a `<DEL>` of
+  the call set at the junction that is not equal to it: a deletion that starts at the exon
+  boundary and is longer than the 64 bp read on either side leaves no base to read on that
+  haplotype. At the other 5 and 2 the call set writes the region as a cluster of small records.
+- **Without phase little changes.** With every genotype unphased, 89 of 97 and 82 of 87 are
+  confirmed. 47 and 24 novel junctions are `unlinked` (two heterozygous records near the
+  junction whose relation the file does not give), which costs 15 and 10 of the assembly arm's
+  junctions; 1 isoform is held for `haplotype_phase_unknown`. The read-haplotype check needs
+  phased sites, so it reports `uninformative` throughout and the one contradicted junction is
+  counted.
+- **Verdicts.** 55 and 65 isoforms are `REFERENCE_BIAS` (48 and 64 unphased); SQANTI3's rules
+  filter discards 55 and 62 of them.
+
+So with the variant calls a WGS study has, the axis keeps its precision and its splice-site
+class, and finds about a third of the deletions an assembly shows. Two things would raise that
+and are not done: accepting a deletion that is nearly, not exactly, the intron (it would have to
+be weighed against the exactness the verdict rests on), and reading a haplotype's motif across
+a long deletion that is not the intron. The two runs of `C_1kgp` took 15 min (HG03516) and
+20 min (HG02717) in all, 0.6 GB.
+
 ### Isoform level, firewall, and what the rescue changes for a user
 
 SQANTI3's rules filter in arm A calls `Artifact` 9,886 of HG03516's adjudicated novel models
@@ -313,5 +379,7 @@ gene/transcript/exon lines only, and both individuals' rows above are from that 
 `run.sh` (all arms; `SAMPLE=`, `WORK=` and tool paths as env vars), `classify_junctions.py`
 (read-level classes; `--same-coordinates` for B1, `--paf` liftover for B2), `score.py`
 (metrics, bootstrap, cost table; `--vcf-arm armC_vcf/wgs` scores the VCF arm from the tool's
-junction table; `--label <ID> --emit-metrics` adds the individual to the
-tracked envelope checked by `benchmark/results/collect.py --check`).
+junction table and `--call-set NAME=PREFIX[,VCF]` a run with another call set;
+`--label <ID> --emit-metrics` adds the individual to the tracked envelope checked by
+`benchmark/results/collect.py --check`), `fetch_1kgp.sh` and `novel_isoform_regions.py` (the
+1000 Genomes genotypes of the regions that hold a novel junction).

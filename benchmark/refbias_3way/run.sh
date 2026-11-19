@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Reference bias three ways (see README.md): the same Iso-Seq reads through the GRCh38
 # pipeline (A), an SNV-personalized diploid (B1), the HPRC phased assembly (B2), and
-# PanIsoGuard post hoc on A: with the two SNV-consensus FASTAs (C) and with every call of the
-# assembly, insertions and deletions included, as one haploid VCF per haplotype (C_vcf).
+# PanIsoGuard post hoc on A: with the two SNV-consensus FASTAs (C), with every call of the
+# assembly, insertions and deletions included, as one haploid VCF per haplotype (C_vcf), and
+# with a call set that does not come from the assembly, the 1000 Genomes short-read calls of
+# the same person, phased and with the phase removed (C_1kgp).
 # Builds on the hg03516_refbias outputs in $DATA.
 #
 # Usage: run.sh <stage>...   or   run.sh all
@@ -24,10 +26,11 @@ ISOQUANT="${ISOQUANT:-$CONDA/isoquant/bin/isoquant}"
 LIFTOFF="${LIFTOFF:-$CONDA/liftoff/bin/liftoff}"
 SQ3BIN="${SQ3BIN:-$CONDA/sqanti3/bin}"
 BCFTOOLS="${BCFTOOLS:-$CONDA/pigval/bin/bcftools}"
+KGP="${KGP:-$(dirname "$DATA")/kgp_1000g}"                          # fetch_1kgp.sh output: <ID>.kgp.vcf.gz, <ID>.kgp.unphased.vcf.gz
 export PATH="$SQ3BIN:$PATH"   # sqanti3_qc.py's `#!/usr/bin/env python` must find its own env
-ALL="A_sqanti B1_build B1_align B1_isoquant B1_sqanti B2_paf B2_liftoff B2_build B2_align B2_isoquant B2_sqanti C_adjudicate C_vcf"
+ALL="A_sqanti B1_build B1_align B1_isoquant B1_sqanti B2_paf B2_liftoff B2_build B2_align B2_isoquant B2_sqanti C_adjudicate C_vcf C_1kgp"
 
-mkdir -p "$WORK"/{armA,armB1,armB2,armC,armC_vcf,paf}; cd "$WORK"
+mkdir -p "$WORK"/{armA,armB1,armB2,armC,armC_vcf,armC_1kgp,paf}; cd "$WORK"
 log() { echo "[$(date '+%F %T')] $*"; }
 
 # Outer invocation: run each stage in a child under /usr/bin/time so wall/RSS are recorded.
@@ -134,6 +137,25 @@ C_vcf() {
     --ref-gtf "$REFGTF" --bam "$DATA/rna.aln.bam" --reference "$GRCH38" \
     --haplotype-vcf "$DATA/mat.hap.vcf.gz" --haplotype-vcf "$DATA/pat.hap.vcf.gz" --haplotype-provenance wgs \
     --out-prefix armC_vcf/wgs > armC_vcf/wgs.log 2>&1
+}
+
+# ---- C with a call set independent of the assembly: 1000 Genomes high-coverage short reads --
+# The sample's own genotypes from the 3,202-sample phased panel (SNVs, indels, SVs), read in the
+# regions of the isoforms that have a novel junction, and the same file with every genotype
+# unphased. One diploid VCF, so the two haplotypes are the two alleles of each genotype.
+C_1kgp() {
+  [ -s armC_1kgp/unphased.adjudicated.tsv ] && return
+  ID=$(echo "$SAMPLE" | tr a-z A-Z)
+  if [ ! -s "$KGP/$ID.kgp.vcf.gz.tbi" ]; then
+    python3 "$HERE/novel_isoform_regions.py" armC/wgs.junctions.tsv "$DATA/isoquant_out/iq/iq.transcript_models.gtf" > armC_1kgp/regions.bed
+    bash "$HERE/fetch_1kgp.sh" "$KGP" armC_1kgp/regions.bed "$ID"
+  fi
+  for v in phased unphased; do
+    f="$KGP/$ID.kgp.vcf.gz"; [ $v = unphased ] && f="$KGP/$ID.kgp.unphased.vcf.gz"
+    "$PIG" adjudicate --classification armA/sq/iq_classification.txt --isoforms-gtf "$DATA/isoquant_out/iq/iq.transcript_models.gtf" \
+      --ref-gtf "$REFGTF" --bam "$DATA/rna.aln.bam" --reference "$GRCH38" \
+      --haplotype-vcf "$f" --haplotype-provenance wgs --out-prefix armC_1kgp/$v > armC_1kgp/$v.log 2>&1
+  done
 }
 
 for s in "$@"; do "$s"; done

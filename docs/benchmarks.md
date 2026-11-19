@@ -26,9 +26,13 @@ show the precision-recall trade-offs under each tested input configuration.
   genome are confirmed on the person's assembly (precision 0.96). That is 47 % and 53 % of the
   junctions the assembly accounts for: 33 of 35 and 41 of 43 made canonical by a variant at the
   splice site, and 221 and 130 that equal a deletion in the person. One run takes 4-6 minutes
-  instead of the 7-11 hours of the personalized pipeline. Consensus FASTAs carry substitutions
-  only and reach the splice-site SNV class alone (31 of 32 and 37 of 39 on an SNV-personalized
-  genome). As isoform verdicts fewer are recovered, because a verdict needs every novel
+  instead of the 7-11 hours of the personalized pipeline. With the 1000 Genomes short-read
+  calls of the same two people, an input that does not come from the assembly, 96 of 103 and
+  85 of 90 called junctions are confirmed (0.93 and 0.94) and 18 % and 26 % of the assembly's
+  are found: nearly all the splice-site junctions (31 of 35, 38 of 43) and about a third of
+  the deletions, which short reads rarely call above 50 bp; removing the phase from that call
+  set changes little. Consensus FASTAs carry substitutions only and reach the splice-site SNV
+  class alone (31 of 32 and 37 of 39 on an SNV-personalized genome). As isoform verdicts fewer are recovered, because a verdict needs every novel
   junction of the isoform explained (144 and 108 isoforms). The reads that use a junction
   explained on one haplotype come from that haplotype at 27 of 28 testable junctions
   ([benchmark/refbias_phasing](../benchmark/refbias_phasing)); `adjudicate --bam` makes the

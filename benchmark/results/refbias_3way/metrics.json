@@ -1,7 +1,7 @@
 {
   "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
   "data_provenance": "real public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
-  "generated_utc": "2026-11-18T14:35:13Z",
+  "generated_utc": "2026-11-19T05:29:33Z",
   "metrics": {
     "samples": {
       "HG02717": {
@@ -192,6 +192,387 @@
             }
           }
         },
+        "call_sets": {
+          "1kgp_phased": {
+            "arms": {
+              "B1": {
+                "V": 43,
+                "V_and_T": 18,
+                "V_rule": 90,
+                "V_rule_and_T": 34,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 34,
+                  "n": 42,
+                  "other_by_label": {
+                    "same-noncanonical": 8
+                  },
+                  "precision": 0.8095238095238095,
+                  "sensitivity_snv_class": 0.8717948717948718
+                },
+                "deleted": {
+                  "n": 48,
+                  "other_by_label": {
+                    "same-canonical": 26,
+                    "same-noncanonical": 21,
+                    "unassessable": 1
+                  },
+                  "precision": 0.0,
+                  "sensitivity_unspliced": 0.0,
+                  "unspliced": 0
+                },
+                "deletion_junctions_by_length": {
+                  "100_to_299_bp": {
+                    "found": 0,
+                    "missed": {},
+                    "n": 0
+                  },
+                  "300_bp_or_more": {
+                    "found": 0,
+                    "missed": {},
+                    "n": 0
+                  },
+                  "50_to_99_bp": {
+                    "found": 0,
+                    "missed": {},
+                    "n": 0
+                  },
+                  "under_50_bp": {
+                    "found": 0,
+                    "missed": {
+                      "other_coordinates_overlap_ge_80pct": 1
+                    },
+                    "n": 1
+                  }
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 34,
+                    "n": 37
+                  },
+                  "deleted": {
+                    "found": 0,
+                    "n": 1
+                  },
+                  "explained_here_only": 0,
+                  "found": 34,
+                  "missed_by_state": {
+                    "no explaining variant in the call set": 4
+                  },
+                  "n": 38
+                },
+                "precision": 0.37777777777777777,
+                "precision_ci": [
+                  0.2777777777777778,
+                  0.4777777777777778
+                ],
+                "precision_in_rescued_isoforms": 0.4186046511627907,
+                "sensitivity": 0.4788732394366197,
+                "sensitivity_ci": [
+                  0.352112676056338,
+                  0.5915492957746479
+                ]
+              },
+              "B2": {
+                "V": 43,
+                "V_and_T": 40,
+                "V_rule": 90,
+                "V_rule_and_T": 85,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 38,
+                  "n": 42,
+                  "other_by_label": {
+                    "same-noncanonical": 3,
+                    "unassessable": 1
+                  },
+                  "precision": 0.9047619047619048,
+                  "sensitivity_snv_class": 0.8837209302325582
+                },
+                "deleted": {
+                  "n": 48,
+                  "other_by_label": {
+                    "unassessable": 1
+                  },
+                  "precision": 0.9791666666666666,
+                  "sensitivity_unspliced": 0.17343173431734318,
+                  "unspliced": 47
+                },
+                "deletion_junctions_by_length": {
+                  "100_to_299_bp": {
+                    "found": 1,
+                    "missed": {
+                      "no_deletion_overlaps": 20,
+                      "other_coordinates_overlap_ge_80pct": 2,
+                      "other_coordinates_overlap_lt_80pct": 1
+                    },
+                    "n": 24
+                  },
+                  "300_bp_or_more": {
+                    "found": 0,
+                    "missed": {
+                      "no_deletion_overlaps": 4,
+                      "other_coordinates_overlap_ge_80pct": 10,
+                      "other_coordinates_overlap_lt_80pct": 3
+                    },
+                    "n": 17
+                  },
+                  "50_to_99_bp": {
+                    "found": 6,
+                    "missed": {
+                      "no_deletion_overlaps": 12,
+                      "other_coordinates_overlap_ge_80pct": 5,
+                      "same_extent_not_used": 1
+                    },
+                    "n": 24
+                  },
+                  "under_50_bp": {
+                    "found": 40,
+                    "missed": {
+                      "no_deletion_overlaps": 18,
+                      "other_coordinates_overlap_ge_80pct": 2,
+                      "other_coordinates_overlap_lt_80pct": 5
+                    },
+                    "n": 65
+                  }
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 38,
+                    "n": 41
+                  },
+                  "deleted": {
+                    "found": 47,
+                    "n": 130
+                  },
+                  "explained_here_only": 0,
+                  "found": 85,
+                  "missed_by_state": {
+                    "a base at the motif unknown": 9,
+                    "disrupted": 1,
+                    "no explaining variant in the call set": 76
+                  },
+                  "n": 171
+                },
+                "precision": 0.9444444444444444,
+                "precision_ci": [
+                  0.8888888888888888,
+                  0.9888888888888889
+                ],
+                "precision_in_rescued_isoforms": 0.9302325581395349,
+                "sensitivity": 0.2623456790123457,
+                "sensitivity_ci": [
+                  0.21604938271604937,
+                  0.30864197530864196
+                ]
+              }
+            },
+            "summary": {
+              "V": 43,
+              "V_rule": 90,
+              "explained_junctions": {
+                "created": 42,
+                "deleted": 48
+              },
+              "held_phase_unknown": 0,
+              "indels_applied_at_motifs": 118,
+              "junction_phase": {
+                "phased": 90
+              },
+              "junctions_unlinked": 0,
+              "read_phase": {
+                "created": {
+                  "NA": 15,
+                  "consistent": 11,
+                  "uninformative": 16
+                },
+                "deleted": {
+                  "NA": 36,
+                  "consistent": 10,
+                  "uninformative": 2
+                }
+              },
+              "rescued_by_reason": {
+                "haplotype_deletion": 40,
+                "haplotype_variant": 25
+              },
+              "rescued_isoforms": 65,
+              "rescued_sqanti3_rules": {
+                "haplotype_deletion": {
+                  "Artifact": 37,
+                  "Isoform": 3
+                },
+                "haplotype_variant": {
+                  "Artifact": 25
+                }
+              },
+              "same_person_check": {
+                "also_in_the_assembly_calls": 12232,
+                "chrom": "chr22",
+                "share": 0.983,
+                "snv_alleles": 12449
+              },
+              "unapplied_alleles_at_motifs": 49,
+              "unphased_het_applied_at_motifs": 0
+            }
+          },
+          "1kgp_unphased": {
+            "arms": {
+              "B1": {
+                "V": 41,
+                "V_and_T": 18,
+                "V_rule": 87,
+                "V_rule_and_T": 34,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 34,
+                  "n": 41,
+                  "other_by_label": {
+                    "same-noncanonical": 7
+                  },
+                  "precision": 0.8292682926829268,
+                  "sensitivity_snv_class": 0.8717948717948718
+                },
+                "deleted": {
+                  "n": 46,
+                  "other_by_label": {
+                    "same-canonical": 25,
+                    "same-noncanonical": 20,
+                    "unassessable": 1
+                  },
+                  "precision": 0.0,
+                  "sensitivity_unspliced": 0.0,
+                  "unspliced": 0
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 34,
+                    "n": 37
+                  },
+                  "deleted": {
+                    "found": 0,
+                    "n": 1
+                  },
+                  "explained_here_only": 0,
+                  "found": 34,
+                  "missed_by_state": {
+                    "no explaining variant in the call set": 3,
+                    "phase not given (unlinked)": 1
+                  },
+                  "n": 38
+                },
+                "precision": 0.39080459770114945,
+                "precision_ci": [
+                  0.2988505747126437,
+                  0.4942528735632184
+                ],
+                "precision_in_rescued_isoforms": 0.43902439024390244,
+                "sensitivity": 0.4788732394366197,
+                "sensitivity_ci": [
+                  0.352112676056338,
+                  0.5915492957746479
+                ]
+              },
+              "B2": {
+                "V": 41,
+                "V_and_T": 38,
+                "V_rule": 87,
+                "V_rule_and_T": 82,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 37,
+                  "n": 41,
+                  "other_by_label": {
+                    "same-noncanonical": 3,
+                    "unassessable": 1
+                  },
+                  "precision": 0.9024390243902439,
+                  "sensitivity_snv_class": 0.8604651162790697
+                },
+                "deleted": {
+                  "n": 46,
+                  "other_by_label": {
+                    "unassessable": 1
+                  },
+                  "precision": 0.9782608695652174,
+                  "sensitivity_unspliced": 0.16605166051660517,
+                  "unspliced": 45
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 37,
+                    "n": 41
+                  },
+                  "deleted": {
+                    "found": 45,
+                    "n": 130
+                  },
+                  "explained_here_only": 0,
+                  "found": 82,
+                  "missed_by_state": {
+                    "a base at the motif unknown": 7,
+                    "disrupted": 1,
+                    "no explaining variant in the call set": 71,
+                    "phase not given (unlinked)": 10
+                  },
+                  "n": 171
+                },
+                "precision": 0.9425287356321839,
+                "precision_ci": [
+                  0.896551724137931,
+                  0.9885057471264368
+                ],
+                "precision_in_rescued_isoforms": 0.926829268292683,
+                "sensitivity": 0.25308641975308643,
+                "sensitivity_ci": [
+                  0.20679012345679013,
+                  0.30246913580246915
+                ]
+              }
+            },
+            "summary": {
+              "V": 41,
+              "V_rule": 87,
+              "explained_junctions": {
+                "created": 41,
+                "deleted": 46
+              },
+              "held_phase_unknown": 1,
+              "indels_applied_at_motifs": 118,
+              "junction_phase": {
+                "phased": 32,
+                "unphased": 55
+              },
+              "junctions_unlinked": 24,
+              "read_phase": {
+                "created": {
+                  "NA": 14,
+                  "uninformative": 27
+                },
+                "deleted": {
+                  "NA": 36,
+                  "uninformative": 10
+                }
+              },
+              "rescued_by_reason": {
+                "haplotype_deletion": 39,
+                "haplotype_variant": 25
+              },
+              "rescued_isoforms": 64,
+              "rescued_sqanti3_rules": {
+                "haplotype_deletion": {
+                  "Artifact": 36,
+                  "Isoform": 3
+                },
+                "haplotype_variant": {
+                  "Artifact": 25
+                }
+              },
+              "unapplied_alleles_at_motifs": 49,
+              "unphased_het_applied_at_motifs": 203
+            }
+          }
+        },
         "cost": {
           "A_align(existing)": {
             "max_rss_gb": 22.946,
@@ -241,6 +622,10 @@
             "max_rss_gb": 9.4,
             "wall": "3:39.43"
           },
+          "C_1kgp": {
+            "max_rss_gb": 0.6,
+            "wall": "20:15.15"
+          },
           "C_adjudicate": {
             "max_rss_gb": 0.6,
             "wall": "18:02.77"
@@ -266,7 +651,12 @@
             "created": 45,
             "deleted": 135
           },
+          "held_phase_unknown": 0,
           "indels_applied_at_motifs": 256,
+          "junction_phase": {
+            "phased": 180
+          },
+          "junctions_unlinked": 0,
           "read_phase": {
             "created": {
               "NA": 15,
@@ -294,7 +684,9 @@
             "haplotype_variant": {
               "Artifact": 28
             }
-          }
+          },
+          "unapplied_alleles_at_motifs": 0,
+          "unphased_het_applied_at_motifs": 0
         }
       },
       "HG03516": {
@@ -483,6 +875,394 @@
             }
           }
         },
+        "call_sets": {
+          "1kgp_phased": {
+            "arms": {
+              "B1": {
+                "V": 39,
+                "V_and_T": 12,
+                "V_rule": 103,
+                "V_rule_and_T": 29,
+                "contradicted_by_reads_by_label": {
+                  "same-noncanonical": 1
+                },
+                "created": {
+                  "in_T_snv_class": 29,
+                  "n": 34,
+                  "other_by_label": {
+                    "same-noncanonical": 5
+                  },
+                  "precision": 0.8529411764705882,
+                  "sensitivity_snv_class": 0.90625
+                },
+                "deleted": {
+                  "n": 69,
+                  "other_by_label": {
+                    "same-canonical": 41,
+                    "same-noncanonical": 24,
+                    "shifted-novel": 2,
+                    "unassessable": 2
+                  },
+                  "precision": 0.0,
+                  "sensitivity_unspliced": 0.0,
+                  "unspliced": 0
+                },
+                "deletion_junctions_by_length": {
+                  "100_to_299_bp": {
+                    "found": 0,
+                    "missed": {},
+                    "n": 0
+                  },
+                  "300_bp_or_more": {
+                    "found": 0,
+                    "missed": {},
+                    "n": 0
+                  },
+                  "50_to_99_bp": {
+                    "found": 0,
+                    "missed": {
+                      "no_deletion_overlaps": 1
+                    },
+                    "n": 1
+                  },
+                  "under_50_bp": {
+                    "found": 0,
+                    "missed": {
+                      "no_deletion_overlaps": 1
+                    },
+                    "n": 1
+                  }
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 29,
+                    "n": 31
+                  },
+                  "deleted": {
+                    "found": 0,
+                    "n": 2
+                  },
+                  "explained_here_only": 0,
+                  "found": 29,
+                  "missed_by_state": {
+                    "no explaining variant in the call set": 4
+                  },
+                  "n": 33
+                },
+                "precision": 0.2815533980582524,
+                "precision_ci": [
+                  0.1941747572815534,
+                  0.36893203883495146
+                ],
+                "precision_in_rescued_isoforms": 0.3076923076923077,
+                "sensitivity": 0.32954545454545453,
+                "sensitivity_ci": [
+                  0.23863636363636365,
+                  0.42045454545454547
+                ]
+              },
+              "B2": {
+                "V": 39,
+                "V_and_T": 35,
+                "V_rule": 103,
+                "V_rule_and_T": 96,
+                "contradicted_by_reads_by_label": {
+                  "same-noncanonical": 1
+                },
+                "created": {
+                  "in_T_snv_class": 31,
+                  "n": 34,
+                  "other_by_label": {
+                    "same-noncanonical": 3
+                  },
+                  "precision": 0.9117647058823529,
+                  "sensitivity_snv_class": 0.8857142857142857
+                },
+                "deleted": {
+                  "n": 69,
+                  "other_by_label": {
+                    "same-canonical": 1,
+                    "unassessable": 3
+                  },
+                  "precision": 0.9420289855072463,
+                  "sensitivity_unspliced": 0.13026052104208416,
+                  "unspliced": 65
+                },
+                "deletion_junctions_by_length": {
+                  "100_to_299_bp": {
+                    "found": 1,
+                    "missed": {
+                      "no_deletion_overlaps": 30,
+                      "other_coordinates_overlap_ge_80pct": 6,
+                      "other_coordinates_overlap_lt_80pct": 1
+                    },
+                    "n": 38
+                  },
+                  "300_bp_or_more": {
+                    "found": 1,
+                    "missed": {
+                      "no_deletion_overlaps": 18,
+                      "other_coordinates_overlap_ge_80pct": 28,
+                      "other_coordinates_overlap_lt_80pct": 3
+                    },
+                    "n": 50
+                  },
+                  "50_to_99_bp": {
+                    "found": 10,
+                    "missed": {
+                      "no_deletion_overlaps": 29,
+                      "other_coordinates_overlap_ge_80pct": 3,
+                      "other_coordinates_overlap_lt_80pct": 2,
+                      "same_extent_not_used": 1
+                    },
+                    "n": 45
+                  },
+                  "under_50_bp": {
+                    "found": 52,
+                    "missed": {
+                      "no_deletion_overlaps": 30,
+                      "other_coordinates_overlap_ge_80pct": 1,
+                      "other_coordinates_overlap_lt_80pct": 6
+                    },
+                    "n": 89
+                  }
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 31,
+                    "n": 33
+                  },
+                  "deleted": {
+                    "found": 64,
+                    "n": 222
+                  },
+                  "explained_here_only": 1,
+                  "found": 95,
+                  "missed_by_state": {
+                    "a base at the motif unknown": 13,
+                    "disrupted": 1,
+                    "no explaining variant in the call set": 146
+                  },
+                  "n": 255
+                },
+                "precision": 0.9320388349514563,
+                "precision_ci": [
+                  0.883495145631068,
+                  0.970873786407767
+                ],
+                "precision_in_rescued_isoforms": 0.8974358974358975,
+                "sensitivity": 0.17582417582417584,
+                "sensitivity_ci": [
+                  0.1446886446886447,
+                  0.20695970695970695
+                ]
+              }
+            },
+            "summary": {
+              "V": 39,
+              "V_rule": 103,
+              "explained_junctions": {
+                "created": 35,
+                "deleted": 69
+              },
+              "held_phase_unknown": 0,
+              "indels_applied_at_motifs": 167,
+              "junction_phase": {
+                "phased": 104
+              },
+              "junctions_unlinked": 0,
+              "read_phase": {
+                "created": {
+                  "NA": 14,
+                  "consistent": 12,
+                  "contradicted": 1,
+                  "uninformative": 8
+                },
+                "deleted": {
+                  "NA": 57,
+                  "consistent": 7,
+                  "uninformative": 5
+                }
+              },
+              "rescued_by_reason": {
+                "haplotype_deletion": 37,
+                "haplotype_variant": 18
+              },
+              "rescued_isoforms": 55,
+              "rescued_sqanti3_rules": {
+                "haplotype_deletion": {
+                  "Artifact": 37
+                },
+                "haplotype_variant": {
+                  "Artifact": 18
+                }
+              },
+              "same_person_check": {
+                "also_in_the_assembly_calls": 12720,
+                "chrom": "chr22",
+                "share": 0.989,
+                "snv_alleles": 12860
+              },
+              "unapplied_alleles_at_motifs": 52,
+              "unphased_het_applied_at_motifs": 0
+            }
+          },
+          "1kgp_unphased": {
+            "arms": {
+              "B1": {
+                "V": 35,
+                "V_and_T": 12,
+                "V_rule": 97,
+                "V_rule_and_T": 29,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 29,
+                  "n": 35,
+                  "other_by_label": {
+                    "same-noncanonical": 6
+                  },
+                  "precision": 0.8285714285714286,
+                  "sensitivity_snv_class": 0.90625
+                },
+                "deleted": {
+                  "n": 62,
+                  "other_by_label": {
+                    "same-canonical": 39,
+                    "same-noncanonical": 20,
+                    "shifted-novel": 1,
+                    "unassessable": 2
+                  },
+                  "precision": 0.0,
+                  "sensitivity_unspliced": 0.0,
+                  "unspliced": 0
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 29,
+                    "n": 31
+                  },
+                  "deleted": {
+                    "found": 0,
+                    "n": 2
+                  },
+                  "explained_here_only": 0,
+                  "found": 29,
+                  "missed_by_state": {
+                    "no explaining variant in the call set": 4
+                  },
+                  "n": 33
+                },
+                "precision": 0.29896907216494845,
+                "precision_ci": [
+                  0.21649484536082475,
+                  0.3917525773195876
+                ],
+                "precision_in_rescued_isoforms": 0.34285714285714286,
+                "sensitivity": 0.32954545454545453,
+                "sensitivity_ci": [
+                  0.23863636363636365,
+                  0.42045454545454547
+                ]
+              },
+              "B2": {
+                "V": 35,
+                "V_and_T": 31,
+                "V_rule": 97,
+                "V_rule_and_T": 89,
+                "contradicted_by_reads_by_label": {},
+                "created": {
+                  "in_T_snv_class": 31,
+                  "n": 35,
+                  "other_by_label": {
+                    "same-noncanonical": 4
+                  },
+                  "precision": 0.8857142857142857,
+                  "sensitivity_snv_class": 0.8857142857142857
+                },
+                "deleted": {
+                  "n": 62,
+                  "other_by_label": {
+                    "same-canonical": 1,
+                    "unassessable": 3
+                  },
+                  "precision": 0.9354838709677419,
+                  "sensitivity_unspliced": 0.11623246492985972,
+                  "unspliced": 58
+                },
+                "of_the_assembly_arm_confirmed": {
+                  "created": {
+                    "found": 31,
+                    "n": 33
+                  },
+                  "deleted": {
+                    "found": 58,
+                    "n": 222
+                  },
+                  "explained_here_only": 0,
+                  "found": 89,
+                  "missed_by_state": {
+                    "a base at the motif unknown": 8,
+                    "disrupted": 1,
+                    "no explaining variant in the call set": 142,
+                    "phase not given (unlinked)": 15
+                  },
+                  "n": 255
+                },
+                "precision": 0.9175257731958762,
+                "precision_ci": [
+                  0.865979381443299,
+                  0.9690721649484536
+                ],
+                "precision_in_rescued_isoforms": 0.8857142857142857,
+                "sensitivity": 0.163003663003663,
+                "sensitivity_ci": [
+                  0.1336996336996337,
+                  0.19413919413919414
+                ]
+              }
+            },
+            "summary": {
+              "V": 35,
+              "V_rule": 97,
+              "explained_junctions": {
+                "created": 35,
+                "deleted": 62
+              },
+              "held_phase_unknown": 0,
+              "indels_applied_at_motifs": 167,
+              "junction_phase": {
+                "phased": 44,
+                "unphased": 53
+              },
+              "junctions_unlinked": 47,
+              "read_phase": {
+                "created": {
+                  "NA": 14,
+                  "uninformative": 21
+                },
+                "deleted": {
+                  "NA": 53,
+                  "uninformative": 9
+                }
+              },
+              "rescued_by_reason": {
+                "haplotype_deletion": 30,
+                "haplotype_variant": 18
+              },
+              "rescued_isoforms": 48,
+              "rescued_sqanti3_rules": {
+                "haplotype_deletion": {
+                  "Artifact": 30
+                },
+                "haplotype_variant": {
+                  "Artifact": 18
+                }
+              },
+              "unapplied_alleles_at_motifs": 52,
+              "unphased_het_applied_at_motifs": 251
+            }
+          }
+        },
         "cost": {
           "A_align(existing)": {
             "max_rss_gb": 23.177,
@@ -532,6 +1312,10 @@
             "max_rss_gb": 9.5,
             "wall": "8:56.00"
           },
+          "C_1kgp": {
+            "max_rss_gb": 0.6,
+            "wall": "15:20.35"
+          },
           "C_adjudicate": {
             "max_rss_gb": 0.6,
             "wall": "10:51.14"
@@ -557,7 +1341,12 @@
             "created": 37,
             "deleted": 229
           },
+          "held_phase_unknown": 0,
           "indels_applied_at_motifs": 410,
+          "junction_phase": {
+            "phased": 266
+          },
+          "junctions_unlinked": 0,
           "read_phase": {
             "created": {
               "NA": 15,
@@ -585,7 +1374,9 @@
             "haplotype_variant": {
               "Artifact": 18
             }
-          }
+          },
+          "unapplied_alleles_at_motifs": 0,
+          "unphased_het_applied_at_motifs": 0
         }
       }
     }

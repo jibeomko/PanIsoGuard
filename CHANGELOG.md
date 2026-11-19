@@ -38,6 +38,12 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   deletion and are `unspliced` on the assembly, and the one junction the phasing benchmark
   found contradicted is no longer counted by the tool. `REFERENCE_BIAS` isoforms: 144 and 108
   (18 and 28 with the FASTAs).
+- The same benchmark with a call set that does not come from the assembly: the 1000 Genomes
+  high-coverage short-read calls of the two people (`fetch_1kgp.sh`, stage `C_1kgp`). 96 of 103
+  and 85 of 90 explained junctions are confirmed (0.93 and 0.94); 18 % and 26 % of the
+  assembly's are found, 31 of 35 and 38 of 43 splice-site junctions and about a third of the
+  deletions, which short reads rarely call above 50 bp. With the phase removed from every
+  genotype, 89 of 97 and 82 of 87.
 - `evidence.chain_n_spanning_reads`: the depth a chain is seen at (reads at its first donor
   that reach past its last intron), also as `n_spanning_reads` in the `decoys` table.
   `[axis_chain] min_fraction` asks that the whole-chain reads be at least that share of them.
@@ -54,13 +60,13 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
 - Read-count baselines in the head-to-head
   ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), `count_baseline.py`). Without
   short reads the caller's own read count ranks FLAIR's isoforms as well as PanIsoGuard does
-  (AUPRC 0.958 against 0.953, both above SQANTI3's default rules at 0.909), and SQANTI3's
-  rules filter run with `FL >= 10` required reaches precision 0.950 at recall 0.885. The whole-chain evidence differs at the operating point: at three reads the
-  caller's count passes all 140 false isoforms and whole-chain reads pass 41, and the verdict
-  passes 4 where the count raised to the same recall passes 19. The documents now say "above
-  SQANTI3's default rules" where they said "above SQANTI3's rules filter", and
-  docs/relationship_to_sqanti3.md notes that SQANTI3's rules filter records why it discards
-  an isoform.
+  (AUPRC 0.958 against 0.953, both above SQANTI3's default rules at 0.909), and SQANTI3's rules
+  filter run with `FL >= 10` required reaches precision 0.950 at recall 0.885. The whole-chain
+  evidence differs at the operating point: at three reads the caller's count passes all 140
+  false isoforms and whole-chain reads pass 41, and the verdict passes 4 where the count raised
+  to the same recall passes 19. The documents now say "above SQANTI3's default rules" where
+  they said "above SQANTI3's rules filter", and docs/relationship_to_sqanti3.md notes that
+  SQANTI3's rules filter records why it discards an isoform.
 - Ruleset `builtin-0.0.8` (TOML `default-0.0.8`). Every tracked benchmark envelope was
   regenerated with the 0.1.1 binary: no verdict and no score of 0.1.0 changed; `refbias_3way`
   gains the VCF arm and `chain_support` the read-share analysis.
