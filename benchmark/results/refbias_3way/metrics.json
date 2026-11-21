@@ -1,7 +1,7 @@
 {
   "command": "SAMPLE=<id> bash benchmark/refbias_3way/run.sh all; benchmark/refbias_3way/classify_junctions.py per B arm; benchmark/refbias_3way/score.py --work W --data D --genome GRCh38.fa --classes B1=... B2=... --label <ID> --emit-metrics ...",
   "data_provenance": "real public HPRC R2 Kinnex Iso-Seq of HG03516 (ESN) and HG02717 (GWD) through four arms on the same reads: A GRCh38 + GENCODE v49 + IsoQuant 3.13 + SQANTI3 6.0.1; B1 SNV-personalized diploid (assembly SNVs on the GRCh38 backbone); B2 HPRC R2 phased assembly diploid with liftoff annotation and paftools liftover; C panisoguard adjudicate post hoc on A with --bam and both SNV-consensus haplotypes. No private data.",
-  "generated_utc": "2026-11-19T05:29:33Z",
+  "generated_utc": "2026-11-21T03:02:46Z",
   "metrics": {
     "samples": {
       "HG02717": {
@@ -543,7 +543,7 @@
                 "phased": 32,
                 "unphased": 55
               },
-              "junctions_unlinked": 24,
+              "junctions_unlinked": 25,
               "read_phase": {
                 "created": {
                   "NA": 14,
@@ -1234,7 +1234,7 @@
                 "phased": 44,
                 "unphased": 53
               },
-              "junctions_unlinked": 47,
+              "junctions_unlinked": 49,
               "read_phase": {
                 "created": {
                   "NA": 14,

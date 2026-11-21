@@ -278,7 +278,7 @@ assembly (B2).
 | sensitivity over `T` (95 % CI) | 47 % (42-51 %) | 18 % (14-21 %) | 16 % (13-19 %) | 53 % (48-59 %) | 26 % (22-31 %) | 25 % (21-30 %) |
 | splice-site class found | 33 / 35 | 31 / 35 | 31 / 35 | 41 / 43 | 38 / 43 | 37 / 43 |
 | `unspliced` found | 221 / 499 | 65 / 499 | 58 / 499 | 130 / 271 | 47 / 271 | 45 / 271 |
-| novel junctions left `unlinked` | 0 | 0 | 47 | 0 | 0 | 24 |
+| novel junctions left `unlinked` | 0 | 0 | 49 | 0 | 0 | 25 |
 | `REFERENCE_BIAS` isoforms (variant / deletion) | 144 (18 / 126) | 55 (18 / 37) | 48 (18 / 30) | 108 (28 / 80) | 65 (25 / 40) | 64 (25 / 39) |
 
 - **What it calls is as often right.** 96 of 103 and 85 of 90 junctions are confirmed on the
@@ -307,7 +307,7 @@ assembly (B2).
   boundary and is longer than the 64 bp read on either side leaves no base to read on that
   haplotype. At the other 5 and 2 the call set writes the region as a cluster of small records.
 - **Without phase little changes.** With every genotype unphased, 89 of 97 and 82 of 87 are
-  confirmed. 47 and 24 novel junctions are `unlinked` (two heterozygous records near the
+  confirmed. 49 and 25 novel junctions are `unlinked` (two heterozygous records near the
   junction whose relation the file does not give), which costs 15 and 10 of the assembly arm's
   junctions; 1 isoform is held for `haplotype_phase_unknown`. The read-haplotype check needs
   phased sites, so it reports `uninformative` throughout and the one contradicted junction is
