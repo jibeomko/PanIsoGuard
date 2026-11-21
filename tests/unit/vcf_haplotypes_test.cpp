@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <fstream>
+#include <iterator>
 #include <map>
 #include <memory>
 
@@ -149,6 +150,22 @@ TEST_CASE("VcfHaplotypes refuses what it cannot read safely", "[vcf]") {
   REQUIRE_THROWS_WITH(VcfHaplotypes(plain), Catch::Contains("index"));
   std::remove(plain.c_str());
   REQUIRE_THROWS(VcfHaplotypes(tiny("does_not_exist.vcf.gz")));
+  // FORMAT/PS declared as a Float: its phase sets cannot be read
+  REQUIRE_THROWS_WITH(VcfHaplotypes(tiny("indel_ps_float.vcf.gz")), Catch::Contains("FORMAT/PS"));
+  // a row htslib cannot parse: the rows after it would not be read
+  REQUIRE_THROWS_WITH(VcfHaplotypes(tiny("indel_bad_row.vcf.gz")), Catch::Contains("cannot be read"));
+  // a file cut short: without the 28 bytes of the BGZF end-of-file block
+  const std::string cut = scratch("cut.vcf.gz");
+  {
+    std::ifstream whole(tiny("indel.vcf.gz"), std::ios::binary);
+    const std::string bytes((std::istreambuf_iterator<char>(whole)), std::istreambuf_iterator<char>());
+    REQUIRE(bytes.size() > 28);
+    std::ofstream(cut, std::ios::binary).write(bytes.data(), static_cast<std::streamsize>(bytes.size() - 28));
+    std::ofstream(cut + ".tbi", std::ios::binary) << std::ifstream(tiny("indel.vcf.gz.tbi"), std::ios::binary).rdbuf();
+  }
+  REQUIRE_THROWS_WITH(VcfHaplotypes(cut), Catch::Contains("truncated"));
+  std::remove(cut.c_str());
+  std::remove((cut + ".tbi").c_str());
 }
 
 // two_jx_edges.vcf.gz: a haploid first record (pos 5), an MNP over the first donor (21-22, 1|0), a `*`
@@ -452,6 +469,47 @@ TEST_CASE("insertions and deletions are applied at splice motifs", "[vcf][indel]
     fa.motifs("chrI", {460, 490}, Strand::kPlus);
     CHECK(fa.n_length_mismatches() == 1);   // once per file and contig
   }
+}
+
+// indel_clash.vcf.gz: the G>T that makes the donor of E and of F canonical on haplotype 2, with
+// two different insertions at E's exon boundary on that haplotype, and at F's one insertion
+// written twice (once with a flanking base).
+TEST_CASE("two insertions at one point: different bases are unknown, the same bases one statement", "[vcf][indel]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("indel_ref.fa"));
+  auto vcf = std::make_shared<VcfHaplotypes>(tiny("indel_clash.vcf.gz"));
+  HaplotypeProvider hp(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{vcf});
+  const JunctionMotifs e = hp.motifs("chrI", {390, 420}, Strand::kPlus);
+  CHECK(e.verdict == VariantVerdict::kNotEvaluable);   // not created: what stands at the boundary is not known
+  CHECK(e.haps[0].motif == "GG-AG");
+  CHECK_FALSE(e.haps[1].evaluable);
+  CHECK(vcf->n_conflicting_records() == 1);
+  JunctionMotifs f = hp.motifs("chrI", {460, 490}, Strand::kPlus);
+  CHECK(f.boundary_insertion_left == 1);               // one insertion of one base, for the reads to place
+  f = hp.motifs("chrI", {460, 490}, Strand::kPlus, [](bool, int) { return BoundaryReads::kWith; });
+  CHECK(f.verdict == VariantVerdict::kCreated);        // the reads carry it: the intron begins with the GT
+  CHECK(f.haps[1].motif == "GT-AG");
+  CHECK(vcf->n_conflicting_records() == 1);
+}
+
+// indel_ps_string.vcf.gz: FORMAT/PS declared as a String; the G>T of E is in the set PATMAT, the
+// one of F in the set 9.
+TEST_CASE("a phase set declared as a String is read by its value", "[vcf][variant]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("indel_ref.fa"));
+  auto vcf = std::make_shared<VcfHaplotypes>(tiny("indel_ps_string.vcf.gz"));
+  HaplotypeProvider hp(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{vcf});
+  const JunctionMotifs e = hp.motifs("chrI", {390, 420}, Strand::kPlus);
+  const JunctionMotifs f = hp.motifs("chrI", {460, 490}, Strand::kPlus);
+  CHECK(e.verdict == VariantVerdict::kCreated);
+  CHECK(f.verdict == VariantVerdict::kCreated);
+  CHECK(f.phase_set == 9);                       // a number is the set of that number
+  CHECK(e.phase_set != kDefaultPhaseSet);        // a name is a set of its own
+  CHECK(e.phase_set != f.phase_set);
+  CHECK(hp.motifs("chrI", {390, 420}, Strand::kPlus).phase_set == e.phase_set);
+  // the reads of E are told apart only by sites of its own set: not by the one at 461, in set 9
+  const std::vector<PhaseSite> sites = hp.phase_sites("chrI", 360, 470, e);
+  REQUIRE(sites.size() == 2);
+  CHECK(sites[0].pos == 391);
+  CHECK(sites[1].pos == 430);
 }
 
 TEST_CASE("adjudicator: indels, a deletion equal to a junction, and the haplotype of the junction reads", "[vcf][indel][adjudicator]") {

@@ -66,10 +66,22 @@ struct VcfHaplotypes::Impl {
   mutable long n_deletion_match = 0;
   mutable int32_t* ps = nullptr;   // bcf_get_format_int32 buffer for PS and END
   mutable int ps_cap = 0;
+  mutable char** ps_str = nullptr;   // bcf_get_format_string buffer for a PS declared as a String
+  mutable int ps_str_cap = 0;
+  mutable std::unordered_map<std::string, long> ps_names;   // the sets such a file names, in the order met
   // the two windows read last (a junction's left and right side are built several times)
   mutable RawWindow cache[2];
   mutable int cache_next = 0;
   const std::vector<RawRecord>& window(const std::string& chrom, int rid, int64_t lo, int64_t hi, std::size_t nh) const;
+  bool read_failed() const { return sr->errnum == vcf_parse_error || sr->errnum == bcf_read_error; }
+  // The set a String PS names: a number is the set of that number, as in an Integer field; any
+  // other value (some call sets write names, such as PATMAT) is a set of its own.
+  long named_set(const std::string& v) const {
+    if (v.size() <= 9 && std::all_of(v.begin(), v.end(), [](unsigned char c) { return std::isdigit(c) != 0; })) return std::stol(v);
+    auto it = ps_names.find(v);
+    if (it == ps_names.end()) it = ps_names.emplace(v, (1L << 40) + static_cast<long>(ps_names.size())).first;
+    return it->second;
+  }
 };
 
 VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample) : impl_(new Impl) {
@@ -109,6 +121,13 @@ VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample)
     delete impl_;
     throw std::runtime_error("cannot read --haplotype-vcf " + path + " (" + why + ")");
   }
+  // A BGZF file without its end-of-file block was cut short, and the records after the cut
+  // would read as reference.
+  if (impl_->sr->errnum == no_eof) {
+    bcf_sr_destroy(impl_->sr); delete impl_;
+    throw std::runtime_error("--haplotype-vcf " + path + " has no BGZF end-of-file block: the file is truncated "
+                             "(write it again with bgzip or bcftools view)");
+  }
   impl_->hdr = bcf_sr_get_header(impl_->sr, 0);
   impl_->n_samples = bcf_hdr_nsamples(impl_->hdr);
   if (impl_->n_samples == 0) {
@@ -143,12 +162,30 @@ VcfHaplotypes::VcfHaplotypes(const std::string& path, const std::string& sample)
     if (p > ploidy) ploidy = p;
   }
   if (ploidy > 0) impl_->ploidy = ploidy;
+  // A record htslib cannot read ends this scan and would end every later read at the same row:
+  // the records after it would read as reference. FORMAT/PS is read as the Integer the
+  // specification defines, or as the String some call sets declare (and htslib assumes when the
+  // header does not declare it); as another type its values could not be read, and every phased
+  // genotype would fall into one set.
+  std::string bad;
+  if (impl_->read_failed())
+    bad = std::string(" holds a record that cannot be read (") + bcf_sr_strerror(impl_->sr->errnum) + "; htslib names it above)";
+  const int ps_id = bcf_hdr_id2int(impl_->hdr, BCF_DT_ID, "PS");
+  if (bad.empty() && ps_id >= 0 && bcf_hdr_idinfo_exists(impl_->hdr, BCF_HL_FMT, ps_id) &&
+      bcf_hdr_id2type(impl_->hdr, BCF_HL_FMT, ps_id) != BCF_HT_INT && bcf_hdr_id2type(impl_->hdr, BCF_HL_FMT, ps_id) != BCF_HT_STR)
+    bad = ": FORMAT/PS is declared as neither an Integer nor a String, so its phase sets cannot be read";
+  if (!bad.empty()) {
+    if (impl_->gt) free(impl_->gt);
+    bcf_sr_destroy(impl_->sr); delete impl_;
+    throw std::runtime_error("--haplotype-vcf " + path + bad);
+  }
 }
 
 VcfHaplotypes::~VcfHaplotypes() {
   if (impl_ != nullptr) {
     if (impl_->gt) free(impl_->gt);
     if (impl_->ps) free(impl_->ps);
+    if (impl_->ps_str) { free(impl_->ps_str[0]); free(impl_->ps_str); }
     if (impl_->sr) bcf_sr_destroy(impl_->sr);
     delete impl_;
   }
@@ -248,6 +285,9 @@ const std::vector<RawRecord>& VcfHaplotypes::Impl::window(const std::string& chr
       if (nps > 0) {
         const int32_t v = ps[sample_idx * (nps / n_samples)];
         if (v != bcf_int32_missing && v != bcf_int32_vector_end) r.set = v;
+      } else if (nps == -2 && bcf_get_format_string(hdr, rec, "PS", &ps_str, &ps_str_cap) > 0) {   // declared as a String
+        const std::string v = ps_str[sample_idx];
+        if (!v.empty() && v != ".") r.set = named_set(v);
       }
       // What the genotype states: a phased one its alleles in order and its phase set; an unphased
       // one its alleles in no order (0/1 and 1/0 say the same, and a PS next to a slash says nothing).
@@ -256,6 +296,11 @@ const std::vector<RawRecord>& VcfHaplotypes::Impl::window(const std::string& chr
       if (!slash) r.statement += ":" + std::to_string(r.set);
     }
     raws.push_back(std::move(r));
+  }
+  if (read_failed()) {
+    w.lo = w.hi = -1;   // not a window to serve again
+    throw std::runtime_error("error reading --haplotype-vcf " + path + " at " + chrom + ":" + std::to_string(lo + 1) +
+                             " (" + bcf_sr_strerror(sr->errnum) + ")");
   }
   return raws;
 }
@@ -368,13 +413,34 @@ VcfLocal VcfHaplotypes::local(const std::string& chrom, int64_t lo, int64_t hi, 
     std::vector<VcfLocal::Edit>& ed = L.edits[h];
     auto by_start = [](const VcfLocal::Edit& a, const VcfLocal::Edit& b) { return a.q0 != b.q0 ? a.q0 < b.q0 : a.q1 < b.q1; };
     std::stable_sort(ed.begin(), ed.end(), by_start);
+    // ---- two insertions at one point: the same bases twice are one statement; different bases
+    // leave what stands there unknown, and with it the base on either side
+    {
+      std::vector<VcfLocal::Edit> one;
+      bool inserts = false;   // one.back() is what the insertions at its point came to
+      int64_t point = 0;
+      for (VcfLocal::Edit& e : ed) {
+        if (e.kind == 'i' && inserts && point == e.q0) {
+          VcfLocal::Edit& p = one.back();
+          p.also.push_back(e.rec);
+          if (p.kind == 'i' && p.ins == e.ins) continue;
+          p.kind = 'u'; p.clash = true; p.ins.clear();
+          p.q0 = std::max<int64_t>(0, point - 1); p.q1 = point + 1;
+          continue;
+        }
+        inserts = e.kind == 'i';
+        point = e.q0;
+        one.push_back(std::move(e));
+      }
+      ed.swap(one);
+      std::stable_sort(ed.begin(), ed.end(), by_start);   // an edit made unknown starts one base earlier
+    }
     // ---- two records on one base: the same substitution twice is one, anything else is unknown
     std::vector<VcfLocal::Edit> out;
     for (VcfLocal::Edit& e : ed) {
       if (!out.empty()) {
         VcfLocal::Edit& p = out.back();
-        const bool both_ins = p.q0 == p.q1 && e.q0 == e.q1 && p.q0 == e.q0;
-        if (e.q0 < p.q1 || both_ins) {
+        if (e.q0 < p.q1) {
           // a `*` allele inside the deletion or replacement that removes its bases: that record speaks
           if (p.star != e.star) {
             const VcfLocal::Edit& star = p.star ? p : e;

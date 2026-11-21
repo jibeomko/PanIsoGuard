@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -218,6 +219,20 @@ LoadedRun load_and_adjudicate(const CommonArgs& c) {
                  haplo->n_haplotypes(), run.haplotype_vcfs.size(), c.vcf_sample.empty() ? "" : " sample ",
                  c.vcf_sample.c_str(), c.haplotype_provenance.c_str());
   }
+
+  // a haplotype source that names none of the isoforms' contigs explains nothing, and says nothing
+  auto names_a_contig = [&](const std::function<bool(const std::string&)>& has) {
+    for (const auto& kv : chains) if (has(kv.second.chrom)) return true;
+    return chains.empty();
+  };
+  const char* no_contig = "warning: %s names none of the isoforms' contigs (other contig names, such as 1 for chr1?); "
+                          "the variant axis is not evaluable with it\n";
+  for (std::size_t i = 0; i < hap_fas.size(); ++i)
+    if (!names_a_contig([&](const std::string& chrom) { return hap_fas[i]->has_chrom(chrom); }))
+      std::fprintf(stderr, no_contig, c.reference_haplotypes[i].c_str());
+  for (const auto& v : run.haplotype_vcfs)
+    if (!names_a_contig([&](const std::string& chrom) { return v->has_chrom(chrom); }))
+      std::fprintf(stderr, no_contig, v->path().c_str());
 
   PangenomeJunctions pangenome;
   const PangenomeJunctions* pangenome_ptr = nullptr;

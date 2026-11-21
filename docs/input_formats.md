@@ -103,6 +103,17 @@ is the largest genotype in the file, read once when the file is opened. A contig
 the VCF header is not evaluable; a contig present without records is reference.
 `--haplotype-vcf` and `--reference-haplotype` are not combined in one run.
 
+- Opening reads the whole file once, every sample's columns included. From a panel of many
+  samples, write the sample's own file first (`bcftools view -s NAME -c 1`).
+- Every record is applied, whatever its FILTER column says, as `bcftools consensus` does. To
+  leave records out, filter the file first (`bcftools view -f PASS`).
+- Contig names are those of `--reference` and the isoform file. A VCF or haplotype FASTA that
+  names none of the isoforms' contigs (`1` for `chr1`) gets a warning, and the variant axis is
+  not evaluable with it.
+- A file that cannot be read whole is refused when it is opened: a BGZF file without its
+  end-of-file block (cut short) and a record htslib cannot parse. Otherwise the records after
+  the break would read as reference.
+
 **What is applied.** Every allele that has a sequence: substitutions (SNVs, MNPs), insertions,
 deletions and other replacements. An insertion or deletion is moved towards the intron as far
 as the reference sequence allows, so the exon is read as the reference has it wherever that is
@@ -138,9 +149,10 @@ never reference, and a base once unknown is not restored by another record.
 - Two records that give one haplotype different content at one base. An allele states the
   sequence over its whole REF span, so the unchanged bases of an MNP count; the spans of both
   records are unknown, in whichever order the rows come. Two substitutions that agree are one
-  statement. A site written twice with the same alleles and another genotype is unknown on
-  every haplotype; an identical repeat is one record
-  (`haplotype_vcf_conflicting_records_at_motifs`).
+  statement. Two different insertions at one point leave that point and the base on either
+  side unknown; the same insertion written twice is one statement. A site written twice with
+  the same alleles and another genotype is unknown on every haplotype; an identical repeat is
+  one record (`haplotype_vcf_conflicting_records_at_motifs`).
 
 **Phase.** An unphased heterozygous genotype is applied by allele order and counted
 (`haplotype_vcf_unphased_het_applied_at_motifs`); its allele order is not part of what it
@@ -149,17 +161,20 @@ states (`0/1` and `1/0` are the same record). The junction table's `variant_phas
 rescued whichever haplotype carries the allele. The file links heterozygous records, and partly
 missing ones such as `1|.`, only inside one phase set (FORMAT `PS`; phased genotypes without
 `PS` form one default set; an unphased record is a group of its own; a `/` before a missing
-allele is unphased). At each junction every placement of the groups found within 64 bp of
-either boundary is tried (up to six groups; more are not tried and the junction is
-`unlinked`). A group matters when turning it over changes what a haplotype carries under some
-placement of the others. With two or more groups that matter, the per-haplotype bases would be
-a composition by allele order, so no haplotype's motif at that junction is known (`unlinked`).
-A heterozygous record that changes nothing under any placement does not count, and a homozygous
-record needs no linkage. Two or more explained junctions that rest on heterozygous alleles are
-rescued only when those alleles share one phase set: unphased alleles, or alleles in different
-sets, do not establish a common haplotype and the isoform is held with reason
-`haplotype_phase_unknown`. In every case the call is the same whichever haplotype index the
-alleles are written on, and however an insertion or deletion is placed inside a repeat.
+allele is unphased). `PS` is read as the Integer the VCF specification defines; where the
+header declares it a String (some call sets name their sets, such as `PATMAT`), each distinct
+value is a set, and a `PS` of another type is refused. At each junction every placement of the
+groups found within 64 bp of either boundary is tried (up to six groups; more are not tried and
+the junction is `unlinked`). A group matters when turning it over changes what a haplotype
+carries under some placement of the others. With two or more groups that matter, the
+per-haplotype bases would be a composition by allele order, so no haplotype's motif at that
+junction is known (`unlinked`). A heterozygous record that changes nothing under any placement
+does not count, and a homozygous record needs no linkage. Two or more explained junctions that
+rest on heterozygous alleles are rescued only when those alleles share one phase set: unphased
+alleles, or alleles in different sets, do not establish a common haplotype and the isoform is
+held with reason `haplotype_phase_unknown`. In every case the call is the same whichever
+haplotype index the alleles are written on, and however an insertion or deletion is placed
+inside a repeat.
 
 ## Junction reads and the haplotype (`--bam` with either haplotype input)
 

@@ -87,6 +87,16 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
     same haplotype, and unknown otherwise; an allele without a sequence is unknown
     (`haplotype_vcf_unapplied_alleles_at_motifs`, which replaces
     `haplotype_vcf_non_snv_skipped_at_motifs`).
+  - Two different insertions at one point on one haplotype leave that point and the base on
+    either side unknown; the same insertion written twice is one statement.
+- A `--haplotype-vcf` that cannot be read whole is refused when it is opened: a BGZF file
+  without its end-of-file block (a file cut short) and a record htslib cannot parse. Before,
+  the records after the break read as reference.
+- A FORMAT `PS` declared as a String is read by its value, each distinct value a phase set (a
+  number the set of that number); a `PS` of another type is refused. Before, a String `PS` was
+  skipped and every phased genotype fell into one set.
+- A VCF or haplotype FASTA that names none of the isoforms' contigs (`1` for `chr1`) gets a
+  warning; the variant axis is not evaluable with it.
 - Linkage is decided by placement. Heterozygous and partly missing records are linked only
   inside one phase set; at each junction every placement of the groups within 64 bp of either
   boundary is tried, and the motif is known only if at most one group changes what a haplotype

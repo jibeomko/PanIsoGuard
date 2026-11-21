@@ -14,6 +14,14 @@ the variant axis; the unit tests in tests/unit/vcf_haplotypes_test.cpp say what 
   F [460,490)       GG..AG      the same                                      4, haplotype 1
 
 Heterozygous single-base sites in the exons (0|1) tell the two haplotypes apart.
+
+Three more files on the same reference:
+  indel_clash.vcf.gz      E: the G>T and two different insertions at that exon boundary, one haplotype;
+                          F: the G>T and one insertion at the boundary written twice (once with a flanking base)
+  indel_ps_string.vcf.gz  FORMAT/PS declared as a String: the two G>T in the sets PATMAT and 9, a third
+                          heterozygous site in PATMAT
+  indel_ps_float.vcf.gz   the same with FORMAT/PS declared as a Float
+  indel_bad_row.vcf.gz    the two G>T after a row whose GT is not a genotype
 """
 import os
 import random
@@ -70,13 +78,15 @@ def write_fasta(name, contig, s):
         f.write(f"{contig}\t{len(s)}\t{len(contig) + 2}\t60\t61\n")
 
 
-def write_vcf(name, rows):
+def write_vcf(name, rows, ps_type=None):
     path = os.path.join(HERE, name)
     with open(path[:-3], "w") as f:
         f.write("##fileformat=VCFv4.2\n##contig=<ID=chrI,length=%d>\n" % N)
         f.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
+        if ps_type: f.write(f'##FORMAT=<ID=PS,Number=1,Type={ps_type},Description="Phase set">\n')
         f.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n")
-        for p, r, a, g in rows: f.write(f"chrI\t{p + 1}\t.\t{r}\t{a}\t.\tPASS\t.\tGT\t{g}\n")
+        fmt = "GT:PS" if ps_type else "GT"
+        for p, r, a, g in rows: f.write(f"chrI\t{p + 1}\t.\t{r}\t{a}\t.\tPASS\t.\t{fmt}\t{g}\n")
     subprocess.check_call(["bgzip", "-f", path[:-3]])
     subprocess.check_call(["tabix", "-f", "-p", "vcf", path])
 
@@ -84,6 +94,13 @@ def write_vcf(name, rows):
 write_fasta("indel_ref.fa", "chrI", ref)
 write_fasta("indel_hap_short.fa", "chrI", ref[:100] + ref[101:])   # one base shorter: other coordinates
 write_vcf("indel.vcf.gz", variants)
+write_vcf("indel_clash.vcf.gz", sorted([
+    (389, ref[389], ref[389] + "C", "0|1"), (389, ref[389], ref[389] + "AA", "0|1"), (391, "G", "T", "0|1"),
+    (458, ref[458:460], ref[458:460] + "C", "0|1"), (459, ref[459], ref[459] + "C", "0|1"), (461, "G", "T", "0|1")]))
+write_vcf("indel_ps_string.vcf.gz", [(391, "G", "T", "0|1:PATMAT"), (430, ref[430], {"A": "C", "C": "A", "G": "T", "T": "G"}[ref[430]], "0|1:PATMAT"),
+                                     (461, "G", "T", "0|1:9")], ps_type="String")
+write_vcf("indel_ps_float.vcf.gz", [(391, "G", "T", "0|1:5"), (461, "G", "T", "0|1:9")], ps_type="Float")
+write_vcf("indel_bad_row.vcf.gz", [(380, ref[380], "N", "x|y"), (391, "G", "T", "0|1"), (461, "G", "T", "0|1")])
 
 hap2 = list(ref)                                # haplotype 2 in reference coordinates (exons only matter)
 for p in SITES: hap2[p] = {"A": "C", "C": "A", "G": "T", "T": "G"}[ref[p]]
