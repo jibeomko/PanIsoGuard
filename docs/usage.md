@@ -252,7 +252,9 @@ in 0-0.1 % of cases (and the deleted genuine transcripts in 100 %); on real PacB
 data a third to a half of the recombinants of two expressed isoforms do, with as many reads as
 their parents, which is what unannotated combinatorial isoforms look like rather than chimeras
 ([benchmark/chain_support](../benchmark/chain_support)). The number is an upper bound on the
-false-lift rate and a measure of how much of your transcriptome the annotation misses.
+false-lift rate and a measure of how much of your transcriptome the annotation misses. Decoys
+on a contig the BAM header does not name cannot be measured: they are left out of the table
+and of every fraction, and counted in the JSON (`decoys_built`, `decoys_not_evaluable`).
 
 ## A worked locus
 

@@ -135,6 +135,12 @@ TEST_CASE("pangenome reader keeps the optional haplotype/path ids and merges dup
   const PangenomeJunctionRecord* b = pj.find_exact("chr1", Strand::kPlus, Junction{300, 400});
   REQUIRE(b != nullptr);
   CHECK(b->haplotype_ids.empty());
+  // an id written twice in one row is one path, not two
+  const PangenomeJunctions twice = read_pangenome_junctions(write_tmp("pig_pg_twice.tsv", "chr1\t101\t200\t+\t1\tP1,P1\n"));
+  const PangenomeJunctionRecord* t = twice.find_exact("chr1", Strand::kPlus, Junction{100, 200});
+  REQUIRE(t != nullptr);
+  CHECK(t->haplotype_ids == std::vector<std::string>{"P1"});
+  CHECK(t->n_haplotypes == 1);
 }
 
 TEST_CASE("pangenome rescue requires one path carrying every novel junction", "[pangenome]") {

@@ -233,6 +233,7 @@ struct JunctionMotifs {
   int boundary_insertion_right = 0;   // the reads did not place (0: none, or placed)
   std::vector<long> file_set;     // per haplotype source: the phase set its heterozygous records at this junction
                                   // share (kNoPhaseSet: none used; kUnusableSet: unphased or mixed)
+  std::vector<int> source_of;     // per haplotype: its source (a FASTA, or one VCF file), an index into file_set
 };
 constexpr long kUnusableSet = -3;
 

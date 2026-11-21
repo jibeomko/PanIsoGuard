@@ -17,6 +17,9 @@ and it must not claim more than the file supports:
   motif      every haplotype motif the tool reports equals the one read off the haplotype sequence
   sound      REFERENCE_BIAS only when, under every orientation of the groups the file does not
              link and with every unknown base free, one haplotype explains every junction
+  pair       a second random file given with the first (two --haplotype-vcf): the chain needs one
+             haplotype of one file, linked by that file, so the two together are REFERENCE_BIAS
+             exactly when one of them is alone, in either order
 
 The haplotype sequence is built by applying the alleles as written. Its motif is found without
 coordinates: the ten exon bases on either side of the intron are located in the sequence, and the
@@ -459,6 +462,16 @@ def one_file(args):
     if g is not None:
         out["ran"].append("sound"); out["guaranteed"] = g
         if base[0] == "REFERENCE_BIAS" and not g: out["fail"].setdefault("sound", []).append({"got": base})
+    if i % 3 == 0:                                                    # every third file gets a companion
+        other = gen_file(rng, seq, nj) if rng.random() < 0.3 else gen_file_near(rng, seq, nj)
+        if other:
+            alone = run_vcf(locus, work, f"{n}_p2", other)
+            a, b = f"{work}/{n}.vcf.gz", f"{work}/{n}_p2.vcf.gz"
+            both = [run_pig(locus, work, f"{n}_p{t}", ["--haplotype-vcf", x, "--haplotype-vcf", y]) for t, x, y in (("ab", a, b), ("ba", b, a))]
+            out["ran"].append("pair"); out["more_runs"] = 2
+            rb = lambda r: r[0] == "REFERENCE_BIAS"
+            if both[0][:2] != both[1][:2] or rb(both[0]) != (rb(base) or rb(alone)):
+                out["fail"].setdefault("pair", []).append({"rows": [row(r).strip() for r in other], "alone": alone, "got": both})
     return out
 
 
@@ -482,8 +495,8 @@ def main():
         res = pool.map(one_file, [(i, a.seed, work) for i in range(a.n)], chunksize=4)
     with open(os.path.join(work, "results.jsonl"), "w") as f:
         for r in res: f.write(json.dumps(r) + "\n")
-    checks = ("order", "relabel", "group", "duplicate", "distractor", "rewrite", "fasta", "motif", "sound")
-    print(f"files {len(res)}  tool runs {sum(1 + len(r['ran']) for r in res)}  classes {dict(sorted(collections.Counter(r['base'][0] for r in res).items()))}")
+    checks = ("order", "relabel", "group", "duplicate", "distractor", "rewrite", "fasta", "motif", "sound", "pair")
+    print(f"files {len(res)}  tool runs {sum(1 + len(r['ran']) + r.get('more_runs', 0) for r in res)}  classes {dict(sorted(collections.Counter(r['base'][0] for r in res).items()))}")
     failed = 0
     for c in checks:
         ran = [r for r in res if c in r["ran"]]; bad = [r for r in ran if c in r["fail"]]; failed += len(bad)

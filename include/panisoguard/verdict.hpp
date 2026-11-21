@@ -120,7 +120,8 @@ struct EvidenceVector {
   // corroboration, like caller consensus: it can lift UNKNOWN support to PROBABLE only.
   bool chain_evaluable = false;
   bool chain_independent = false;   // counted in --validation-bam libraries the caller did not use
-  int chain_n_full_reads = 0;       // with validation libraries: the largest count among them
+  int chain_n_full_reads = 0;       // with validation libraries: the largest count among them; the two counts
+                                    // below are that library's
   int chain_n_partial_reads = 0;
   int chain_n_spanning_reads = 0;   // reads at the chain's first donor that reach past its last intron (the depth)
   int chain_n_full_reads_own = -1;  // the caller's own --bam when validation libraries decide; -1 = not counted

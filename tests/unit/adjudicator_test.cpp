@@ -1,6 +1,7 @@
 #include "catch2/catch.hpp"
 
 #include <cstdio>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <string>
@@ -473,6 +474,51 @@ TEST_CASE("adjudicator: --validation-bam supplies the whole-chain reads and mark
   CHECK(out[0].evidence.chain_full_by_library[0] == std::make_pair(std::string("mini.bam"), 4));
   CHECK(out[0].evidence.chain_n_libraries_supporting == 1);
   CHECK(out[0].evidence.chain_n_full_reads_own == -1);
+}
+
+// chain_shallow.bam and chain_deep.bam: the same three whole-chain reads of chrI {390,420},{460,490};
+// the deep library has nine more reads that span the chain without splicing.
+TEST_CASE("adjudicator: the order of --validation-bam libraries does not change the call", "[adjudicator][chain]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  BamReader shallow(tiny("chain_shallow.bam")), deep(tiny("chain_deep.bam"));
+  SqantiTable sqanti;
+  SqantiRecord r = rec("isoTie", "novel_not_in_catalog", "canonical"); r.chrom = "chrI";
+  sqanti.records.push_back(r);
+  std::map<std::string, IntronChain> chains;
+  IntronChain c = chain({{390, 420}, {460, 490}}); c.chrom = "chrI";
+  chains["isoTie"] = c;
+  AdjudicateInputs in;
+  in.sqanti = &sqanti; in.chains = &chains; in.catalog = &cat;
+  const std::string path = scratch("tie_fraction.toml");
+  std::ofstream(path) << "[axis_chain]\nmin_fraction = 0.5\n";
+  const RuleEngine half = RuleEngine::from_toml(path);
+  std::remove(path.c_str());
+
+  in.validation_bams = {&deep};                     // 3 of 12 spanning reads: under the share asked
+  auto out = adjudicate(in, half);
+  CHECK(out[0].evidence.chain_n_full_reads == 3);
+  CHECK(out[0].evidence.chain_n_spanning_reads == 12);
+  CHECK(out[0].verdict.confidence == ConfidenceClass::kUnresolved);
+  for (const auto& order : {std::vector<const BamReader*>{&shallow, &deep}, std::vector<const BamReader*>{&deep, &shallow}}) {
+    in.validation_bams = order;                     // equal counts: the library with the smaller depth speaks
+    out = adjudicate(in, half);
+    CHECK(out[0].evidence.chain_n_full_reads == 3);
+    CHECK(out[0].evidence.chain_n_spanning_reads == 3);
+    CHECK(out[0].evidence.chain_n_libraries_supporting == 2);
+    CHECK(out[0].verdict.confidence == ConfidenceClass::kNovelProbable);
+    CHECK(out[0].verdict.verdict_reason == "chain_support;independent_library");
+  }
+  // a chain no library carries still has a depth: the smallest among the libraries
+  SqantiRecord none = rec("isoNone", "novel_not_in_catalog", "canonical"); none.chrom = "chrI";
+  sqanti.records.push_back(none);
+  IntronChain other = chain({{391, 420}, {460, 490}}); other.chrom = "chrI";
+  chains["isoNone"] = other;
+  in.validation_bams = {&deep, &shallow};
+  out = adjudicate(in, RuleEngine());
+  const AdjudicationResult* n = find(out, "isoNone");
+  REQUIRE(n != nullptr);
+  CHECK(n->evidence.chain_n_full_reads == 0);
+  CHECK(n->evidence.chain_n_spanning_reads == 3);
 }
 
 TEST_CASE("adjudicator: several --validation-bam libraries are counted one by one", "[adjudicator][chain]") {

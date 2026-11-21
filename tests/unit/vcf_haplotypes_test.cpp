@@ -512,6 +512,59 @@ TEST_CASE("a phase set declared as a String is read by its value", "[vcf][varian
   CHECK(sites[1].pos == 430);
 }
 
+// indel_set10.vcf.gz: the G>T of E and of F on haplotype 1, one phase set. indel_set20.vcf.gz: the
+// G>T of E alone, in another set. indel_unphased2.vcf.gz: both as 0/1.
+TEST_CASE("adjudicator: each VCF file answers for the phase of its own haplotypes", "[vcf][adjudicator]") {
+  const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
+  auto ref = std::make_shared<FastaFetcher>(tiny("indel_ref.fa"));
+  SqantiTable sqanti;
+  SqantiRecord r; r.isoform = "isoEF"; r.chrom = "chrI"; r.strand = Strand::kPlus;
+  r.structural_category = "novel_not_in_catalog"; r.all_canonical = "non_canonical";
+  sqanti.records.push_back(r);
+  std::map<std::string, IntronChain> chains;
+  IntronChain c; c.chrom = "chrI"; c.strand = Strand::kPlus; c.introns = {{390, 420}, {460, 490}};
+  chains["isoEF"] = c;
+  AdjudicateInputs in;
+  in.sqanti = &sqanti; in.chains = &chains; in.catalog = &cat; in.haplotype_circular = false;
+  auto call = [&](std::vector<const char*> files) {
+    std::vector<std::shared_ptr<VcfHaplotypes>> vcfs;
+    for (const char* f : files) vcfs.push_back(std::make_shared<VcfHaplotypes>(tiny(f)));
+    HaplotypeProvider hp(ref, vcfs);
+    in.haplotype = &hp;
+    const auto out = adjudicate(in, RuleEngine());
+    return out[0].verdict.confidence == ConfidenceClass::kReferenceBias ? std::string("reference_bias") : out[0].verdict.verdict_reason;
+  };
+  CHECK(call({"indel_set10.vcf.gz"}) == "reference_bias");
+  CHECK(call({"indel_unphased2.vcf.gz"}) == "haplotype_phase_unknown");
+  // a second file that knows E in another set, or leaves both unphased, does not unlink the first
+  CHECK(call({"indel_set10.vcf.gz", "indel_set20.vcf.gz"}) == "reference_bias");
+  CHECK(call({"indel_set20.vcf.gz", "indel_set10.vcf.gz"}) == "reference_bias");
+  CHECK(call({"indel_set10.vcf.gz", "indel_unphased2.vcf.gz"}) == "reference_bias");
+  CHECK(call({"indel_unphased2.vcf.gz", "indel_set10.vcf.gz"}) == "reference_bias");
+  // no file links both: the one haplotype index that carries both is the unphased file's
+  CHECK(call({"indel_unphased2.vcf.gz", "indel_set20.vcf.gz"}) == "haplotype_phase_unknown");
+  CHECK(call({"indel_set20.vcf.gz"}) != "reference_bias");
+}
+
+// long_ref.fa: chrL with one 400-bp intron {100,500}. long_del.vcf.gz deletes it on haplotype 1;
+// long_del_bad.vcf.gz is the same record with one base of its REF changed 200 bases in, outside
+// the bases read around either boundary.
+TEST_CASE("the REF of a long deletion is compared with the reference over its whole length", "[vcf][indel]") {
+  auto ref = std::make_shared<FastaFetcher>(tiny("long_ref.fa"));
+  auto good = std::make_shared<VcfHaplotypes>(tiny("long_del.vcf.gz"));
+  HaplotypeProvider hp(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{good});
+  const JunctionMotifs a = hp.motifs("chrL", {100, 500}, Strand::kPlus);
+  CHECK(a.verdict == VariantVerdict::kDeleted);
+  CHECK(a.deleted == std::vector<bool>{true, false});
+  CHECK(good->n_ref_mismatches() == 0);
+  auto bad = std::make_shared<VcfHaplotypes>(tiny("long_del_bad.vcf.gz"));
+  HaplotypeProvider hb(ref, std::vector<std::shared_ptr<VcfHaplotypes>>{bad});
+  const JunctionMotifs b = hb.motifs("chrL", {100, 500}, Strand::kPlus);
+  CHECK(b.verdict == VariantVerdict::kNotEvaluable);   // the record describes another sequence
+  CHECK(b.deleted == std::vector<bool>{false, false});
+  CHECK(bad->n_ref_mismatches() == 1);
+}
+
 TEST_CASE("adjudicator: indels, a deletion equal to a junction, and the haplotype of the junction reads", "[vcf][indel][adjudicator]") {
   const Catalog cat = build_catalog_from_gtf(tiny("mini.gtf"));
   auto ref = std::make_shared<FastaFetcher>(tiny("indel_ref.fa"));

@@ -22,6 +22,14 @@ Three more files on the same reference:
                           heterozygous site in PATMAT
   indel_ps_float.vcf.gz   the same with FORMAT/PS declared as a Float
   indel_bad_row.vcf.gz    the two G>T after a row whose GT is not a genotype
+  indel_set10.vcf.gz      the two G>T on haplotype 1, in phase set 10
+  indel_set20.vcf.gz      the G>T of E alone, on haplotype 1, in phase set 20
+  indel_unphased2.vcf.gz  the two G>T as 0/1
+  chain_shallow.bam       three reads that carry the chain of E and F end to end
+  chain_deep.bam          three such reads and nine that span the chain without splicing
+
+long_ref.fa is another contig, chrL, with one 400-bp intron [100, 500). long_del.vcf.gz deletes it
+(1|0); long_del_bad.vcf.gz is the same record with one base of its REF, 200 bases in, changed.
 """
 import os
 import random
@@ -78,15 +86,15 @@ def write_fasta(name, contig, s):
         f.write(f"{contig}\t{len(s)}\t{len(contig) + 2}\t60\t61\n")
 
 
-def write_vcf(name, rows, ps_type=None):
+def write_vcf(name, rows, ps_type=None, contig=("chrI", N)):
     path = os.path.join(HERE, name)
     with open(path[:-3], "w") as f:
-        f.write("##fileformat=VCFv4.2\n##contig=<ID=chrI,length=%d>\n" % N)
+        f.write("##fileformat=VCFv4.2\n##contig=<ID=%s,length=%d>\n" % contig)
         f.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
         if ps_type: f.write(f'##FORMAT=<ID=PS,Number=1,Type={ps_type},Description="Phase set">\n')
         f.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n")
         fmt = "GT:PS" if ps_type else "GT"
-        for p, r, a, g in rows: f.write(f"chrI\t{p + 1}\t.\t{r}\t{a}\t.\tPASS\t.\t{fmt}\t{g}\n")
+        for p, r, a, g in rows: f.write(f"{contig[0]}\t{p + 1}\t.\t{r}\t{a}\t.\tPASS\t.\t{fmt}\t{g}\n")
     subprocess.check_call(["bgzip", "-f", path[:-3]])
     subprocess.check_call(["tabix", "-f", "-p", "vcf", path])
 
@@ -101,6 +109,23 @@ write_vcf("indel_ps_string.vcf.gz", [(391, "G", "T", "0|1:PATMAT"), (430, ref[43
                                      (461, "G", "T", "0|1:9")], ps_type="String")
 write_vcf("indel_ps_float.vcf.gz", [(391, "G", "T", "0|1:5"), (461, "G", "T", "0|1:9")], ps_type="Float")
 write_vcf("indel_bad_row.vcf.gz", [(380, ref[380], "N", "x|y"), (391, "G", "T", "0|1"), (461, "G", "T", "0|1")])
+write_vcf("indel_set10.vcf.gz", [(391, "G", "T", "1|0:10"), (461, "G", "T", "1|0:10")], ps_type="Integer")
+write_vcf("indel_set20.vcf.gz", [(391, "G", "T", "1|0:20")], ps_type="Integer")
+write_vcf("indel_unphased2.vcf.gz", [(391, "G", "T", "0/1"), (461, "G", "T", "0/1")])
+
+lrng = random.Random(23)
+lseq = []
+while len(lseq) < 600:
+    b = lrng.choice("ACGT")
+    if not lseq or lseq[-1] != b: lseq.append(b)
+lseq[100:102] = "CC"; lseq[498:500] = "TT"       # not a splice motif, and no base to slide the deletion over
+lref = "".join(lseq)
+assert lref[99] != lref[499] and lref[100] != lref[500]
+write_fasta("long_ref.fa", "chrL", lref)
+whole = lref[99:500]
+other = whole[:200] + {"A": "C", "C": "A", "G": "T", "T": "G"}[whole[200]] + whole[201:]
+for name, r in (("long_del.vcf.gz", whole), ("long_del_bad.vcf.gz", other)):
+    write_vcf(name, [(99, r, r[0], "1|0")], contig=("chrL", len(lref)))
 
 hap2 = list(ref)                                # haplotype 2 in reference coordinates (exons only matter)
 for p in SITES: hap2[p] = {"A": "C", "C": "A", "G": "T", "T": "G"}[ref[p]]
@@ -123,3 +148,16 @@ with open(sam, "w") as f:
     f.write("\n".join(reads) + "\n")
 subprocess.check_call(["samtools", "sort", "--no-PG", "-O", "bam", "-o", os.path.join(HERE, "indel.bam"), sam])
 subprocess.check_call(["samtools", "index", os.path.join(HERE, "indel.bam")])
+
+# two libraries with the same three whole-chain reads of E-F and another depth
+whole_chain = lambda i: f"w{i}\t0\tchrI\t361\t60\t30M30N40M30N30M\t*\t0\t0\t{ref[360:390] + ref[420:460] + ref[490:520]}\t*"
+unspliced = lambda i: f"u{i}\t0\tchrI\t361\t60\t160M\t*\t0\t0\t{ref[360:520]}\t*"
+for name, lines in (("chain_shallow", [whole_chain(i) for i in range(3)]),
+                    ("chain_deep", [whole_chain(i) for i in range(3)] + [unspliced(i) for i in range(9)])):
+    sam = os.path.join(HERE, name + ".sam")
+    with open(sam, "w") as f:
+        f.write("@HD\tVN:1.6\tSO:coordinate\n@SQ\tSN:chrI\tLN:%d\n" % N)
+        f.write("\n".join(lines) + "\n")
+    subprocess.check_call(["samtools", "sort", "--no-PG", "-O", "bam", "-o", os.path.join(HERE, name + ".bam"), sam])
+    subprocess.check_call(["samtools", "index", os.path.join(HERE, name + ".bam")])
+    os.remove(sam)

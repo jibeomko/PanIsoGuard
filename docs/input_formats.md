@@ -23,7 +23,10 @@ against `--ref-gtf`: an annotated chain is `full-splice_match`, a contiguous par
 `incomplete-splice_match`, a new combination of annotated introns `novel_in_catalog`, a
 chain with a novel intron in an annotated locus on its strand `novel_not_in_catalog`, one
 whose locus is annotated only on the other strand `antisense`, one in an unannotated region
-`intergenic`; a mono-exonic isoform is `mono-exon` and not adjudicated. With `--reference`,
+`intergenic`. A mono-exonic isoform inside an exon of an annotated mono-exonic transcript is
+`full-splice_match`, inside an exon of a multi-exonic one `incomplete-splice_match`, one that
+overlaps an exon `genic`, one inside a transcript's span only `genic_intron`, and otherwise
+`antisense` or `intergenic`. With `--reference`,
 `all_canonical` reads every intron's dinucleotides (GT-AG, GC-AG, AT-AC) and
 `perc_A_downstream_TTS` the A content of the 20 bases after the 3' end on the transcript
 strand, SQANTI3's definitions; without it both are NA. `RTS_stage` and `polyA_motif_found`
@@ -145,7 +148,8 @@ never reference, and a base once unknown is not restored by another record.
   index the record does not define, or a record without `GT`: the record's REF span is unknown
   on the haplotypes concerned (`haplotype_vcf_missing_alleles_at_motifs`).
 - A REF that is not the reference sequence: the record describes another genome, and its span
-  is unknown on every haplotype (`haplotype_vcf_ref_mismatches_at_motifs`).
+  is unknown on every haplotype (`haplotype_vcf_ref_mismatches_at_motifs`). The REF is compared
+  over its whole length, so a long deletion written out is checked between its ends too.
 - Two records that give one haplotype different content at one base. An allele states the
   sequence over its whole REF span, so the unchanged bases of an MNP count; the spans of both
   records are unknown, in whichever order the rows come. Two substitutions that agree are one
@@ -174,7 +178,9 @@ rest on heterozygous alleles are rescued only when those alleles share one phase
 alleles, or alleles in different sets, do not establish a common haplotype and the isoform is
 held with reason `haplotype_phase_unknown`. In every case the call is the same whichever
 haplotype index the alleles are written on, and however an insertion or deletion is placed
-inside a repeat.
+inside a repeat. With several files, each file answers for its own haplotypes: a haplotype that
+explains every junction stands when its own file links the alleles it rests on, whatever phase
+set another file gives the same sites.
 
 ## Junction reads and the haplotype (`--bam` with either haplotype input)
 
@@ -216,7 +222,8 @@ accepted); the optional 5th column is the number of supporting graph haplotypes
 (default `1`, gated by `axis_pangenome.min_haplotypes`; note `1` is a single graph path,
 not a population frequency; raise it for stricter support); the optional 6th column is
 a comma-separated list of the haplotype/path ids carrying the junction (e.g.
-`HG002#1,HG005#2`; duplicate rows for one junction union their ids;
+`HG002#1,HG005#2`; duplicate rows for one junction union their ids, and an id written twice
+counts once;
 `benchmark/pangenome/derive_junctions.py` writes it from the genotype columns of a
 `vg deconstruct` VCF). When all of an
 isoform's novel-vs-linear-reference junctions are found here (on one common path, if

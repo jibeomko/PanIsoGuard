@@ -165,14 +165,21 @@ EvidenceVector build_evidence(const SqantiRecord& r,
         names.push_back(cut == std::string::npos ? p : p.substr(cut + 1));
         for (std::size_t k = 0; k + 1 < names.size(); ++k) if (names[k] == names.back()) clash = true;
       }
+      // One library speaks for the chain, and its counts and its depth go together: the one with
+      // the most whole-chain reads; among equals the one with more partial reads, then the one that
+      // sees the chain at the smaller depth. The order of the options does not enter.
       for (std::size_t li = 0; li < validation_bams.size(); ++li) {
         const BamReader* vb = validation_bams[li];
         const ChainBamSupport cs = vb->chain_support(it->second);
         ev.chain_full_by_library.emplace_back(clash ? vb->path() : names[li], cs.evaluated ? cs.n_full : -1);
         if (!cs.evaluated) continue;
+        const bool first = !ev.chain_evaluable;
         ev.chain_evaluable = true;
         if (cs.n_full >= cfg.chain_min_full_reads) ++ev.chain_n_libraries_supporting;
-        if (cs.n_full > ev.chain_n_full_reads || (cs.n_full == ev.chain_n_full_reads && cs.n_partial > ev.chain_n_partial_reads)) {
+        const bool more = cs.n_full != ev.chain_n_full_reads ? cs.n_full > ev.chain_n_full_reads
+                        : cs.n_partial != ev.chain_n_partial_reads ? cs.n_partial > ev.chain_n_partial_reads
+                        : cs.n_span < ev.chain_n_spanning_reads;
+        if (first || more) {
           ev.chain_n_full_reads = cs.n_full;
           ev.chain_n_partial_reads = cs.n_partial;
           ev.chain_n_spanning_reads = cs.n_span;
@@ -201,9 +208,13 @@ EvidenceVector build_evidence(const SqantiRecord& r,
 
     int n_novel = 0, n_supported = 0, n_pan = 0, n_variant_created = 0, n_variant_deleted = 0, n_variant_disrupted = 0;
     int n_phase_uncertain = 0, n_phase_contradicted = 0;
-    // explained junctions that some but not all haplotypes explain rest on a heterozygous
-    // allele; a common haplotype across them needs their alleles in one phase set
-    int n_phase_dependent = 0; bool phase_broken = false; long phase_set_common = kNoPhaseSet;
+    // An explained junction that some but not all haplotypes of one source (a VCF file) explain
+    // rests on a heterozygous allele of that file; a common haplotype across two or more of them
+    // needs those alleles in one phase set of the file. Each source is asked on its own: what
+    // another file says about the same junction does not unlink it.
+    struct SourcePhase { int n = 0; bool broken = false; long set = kNoPhaseSet; };
+    std::vector<SourcePhase> source_phase;
+    std::vector<int> source_of;   // per haplotype, its source
     int n_known = 0, n_known_supported = 0, n_bam_gated = 0;
     bool any_bam_eval = false;
     bool any_variant_eval = false;
@@ -276,12 +287,21 @@ EvidenceVector build_evidence(const SqantiRecord& r,
             if (vv == VariantVerdict::kCreated) ++n_variant_created; else ++n_variant_deleted;
             if (jm.phase == MotifPhase::kUnphased) ++n_phase_uncertain;
             for (std::size_t h = 0; h < hap_common.size(); ++h) hap_common[h] = hap_common[h] && hap_at[h];
-            const bool on_every_hap = std::find(hap_at.begin(), hap_at.end(), false) == hap_at.end();
-            if (!on_every_hap && jm.phase != MotifPhase::kUnknown) {   // VCF input and a heterozygous allele
-              ++n_phase_dependent;
-              if (jm.phase == MotifPhase::kUnphased || jm.phase_mixed) phase_broken = true;
-              else if (phase_set_common == kNoPhaseSet) phase_set_common = jm.phase_set;
-              else if (phase_set_common != jm.phase_set) phase_broken = true;
+            if (source_of.empty()) source_of = jm.source_of;
+            if (source_phase.size() < jm.file_set.size()) source_phase.resize(jm.file_set.size());
+            for (std::size_t f = 0; f < jm.file_set.size(); ++f) {
+              bool some = false, every = true;
+              for (std::size_t h = 0; h < hap_at.size() && h < jm.source_of.size(); ++h) {
+                if (jm.source_of[h] != static_cast<int>(f)) continue;
+                if (hap_at[h]) some = true; else every = false;
+              }
+              const long set = jm.file_set[f];
+              if (!some || every || set == kNoPhaseSet) continue;   // no heterozygous allele of this file decides here
+              SourcePhase& sp = source_phase[f];
+              ++sp.n;
+              if (set == kUnusableSet) sp.broken = true;
+              else if (sp.set == kNoPhaseSet) sp.set = set;
+              else if (sp.set != set) sp.broken = true;
             }
           }
         }
@@ -351,9 +371,19 @@ EvidenceVector build_evidence(const SqantiRecord& r,
     ev.n_novel_jx_variant_deleted = n_variant_deleted;
     ev.n_novel_jx_read_phase_contradicted = n_phase_contradicted;
     ev.n_novel_jx_variant_disrupted = n_variant_disrupted;
-    ev.haplotype_consistent = n_variant_created + n_variant_deleted > 0 &&
-                              std::find(hap_common.begin(), hap_common.end(), true) != hap_common.end();
-    ev.haplotype_phase_unknown = n_phase_dependent >= 2 && phase_broken;
+    // A common haplotype stands when its own file links the alleles it rests on. When no common
+    // haplotype is linked and some file leaves two or more of its alleles unlinked, the haplotype
+    // indices that file writes say nothing: one common haplotype is not established.
+    bool common_any = false, common_linked = false, any_unlinked = false;
+    auto unlinked = [&](std::size_t f) { return f < source_phase.size() && source_phase[f].n >= 2 && source_phase[f].broken; };
+    for (std::size_t f = 0; f < source_phase.size(); ++f) if (unlinked(f)) any_unlinked = true;
+    for (std::size_t h = 0; h < hap_common.size(); ++h) {
+      if (!hap_common[h]) continue;
+      common_any = true;
+      if (h >= source_of.size() || !unlinked(static_cast<std::size_t>(source_of[h]))) common_linked = true;
+    }
+    ev.haplotype_consistent = n_variant_created + n_variant_deleted > 0 && common_any;
+    ev.haplotype_phase_unknown = any_unlinked && !common_linked;
     // Rescue requires all of the isoform's novel junctions to be explained by the
     // reference-bias evidence -- a single explained junction does not make a
     // multi-novel-junction isoform "false novel" (the others may be new) --

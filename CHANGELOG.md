@@ -54,8 +54,9 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   indels, symbolic alleles, every way of writing a genotype). The call must not depend on row
   order, haplotype labels, the orientation of unlinked groups, repeated rows, records away
   from the motifs, or the placement of an indel in a repeat; every haplotype motif the tool
-  reports must equal the one read off the haplotype sequence; and `REFERENCE_BIAS` is allowed
-  only when every reading of the file has a haplotype that explains each junction.
+  reports must equal the one read off the haplotype sequence; `REFERENCE_BIAS` is allowed
+  only when every reading of the file has a haplotype that explains each junction; and two
+  files given together are `REFERENCE_BIAS` exactly when one of them is alone.
 - CI builds and runs the whole test suite under AddressSanitizer and UndefinedBehaviorSanitizer.
 - Read-count baselines in the head-to-head
   ([benchmark/sqanti3_filter_h2h](benchmark/sqanti3_filter_h2h), `count_baseline.py`). Without
@@ -97,6 +98,22 @@ this project uses [Semantic Versioning](https://semver.org) (pre-1.0: minor/patc
   skipped and every phased genotype fell into one set.
 - A VCF or haplotype FASTA that names none of the isoforms' contigs (`1` for `chr1`) gets a
   warning; the variant axis is not evaluable with it.
+- With several `--haplotype-vcf` files, each file answers for the phase of its own haplotypes.
+  A haplotype that explains every novel junction stands when its own file links the alleles it
+  rests on. Before, a second file that gave one of the junctions another phase set, or left it
+  unphased, held the isoform (`haplotype_phase_unknown`).
+- The REF of a record is compared with the reference over its whole length. Before, a long
+  deletion written out was compared only in the bases read around the junction, so one that
+  differed from the reference between its ends could still explain a junction.
+- With several `--validation-bam` libraries the counts and the depth of a chain are those of
+  one library, chosen the same way in any order of the options: the most whole-chain reads,
+  then the most partial reads, then the smaller depth. Before, libraries with equal counts
+  were taken in the order given, which could change a call under `[axis_chain] min_fraction`;
+  a chain no library carries now reports its depth instead of 0.
+- `panisoguard decoys` leaves decoys on a contig the BAM header does not name out of the table
+  and of every fraction, and counts them (`decoys_built`, `decoys_not_evaluable` in the JSON).
+  Before, they counted as decoys without reads and lowered the reported rate.
+- A haplotype id written twice in one row of `--pangenome-junctions` counts once.
 - Linkage is decided by placement. Heterozygous and partly missing records are linked only
   inside one phase set; at each junction every placement of the groups within 64 bp of either
   boundary is tried, and the motif is known only if at most one group changes what a haplotype

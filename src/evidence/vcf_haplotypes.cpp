@@ -37,6 +37,8 @@ struct RawRecord {
   int n_known = 0, n_unknown = 0;
   long set = kDefaultPhaseSet;
   std::string key, statement;
+  mutable signed char beyond = -1;     // the REF bases outside the window it was read for: -1 not compared yet,
+                                       // 0 the reference's, 1 not
 };
 
 // The records of one window as read from the file.
@@ -344,6 +346,25 @@ VcfLocal VcfHaplotypes::local(const std::string& chrom, int64_t lo, int64_t hi, 
     for (int64_t p = std::max(r.pos, lo); p < std::min<int64_t>(r.pos + static_cast<int64_t>(ref.size()), hi) && !unknown_all; ++p) {
       const char a = ref[static_cast<std::size_t>(p - r.pos)], b = up(L.ref[static_cast<std::size_t>(p - lo)]);
       if (acgt(a) && acgt(b) && a != b) { rec.ref_mismatch = true; unknown_all = true; }
+    }
+    // A REF longer than the window (a long deletion written out) is compared over its whole length
+    // where the genome is at hand: a deletion that starts and ends as the reference does but
+    // differs in between describes another sequence too.
+    const int64_t ref_end = r.pos + static_cast<int64_t>(ref.size());
+    if (!unknown_all && reference != nullptr && (r.pos < lo || ref_end > hi)) {
+      if (r.beyond < 0) {
+        auto differs = [&](int64_t a, int64_t b) {
+          if (b <= a) return false;
+          const std::string g = reference->fetch(chrom, a, b);
+          for (std::size_t k = 0; k < g.size(); ++k) {
+            const char x = ref[static_cast<std::size_t>(a - r.pos) + k];
+            if (acgt(x) && acgt(g[k]) && x != g[k]) return true;
+          }
+          return false;
+        };
+        r.beyond = differs(r.pos, std::min(lo, ref_end)) || differs(std::max(hi, r.pos), ref_end) ? 1 : 0;
+      }
+      if (r.beyond == 1) { rec.ref_mismatch = true; unknown_all = true; }
     }
     auto unknown = [&](std::size_t h) { L.edits[h].push_back(VcfLocal::Edit{r.pos, r.end, "", ri, 'u', {}, false, false}); };
     if (unknown_all) {

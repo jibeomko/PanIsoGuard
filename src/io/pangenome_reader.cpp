@@ -88,8 +88,9 @@ PangenomeJunctions read_pangenome_junctions(const std::string& path) {
       }
     }
     if (f.size() >= 6 && !f[5].empty() && f[5] != "NA" && f[5] != ".") {
-      for (const std::string& id : split(f[5], ','))
-        if (!id.empty()) rec.haplotype_ids.push_back(id);
+      for (const std::string& id : split(f[5], ','))   // an id written twice is one path
+        if (!id.empty() && std::find(rec.haplotype_ids.begin(), rec.haplotype_ids.end(), id) == rec.haplotype_ids.end())
+          rec.haplotype_ids.push_back(id);
       rec.n_haplotypes = std::max(rec.n_haplotypes, static_cast<int>(rec.haplotype_ids.size()));
     }
     table.add(std::move(rec));

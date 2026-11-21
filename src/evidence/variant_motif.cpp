@@ -305,6 +305,7 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
     }
     m.deleted.push_back(false);
     m.file_set.push_back(kNoPhaseSet);
+    m.source_of.push_back(static_cast<int>(m.file_set.size()) - 1);
   }
   for (const auto& vcf : vcfs_) {
     const std::size_t nh = vcf->n_haplotypes();
@@ -312,6 +313,7 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
       m.haps.insert(m.haps.end(), nh, SpliceMotif{});
       m.deleted.insert(m.deleted.end(), nh, false);
       m.file_set.push_back(set);
+      m.source_of.insert(m.source_of.end(), nh, static_cast<int>(m.file_set.size()) - 1);
     };
     if (!vcf->has_chrom(chrom) || ref_len < 0 || intron.start < 1 || intron.end >= ref_len) { not_evaluable(kNoPhaseSet); continue; }
     // the bases next to the last exonic base on either side: intron.start - 1 and intron.end
@@ -437,6 +439,7 @@ JunctionMotifs HaplotypeProvider::motifs(const std::string& chrom, const Junctio
     m.boundary_insertion_left = std::max(m.boundary_insertion_left, base.unplaced_left);
     m.boundary_insertion_right = std::max(m.boundary_insertion_right, base.unplaced_right);
     m.file_set.push_back(of_group == nullptr ? kNoPhaseSet : unphased ? kUnusableSet : set);
+    m.source_of.insert(m.source_of.end(), nh, static_cast<int>(m.file_set.size()) - 1);
     if (unphased) m.phase = MotifPhase::kUnphased;
     else if (!recs.empty() && m.phase == MotifPhase::kUnknown) m.phase = MotifPhase::kPhased;
     if (set != kNoPhaseSet) {

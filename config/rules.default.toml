@@ -65,7 +65,8 @@ max_indel_near_frac    = 0.5        # > this fraction with an indel adjacent to 
 # the chain (evidence.chain_n_spanning_reads: reads at the chain's first donor that reach past its
 # last intron). Off by default: among the LRGASP amplicon-validated novel chains the read share
 # goes down to 0.2 %, so a floor removes validated chains before it removes unvalidated ones
-# (benchmark/chain_support, "Depth").
+# (benchmark/chain_support, "Depth"). With --validation-bam the share is taken in the library
+# that has the most whole-chain reads.
 [axis_chain]
 min_full_reads = 3
 min_fraction   = 0.0

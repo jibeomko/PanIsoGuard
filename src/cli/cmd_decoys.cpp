@@ -30,12 +30,15 @@ void usage() {
       "  --min-full-reads N      lift threshold to evaluate (default 3 = chain_min_full_reads)\n"
       "  --max-per-gene N        at most N decoys per gene, sampled (default 10; 0 = all)\n"
       "  --seed N                sampling seed (default 1)\n"
-      "  --out PREFIX            writes PREFIX.decoys.tsv (one row per decoy) and PREFIX.decoys.json\n"
+      "  --out PREFIX            writes PREFIX.decoys.tsv (one row per decoy the BAM can measure) and\n"
+      "                          PREFIX.decoys.json\n"
       "\n"
       "A decoy is the 5' introns of one annotated transcript joined to the 3' introns of another\n"
       "transcript of the same gene at a shared intron, when the result is not an annotated chain\n"
       "or a piece of one. The fraction of decoys with >= N whole-chain reads is an upper bound\n"
-      "on the chain axis's false-lift rate in this dataset (some decoys are real, unannotated).\n");
+      "on the chain axis's false-lift rate in this dataset (some decoys are real, unannotated).\n"
+      "Decoys on a contig the BAM header does not name cannot be measured: they are counted apart\n"
+      "(decoys_not_evaluable) and enter no fraction.\n");
 }
 
 struct Tally {
@@ -102,14 +105,16 @@ int cmd_decoys(int argc, char** argv) {
     // parents: the whole-chain read count of every annotated transcript a decoy was built from
     std::unordered_map<std::string, const Transcript*> by_id;
     for (const auto& t : ts) by_id.emplace(t.id, &t);
+    // A chain on a contig the BAM header does not name was not looked for: neither it nor its
+    // parents enter a count.
     std::unordered_map<std::string, int> parent_full;
     Tally parents;
     for (const auto& d : decoys) {
       for (const std::string* p : {&d.parent_a, &d.parent_b}) {
         if (parent_full.count(*p)) continue;
-        const int n = bam.chain_support(by_id.at(*p)->chain).n_full;
-        parent_full[*p] = n;
-        parents.add(n >= min_full);
+        const ChainBamSupport s = bam.chain_support(by_id.at(*p)->chain);
+        parent_full[*p] = s.n_full;
+        if (s.evaluated) parents.add(s.n_full >= min_full);
       }
     }
     std::ofstream tsv(out_prefix + ".decoys.tsv");
@@ -118,15 +123,17 @@ int cmd_decoys(int argc, char** argv) {
            "n_full_reads\tn_partial_reads\tparent_a_full_reads\tparent_b_full_reads\tlifted\tn_spanning_reads\n";
     Tally all, both_parents;
     std::map<std::size_t, Tally> by_n;
-    std::size_t k = 0;
+    std::size_t k = 0, not_evaluable = 0;
     for (const auto& d : decoys) {
       const ChainBamSupport s = bam.chain_support(d.chain);
-      const bool lifted = s.evaluated && s.n_full >= min_full;
+      ++k;   // the decoy's number in the set built from this annotation and seed, whatever the BAM holds
+      if (!s.evaluated) { ++not_evaluable; continue; }
+      const bool lifted = s.n_full >= min_full;
       const int pa = parent_full[d.parent_a], pb = parent_full[d.parent_b];
       all.add(lifted);
       by_n[d.chain.introns.size()].add(lifted);
       if (pa >= min_full && pb >= min_full) both_parents.add(lifted);
-      tsv << "decoy_" << ++k << '\t' << d.chain.chrom << '\t' << strand_char(d.chain.strand) << '\t'
+      tsv << "decoy_" << k << '\t' << d.chain.chrom << '\t' << strand_char(d.chain.strand) << '\t'
           << d.gene_id << '\t' << d.chain.introns.size() << '\t' << d.parent_a << '\t' << d.parent_b << '\t'
           << introns_1based(d.chain) << '\t' << s.n_full << '\t' << s.n_partial << '\t' << pa << '\t' << pb
           << '\t' << (lifted ? "true" : "false") << '\t' << s.n_span << '\n';
@@ -141,7 +148,8 @@ int cmd_decoys(int argc, char** argv) {
     };
     js << "{\n  \"tool_version\": \"" << kVersion << "\",\n  \"ref_gtf\": \"" << json_escape(ref_gtf)
        << "\",\n  \"bam\": \"" << json_escape(bam_path) << "\",\n  \"min_full_reads\": " << min_full << ",\n  \"max_per_gene\": " << max_per_gene
-       << ",\n  \"seed\": " << seed << ",\n";
+       << ",\n  \"seed\": " << seed << ",\n  \"decoys_built\": " << decoys.size()
+       << ",\n  \"decoys_not_evaluable\": " << not_evaluable << ",\n";
     tally("decoys", all);
     tally("decoys_both_parents_lifted", both_parents);
     tally("parents", parents);
@@ -160,6 +168,9 @@ int cmd_decoys(int argc, char** argv) {
         "wrote %s.{decoys.tsv,decoys.json}\n",
         min_full, all.lifted, all.n, all.rate(), min_full, both_parents.lifted, both_parents.n, both_parents.rate(),
         min_full, parents.lifted, parents.n, parents.rate(), out_prefix.c_str());
+    if (not_evaluable > 0)
+      std::fprintf(stderr, "warning: %zu of %zu decoys lie on contigs the BAM header does not name and were not measured\n",
+                   not_evaluable, decoys.size());
   } catch (const std::exception& e) {
     std::fprintf(stderr, "decoys: error: %s\n", e.what());
     return 1;

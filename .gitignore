@@ -72,3 +72,7 @@ benchmark/**/data/
 !tests/data/tiny/noisy.bam.bai
 !tests/data/tiny/indel.bam
 !tests/data/tiny/indel.bam.bai
+!tests/data/tiny/chain_shallow.bam
+!tests/data/tiny/chain_shallow.bam.bai
+!tests/data/tiny/chain_deep.bam
+!tests/data/tiny/chain_deep.bam.bai
