@@ -201,7 +201,9 @@ flags stay visible in the `evidence` block of `attribution.jsonl`.
        novel-in-catalog chains and reports the fraction that ≥ `chain_min_full_reads` reads
        carry end to end (an upper bound; some decoys are real, unannotated isoforms).
        `evidence.chain_n_spanning_reads` is the depth the chain is seen at (reads at its
-       first donor that reach past its last intron). `[axis_chain] min_fraction` can ask
+       first donor that reach past its last intron; with `--validation-bam`, the depth in
+       the library that has the most whole-chain reads, and 0 when no library has a
+       whole-chain or partial read). `[axis_chain] min_fraction` can ask
        that the whole-chain reads be a share of them; it is 0 by default, because
        amplicon-validated chains go down to 0.2 % of the spanning reads while unvalidated
        ones that reach three reads sit higher
